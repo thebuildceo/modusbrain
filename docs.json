@@ -1,0 +1,50 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "ModusBrain",
+  "description": "The company brain agents can safely execute against.",
+  "colors": {
+    "primary": "#2563EB",
+    "light": "#3B82F6",
+    "dark": "#1D4ED8"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "GitHub",
+        "href": "https://github.com/thebuildceo/modusbrain"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Quickstart",
+      "href": "/quickstart"
+    }
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/thebuildceo/modusbrain"
+    }
+  },
+  "navigation": {
+    "groups": [
+      {
+        "group": "Get started",
+        "pages": [
+          "introduction",
+          "quickstart",
+          "install",
+          "opskill-workflow"
+        ]
+      },
+      {
+        "group": "Reference",
+        "pages": [
+          "cli-reference",
+          "env-vars",
+          "attribution"
+        ]
+      }
+    ]
+  }
+}

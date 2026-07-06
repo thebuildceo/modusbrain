@@ -1,0 +1,89 @@
+---
+title: Operational skills workflow
+description: Compile, approve, execute, audit, and correct — the full ModusBrain loop.
+icon: list-check
+---
+
+# Operational skills workflow
+
+ModusBrain operational skills follow five phases. This page walks through **refund handling** as an example.
+
+## Phase 1 — Compile
+
+Turn brain content into a versioned draft skill:
+
+```bash
+# Ingest policy content first (optional)
+modusbrain capture --file ./docs/refund-policy.md
+
+modusbrain opskill compile "refund handling" \
+  --risk-tier high_stakes \
+  --owner support-lead
+```
+
+Each skill version includes:
+- **Prose judgment** — edge-case guidance for agents
+- **Structured policy** — rules like `if amount < 500 → auto_approve`
+- **Provenance** — source pages, compiler, timestamps
+
+## Phase 2 — Approve
+
+Draft skills cannot be auto-executed by remote agents until approved:
+
+```bash
+modusbrain opskill show refund-handling
+modusbrain opskill approve refund-handling --by alice@company.com
+```
+
+For high-stakes execution below confidence threshold, issue an approval token:
+
+```bash
+modusbrain opskill approve-token refund-handling
+```
+
+## Phase 3 — Execute (with gating)
+
+```bash
+modusbrain opskill execute refund-handling \
+  --task "Process $300 refund for order #4521" \
+  --context '{"amount":300}'
+```
+
+| Risk tier | Default confidence threshold |
+| --- | --- |
+| `informational` | 0.50 |
+| `low_stakes` | 0.70 |
+| `high_stakes` | 0.85 |
+
+## Phase 4 — Audit
+
+Every execution is logged:
+
+```bash
+modusbrain opskill audit --slug refund-handling --json
+```
+
+Logs include: skill slug, version, confidence score, action taken, agent ID, result.
+
+## Phase 5 — Feedback loop
+
+When a human corrects an agent action:
+
+```bash
+modusbrain opskill correct refund-handling \
+  --original "auto_approve" \
+  --correction "Amounts over $400 need manager approval" \
+  --by bob@company.com
+```
+
+Corrections write evidence pages and may trigger automatic re-compilation.
+
+## Conflict handling
+
+```bash
+modusbrain opskill flag-conflict refund-handling \
+  --description "Policy docs disagree on $500 threshold" \
+  --sources wiki/policies/refund-policy,wiki/policies/old-refund
+
+modusbrain opskill resolve 1 --by alice@company.com --note "Use $400 threshold"
+```

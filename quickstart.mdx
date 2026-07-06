@@ -1,0 +1,77 @@
+---
+title: Quickstart
+description: Install ModusBrain and run your first operational skill in 5 minutes.
+icon: rocket
+---
+
+# Quickstart
+
+Get ModusBrain running locally in about 5 minutes.
+
+## Prerequisites
+
+- [Bun](https://bun.sh) installed
+- Terminal access
+
+## 1. Install
+
+```bash
+curl -fsSL https://bun.sh/install | bash
+git clone https://github.com/thebuildceo/modusbrain.git
+cd modusbrain
+bun install --ignore-scripts
+bun link
+```
+
+Or install globally once published:
+
+```bash
+bun install -g github:thebuildceo/modusbrain
+```
+
+<Note>
+The legacy `gbrain` CLI alias still works during migration.
+</Note>
+
+## 2. Initialize your brain
+
+```bash
+modusbrain init
+modusbrain apply-migrations --yes
+modusbrain config set schema_pack modusbrain-ops
+```
+
+This creates a local brain at `~/.modusbrain` (PGLite, zero-config — no database server required).
+
+## 3. Compile your first skill
+
+```bash
+modusbrain opskill compile "refund handling" --risk-tier low_stakes
+modusbrain opskill show refund-handling
+```
+
+## 4. Approve and execute
+
+```bash
+modusbrain opskill approve refund-handling --by you@company.com
+modusbrain opskill execute refund-handling \
+  --task "Process $300 refund" \
+  --context '{"amount":300}'
+```
+
+## 5. Check the audit trail
+
+```bash
+modusbrain opskill audit --json
+```
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Full workflow" icon="route" href="/opskill-workflow">
+    Refund handling walkthrough with all 5 phases.
+  </Card>
+  <Card title="CLI reference" icon="terminal" href="/cli-reference">
+    All opskill commands.
+  </Card>
+</CardGroup>

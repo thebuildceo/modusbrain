@@ -103,27 +103,22 @@ Built on GBrain (MIT) · Postgres-native · Self-hostable · SOC2-ready audit ex
 ### Steps
 
 1. Create account at [mintlify.com](https://mintlify.com)
-2. Connect GitHub repo `your-org/modusbrain`
-3. Point docs root to `/docs` (create this folder) or use `MODUSBRAIN_LAUNCH.md` + `company-brain-rfs-analysis.md` as seeds
-4. Set custom domain: **docs.modusbrain.com**
-   - DNS: CNAME `docs` → Mintlify-provided target
-5. Add `mint.json` at repo root:
+2. Connect GitHub repo `thebuildceo/modusbrain` (branch: `main`)
+3. **Required:** `docs.json` must exist at the **repo root** (already added in this repo)
+4. Doc pages are `.mdx` files at repo root: `introduction.mdx`, `quickstart.mdx`, etc.
+5. Push to `main` → Mintlify auto-redeploys
+6. Set custom domain: **docs.modusbrain.com** (DNS CNAME → Mintlify target)
 
-```json
-{
-  "name": "ModusBrain",
-  "logo": { "light": "/logo/light.svg", "dark": "/logo/dark.svg" },
-  "favicon": "/favicon.svg",
-  "colors": { "primary": "#2563EB", "light": "#3B82F6", "dark": "#1D4ED8" },
-  "topbarLinks": [{ "name": "GitHub", "url": "https://github.com/your-org/modusbrain" }],
-  "topbarCtaButton": { "name": "Install", "url": "https://docs.modusbrain.com/quickstart" },
-  "navigation": [
-    { "group": "Start", "pages": ["quickstart", "install", "opskill-workflow"] },
-    { "group": "Product", "pages": ["features/compile", "features/gating", "features/audit"] },
-    { "group": "Deploy", "pages": ["deploy/self-host", "deploy/supabase", "deploy/mcp"] },
-    { "group": "Reference", "pages": ["cli/opskill", "mcp/operations", "env-vars"] }
-  ]
-}
+**If deploy fails with "Unable to find docs.json or mint.json":**
+- Confirm `docs.json` is at the repository root (not inside `/docs`)
+- Confirm Mintlify is connected to branch `main`
+- Click **Manual update** in Mintlify dashboard after pushing
+
+**Local preview (optional):**
+```bash
+npm i -g mint
+cd modusbrain
+mint dev
 ```
 
 ### Essential doc pages to write first

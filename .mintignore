@@ -1,0 +1,15 @@
+node_modules/
+bun.lock
+bin/
+test/
+tests/
+tools/
+admin/
+evals/
+skills/
+src/
+scripts/
+.github/
+terminals/
+*.test.ts
+llms-full.txt

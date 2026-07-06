@@ -1,0 +1,49 @@
+---
+title: Environment variables
+description: MODUSBRAIN_* configuration with GBRAIN_* legacy aliases.
+icon: gear
+---
+
+# Environment variables
+
+ModusBrain prefers `MODUSBRAIN_*` environment variables. Legacy `GBRAIN_*` names still work.
+
+## Home and config
+
+| Variable | Description |
+| --- | --- |
+| `MODUSBRAIN_HOME` | Parent directory for config (appends `/.modusbrain`) |
+| `GBRAIN_HOME` | Legacy alias for `MODUSBRAIN_HOME` |
+
+## Database
+
+| Variable | Description |
+| --- | --- |
+| `MODUSBRAIN_DATABASE_URL` | Postgres connection URL |
+| `GBRAIN_DATABASE_URL` | Legacy alias |
+
+## Source routing
+
+| Variable | Description |
+| --- | --- |
+| `MODUSBRAIN_SOURCE` | Default source ID for CLI/MCP |
+| `GBRAIN_SOURCE` | Legacy alias |
+
+Dotfile: `.modusbrain-source` (legacy `.gbrain-source` also read)
+
+## Models and API keys
+
+| Variable | Description |
+| --- | --- |
+| `ANTHROPIC_API_KEY` | For synthesis (`modusbrain think`) |
+| `OPENAI_API_KEY` | Embeddings (optional) |
+| `MODUSBRAIN_EMBEDDING_MODEL` | Override embedding model |
+| `MODUSBRAIN_CHAT_MODEL` | Override chat model |
+
+## Example
+
+```bash
+export MODUSBRAIN_HOME=$HOME
+export MODUSBRAIN_SOURCE=default
+modusbrain doctor
+```

@@ -1,0 +1,54 @@
+---
+title: CLI reference
+description: ModusBrain operational skills CLI commands.
+icon: terminal
+---
+
+# CLI reference
+
+Primary namespace: `modusbrain opskill`
+
+Alias: `modusbrain skill compile|approve|execute|...` (subcommand form only)
+
+<Warning>
+`modusbrain skill <name>` without a subcommand fetches host skillpack instructions (GBrain behavior). Use `opskill` for operational skills.
+</Warning>
+
+## Commands
+
+| Command | Description |
+| --- | --- |
+| `modusbrain opskill compile "<topic>"` | Draft skill from brain content |
+| `modusbrain opskill approve <slug> --by <user>` | Promote draft to active |
+| `modusbrain opskill list` | List all skills |
+| `modusbrain opskill show <slug>` | Version history + metadata |
+| `modusbrain opskill execute <slug> --task "..." --context JSON` | Run with confidence gating |
+| `modusbrain opskill approve-token <slug>` | Issue 1h approval token |
+| `modusbrain opskill flag-conflict <slug>` | Open conflict queue item |
+| `modusbrain opskill resolve <id> --by <user> --note "..."` | Resolve + re-compile |
+| `modusbrain opskill audit [--slug X]` | Agent action audit trail |
+| `modusbrain opskill correct <slug>` | Record human correction |
+
+Add `--json` to any command for machine-readable output.
+
+## MCP operations
+
+| Operation | Scope |
+| --- | --- |
+| `compile_operational_skill` | write |
+| `approve_operational_skill` | write (local only) |
+| `execute_operational_skill` | read |
+| `list_operational_skills` | read |
+
+## Core GBrain commands
+
+ModusBrain also includes the full GBrain engine:
+
+```bash
+modusbrain search "query"
+modusbrain think "question"
+modusbrain doctor
+modusbrain sync
+```
+
+Run `modusbrain --help` for the complete list.
