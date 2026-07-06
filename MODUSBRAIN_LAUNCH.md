@@ -105,9 +105,12 @@ Built on GBrain (MIT) · Postgres-native · Self-hostable · SOC2-ready audit ex
 1. Create account at [mintlify.com](https://mintlify.com)
 2. Connect GitHub repo `thebuildceo/modusbrain` (branch: `main`)
 3. **Required:** `docs.json` must exist at the **repo root** (already added in this repo)
-4. Doc pages are `.mdx` files at repo root: `introduction.mdx`, `quickstart.mdx`, etc.
-5. Push to `main` → Mintlify auto-redeploys
-6. Set custom domain: **docs.modusbrain.com** (DNS CNAME → Mintlify target)
+4. Doc pages: **ModusBrain tab** = root `.mdx` files; **Engine docs tab** = all 115+ files from `/docs` (auto-wired by `docs.json`)
+5. After adding docs under `/docs`, regenerate navigation: `bun run docs:nav`
+6. Push to `main` → Mintlify auto-redeploys
+7. Set custom domain: **docs.modusbrain.com** (DNS CNAME → Mintlify target)
+
+**Why only 7 pages showed at first?** Mintlify only displays pages listed in `docs.json` navigation — it does not auto-scan `/docs`. The fix adds an **Engine docs** tab with all 115 markdown files from `/docs`.
 
 **If deploy fails with "Unable to find docs.json or mint.json":**
 - Confirm `docs.json` is at the repository root (not inside `/docs`)

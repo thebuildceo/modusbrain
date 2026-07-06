@@ -27,22 +27,227 @@
     }
   },
   "navigation": {
-    "groups": [
+    "tabs": [
       {
-        "group": "Get started",
-        "pages": [
-          "introduction",
-          "quickstart",
-          "install",
-          "opskill-workflow"
+        "tab": "ModusBrain",
+        "groups": [
+          {
+            "group": "Get started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "install",
+              "opskill-workflow"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "cli-reference",
+              "env-vars",
+              "attribution"
+            ]
+          }
         ]
       },
       {
-        "group": "Reference",
-        "pages": [
-          "cli-reference",
-          "env-vars",
-          "attribution"
+        "tab": "Engine docs",
+        "groups": [
+          {
+            "group": "Core",
+            "pages": [
+              "docs/contradictions",
+              "docs/embedding-migrations",
+              "docs/ENGINES",
+              "docs/eval-bench",
+              "docs/eval-capture",
+              "docs/eval-takes-quality",
+              "docs/GBRAIN_RECOMMENDED_SCHEMA",
+              "docs/GBRAIN_SKILLPACK",
+              "docs/GBRAIN_V0",
+              "docs/GBRAIN_VERIFY",
+              "docs/guardrails",
+              "docs/INSTALL",
+              "docs/progress-events",
+              "docs/RELEASING",
+              "docs/schema-author-tutorial",
+              "docs/skillpack-anatomy",
+              "docs/storage-tiering",
+              "docs/takes-vs-facts",
+              "docs/TESTING",
+              "docs/UPGRADING_DOWNSTREAM_AGENTS",
+              "docs/v0.38-smoke-test-report",
+              "docs/what-schemas-unlock"
+            ]
+          },
+          {
+            "group": "AI providers",
+            "pages": [
+              "docs/ai-providers/llama-server-reranker",
+              "docs/ai-providers/zeroentropy"
+            ]
+          },
+          {
+            "group": "Architecture",
+            "pages": [
+              "docs/architecture/brains-and-sources",
+              "docs/architecture/calibration-quality-gate-spec",
+              "docs/architecture/frontmatter-scan-incremental",
+              "docs/architecture/infra-layer",
+              "docs/architecture/KEY_FILES",
+              "docs/architecture/lens-packs",
+              "docs/architecture/pack-upgrade-mechanism",
+              "docs/architecture/RETRIEVAL",
+              "docs/architecture/RETRIEVAL_MAXPOOL_INCIDENT",
+              "docs/architecture/schema-packs",
+              "docs/architecture/serve-sync-concurrency",
+              "docs/architecture/system-of-record",
+              "docs/architecture/thin-client",
+              "docs/architecture/topologies",
+              "docs/architecture/type-taxonomy"
+            ]
+          },
+          {
+            "group": "Designs",
+            "pages": [
+              "docs/designs/2026_05_EVAL_PLAN",
+              "docs/designs/CODE_CATHEDRAL_II",
+              "docs/designs/COMMUNITY_IDEAS",
+              "docs/designs/HOMEBREW_FOR_PERSONAL_AI",
+              "docs/designs/KNOWLEDGE_RUNTIME",
+              "docs/designs/MINIONS_AGENT_ORCHESTRATION",
+              "docs/designs/SKILLPACK_REGISTRY_V1_SPEC",
+              "docs/designs/V038_SCHEMA_PACKS"
+            ]
+          },
+          {
+            "group": "Ethos",
+            "pages": [
+              "docs/ethos/MARKDOWN_SKILLS_AS_RECIPES",
+              "docs/ethos/ORIGIN",
+              "docs/ethos/THIN_HARNESS_FAT_SKILLS"
+            ]
+          },
+          {
+            "group": "Eval",
+            "pages": [
+              "docs/eval/METRIC_GLOSSARY",
+              "docs/eval/SEARCH_MODE_METHODOLOGY"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "docs/guides/agent-to-gbrain",
+              "docs/guides/brain-agent-loop",
+              "docs/guides/brain-first-lookup",
+              "docs/guides/brain-vs-memory",
+              "docs/guides/compiled-truth",
+              "docs/guides/content-media",
+              "docs/guides/cron-schedule",
+              "docs/guides/deterministic-collectors",
+              "docs/guides/diligence-ingestion",
+              "docs/guides/enrichment-pipeline",
+              "docs/guides/entity-detection",
+              "docs/guides/executive-assistant",
+              "docs/guides/idea-capture",
+              "docs/guides/live-sync",
+              "docs/guides/meeting-ingestion",
+              "docs/guides/minions-deployment",
+              "docs/guides/minions-fix",
+              "docs/guides/minions-shell-jobs",
+              "docs/guides/multi-source-brains",
+              "docs/guides/operational-disciplines",
+              "docs/guides/originals-folder",
+              "docs/guides/plugin-authors",
+              "docs/guides/plugin-handlers",
+              "docs/guides/push-context",
+              "docs/guides/queue-operations-runbook",
+              "docs/guides/quiet-hours",
+              "docs/guides/repo-architecture",
+              "docs/guides/rls-and-you",
+              "docs/guides/scaling-skills",
+              "docs/guides/search-modes",
+              "docs/guides/skill-development",
+              "docs/guides/skillopt",
+              "docs/guides/skillpacks-as-scaffolding",
+              "docs/guides/source-attribution",
+              "docs/guides/sub-agent-routing",
+              "docs/guides/upgrades-auto-update"
+            ]
+          },
+          {
+            "group": "Incidents",
+            "pages": [
+              "docs/incidents/2026-05-20-lsd-cost-explosion"
+            ]
+          },
+          {
+            "group": "Integrations",
+            "pages": [
+              "docs/integrations/credential-gateway",
+              "docs/integrations/embedding-providers",
+              "docs/integrations/meeting-webhooks",
+              "docs/integrations/pre-commit",
+              "docs/integrations/README",
+              "docs/integrations/reliability-repair"
+            ]
+          },
+          {
+            "group": "Issues",
+            "pages": [
+              "docs/issues/cross-modal-search",
+              "docs/issues/doctor-auto-heal-and-scoring"
+            ]
+          },
+          {
+            "group": "MCP integrations",
+            "pages": [
+              "docs/mcp/ALTERNATIVES",
+              "docs/mcp/CHATGPT",
+              "docs/mcp/CLAUDE_CODE",
+              "docs/mcp/CLAUDE_COWORK",
+              "docs/mcp/CLAUDE_DESKTOP",
+              "docs/mcp/CODEX",
+              "docs/mcp/DEPLOY",
+              "docs/mcp/PERPLEXITY"
+            ]
+          },
+          {
+            "group": "Migrations",
+            "pages": [
+              "docs/migrations/v0.41.2-markdown-greenfield"
+            ]
+          },
+          {
+            "group": "Operations",
+            "pages": [
+              "docs/operations/headless-install",
+              "docs/operations/spend-controls"
+            ]
+          },
+          {
+            "group": "Plans",
+            "pages": [
+              "docs/plans/2026-06-03-001-feat-idea-lineage-skill-plan"
+            ]
+          },
+          {
+            "group": "Proposals",
+            "pages": [
+              "docs/proposals/temporal-contradiction-probe"
+            ]
+          },
+          {
+            "group": "Tutorials",
+            "pages": [
+              "docs/tutorials/company-brain",
+              "docs/tutorials/connect-coding-agent",
+              "docs/tutorials/improving-skills-with-skillopt",
+              "docs/tutorials/personal-brain",
+              "docs/tutorials/README"
+            ]
+          }
         ]
       }
     ]
