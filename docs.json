@@ -8,6 +8,15 @@
     "light": "#3B82F6",
     "dark": "#1D4ED8"
   },
+  "logo": {
+    "light": "/logo/moduslogo.svg",
+    "dark": "/logo/moduslogo.svg",
+    "href": "/introduction"
+  },
+  "favicon": "/logo/moduslogo.svg",
+  "appearance": {
+    "default": "dark"
+  },
   "navbar": {
     "links": [
       {
