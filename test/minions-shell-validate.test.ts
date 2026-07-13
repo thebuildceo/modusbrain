@@ -19,10 +19,10 @@
 import { describe, test, expect } from 'bun:test';
 import { validateShellJobParams } from '../src/core/minions/handlers/shell-validate.ts';
 import { UnrecoverableError } from '../src/core/minions/types.ts';
-import type { GBrainConfig } from '../src/core/config.ts';
+import type { ModusBrainConfig } from '../src/core/config.ts';
 
 const dbUrl = 'postgresql://test:test@localhost:5432/test';
-const fakeCfg: GBrainConfig = {
+const fakeCfg: ModusBrainConfig = {
   engine: 'postgres',
   database_url: dbUrl,
   anthropic_api_key: 'sk-ant-test',
@@ -140,8 +140,8 @@ describe('inherit — fail-fast on missing config value', () => {
   test('inherit:["database_url"] + config without database_url → reject with set-hint', () => {
     expect(() => validateShellJobParams(
       { cmd: 'echo', cwd: '/tmp', inherit: ['database_url'] },
-      { config: { engine: 'postgres' } as GBrainConfig },
-    )).toThrow(/gbrain config set database_url/);
+      { config: { engine: 'postgres' } as ModusBrainConfig },
+    )).toThrow(/modusbrain config set database_url/);
   });
   test('inherit:["database_url"] + null config → reject', () => {
     expect(() => validateShellJobParams(
@@ -169,18 +169,18 @@ describe('what the validator deliberately does NOT do (agency for the agent)', (
     // directly (and accept that it lands in the row plaintext). v0.36.5.0
     // honors the agent's call.
     const p = validateShellJobParams(
-      { cmd: 'echo', cwd: '/tmp', env: { GBRAIN_DATABASE_URL: dbUrl, DATABASE_URL: dbUrl } },
+      { cmd: 'echo', cwd: '/tmp', env: { MODUSBRAIN_DATABASE_URL: dbUrl, DATABASE_URL: dbUrl } },
       { config: fakeCfg },
     );
-    expect(p.env).toEqual({ GBRAIN_DATABASE_URL: dbUrl, DATABASE_URL: dbUrl });
+    expect(p.env).toEqual({ MODUSBRAIN_DATABASE_URL: dbUrl, DATABASE_URL: dbUrl });
   });
   test('caller can put inline secret-key=value in cmd', () => {
     // No inline-cmd scan. The agent knows what it's writing.
     const p = validateShellJobParams(
-      { cmd: 'GBRAIN_DATABASE_URL=postgresql://... gbrain sync', cwd: '/tmp' },
+      { cmd: 'MODUSBRAIN_DATABASE_URL=postgresql://... modusbrain sync', cwd: '/tmp' },
       { config: fakeCfg },
     );
-    expect(p.cmd).toContain('GBRAIN_DATABASE_URL');
+    expect(p.cmd).toContain('MODUSBRAIN_DATABASE_URL');
   });
   test('inherit + env: with overlapping intent both work (last write wins per overlay order)', () => {
     // Agent might want inherit for value-from-config AND env: for an

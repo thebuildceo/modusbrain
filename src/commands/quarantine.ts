@@ -1,9 +1,9 @@
 /**
- * gbrain quarantine — operator surface for the content-quality gate (issue #1699).
+ * modusbrain quarantine — operator surface for the content-quality gate (issue #1699).
  *
- *   gbrain quarantine list [--json] [--include-flagged]
- *   gbrain quarantine clear <slug> [--force] [--no-embed] [--json]
- *   gbrain quarantine scan [--limit N] [--apply] [--no-embed] [--json]
+ *   modusbrain quarantine list [--json] [--include-flagged]
+ *   modusbrain quarantine clear <slug> [--force] [--no-embed] [--json]
+ *   modusbrain quarantine scan [--limit N] [--apply] [--no-embed] [--json]
  *
  * `quarantine` (hidden) marks high-confidence junk; `content_flag` (warned,
  * still searchable) marks fuzzy markup-heavy / oversize pages. See
@@ -97,7 +97,7 @@ async function runClear(engine: BrainEngine, args: string[]): Promise<void> {
   // First non-flag positional after the subcommand is the slug.
   const slug = args.find((a) => !a.startsWith('--'));
   if (!slug) {
-    console.error('Usage: gbrain quarantine clear <slug> [--force] [--no-embed]');
+    console.error('Usage: modusbrain quarantine clear <slug> [--force] [--no-embed]');
     process.exit(2);
   }
   const page = await engine.getPage(slug);
@@ -126,8 +126,8 @@ async function runClear(engine: BrainEngine, args: string[]): Promise<void> {
     tags,
   });
 
-  const prevNoSanity = process.env.GBRAIN_NO_SANITY;
-  if (force) process.env.GBRAIN_NO_SANITY = '1';
+  const prevNoSanity = process.env.MODUSBRAIN_NO_SANITY;
+  if (force) process.env.MODUSBRAIN_NO_SANITY = '1';
   let result;
   try {
     result = await importFromContent(engine, slug, markdown, {
@@ -137,8 +137,8 @@ async function runClear(engine: BrainEngine, args: string[]): Promise<void> {
     });
   } finally {
     if (force) {
-      if (prevNoSanity === undefined) delete process.env.GBRAIN_NO_SANITY;
-      else process.env.GBRAIN_NO_SANITY = prevNoSanity;
+      if (prevNoSanity === undefined) delete process.env.MODUSBRAIN_NO_SANITY;
+      else process.env.MODUSBRAIN_NO_SANITY = prevNoSanity;
     }
   }
 
@@ -157,7 +157,7 @@ async function runClear(engine: BrainEngine, args: string[]): Promise<void> {
   console.log(
     `Cleared "${slug}".` +
     (result.flagged ? ` (now flagged: ${result.flag_reason} — searchable, agent warned.)` : '') +
-    (noEmbed ? ' Embedding skipped (--no-embed); run `gbrain embed --stale` to make it searchable.' : ''),
+    (noEmbed ? ' Embedding skipped (--no-embed); run `modusbrain embed --stale` to make it searchable.' : ''),
   );
 }
 
@@ -180,7 +180,7 @@ async function runScan(engine: BrainEngine, args: string[]): Promise<void> {
   const { assessContentSanity } = await import('../core/content-sanity.ts');
   const { loadOperatorLiterals } = await import('../core/content-sanity-literals.ts');
   const { loadConfig, loadConfigWithEngine } = await import('../core/config.ts');
-  let effCs: NonNullable<import('../core/config.ts').GBrainConfig['content_sanity']> = {};
+  let effCs: NonNullable<import('../core/config.ts').ModusBrainConfig['content_sanity']> = {};
   try {
     effCs = (await loadConfigWithEngine(engine, loadConfig()))?.content_sanity ?? {};
   } catch { /* fall back to defaults if DB-config lift fails */ }
@@ -264,7 +264,7 @@ export async function runQuarantine(engine: BrainEngine, args: string[]): Promis
     case 'scan':
       return runScan(engine, rest);
     default:
-      console.error('Usage: gbrain quarantine <list|clear|scan> [...]');
+      console.error('Usage: modusbrain quarantine <list|clear|scan> [...]');
       console.error('  list  [--json] [--include-flagged]');
       console.error('  clear <slug> [--force] [--no-embed] [--json]');
       console.error('  scan  [--limit N] [--apply] [--no-embed] [--json]');

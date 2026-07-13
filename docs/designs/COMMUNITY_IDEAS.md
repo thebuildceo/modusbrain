@@ -1,12 +1,12 @@
 # Community Ideas Ledger
 
 > A diary of the **valuable ideas** surfaced by the community-PR wave, kept so that
-> good thinking survives even when the PR that carried it is closed. gbrain moves
+> good thinking survives even when the PR that carried it is closed. modusbrain moves
 > fast and the maintainer's "cathedral" rewrites supersede most individual PRs —
 > but the *idea* behind a closed PR is often still worth something.
 >
 > **Bar for this file:** an idea only earns a line if it is (a) still live on
-> master and (b) genuinely valuable to gbrain users. **Graduating an idea to
+> master and (b) genuinely valuable to modusbrain users. **Graduating an idea to
 > `TODOS.md` is a higher bar still** — it must serve the North Star (next-Postgres-
 > for-memory: widest coverage, best-for-the-most-at-the-least) and be worth a
 > maintainer-owned implementation. Most lines here will never graduate. That's fine.
@@ -28,8 +28,8 @@ contributors hit the same walls.
 - **Configurable FTS language** (#580/#581/#582, @rafaelreis-r) — **OPEN, high.**
   Every `to_tsvector`/`tsquery` is hardcoded `'english'` (query side, trigger side,
   and no reindex path), so non-English brains run every search through the English
-  stemmer. A coherent 3-PR set: `GBRAIN_FTS_LANGUAGE` config → migration recreating
-  triggers with the chosen language → `gbrain reindex-search-vector` to change it
+  stemmer. A coherent 3-PR set: `MODUSBRAIN_FTS_LANGUAGE` config → migration recreating
+  triggers with the chosen language → `modusbrain reindex-search-vector` to change it
   post-install. **Strongest i18n candidate to graduate.**
 - **Full-Unicode slugs** (#782, @tamagodo-fu; #514 zh, @JimmyJiang67) — **HELD, high.**
   CJK slugs already work (`CJK_SLUG_CHARS`); generalize to all scripts (Cyrillic,
@@ -94,7 +94,7 @@ these are the densest source of real bugs in the whole backlog.
   fixes a duplicate-line accumulation bug.
 - **`DATABASE_URL` hijack** (#1884, @awilkinson) — **OPEN, high.** A co-located app's
   generic `DATABASE_URL` silently overrides the configured brain (wrong DB, or
-  auto-migrates it). Fix precedence: `GBRAIN_DATABASE_URL` > config.json > `DATABASE_URL`.
+  auto-migrates it). Fix precedence: `MODUSBRAIN_DATABASE_URL` > config.json > `DATABASE_URL`.
 - **Engine-switch strips config** (#1088, @samchaudhary) — **OPEN, high.** `migrate --to`
   rewrites config to just `{engine,url}`, dropping `embedding_model`/`dimensions`/keys;
   migration "succeeds" but new embeds break.
@@ -105,8 +105,8 @@ these are the densest source of real bugs in the whole backlog.
   turns a Session-Pooler URL into an IPv6-only host, ECONNREFUSED on IPv4-only networks
   (the majority). Return null for pooler URLs.
 - **HOME-isolation in tests** (#205/#517/#534 @orendi84, #434 @lloydarmbrust) — **OPEN,
-  high.** The E2E suite spawns `gbrain init/import` against the developer's real
-  `~/.gbrain/config.json`, clobbering their live DB URL+keys. Isolate HOME to a tmpdir.
+  high.** The E2E suite spawns `modusbrain init/import` against the developer's real
+  `~/.modusbrain/config.json`, clobbering their live DB URL+keys. Isolate HOME to a tmpdir.
   *(A footgun that bites contributors of this very repo.)*
 - **dim-aware embed write target** (#1263, @DmitryBMsk) — **OPEN, high.** `upsertChunks`
   always writes the legacy `embedding vector(1536)` column, so brains on an alternate
@@ -126,7 +126,7 @@ these are the densest source of real bugs in the whole backlog.
 
 - **Keyword search ignores page titles** (#1646, @jeades) — **OPEN, high.** `searchKeyword`
   ranks only chunk `search_vector`, never `pages.search_vector` (weight-A titles), so an
-  exact-title `gbrain search` returns nothing while `query` finds it. High-impact, tiny.
+  exact-title `modusbrain search` returns nothing while `query` finds it. High-impact, tiny.
 - **`code-def` misses most OO symbols** (#1628, @rayers) — **OPEN, high.** `DEF_TYPES`
   omits method/constructor/field/struct/protocol, so `code-def` returns 0 for most
   object-oriented code. Root-cause fix in `normalizeSymbolType` + `DEF_TYPES`.
@@ -204,7 +204,7 @@ bge-m3, Copilot, Composio, Kimi, LM Studio, Mistral, Hunyuan, MiniMax…). The
   #1618 @punksterlabs) — **OPEN, high.** `FREE_LOCAL_CHAT_PROVIDERS` doesn't exist (only
   embed), brainstorm/cycle/takes hardcode `anthropic:claude-sonnet-4-6`, and the
   openai-compat `generateObject` path silently fails on providers that reject
-  `json_schema`. The "run gbrain fully local" cluster.
+  `json_schema`. The "run modusbrain fully local" cluster.
 - **OpenRouter config key** (#1714 @tmchow), **OAuth bearer for AI providers**
   (#1312 @pabloglzg), **API-key files** (#570 @shawnduggan) — **OPEN, med.** Credential
   ergonomics: config-file key (not just env), externally-minted bearer tokens, and
@@ -250,12 +250,12 @@ triage report) and should be treated as a coordinated design, not piecemeal merg
   ffprobe/ffmpeg/`rm -rf`. **Confirmed still present on master.** Switch to
   `execFileSync` arg arrays + `fs.rmSync`.
 - **Dotfile / skills-dir confinement** (#418/#419, @garagon) — **OPEN, high, SECURITY.**
-  `.gbrain-source` walk-up trusts any ancestor dotfile (source hijack on shared hosts);
+  `.modusbrain-source` walk-up trusts any ancestor dotfile (source hijack on shared hosts);
   `resolveWorkspaceSkillsDir` never canonicalizes (symlink escape). `lstat` ownership/
   symlink/world-writable checks + realpath containment.
 - **Destructive reclone gate** (#1705, @mvanhorn) — **OPEN, high, SECURITY.**
   `recloneIfMissing` does `rm`+rename over `src.local_path` without verifying it's
-  gbrain-managed, so a re-pointed source can wipe a user's working tree. Gate behind
+  modusbrain-managed, so a re-pointed source can wipe a user's working tree. Gate behind
   `isManagedRecloneTarget()` + reject `..`. *(The maintainer's own #1960 is the canonical
   landing for this class — cross-check.)*
 - **CORS preflight asymmetry** (#983, @yashkot007) — **OPEN, high, SECURITY.** Preflight
@@ -274,20 +274,20 @@ triage report) and should be treated as a coordinated design, not piecemeal merg
   one-liner hard-fails `bun install`, backslash bundle keys. A coordinated "first-class
   Windows" pass. *(A working Windows binary + CI target #180/#181 is the prerequisite for
   the full story.)*
-- **`.gbrainignore` / per-repo exclusion** (#1483 @eepaul; repo-local code filters
+- **`.modusbrainignore` / per-repo exclusion** (#1483 @eepaul; repo-local code filters
   #1011 @AndrewLauder; `--respect-gitignore` #1159 @jetsetterfl) — **OPEN, high.** Sync
   indexes every file with no ignore mechanism (`data/`, `*.parquet`, fixtures, vendored
-  trees), bloating DB + embedding cost. gitignore-parity `.gbrainignore` + per-source
+  trees), bloating DB + embedding cost. gitignore-parity `.modusbrainignore` + per-source
   `excludePatterns`. *(See also the maintainer's walker-prune work; #1942 prunes
   vendor/dist/build.)*
 - **Monorepo sub-path sources** (#774, @jeremyknows) — **HELD, high.** `--src-subpath`
   (split repo into git-root + logical-source axes) + `--exclude` so one repo can hold N
   sources at subdirs.
 - **MCP tool filtering** (#747, @joelwp) — **OPEN, high.** MCP advertises all ~51 ops to
-  every consumer (~10K tokens of schemas, tool confusion); `GBRAIN_EXPOSED_TOOLS` filters
+  every consumer (~10K tokens of schemas, tool confusion); `MODUSBRAIN_EXPOSED_TOOLS` filters
   the advertised surface.
 - **Install-method detection for upgrade** (#538, @brucek) — **OPEN, high.** The README's
-  own recommended git-clone+bun-link install detects as `unknown`, so `gbrain upgrade`
+  own recommended git-clone+bun-link install detects as `unknown`, so `modusbrain upgrade`
   offers three dead ends including a wrong npm package.
 - **Runtime subagent defs** (#1282, @dcarolan1) — **OPEN, high.** The plugin loader
   validates `SubagentDefinition[]` at startup but the handler never reads
@@ -327,10 +327,10 @@ These are net-new surfaces held for a product decision, not auto-closed.
   email corpus already in the brain to build a queryable writing-voice profile so agents
   draft in the user's voice. Overlaps soul-audit.
 - **MCP put_page parity + DB→markdown reconciliation** (#438, @rayzhux) — **HELD, high.**
-  A frontmatter-only safe auto-link mode for remote callers + `GBRAIN_BRAIN_ROOT` to render
+  A frontmatter-only safe auto-link mode for remote callers + `MODUSBRAIN_BRAIN_ROOT` to render
   remote writes back to markdown so MCP writes reach the git source-of-truth. Touches the
   remote trust boundary — a design proposal, not a merge.
-- **Recipe discovery convention** (#1279, @ialmeida-jera) — **OPEN, med.** `~/.gbrain/recipes/`
+- **Recipe discovery convention** (#1279, @ialmeida-jera) — **OPEN, med.** `~/.modusbrain/recipes/`
   auto-discovery + `--external-dir`, loaded untrusted to keep the command-spawn boundary.
 - **Destructive-op audit trail + audit-factory** (#1069/#1070, @vincedk-alt) — **HELD, med.**
   Rotating JSONL forensic trail for hard-deletes + a shared `createAuditLogger` factory.
@@ -348,7 +348,7 @@ These are net-new surfaces held for a product decision, not auto-closed.
   checks aren't registered in `doctor-categories`, printing `unknown check name` every run;
   the drift guard only scanned `doctor.ts`, missing `onboard/checks.ts` emitters.
 - **Honest stale-lock hint** (#1553, @Sanjays2402) — **OPEN, med.** doctor always says
-  `gbrain sync --break-lock`, which silently no-ops on `gbrain-cycle` locks.
+  `modusbrain sync --break-lock`, which silently no-ops on `modusbrain-cycle` locks.
 
 ---
 

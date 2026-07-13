@@ -48,7 +48,7 @@ export function App() {
   return (
     <div className="app">
       <nav className="sidebar">
-        <div className="sidebar-logo">GBrain</div>
+        <div className="sidebar-logo">ModusBrain</div>
         <div className="sidebar-nav">
           <a className={`nav-item ${page === 'dashboard' ? 'active' : ''}`}
              onClick={() => navigate('dashboard')}>Dashboard</a>

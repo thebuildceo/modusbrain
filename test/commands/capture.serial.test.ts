@@ -1,5 +1,5 @@
 /**
- * gbrain capture CLI verb tests.
+ * modusbrain capture CLI verb tests.
  *
  * Pure helper coverage (parseArgs, defaultSlug, buildContent) + an
  * integration smoke that the local-install path lands a page when the
@@ -21,7 +21,6 @@ let engine: PGLiteEngine;
 let tmpRoot: string;
 let brainDir: string;
 let oldHome: string | undefined;
-let oldGbrainHome: string | undefined;
 let oldModusbrainHome: string | undefined;
 
 beforeAll(async () => {
@@ -37,11 +36,9 @@ afterAll(async () => {
 beforeEach(async () => {
   await resetPgliteState(engine);
   oldHome = process.env.HOME;
-  oldGbrainHome = process.env.GBRAIN_HOME;
   oldModusbrainHome = process.env.MODUSBRAIN_HOME;
-  tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'gbrain-capture-'));
+  tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'modusbrain-capture-'));
   process.env.HOME = tmpRoot;
-  process.env.GBRAIN_HOME = tmpRoot;
   process.env.MODUSBRAIN_HOME = tmpRoot;
   brainDir = path.join(tmpRoot, 'brain');
   fs.mkdirSync(brainDir, { recursive: true });
@@ -50,7 +47,6 @@ beforeEach(async () => {
 
 afterEach(() => {
   if (oldHome === undefined) delete process.env.HOME; else process.env.HOME = oldHome;
-  if (oldGbrainHome === undefined) delete process.env.GBRAIN_HOME; else process.env.GBRAIN_HOME = oldGbrainHome;
   if (oldModusbrainHome === undefined) delete process.env.MODUSBRAIN_HOME; else process.env.MODUSBRAIN_HOME = oldModusbrainHome;
   fs.rmSync(tmpRoot, { recursive: true, force: true });
 });

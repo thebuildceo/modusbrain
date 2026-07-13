@@ -118,7 +118,7 @@ describe('pathToSlug with pageKind', () => {
   });
 
   test('repoPrefix is prepended (markdown and code)', () => {
-    expect(pathToSlug('guides/foo.md', 'gbrain')).toBe('gbrain/guides/foo');
-    expect(pathToSlug('src/foo.ts', 'gbrain', { pageKind: 'code' })).toBe('gbrain/src-foo-ts');
+    expect(pathToSlug('guides/foo.md', 'modusbrain')).toBe('modusbrain/guides/foo');
+    expect(pathToSlug('src/foo.ts', 'modusbrain', { pageKind: 'code' })).toBe('modusbrain/src-foo-ts');
   });
 });

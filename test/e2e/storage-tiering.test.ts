@@ -2,7 +2,7 @@
  * E2E test for storage tiering — Postgres-only.
  *
  * Per the v0.23.0 plan: full lifecycle. Container restart simulation:
- * write pages via Postgres, delete files from disk, run gbrain export
+ * write pages via Postgres, delete files from disk, run modusbrain export
  * --restore-only, assert files restored. Real .gitignore round-trip.
  * Real source-resolver path through getDefaultSourcePath().
  *
@@ -40,7 +40,7 @@ if (!hasDatabase()) {
     });
 
     beforeEach(() => {
-      tmp = mkdtempSync(join(tmpdir(), 'gbrain-e2e-storage-'));
+      tmp = mkdtempSync(join(tmpdir(), 'modusbrain-e2e-storage-'));
       __resetMissingStorageWarning();
       __resetPGLiteWarn();
       __resetPGLiteTierWarn();
@@ -50,9 +50,9 @@ if (!hasDatabase()) {
       rmSync(tmp, { recursive: true, force: true });
     }
 
-    function writeGbrainYml(): void {
+    function writeModusbrainYml(): void {
       writeFileSync(
-        join(tmp, 'gbrain.yml'),
+        join(tmp, 'modusbrain.yml'),
         `storage:
   db_tracked:
     - people/
@@ -83,7 +83,7 @@ if (!hasDatabase()) {
           [tmp],
         );
 
-        writeGbrainYml();
+        writeModusbrainYml();
 
         // Seed 4 pages: 1 db_tracked, 2 db_only, 1 unspecified.
         await engine.putPage('people/alice', {
@@ -126,7 +126,7 @@ if (!hasDatabase()) {
         // .gitignore management: empty .gitignore → managed block written.
         manageGitignore(tmp, 'postgres');
         const gitignore = readFileSync(join(tmp, '.gitignore'), 'utf-8');
-        expect(gitignore).toContain('# Auto-managed by gbrain');
+        expect(gitignore).toContain('# Auto-managed by modusbrain');
         expect(gitignore).toContain('media/x/');
         expect(gitignore).toContain('media/articles/');
 
@@ -156,7 +156,7 @@ if (!hasDatabase()) {
           [tmp],
         );
 
-        writeGbrainYml();
+        writeModusbrainYml();
 
         // Write some db_only pages to the database.
         await engine.putPage('media/x/tweet-1', {
@@ -255,7 +255,7 @@ if (!hasDatabase()) {
 
     test('manageGitignore on Postgres engine does NOT emit PGLite warning', async () => {
       try {
-        writeGbrainYml();
+        writeModusbrainYml();
         const warnings: string[] = [];
         const orig = console.warn;
         console.warn = (...a: unknown[]) => warnings.push(a.map(String).join(' '));

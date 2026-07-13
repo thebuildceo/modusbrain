@@ -2,7 +2,7 @@
  * Tests for the v0.13.0 frontmatter relationship indexing migration.
  *
  * Iron rule (regression guard for Bug 1, v0.14.0 upgrade night): phase
- * handlers must shell out to the bare string `gbrain`, NOT to
+ * handlers must shell out to the bare string `modusbrain`, NOT to
  * `process.execPath`. On bun-installed trees execPath is the bun runtime;
  * `bun extract ...` gets interpreted as `bun run extract` and the upgrade
  * crashes mid-migration. The canonical shim on PATH is the right target.
@@ -51,25 +51,25 @@ describe('v0.13.0 — Frontmatter relationship indexing migration', () => {
     expect(src).not.toContain('process.execPath');
   });
 
-  test('source does NOT build commands from a GBRAIN constant (Bug 1 regression)', () => {
-    // Earlier revisions used `const GBRAIN = process.execPath` and built
-    // commands as `${GBRAIN} extract ...`. The constant was the vector.
+  test('source does NOT build commands from a MODUSBRAIN constant (Bug 1 regression)', () => {
+    // Earlier revisions used `const MODUSBRAIN = process.execPath` and built
+    // commands as `${MODUSBRAIN} extract ...`. The constant was the vector.
     const src = readFileSync(SRC_PATH, 'utf-8');
-    expect(src).not.toMatch(/const\s+GBRAIN\s*=/);
-    expect(src).not.toMatch(/\$\{GBRAIN\}/);
+    expect(src).not.toMatch(/const\s+MODUSBRAIN\s*=/);
+    expect(src).not.toMatch(/\$\{MODUSBRAIN\}/);
   });
 
-  test('phases use in-process schema + bare `gbrain` subprocess (v0.41.37.0 #1605)', () => {
+  test('phases use in-process schema + bare `modusbrain` subprocess (v0.41.37.0 #1605)', () => {
     const src = readFileSync(SRC_PATH, 'utf-8');
-    // Schema bring-up is now IN-PROCESS (was execSync('gbrain init
+    // Schema bring-up is now IN-PROCESS (was execSync('modusbrain init
     // --migrate-only'), which died with getaddrinfo ENOTFOUND on Windows).
     expect(src).toContain('runMigrateOnlyCore()');
-    expect(src).not.toContain("execSync('gbrain init --migrate-only'");
+    expect(src).not.toContain("execSync('modusbrain init --migrate-only'");
     // Backfill extract goes through the stderr-capturing wrapper (still bare
-    // `gbrain` so the canonical shim on PATH wins).
-    expect(src).toContain("runGbrainSubprocess('gbrain extract links --source db --include-frontmatter'");
-    // Stats readback still shells out (reads stdout); bare gbrain.
-    expect(src).toContain("execSync('gbrain call get_stats'");
+    // `modusbrain` so the canonical shim on PATH wins).
+    expect(src).toContain("runModusbrainSubprocess('modusbrain extract links --source db --include-frontmatter'");
+    // Stats readback still shells out (reads stdout); bare modusbrain.
+    expect(src).toContain("execSync('modusbrain call get_stats'");
   });
 
   test('phase commands never reference `bun` or `.ts` paths (Bug 1 regression)', () => {

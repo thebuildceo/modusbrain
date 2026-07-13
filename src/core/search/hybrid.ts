@@ -130,7 +130,7 @@ registerBackgroundWorkDrainer({
  * boosted ranking determines which chunks per page are kept.
  */
 const BACKLINK_BOOST_COEF = 0.05;
-const DEBUG = process.env.GBRAIN_SEARCH_DEBUG === '1';
+const DEBUG = process.env.MODUSBRAIN_SEARCH_DEBUG === '1';
 
 /**
  * Apply backlink boost to a result list in place. Mutates each result's score
@@ -185,7 +185,7 @@ export function applyBacklinkBoost(
  * runs, then pass the resulting threshold to every stage. Single-baseline
  * semantic — order-independent across the three metadata-axis boosts.
  *
- * Why this exists: gbrain's bounded boosts (`[1.0, ~1.6]` log-compressed
+ * Why this exists: modusbrain's bounded boosts (`[1.0, ~1.6]` log-compressed
  * salience clip, log-scaled backlinks, half-life recency) keep any single
  * boost from catastrophically flipping rankings on curated small corpora.
  * On larger corpora indexed with dense embedders (text-embedding-3-large,
@@ -747,7 +747,7 @@ export interface HybridSearchOpts extends SearchOpts {
  * the CLI's 10s force-exit. Default 6s leaves headroom under that deadline.
  */
 const QUERY_EMBED_TIMEOUT_MS = (() => {
-  const n = Number(process.env.GBRAIN_QUERY_EMBED_TIMEOUT_MS);
+  const n = Number(process.env.MODUSBRAIN_QUERY_EMBED_TIMEOUT_MS);
   return Number.isFinite(n) && n > 0 ? n : 6_000;
 })();
 
@@ -924,7 +924,7 @@ export async function hybridSearch(
   let expansionApplied = false;
 
   // A throwing user callback must never break the search hot path — onMeta
-  // is a public surface (gbrain/search/hybrid) so a third-party closure bug
+  // is a public surface (modusbrain/search/hybrid) so a third-party closure bug
   // shouldn't take down query/search responses.
   //
   // v0.32.3 search-lite: every emitMeta call ALSO records to the in-process

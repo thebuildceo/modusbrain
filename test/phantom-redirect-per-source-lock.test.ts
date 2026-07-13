@@ -1,9 +1,9 @@
 /**
  * v0.40 D16 regression test: phantom-redirect uses per-source lock.
  *
- * Pre-v0.40 phantom-redirect acquired the bare `gbrain-sync` lock, blocking
+ * Pre-v0.40 phantom-redirect acquired the bare `modusbrain-sync` lock, blocking
  * every concurrent sync brain-wide. After D16, phantom acquires
- * `gbrain-sync:<sourceId>` — same-source sync still serializes; cross-source
+ * `modusbrain-sync:<sourceId>` — same-source sync still serializes; cross-source
  * sync proceeds unblocked.
  *
  * Pure source-text regression guard. The full behavior is covered by
@@ -39,8 +39,8 @@ describe('phantom-redirect lock contract', () => {
     expect(SRC).not.toMatch(/acquireLockWithRetry\s*\(\s*engine\s*,\s*SYNC_LOCK_ID\s*\)/);
   });
 
-  test('helper sanity: syncLockId returns gbrain-sync:<source> shape', () => {
-    expect(syncLockId('default')).toBe('gbrain-sync:default');
-    expect(syncLockId('zion-brain')).toBe('gbrain-sync:zion-brain');
+  test('helper sanity: syncLockId returns modusbrain-sync:<source> shape', () => {
+    expect(syncLockId('default')).toBe('modusbrain-sync:default');
+    expect(syncLockId('zion-brain')).toBe('modusbrain-sync:zion-brain');
   });
 });

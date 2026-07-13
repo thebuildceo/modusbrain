@@ -56,9 +56,9 @@ broken brain. See `skills/conventions/quality.md` for format.
 
 Before using ANY external API to research a person, company, or topic:
 
-1. `gbrain search "name"` — keyword search for existing pages
-2. `gbrain query "natural question about name"` — hybrid search for context
-3. `gbrain get <slug>` — if you know the slug, read the full page
+1. `modusbrain search "name"` — keyword search for existing pages
+2. `modusbrain query "natural question about name"` — hybrid search for context
+3. `modusbrain get <slug>` — if you know the slug, read the full page
 4. Check backlinks: who references this entity?
 5. Check timeline: recent events involving this entity
 
@@ -89,9 +89,9 @@ to the graph (`links` table) with inferred relationship types. Stale links
   `founded`, `advises`, `source` (frontmatter), `mentions` (default).
 - The `put_page` MCP response includes `auto_links: { created, removed, errors }`
   so the agent can verify outcomes.
-- To disable: `gbrain config set auto_link false`. Default is on.
-- Timeline entries with specific dates still need explicit `gbrain timeline-add`
-  (or batch via `gbrain extract timeline --source db`).
+- To disable: `modusbrain config set auto_link false`. Default is on.
+- Timeline entries with specific dates still need explicit `modusbrain timeline-add`
+  (or batch via `modusbrain extract timeline --source db`).
 
 ### Phase 3: On Every Outbound Response (READ → PULL → RESPOND)
 

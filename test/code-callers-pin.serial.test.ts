@@ -2,10 +2,10 @@
  * v0.41.30.0 — code-callers / code-callees end-to-end source resolution (BUG 1).
  *
  * Serial (`*.serial.test.ts`) because it process.chdir()s into a temp dir
- * holding a .gbrain-source pin — process.cwd() is process-global and races
+ * holding a .modusbrain-source pin — process.cwd() is process-global and races
  * with parallel files. Drives the real runCodeCallers / runCodeCallees through
  * their process.cwd()-based resolution, asserting:
- *   - a .gbrain-source pin resolves on a multi-source brain (no exit 2)
+ *   - a .modusbrain-source pin resolves on a multi-source brain (no exit 2)
  *   - no pin + no flag + multi-source still errors (exit 2)
  *   - explicit --source overrides
  *   - A4: JSON envelope carries source_id + scope; --all-sources → null/'all'
@@ -56,7 +56,7 @@ async function addSource(id: string, localPath: string | null): Promise<void> {
 }
 
 function pinnedDir(sourceId: string): string {
-  const dir = mkdtempSync(join(tmpdir(), 'gbrain-pin-cli-'));
+  const dir = mkdtempSync(join(tmpdir(), 'modusbrain-pin-cli-'));
   writeFileSync(join(dir, '.modusbrain-source'), `${sourceId}\n`);
   return dir;
 }
@@ -85,19 +85,19 @@ async function capture(fn: () => Promise<void>): Promise<{ logs: string[]; errs:
   return { logs, errs, exitCode };
 }
 
-describe('code-callers / code-callees — .gbrain-source pin (CLI wiring)', () => {
+describe('code-callers / code-callees — .modusbrain-source pin (CLI wiring)', () => {
   test('pin resolves on a multi-source brain: no exit 2, output names the pinned source', async () => {
     await addSource('repo-a', '/fake/a');
     await addSource('repo-b', '/fake/b');
     const dir = pinnedDir('repo-a');
     process.chdir(dir);
     try {
-      const callers = await withEnv({ GBRAIN_SOURCE: undefined }, () =>
+      const callers = await withEnv({ MODUSBRAIN_SOURCE: undefined }, () =>
         capture(() => runCodeCallers(engine, ['someSym', '--no-json'])));
       expect(callers.exitCode).toBeNull(); // resolved, did NOT error
       expect(callers.logs.join('\n')).toContain("repo-a");
 
-      const callees = await withEnv({ GBRAIN_SOURCE: undefined }, () =>
+      const callees = await withEnv({ MODUSBRAIN_SOURCE: undefined }, () =>
         capture(() => runCodeCallees(engine, ['someSym', '--no-json'])));
       expect(callees.exitCode).toBeNull();
       expect(callees.logs.join('\n')).toContain("repo-a");
@@ -110,15 +110,15 @@ describe('code-callers / code-callees — .gbrain-source pin (CLI wiring)', () =
   test('no pin + no flag + multi-source → exit 2 (ambiguous preserved)', async () => {
     await addSource('repo-a', '/fake/a');
     await addSource('repo-b', '/fake/b');
-    const dir = mkdtempSync(join(tmpdir(), 'gbrain-nopin-cli-'));
+    const dir = mkdtempSync(join(tmpdir(), 'modusbrain-nopin-cli-'));
     process.chdir(dir);
     try {
-      const callers = await withEnv({ GBRAIN_SOURCE: undefined }, () =>
+      const callers = await withEnv({ MODUSBRAIN_SOURCE: undefined }, () =>
         capture(() => runCodeCallers(engine, ['someSym', '--no-json'])));
       expect(callers.exitCode).toBe(2);
       expect(callers.errs.join('\n')).toContain('--source');
 
-      const callees = await withEnv({ GBRAIN_SOURCE: undefined }, () =>
+      const callees = await withEnv({ MODUSBRAIN_SOURCE: undefined }, () =>
         capture(() => runCodeCallees(engine, ['someSym', '--no-json'])));
       expect(callees.exitCode).toBe(2);
     } finally {
@@ -133,7 +133,7 @@ describe('code-callers / code-callees — .gbrain-source pin (CLI wiring)', () =
     const dir = pinnedDir('repo-a');
     process.chdir(dir);
     try {
-      const { logs, exitCode } = await withEnv({ GBRAIN_SOURCE: undefined }, () =>
+      const { logs, exitCode } = await withEnv({ MODUSBRAIN_SOURCE: undefined }, () =>
         capture(() => runCodeCallers(engine, ['someSym', '--source', 'repo-b', '--json'])));
       expect(exitCode).toBeNull();
       const env = JSON.parse(logs.join('\n'));
@@ -151,7 +151,7 @@ describe('code-callers / code-callees — .gbrain-source pin (CLI wiring)', () =
     const dir = pinnedDir('repo-a');
     process.chdir(dir);
     try {
-      const { logs } = await withEnv({ GBRAIN_SOURCE: undefined }, () =>
+      const { logs } = await withEnv({ MODUSBRAIN_SOURCE: undefined }, () =>
         capture(() => runCodeCallers(engine, ['someSym', '--json'])));
       const env = JSON.parse(logs.join('\n'));
       expect(env.source_id).toBe('repo-a');
@@ -166,7 +166,7 @@ describe('code-callers / code-callees — .gbrain-source pin (CLI wiring)', () =
   test('A4: --all-sources → source_id null, scope "all"', async () => {
     await addSource('repo-a', '/fake/a');
     await addSource('repo-b', '/fake/b');
-    const dir = mkdtempSync(join(tmpdir(), 'gbrain-all-cli-'));
+    const dir = mkdtempSync(join(tmpdir(), 'modusbrain-all-cli-'));
     process.chdir(dir);
     try {
       const { logs, exitCode } = await capture(() =>
@@ -183,11 +183,11 @@ describe('code-callers / code-callees — .gbrain-source pin (CLI wiring)', () =
 
   test('A4: sole_non_default tier emits the stderr nudge', async () => {
     await addSource('repo-a', '/fake/a'); // default + one non-default w/ local_path
-    const dir = mkdtempSync(join(tmpdir(), 'gbrain-sole-cli-'));
+    const dir = mkdtempSync(join(tmpdir(), 'modusbrain-sole-cli-'));
     process.chdir(dir);
     try {
       const { errs, exitCode } = await withEnv(
-        { GBRAIN_SOURCE: undefined, GBRAIN_NO_SOLE_NON_DEFAULT_NUDGE: undefined },
+        { MODUSBRAIN_SOURCE: undefined, MODUSBRAIN_NO_SOLE_NON_DEFAULT_NUDGE: undefined },
         () => capture(() => runCodeCallers(engine, ['someSym', '--json'])));
       expect(exitCode).toBeNull();
       expect(errs.join('\n')).toContain("routing to source 'repo-a'");
@@ -203,7 +203,7 @@ describe('code-callers / code-callees — .gbrain-source pin (CLI wiring)', () =
     const dir = pinnedDir('repo-a');
     process.chdir(dir);
     try {
-      const { errs } = await withEnv({ GBRAIN_SOURCE: undefined }, () =>
+      const { errs } = await withEnv({ MODUSBRAIN_SOURCE: undefined }, () =>
         capture(() => runCodeCallers(engine, ['someSym', '--json'])));
       expect(errs.join('\n')).not.toContain('routing to source');
     } finally {
@@ -219,12 +219,12 @@ describe('code-callers / code-callees — .gbrain-source pin (CLI wiring)', () =
     process.chdir(dir);
     try {
       // human output
-      const human = await withEnv({ GBRAIN_SOURCE: undefined }, () =>
+      const human = await withEnv({ MODUSBRAIN_SOURCE: undefined }, () =>
         capture(() => runCodeCallers(engine, ['someSym', '--no-json'])));
       expect(human.logs.join('\n')).toContain('Try --all-sources');
 
       // JSON hint field
-      const jsonRun = await withEnv({ GBRAIN_SOURCE: undefined }, () =>
+      const jsonRun = await withEnv({ MODUSBRAIN_SOURCE: undefined }, () =>
         capture(() => runCodeCallees(engine, ['someSym', '--json'])));
       const env = JSON.parse(jsonRun.logs.join('\n'));
       expect(env.count).toBe(0);
@@ -235,13 +235,13 @@ describe('code-callers / code-callees — .gbrain-source pin (CLI wiring)', () =
     }
   });
 
-  test('bad .gbrain-source pin → exit 2 with JSON error envelope', async () => {
+  test('bad .modusbrain-source pin → exit 2 with JSON error envelope', async () => {
     await addSource('repo-a', '/fake/a');
     await addSource('repo-b', '/fake/b');
     const dir = pinnedDir('nonexistent-src');
     process.chdir(dir);
     try {
-      const { logs, exitCode } = await withEnv({ GBRAIN_SOURCE: undefined }, () =>
+      const { logs, exitCode } = await withEnv({ MODUSBRAIN_SOURCE: undefined }, () =>
         capture(() => runCodeCallers(engine, ['someSym', '--json'])));
       expect(exitCode).toBe(2);
       const env = JSON.parse(logs.join('\n'));

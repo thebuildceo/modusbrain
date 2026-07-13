@@ -63,11 +63,11 @@ extractable rules, different link verbs, different rubric).
 
 Add the type:
 ```
-gbrain schema add-type meeting \
+modusbrain schema add-type meeting \
   --primitive temporal \
   --prefix meetings/ \
   --extractable
-gbrain schema sync --apply
+modusbrain schema sync --apply
 ```
 
 The `sync --apply` backfills all 4000 pages. From here forward,
@@ -89,7 +89,7 @@ imports under `meetings/` infer `meeting` type via the pack.
   `expert_routing_without_prefix` lint rule warns about this exact
   shape: an expert-routed type with no prefix never matches a put_page
   inference, so `whoknows` silently never surfaces it.
-- **Don't mutate `gbrain-base` or `gbrain-recommended`.** Fork first.
+- **Don't mutate `gbrain-base` or `modusbrain-recommended`.** Fork first.
 
 ## When to remove a type
 
@@ -107,7 +107,7 @@ Break those references first.
 
 ## When to commit the pack
 
-If your pack lives in source control (`~/.gbrain/schema-packs/<name>/`
+If your pack lives in source control (`~/.modusbrain/schema-packs/<name>/`
 is a git repo), commit after every batch of mutations. The
 `mutation_count_anomaly` lint rule warns at >50 mutations in 7 days —
 that's the hint to start committing rather than relying on disk-only
@@ -123,8 +123,8 @@ pointing at the `unify-types` PROTECTED Minion handler.
 
 v0.41.22 ships **gbrain-base-v2** as the declared successor to
 gbrain-base@1.x — collapses 94 noisy types to 15 canonical via
-declarative mapping_rules. Run via `gbrain onboard --check --explain`
-(preview) → `gbrain jobs submit unify-types --allow-protected --params
+declarative mapping_rules. Run via `modusbrain onboard --check --explain`
+(preview) → `modusbrain jobs submit unify-types --allow-protected --params
 '{"target_pack":"gbrain-base-v2"}'` (apply). See
 `skills/schema-unify/SKILL.md` for the full playbook.
 
@@ -138,9 +138,9 @@ codex D9 — third-party packs cannot inject `title` / `slug` / `type`.
 
 When NOT to upgrade:
 - Custom types not covered by the successor's mapping_rules → fork the
-  successor first (`gbrain schema fork gbrain-base-v2 my-pack`), edit
+  successor first (`modusbrain schema fork gbrain-base-v2 my-pack`), edit
   rules, then target your fork.
 - Mid-ingest or autopilot maintenance → wait. Unify holds the
-  `gbrain-unify` db-lock for ~10 min on big brains.
+  `modusbrain-unify` db-lock for ~10 min on big brains.
 - Federated brain with sources you don't want to touch → scope per
   source via `--params sourceId`.

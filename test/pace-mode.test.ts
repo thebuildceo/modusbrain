@@ -102,11 +102,11 @@ describe('config + env parsing', () => {
     expect(ov.maxSleepMs).toBeUndefined();
   });
 
-  test('readPaceEnv reads GBRAIN_PACE_* including mode', () => {
+  test('readPaceEnv reads MODUSBRAIN_PACE_* including mode', () => {
     const { envMode, envOverrides } = readPaceEnv({
-      GBRAIN_PACE_MODE: 'gentle',
-      GBRAIN_PACE_MAX_CONCURRENCY: '3',
-      GBRAIN_PACE_ENABLED: 'true',
+      MODUSBRAIN_PACE_MODE: 'gentle',
+      MODUSBRAIN_PACE_MAX_CONCURRENCY: '3',
+      MODUSBRAIN_PACE_ENABLED: 'true',
     });
     expect(envMode).toBe('gentle');
     expect(envOverrides.maxConcurrency).toBe(3);
@@ -114,7 +114,7 @@ describe('config + env parsing', () => {
   });
 
   test('rejects out-of-range env concurrency (falls through)', () => {
-    const { envOverrides } = readPaceEnv({ GBRAIN_PACE_MAX_CONCURRENCY: '99999' });
+    const { envOverrides } = readPaceEnv({ MODUSBRAIN_PACE_MAX_CONCURRENCY: '99999' });
     expect(envOverrides.maxConcurrency).toBeUndefined();
   });
 });

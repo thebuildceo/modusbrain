@@ -17,7 +17,7 @@ import { PGLiteEngine } from '../src/core/pglite-engine.ts';
 
 describe('#2034 PGLiteEngine.reconnect', () => {
   test('restores connectivity and persisted state against the saved config', async () => {
-    const dir = mkdtempSync(join(tmpdir(), 'gbrain-reconnect-'));
+    const dir = mkdtempSync(join(tmpdir(), 'modusbrain-reconnect-'));
     const engine = new PGLiteEngine();
     try {
       await engine.connect({ database_path: dir });

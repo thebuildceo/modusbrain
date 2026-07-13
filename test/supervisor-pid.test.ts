@@ -1,7 +1,7 @@
 /**
  * Unit tests for the shared supervisor PID-file reader (issue #1815, Q4).
  * One regression point now backs `jobs supervisor status`, `jobs stats`, and
- * `gbrain doctor`.
+ * `modusbrain doctor`.
  */
 
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
@@ -11,7 +11,7 @@ import { tmpdir } from 'os';
 import { readSupervisorPid } from '../src/core/minions/supervisor-pid.ts';
 
 let dir: string;
-beforeEach(() => { dir = mkdtempSync(join(tmpdir(), 'gbrain-suppid-')); });
+beforeEach(() => { dir = mkdtempSync(join(tmpdir(), 'modusbrain-suppid-')); });
 afterEach(() => { try { rmSync(dir, { recursive: true, force: true }); } catch { /* ignore */ } });
 
 describe('readSupervisorPid', () => {

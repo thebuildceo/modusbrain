@@ -1,5 +1,5 @@
 /**
- * Unit tests for parseNiceFlag (issue #1815) — flag > GBRAIN_NICE env > undefined.
+ * Unit tests for parseNiceFlag (issue #1815) — flag > MODUSBRAIN_NICE env > undefined.
  */
 
 import { describe, test, expect } from 'bun:test';
@@ -15,15 +15,15 @@ describe('parseNiceFlag', () => {
     expect(parseNiceFlag(['jobs', 'work', '--nice', '-5'], {})).toBe(-5);
   });
 
-  test('falls back to GBRAIN_NICE env', () => {
-    expect(parseNiceFlag(['jobs', 'work'], { GBRAIN_NICE: '7' })).toBe(7);
+  test('falls back to MODUSBRAIN_NICE env', () => {
+    expect(parseNiceFlag(['jobs', 'work'], { MODUSBRAIN_NICE: '7' })).toBe(7);
   });
 
   test('flag wins over env', () => {
-    expect(parseNiceFlag(['jobs', 'work', '--nice', '3'], { GBRAIN_NICE: '15' })).toBe(3);
+    expect(parseNiceFlag(['jobs', 'work', '--nice', '3'], { MODUSBRAIN_NICE: '15' })).toBe(3);
   });
 
   test('empty env string is treated as absent', () => {
-    expect(parseNiceFlag(['jobs', 'work'], { GBRAIN_NICE: '' })).toBeUndefined();
+    expect(parseNiceFlag(['jobs', 'work'], { MODUSBRAIN_NICE: '' })).toBeUndefined();
   });
 });

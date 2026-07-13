@@ -117,14 +117,14 @@ describe('loadConfig — legacy provider+model migration (v0.36.1.x #1086)', () 
     const { join } = await import('path');
     const { tmpdir } = await import('os');
     const { withEnv } = await import('./helpers/with-env.ts');
-    const tmpHome = mkdtempSync(join(tmpdir(), 'gbrain-cfg-test-'));
+    const tmpHome = mkdtempSync(join(tmpdir(), 'modusbrain-cfg-test-'));
     try {
-      mkdirSync(join(tmpHome, '.gbrain'), { recursive: true });
+      mkdirSync(join(tmpHome, '.modusbrain'), { recursive: true });
       writeFileSync(
-        join(tmpHome, '.gbrain', 'config.json'),
+        join(tmpHome, '.modusbrain', 'config.json'),
         JSON.stringify({ engine: 'pglite', database_path: '/tmp/x', provider: 'voyage', model: 'voyage-4-large' }),
       );
-      await withEnv({ GBRAIN_HOME: tmpHome }, async () => {
+      await withEnv({ MODUSBRAIN_HOME: tmpHome }, async () => {
         const { loadConfig } = await import('../src/core/config.ts');
         const cfg = loadConfig();
         expect(cfg).not.toBeNull();
@@ -142,11 +142,11 @@ describe('loadConfig — legacy provider+model migration (v0.36.1.x #1086)', () 
     const { join } = await import('path');
     const { tmpdir } = await import('os');
     const { withEnv } = await import('./helpers/with-env.ts');
-    const tmpHome = mkdtempSync(join(tmpdir(), 'gbrain-cfg-test-'));
+    const tmpHome = mkdtempSync(join(tmpdir(), 'modusbrain-cfg-test-'));
     try {
-      mkdirSync(join(tmpHome, '.gbrain'), { recursive: true });
+      mkdirSync(join(tmpHome, '.modusbrain'), { recursive: true });
       writeFileSync(
-        join(tmpHome, '.gbrain', 'config.json'),
+        join(tmpHome, '.modusbrain', 'config.json'),
         JSON.stringify({
           engine: 'pglite',
           database_path: '/tmp/x',
@@ -155,7 +155,7 @@ describe('loadConfig — legacy provider+model migration (v0.36.1.x #1086)', () 
           model: 'voyage-4-large',
         }),
       );
-      await withEnv({ GBRAIN_HOME: tmpHome }, async () => {
+      await withEnv({ MODUSBRAIN_HOME: tmpHome }, async () => {
         const { loadConfig } = await import('../src/core/config.ts');
         const cfg = loadConfig();
         expect(cfg!.embedding_model).toBe('openai:text-embedding-3-large');
@@ -170,14 +170,14 @@ describe('loadConfig — legacy provider+model migration (v0.36.1.x #1086)', () 
     const { join } = await import('path');
     const { tmpdir } = await import('os');
     const { withEnv } = await import('./helpers/with-env.ts');
-    const tmpHome = mkdtempSync(join(tmpdir(), 'gbrain-cfg-test-'));
+    const tmpHome = mkdtempSync(join(tmpdir(), 'modusbrain-cfg-test-'));
     try {
-      mkdirSync(join(tmpHome, '.gbrain'), { recursive: true });
+      mkdirSync(join(tmpHome, '.modusbrain'), { recursive: true });
       writeFileSync(
-        join(tmpHome, '.gbrain', 'config.json'),
+        join(tmpHome, '.modusbrain', 'config.json'),
         JSON.stringify({ engine: 'pglite', database_path: '/tmp/x', embedding_model: 'voyage:voyage-3-large' }),
       );
-      await withEnv({ GBRAIN_HOME: tmpHome }, async () => {
+      await withEnv({ MODUSBRAIN_HOME: tmpHome }, async () => {
         const { loadConfig } = await import('../src/core/config.ts');
         const cfg = loadConfig();
         expect(cfg!.embedding_model).toBe('voyage:voyage-3-large');
@@ -190,10 +190,10 @@ describe('loadConfig — legacy provider+model migration (v0.36.1.x #1086)', () 
 
 // v0.36.1.x #1019 (cherry-pick #1083): configDir uses path.isAbsolute and
 // dual-separator '..' rejection so Windows paths are accepted.
-describe('configDir — GBRAIN_HOME Windows path acceptance (v0.36.1.x #1019)', () => {
+describe('configDir — MODUSBRAIN_HOME Windows path acceptance (v0.36.1.x #1019)', () => {
   test('relative paths are rejected with an absolute-path error', async () => {
     const { withEnv } = await import('./helpers/with-env.ts');
-    await withEnv({ GBRAIN_HOME: 'relative/path' }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: 'relative/path' }, async () => {
       const { configDir } = await import('../src/core/config.ts');
       expect(() => configDir()).toThrow(/absolute/);
     });
@@ -201,7 +201,7 @@ describe('configDir — GBRAIN_HOME Windows path acceptance (v0.36.1.x #1019)', 
 
   test("'..' segments rejected on POSIX-style absolute paths", async () => {
     const { withEnv } = await import('./helpers/with-env.ts');
-    await withEnv({ GBRAIN_HOME: '/tmp/foo/../bar' }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: '/tmp/foo/../bar' }, async () => {
       const { configDir } = await import('../src/core/config.ts');
       expect(() => configDir()).toThrow(/'..' segments/);
     });
@@ -214,7 +214,7 @@ describe('configDir — GBRAIN_HOME Windows path acceptance (v0.36.1.x #1019)', 
     // backslash '..' segment — that's the case where the pre-fix
     // single-separator split would have let it through.
     const { withEnv } = await import('./helpers/with-env.ts');
-    await withEnv({ GBRAIN_HOME: '/tmp/foo\\..\\bar' }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: '/tmp/foo\\..\\bar' }, async () => {
       const { configDir } = await import('../src/core/config.ts');
       expect(() => configDir()).toThrow(/'..' segments/);
     });
@@ -222,17 +222,17 @@ describe('configDir — GBRAIN_HOME Windows path acceptance (v0.36.1.x #1019)', 
 });
 
 // v0.42 (#1699): content_sanity.max_markup_ratio env parsing.
-describe('loadConfig — GBRAIN_MAX_MARKUP_RATIO env (v0.42 #1699)', () => {
+describe('loadConfig — MODUSBRAIN_MAX_MARKUP_RATIO env (v0.42 #1699)', () => {
   async function withHomeAndEnv(env: Record<string, string | undefined>, fn: (cfg: unknown) => void) {
     const { mkdtempSync, mkdirSync, writeFileSync, rmSync } = await import('fs');
     const { join } = await import('path');
     const { tmpdir } = await import('os');
     const { withEnv } = await import('./helpers/with-env.ts');
-    const tmpHome = mkdtempSync(join(tmpdir(), 'gbrain-cfg-mk-'));
+    const tmpHome = mkdtempSync(join(tmpdir(), 'modusbrain-cfg-mk-'));
     try {
-      mkdirSync(join(tmpHome, '.gbrain'), { recursive: true });
-      writeFileSync(join(tmpHome, '.gbrain', 'config.json'), JSON.stringify({ engine: 'pglite', database_path: '/tmp/x' }));
-      await withEnv({ GBRAIN_HOME: tmpHome, ...env }, async () => {
+      mkdirSync(join(tmpHome, '.modusbrain'), { recursive: true });
+      writeFileSync(join(tmpHome, '.modusbrain', 'config.json'), JSON.stringify({ engine: 'pglite', database_path: '/tmp/x' }));
+      await withEnv({ MODUSBRAIN_HOME: tmpHome, ...env }, async () => {
         const { loadConfig } = await import('../src/core/config.ts');
         fn(loadConfig());
       });
@@ -242,13 +242,13 @@ describe('loadConfig — GBRAIN_MAX_MARKUP_RATIO env (v0.42 #1699)', () => {
   }
 
   test('valid ratio in (0,1] is parsed onto content_sanity', async () => {
-    await withHomeAndEnv({ GBRAIN_MAX_MARKUP_RATIO: '0.7' }, (cfg) => {
+    await withHomeAndEnv({ MODUSBRAIN_MAX_MARKUP_RATIO: '0.7' }, (cfg) => {
       expect((cfg as { content_sanity?: { max_markup_ratio?: number } }).content_sanity?.max_markup_ratio).toBe(0.7);
     });
   });
 
   test('out-of-range value (>1) is ignored', async () => {
-    await withHomeAndEnv({ GBRAIN_MAX_MARKUP_RATIO: '1.5' }, (cfg) => {
+    await withHomeAndEnv({ MODUSBRAIN_MAX_MARKUP_RATIO: '1.5' }, (cfg) => {
       expect((cfg as { content_sanity?: { max_markup_ratio?: number } }).content_sanity?.max_markup_ratio).toBeUndefined();
     });
   });

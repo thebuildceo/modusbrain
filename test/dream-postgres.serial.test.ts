@@ -1,5 +1,5 @@
 /**
- * v0.41.30.0 — `gbrain dream` runs against a checkout-less (postgres-shaped)
+ * v0.41.30.0 — `modusbrain dream` runs against a checkout-less (postgres-shaped)
  * brain (BUG 2).
  *
  * Pre-fix dream.ts:resolveBrainDir process.exit(1)'d with "No brain directory
@@ -112,11 +112,11 @@ describe('runDream — A1 per-source scope (no checkout)', () => {
     // 0 facts. The fix makes cycleSourceId = opts.sourceId = 'repo-a'.
     const fence =
       `# Bob\n\nBody.\n\n## Facts\n\n` +
-      `<!--- gbrain:facts:begin -->\n` +
+      `<!--- modusbrain:facts:begin -->\n` +
       `| # | claim | kind | confidence | visibility | notability | valid_from | valid_until | source | context |\n` +
       `|---|-------|------|------------|------------|------------|------------|-------------|--------|---------|\n` +
       `| 1 | Founded Acme | fact | 1.0 | world | high | 2017-01-01 |  | linkedin |  |\n` +
-      `<!--- gbrain:facts:end -->\n`;
+      `<!--- modusbrain:facts:end -->\n`;
     await engine.executeRaw(
       `INSERT INTO pages (slug, source_id, title, type, page_kind, compiled_truth, timeline, frontmatter, updated_at, created_at)
        VALUES ('people/bob', 'repo-a', 'Bob', 'person', 'markdown', $1, '', '{}'::jsonb, NOW(), NOW())`,
@@ -142,7 +142,7 @@ describe('runDream — A1 per-source scope (no checkout)', () => {
     // checkout, resolveBrainDir must return null (DB-only) and NOT fall through
     // to the global sync.repo_path — otherwise FS phases run against the default
     // brain's checkout while DB phases + the freshness stamp target repo-a.
-    const globalRepo = mkdtempSync(join(tmpdir(), 'gbrain-global-repo-'));
+    const globalRepo = mkdtempSync(join(tmpdir(), 'modusbrain-global-repo-'));
     try {
       await engine.setConfig('sync.repo_path', globalRepo); // exists on disk
       await engine.executeRaw(

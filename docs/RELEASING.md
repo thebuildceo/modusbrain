@@ -1,4 +1,4 @@
-# Releasing & contributing (gbrain)
+# Releasing & contributing (modusbrain)
 
 The full release + contributor process. CLAUDE.md keeps the ship-critical IRON RULES
 inline (the Version-locations table, branch=workspace, post-ship `/document-release`,
@@ -18,7 +18,7 @@ Two equivalent paths:
   `DATABASE_URL` unset; `--no-shard` for the legacy sequential flow). Stronger
   than PR CI's 2-file Tier 1 set; closer to what nightly Tier 1 catches. Spins
   up + tears down postgres automatically via `docker-compose.ci.yml`. Override
-  the host port with `GBRAIN_CI_PG_PORT=5435 bun run ci:local` if 5434 collides.
+  the host port with `MODUSBRAIN_CI_PG_PORT=5435 bun run ci:local` if 5434 collides.
 - `bun run ci:local:diff` runs only the E2E files matched by the diff selector
   (`scripts/select-e2e.ts`), falling back to ALL E2E files on unmapped src/
   paths or schema/skills/package.json changes. Fast iteration during a focused
@@ -93,7 +93,7 @@ If any answer is no, fix it before continuing.
 **What to keep:**
 - The user-facing change: what commands exist now, what flag was added, what behavior fixed.
 - Numbers that mean something to the user: TTHW, commands that timed out before, detection counts.
-- Upgrade instructions: `gbrain upgrade` + any manual step if needed.
+- Upgrade instructions: `modusbrain upgrade` + any manual step if needed.
 - Credit to external contributors when a community PR was incorporated.
 
 ## CHANGELOG voice + release-summary format
@@ -103,7 +103,7 @@ happened.** Nobody reading release notes cares that codex caught a bug, that
 the plan went through CEO + eng review, that the migration was originally
 numbered v68 and renumbered to v79 during master merge, or that two
 review rounds caught architectural mistakes. The reader cares what
-`gbrain brainstorm` does and how to use it. If a fact only exists because
+`modusbrain brainstorm` does and how to use it. If a fact only exists because
 of the development process, it does NOT belong in the CHANGELOG.
 
 **Specifically forbidden in CHANGELOG entries:**
@@ -126,7 +126,7 @@ of the development process, it does NOT belong in the CHANGELOG.
   mistake ("the first plan was wrong", "we corrected the approach", "the
   shipped version supersedes the original design").
 
-**Smell test:** read the entry as a stranger who has never touched gbrain.
+**Smell test:** read the entry as a stranger who has never touched modusbrain.
 If any sentence makes them think "why are you telling me this?", cut it.
 Every sentence in the release-summary AND in the itemized changes must
 answer one of three questions: *What can I now do? How do I use it? What
@@ -144,7 +144,7 @@ know exactly what changed.
 ### Release-summary template
 
 **Iron rule: lead ELI10, get precise after.** The first ~150 words of every entry
-must be readable by someone who does NOT know gbrain's internals. No file paths,
+must be readable by someone who does NOT know modusbrain's internals. No file paths,
 no function names, no internal constants, no acronyms (no "RRF", no "knobsHash",
 no "MODE_BUNDLES", no "CDX-4"), no jargon that requires reading the codebase to
 parse. Lead with the user-visible behavior change, in everyday English, like
@@ -194,7 +194,7 @@ Voice rules (apply throughout):
   precision."
 - Be direct about quality. "Well-designed" or "this is a mess." No dancing.
 
-**The smell test:** if someone who has never opened gbrain reads the first 150
+**The smell test:** if someone who has never opened modusbrain reads the first 150
 words and walks away knowing what shipped and whether they care, the entry
 passes. If they need to grep the codebase to follow along, rewrite the lead.
 
@@ -206,7 +206,7 @@ work.
 
 Source material to pull from:
 - CHANGELOG.md previous entry for prior context
-- Latest `gbrain-evals/docs/benchmarks/[latest].md` for headline numbers (sibling repo)
+- Latest `modusbrain-evals/docs/benchmarks/[latest].md` for headline numbers (sibling repo)
 - Recent commits (`git log <prev-version>..HEAD --oneline`) for what shipped
 - Don't make up numbers. If a metric isn't in a benchmark or production data, don't
   include it. Say "no measurement yet" if asked.
@@ -219,11 +219,11 @@ After the release-summary and BEFORE `### Itemized changes`, every `## [X.Y.Z]`
 entry MUST include a human-readable self-repair block under the heading
 `## To take advantage of v[version]`.
 
-Why: `gbrain upgrade` runs `gbrain post-upgrade` which runs `gbrain apply-migrations`.
+Why: `modusbrain upgrade` runs `modusbrain post-upgrade` which runs `modusbrain apply-migrations`.
 This chain has a known weak link — `upgrade.ts` catches post-upgrade failures as
 best-effort (so the binary still works). When that chain silently fails, users end
 up with half-upgraded brains. The self-repair block gives them a paste-ready
-recovery path; the v0.13+ `~/.gbrain/upgrade-errors.jsonl` trail + `gbrain doctor`
+recovery path; the v0.13+ `~/.modusbrain/upgrade-errors.jsonl` trail + `modusbrain doctor`
 integration close the loop.
 
 Template (adapt the verify commands per release):
@@ -231,28 +231,28 @@ Template (adapt the verify commands per release):
 ```markdown
 ## To take advantage of v[version]
 
-`gbrain upgrade` should do this automatically. If it didn't, or if `gbrain doctor`
+`modusbrain upgrade` should do this automatically. If it didn't, or if `modusbrain doctor`
 warns about a partial migration:
 
 1. **Run the orchestrator manually:**
    ```bash
-   gbrain apply-migrations --yes
+   modusbrain apply-migrations --yes
    ```
 2. **Your agent reads `skills/migrations/v[version].md` the next time you interact with it.**
    [One sentence on whether headless agents need manual action, or whether the
    orchestrator already handled the mechanical side.]
 3. **Verify the outcome:**
    ```bash
-   [release-specific verify commands, e.g. `gbrain graph ... --depth 2`]
-   gbrain stats
+   [release-specific verify commands, e.g. `modusbrain graph ... --depth 2`]
+   modusbrain stats
    ```
 4. **If any step fails or the numbers look wrong,** please file an issue:
    https://github.com/garrytan/gbrain/issues with:
-   - output of `gbrain doctor`
-   - contents of `~/.gbrain/upgrade-errors.jsonl` if it exists
+   - output of `modusbrain doctor`
+   - contents of `~/.modusbrain/upgrade-errors.jsonl` if it exists
    - which step broke
 
-   This feedback loop is how the gbrain maintainers find fragile upgrade paths. Thank you.
+   This feedback loop is how the modusbrain maintainers find fragile upgrade paths. Thank you.
 ```
 
 **Skip this block** for patches that are pure bug fixes with zero user-facing action
@@ -270,8 +270,8 @@ Tests, etc.). Same rules as before:
 - Lead with what the user can now DO that they couldn't before
 - Frame as benefits and capabilities, not files changed or code written
 - Make the user think "hell yeah, I want that"
-- Bad: "Added GBRAIN_VERIFY.md installation verification runbook"
-- Good: "Your agent now verifies the entire GBrain installation end-to-end, catching
+- Bad: "Added MODUSBRAIN_VERIFY.md installation verification runbook"
+- Good: "Your agent now verifies the entire ModusBrain installation end-to-end, catching
   silent sync failures and stale embeddings before they bite you"
 - Bad: "Setup skill Phase H and Phase I added"
 - Good: "New installs automatically set up live sync so your brain never falls behind"
@@ -296,7 +296,7 @@ reads these files post-upgrade (Section 17, Step 4) and executes them.
 - New setup step that existing installs don't have (e.g., v0.5.0 added live sync,
   existing users need to set it up, not just new installs)
 - New SKILLPACK section with a MUST ADD setup requirement
-- Schema changes that require `gbrain init` or manual SQL
+- Schema changes that require `modusbrain init` or manual SQL
 - Changed defaults that affect existing behavior
 - Deprecated commands or flags that need replacement
 - New verification steps that should run on existing installs
@@ -317,9 +317,9 @@ for the pattern.
 
 ## Migration is canonical, not advisory
 
-GBrain's job is to deliver a canonical, working setup to every user on upgrade.
+ModusBrain's job is to deliver a canonical, working setup to every user on upgrade.
 Anything that looks like a "host-repo change" — AGENTS.md, cron manifests,
-launchctl units, config files outside `~/.gbrain/` — is a GBrain migration
+launchctl units, config files outside `~/.modusbrain/` — is a ModusBrain migration
 step, not a nudge we leave for the host-repo maintainer. Migrations edit host
 files (with backups) to make the canonical setup real. Exceptions: changes
 that require human judgment (content edits, renames that break semantics,
@@ -335,14 +335,14 @@ orchestrator should be doing that edit, not the user.
 data file the worker would exec is an RCE surface. Those get registered in
 the host's own repo via the plugin contract (`docs/guides/plugin-handlers.md`);
 the migration orchestrator emits a structured TODO to
-`~/.gbrain/migrations/pending-host-work.jsonl` + the host agent walks the
+`~/.modusbrain/migrations/pending-host-work.jsonl` + the host agent walks the
 TODOs using `skills/migrations/v0.11.0.md` — stays host-agnostic, still
 canonical.
 
 
 ## Schema state tracking
 
-`~/.gbrain/update-state.json` tracks which recommended schema directories the user
+`~/.modusbrain/update-state.json` tracks which recommended schema directories the user
 adopted, declined, or added custom. The auto-update agent (SKILLPACK Section 17)
 reads this during upgrades to suggest new schema additions without re-suggesting
 things the user already declined. The setup skill writes the initial state during
@@ -419,7 +419,7 @@ before running CI:
 1. `gh pr checkout <N>` — pull down the fork's branch. Note the PR number and
    head branch name (`gh pr view <N> --json headRefName --jq .headRefName`).
 2. `git push origin HEAD:<branch-name>` — push the same branch to the base
-   repo (origin points at `garrytan/gbrain`, not the fork). This is the move
+   repo (origin points at `garrytan/modusbrain`, not the fork). This is the move
    that gives CI access to secrets.
 3. `gh pr close <N> --comment "moving to base-repo branch for secret access"`
    — close the fork PR so the queue stays clean.

@@ -208,7 +208,7 @@ describe('runThink (with stub client)', () => {
   });
 
   test('degrades gracefully without ANTHROPIC_API_KEY', async () => {
-    // Hermetic: neutralize BOTH the env var AND ~/.gbrain config key, else a
+    // Hermetic: neutralize BOTH the env var AND ~/.modusbrain config key, else a
     // developer/CI machine with a configured key fires a real LLM call and this
     // assertion flips to LLM_OUTPUT_NOT_JSON.
     const result = await withoutAnthropicKey(() => runThink(engine, { question: 'no key test' }));

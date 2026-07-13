@@ -22,15 +22,15 @@ import { join } from 'path';
 
 let engine: PGLiteEngine;
 let brainDir: string;
-// Per-test GBRAIN_HOME isolation: cycle's PGLite path acquires a file
-// lock at `~/.gbrain/cycle.lock` (no sourceId scope). Without isolating
-// GBRAIN_HOME per test, parallel gbrain processes on the same machine
+// Per-test MODUSBRAIN_HOME isolation: cycle's PGLite path acquires a file
+// lock at `~/.modusbrain/cycle.lock` (no sourceId scope). Without isolating
+// MODUSBRAIN_HOME per test, parallel modusbrain processes on the same machine
 // (including sibling Conductor worktrees running their own tests)
 // contend for the same lock file — runCycle returns 'skipped' and the
 // last_full_cycle_at exit hook silently no-ops. Each test wraps its
-// body in `withEnv({GBRAIN_HOME: <unique tmp>})` so the file lock path
+// body in `withEnv({MODUSBRAIN_HOME: <unique tmp>})` so the file lock path
 // becomes per-test.
-let gbrainHome: string;
+let modusbrainHome: string;
 
 beforeAll(async () => {
   engine = new PGLiteEngine();
@@ -44,8 +44,8 @@ afterAll(async () => {
 
 beforeEach(async () => {
   await resetPgliteState(engine);
-  brainDir = mkdtempSync(join(tmpdir(), 'gbrain-cycle-lfca-'));
-  gbrainHome = mkdtempSync(join(tmpdir(), 'gbrain-cycle-lfca-home-'));
+  brainDir = mkdtempSync(join(tmpdir(), 'modusbrain-cycle-lfca-'));
+  modusbrainHome = mkdtempSync(join(tmpdir(), 'modusbrain-cycle-lfca-home-'));
 });
 
 async function seedSource(id: string): Promise<void> {
@@ -67,7 +67,7 @@ async function readLastFullCycleAt(sourceId: string): Promise<string | null> {
 
 describe('runCycle last_full_cycle_at exit hook', () => {
   test('per-source cycle with status=ok writes timestamp', async () => {
-    await withEnv({ GBRAIN_HOME: gbrainHome }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: modusbrainHome }, async () => {
       await seedSource('alpha');
       const before = await readLastFullCycleAt('alpha');
       expect(before).toBeNull();
@@ -91,7 +91,7 @@ describe('runCycle last_full_cycle_at exit hook', () => {
   });
 
   test('legacy caller (no sourceId) does NOT write any source timestamp', async () => {
-    await withEnv({ GBRAIN_HOME: gbrainHome }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: modusbrainHome }, async () => {
       await seedSource('default-like');
       // No sourceId passed; should remain untouched.
       await runCycle(engine, {
@@ -105,7 +105,7 @@ describe('runCycle last_full_cycle_at exit hook', () => {
   });
 
   test('dryRun=true skips the write', async () => {
-    await withEnv({ GBRAIN_HOME: gbrainHome }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: modusbrainHome }, async () => {
       await seedSource('beta');
       await runCycle(engine, {
         brainDir,
@@ -119,14 +119,14 @@ describe('runCycle last_full_cycle_at exit hook', () => {
   });
 
   test('cycle that returns skipped (lock held) does NOT mark timestamp', async () => {
-    await withEnv({ GBRAIN_HOME: gbrainHome }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: modusbrainHome }, async () => {
       await seedSource('gamma');
       // Inject a live lock row directly so the cycle returns 'skipped'.
       // This simulates "another cycle is already running for gamma."
-      const lockId = 'gbrain-cycle:gamma';
+      const lockId = 'modusbrain-cycle:gamma';
       const pid = process.pid;
       await engine.executeRaw(
-        `INSERT INTO gbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at)
+        `INSERT INTO modusbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at)
          VALUES ($1, $2, 'test', NOW(), NOW() + INTERVAL '30 minutes')`,
         [lockId, pid + 99999],
       );
@@ -143,7 +143,7 @@ describe('runCycle last_full_cycle_at exit hook', () => {
   });
 
   test('two consecutive per-source cycles update the timestamp on each run', async () => {
-    await withEnv({ GBRAIN_HOME: gbrainHome }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: modusbrainHome }, async () => {
       await seedSource('delta');
       await runCycle(engine, { brainDir, sourceId: 'delta', phases: ['lint'] });
       const first = await readLastFullCycleAt('delta');

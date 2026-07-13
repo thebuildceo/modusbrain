@@ -1,5 +1,5 @@
 /**
- * buildGatewayConfig — translate a stored GBrainConfig into the gateway's
+ * buildGatewayConfig — translate a stored ModusBrainConfig into the gateway's
  * AIGatewayConfig (env dict + base_urls + model strings).
  *
  * v0.42 (#1780 Gap 2): extracted from src/cli.ts into a core module so
@@ -16,11 +16,11 @@
  * endpoint (custom OpenAI base URL, llama-server, etc.).
  */
 
-import type { GBrainConfig } from '../config.ts';
+import type { ModusBrainConfig } from '../config.ts';
 import type { AIGatewayConfig } from './types.ts';
 
-export function buildGatewayConfig(c: GBrainConfig): AIGatewayConfig {
-  // v0.32 (#121 reworked): when ~/.gbrain/config.json declares
+export function buildGatewayConfig(c: ModusBrainConfig): AIGatewayConfig {
+  // v0.32 (#121 reworked): when ~/.modusbrain/config.json declares
   // openai_api_key / anthropic_api_key, fold them into the gateway env so
   // recipes that read OPENAI_API_KEY / ANTHROPIC_API_KEY find them. Process
   // env still wins (it's loaded last) — this is a fallback for daemons /
@@ -29,10 +29,10 @@ export function buildGatewayConfig(c: GBrainConfig): AIGatewayConfig {
   if (c.openai_api_key) envFromConfig.OPENAI_API_KEY = c.openai_api_key;
   if (c.anthropic_api_key) envFromConfig.ANTHROPIC_API_KEY = c.anthropic_api_key;
   // v0.37 fix wave (CDX2-5+6): ZE became the default provider in v0.36 but
-  // the env-mapping at this seam never picked it up. `gbrain config set
+  // the env-mapping at this seam never picked it up. `modusbrain config set
   // zeroentropy_api_key X` wrote DB plane (ignored by gateway). The file-
-  // plane field now exists (GBrainConfig type) and gets mapped here, so
-  // setting it via `~/.gbrain/config.json` propagates into the gateway.
+  // plane field now exists (ModusBrainConfig type) and gets mapped here, so
+  // setting it via `~/.modusbrain/config.json` propagates into the gateway.
   if (c.zeroentropy_api_key) envFromConfig.ZEROENTROPY_API_KEY = c.zeroentropy_api_key;
 
   // v0.32 codex finding #4+#5 fix: thread local-server _BASE_URL env vars

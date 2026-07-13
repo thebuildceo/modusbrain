@@ -1,12 +1,12 @@
 /**
- * E2E `gbrain status` against a real PGLite brain.
+ * E2E `modusbrain status` against a real PGLite brain.
  *
  * Seeds:
  *   - 1 source row
  *   - 1 `autopilot-cycle` completed row with `result.report.totals`
  *   - 1 `autopilot-embed` completed row (newer; covers the dual-row
  *     "Last full" + "Last targeted" output per D3)
- *   - 1 active gbrain_cycle_locks row
+ *   - 1 active modusbrain_cycle_locks row
  *   - some minion_jobs counts (waiting/active/dead)
  *
  * Asserts:
@@ -62,7 +62,7 @@ async function seedSource(engine: PGLiteEngine, id: string) {
   );
 }
 
-describe('gbrain status E2E (PGLite)', () => {
+describe('modusbrain status E2E (PGLite)', () => {
   test('JSON envelope shape includes schema_version + sync + cycle + locks + workers + queue + autopilot', async () => {
     await seedSource(engine, 'default');
     let jsonOut = '';
@@ -151,8 +151,8 @@ describe('gbrain status E2E (PGLite)', () => {
   test('active lock surfaces in the locks section', async () => {
     await seedSource(engine, 'default');
     await engine.executeRaw(
-      `INSERT INTO gbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at, last_refreshed_at)
-       VALUES ('gbrain-cycle', 1234, 'test-host', NOW(), NOW() + INTERVAL '30 minutes', NOW())`,
+      `INSERT INTO modusbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at, last_refreshed_at)
+       VALUES ('modusbrain-cycle', 1234, 'test-host', NOW(), NOW() + INTERVAL '30 minutes', NOW())`,
     );
     let jsonOut = '';
     await runStatus(engine, ['--json'], {
@@ -164,7 +164,7 @@ describe('gbrain status E2E (PGLite)', () => {
     const parsed = JSON.parse(jsonOut.trim());
     expect(Array.isArray(parsed.locks)).toBe(true);
     expect(parsed.locks).toHaveLength(1);
-    expect(parsed.locks[0].id).toBe('gbrain-cycle');
+    expect(parsed.locks[0].id).toBe('modusbrain-cycle');
     expect(parsed.locks[0].holder_pid).toBe(1234);
   });
 

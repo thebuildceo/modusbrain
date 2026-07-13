@@ -36,9 +36,9 @@ afterEach(() => {
 
 describe('batch-retry-audit privacy backfill (D9)', () => {
   test('case 1 — logBatchRetry: PG connection-failure error has no DSN/IP/password in JSONL', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: tmpDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: tmpDir }, async () => {
       const err = new Error(
-        'PG retry context: postgres://garry:hunter2@db.example.com:5432/gbrain failed (192.168.1.42)',
+        'PG retry context: postgres://garry:hunter2@db.example.com:5432/modusbrain failed (192.168.1.42)',
       );
       logBatchRetry('addLinksBatch', 100, 1, 1000, err);
       const file = path.join(tmpDir, computeIsoWeekFilename(BATCH_RETRY_FEATURE_NAME));
@@ -52,7 +52,7 @@ describe('batch-retry-audit privacy backfill (D9)', () => {
   });
 
   test('case 2 — logBatchExhausted: same privacy contract on the exhausted path', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: tmpDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: tmpDir }, async () => {
       const err = new Error('FATAL: password=hunter2 authentication failed for user=postgres');
       logBatchExhausted('addTimelineEntriesBatch', 50, 4, err);
       const file = path.join(tmpDir, computeIsoWeekFilename(BATCH_RETRY_FEATURE_NAME));
@@ -64,7 +64,7 @@ describe('batch-retry-audit privacy backfill (D9)', () => {
   });
 
   test('case 3 — plain error message (no secrets) flows through unchanged', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: tmpDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: tmpDir }, async () => {
       logBatchRetry('upsertChunks', 100, 1, 1000, new Error('Connection terminated unexpectedly'));
       const file = path.join(tmpDir, computeIsoWeekFilename(BATCH_RETRY_FEATURE_NAME));
       const raw = fs.readFileSync(file, 'utf8');

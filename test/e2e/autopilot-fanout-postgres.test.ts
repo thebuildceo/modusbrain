@@ -45,11 +45,11 @@ beforeEach(async () => {
   if (skip) return;
   await engine.executeRaw(`DELETE FROM sources WHERE id <> 'default'`);
   await engine.executeRaw(`DELETE FROM minion_jobs`);
-  await engine.executeRaw(`DELETE FROM gbrain_cycle_locks`);
+  await engine.executeRaw(`DELETE FROM modusbrain_cycle_locks`);
 });
 
 async function seedSource(id: string, opts: { local_path?: string } = {}): Promise<void> {
-  const localPath = opts.local_path ?? mkdtempSync(join(tmpdir(), `gbrain-fanout-${id}-`));
+  const localPath = opts.local_path ?? mkdtempSync(join(tmpdir(), `modusbrain-fanout-${id}-`));
   // Direct literal `'{}'::jsonb` is fine (no parameter binding). Test
   // explicitly resets config to {} so each test starts clean.
   await engine.executeRaw(

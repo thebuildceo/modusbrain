@@ -1,5 +1,5 @@
 /**
- * skillpack/init-brain-pack.ts — `gbrain skillpack init-brain-pack` scaffold.
+ * skillpack/init-brain-pack.ts — `modusbrain skillpack init-brain-pack` scaffold.
  *
  * Writes a starter brain-resident skillpack into a brain/source repo: skills
  * co-evolved with that brain, versioned in its repo, discovered by any harness
@@ -10,7 +10,7 @@
  * connecting harness reads.
  *
  * Reuses the refuse-overwrite `applyWritePlan` contract from init-scaffold.ts.
- * Sets `brain_resident: true` and pins `gbrain_min_version` to the EXACT serving
+ * Sets `brain_resident: true` and pins `modusbrain_min_version` to the EXACT serving
  * version (not major.minor.0) so a pack that depends on a just-shipped op can't
  * silently install on a binary that predates it.
  */
@@ -34,8 +34,8 @@ export interface InitBrainPackOptions {
   author?: string;
   license?: string;
   homepage?: string;
-  /** Pin gbrain_min_version to this exact version (default: serving VERSION). */
-  gbrainVersion?: string;
+  /** Pin modusbrain_min_version to this exact version (default: serving VERSION). */
+  modusbrainVersion?: string;
   /** Dry-run: report intent without writing. */
   dryRun?: boolean;
 }
@@ -83,7 +83,7 @@ export function runInitBrainPack(opts: InitBrainPackOptions): InitBrainPackResul
   }
   // Pin to the EXACT serving version (#13) so a pack depending on a just-shipped
   // op can't install on an older binary that lacks it.
-  const minVersion = opts.gbrainVersion ?? VERSION;
+  const minVersion = opts.modusbrainVersion ?? VERSION;
 
   const manifest: SkillpackManifest = {
     api_version: SKILLPACK_API_VERSION,
@@ -93,7 +93,7 @@ export function runInitBrainPack(opts: InitBrainPackOptions): InitBrainPackResul
     author: opts.author ?? 'Your Name <you@example.com>',
     license: opts.license ?? 'MIT',
     homepage: opts.homepage ?? `https://github.com/your-user/${opts.name}`,
-    gbrain_min_version: minVersion,
+    modusbrain_min_version: minVersion,
     skills: [`skills/${firstSlug}`],
     runbooks: { bootstrap: 'runbooks/bootstrap.md' },
     changelog: 'CHANGELOG.md',
@@ -119,8 +119,8 @@ export function runInitBrainPack(opts: InitBrainPackOptions): InitBrainPackResul
       'triggers:',
       `  - example trigger phrase 1 for ${firstSlug}`,
       `  - example trigger phrase 2 for ${firstSlug}`,
-      '# tools: list gbrain ops this skill calls (e.g. [search, put_page]); used by the',
-      '# version-skew lint to fail loud if a connecting gbrain lacks them.',
+      '# tools: list modusbrain ops this skill calls (e.g. [search, put_page]); used by the',
+      '# version-skew lint to fail loud if a connecting modusbrain lacks them.',
       '---',
       '',
       `# ${firstSlug}`,
@@ -146,7 +146,7 @@ export function runInitBrainPack(opts: InitBrainPackOptions): InitBrainPackResul
     content: [
       '# Bootstrap',
       '',
-      'Post-scaffold steps. gbrain displays this but does NOT auto-execute.',
+      'Post-scaffold steps. modusbrain displays this but does NOT auto-execute.',
       'The harness reads it and walks per-step at its own discretion.',
       '',
       `1. show user: "${opts.name} is installed. Try a trigger phrase from skills/${firstSlug}/SKILL.md."`,
@@ -174,7 +174,7 @@ export function runInitBrainPack(opts: InitBrainPackOptions): InitBrainPackResul
       'Ask the user first, then:',
       '',
       '```bash',
-      `gbrain skillpack scaffold <this-repo>`,
+      `modusbrain skillpack scaffold <this-repo>`,
       '```',
       '',
       '## 4. Conventions this brain expects',
@@ -184,7 +184,7 @@ export function runInitBrainPack(opts: InitBrainPackOptions): InitBrainPackResul
       '',
       '## 5. Version compatibility',
       '',
-      `- gbrain_min_version: ${minVersion}`,
+      `- modusbrain_min_version: ${minVersion}`,
       `- schema_pack: ${schemaPack}`,
       '',
     ].join('\n'),

@@ -124,7 +124,7 @@ export async function executeRawJsonb<R = Record<string, unknown>>(
   // JSONB via the explicit `::jsonb` cast in the caller's SQL string. A
   // top-level ARRAY is rejected: postgres.js can bind a bare JS array as a
   // Postgres ARRAY literal rather than jsonb, which silently re-enters the
-  // "malformed array literal" class gbrain#1861 exists to escape. Wrap arrays
+  // "malformed array literal" class modusbrain#1861 exists to escape. Wrap arrays
   // in an object, e.g. `[{ rows: [...] }]` selected via
   // `jsonb_to_recordset(($N::jsonb)->'rows')`. This enforces at the call layer
   // the invariant the batch-insert methods rely on (codex #1861 P2a).
@@ -134,7 +134,7 @@ export async function executeRawJsonb<R = Record<string, unknown>>(
         'executeRawJsonb: a top-level array jsonb param can bind as a Postgres ' +
         'array literal (not jsonb) through postgres.js. Wrap it in an object — ' +
         "e.g. `[{ rows: [...] }]` with `jsonb_to_recordset(($N::jsonb)->'rows')`. " +
-        '(gbrain#1861)',
+        '(modusbrain#1861)',
       );
     }
   }

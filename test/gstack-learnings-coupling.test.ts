@@ -24,7 +24,7 @@ import {
   type IncorrectResolutionEvent,
   type GstackLearningEntry,
 } from '../src/core/calibration/gstack-coupling.ts';
-import { GBrainError } from '../src/core/types.ts';
+import { ModusBrainError } from '../src/core/types.ts';
 
 function buildEvent(overrides: Partial<IncorrectResolutionEvent> = {}): IncorrectResolutionEvent {
   return {
@@ -47,7 +47,7 @@ function buildEvent(overrides: Partial<IncorrectResolutionEvent> = {}): Incorrec
 describe('buildLearningEntry', () => {
   test('emits canonical entry shape', () => {
     const entry = buildLearningEntry(buildEvent());
-    expect(entry.skill).toBe('gbrain-calibration');
+    expect(entry.skill).toBe('modusbrain-calibration');
     expect(entry.type).toBe('observation');
     expect(entry.source).toBe('observed');
     expect(entry.key).toContain(GSTACK_LEARNING_NAMESPACE);
@@ -144,7 +144,7 @@ describe('writeIncorrectResolution', () => {
     });
     expect(result.written).toBe(true);
     expect(received).toBeDefined();
-    expect(received!.skill).toBe('gbrain-calibration');
+    expect(received!.skill).toBe('modusbrain-calibration');
     expect(received!.key).toContain('take-42');
   });
 
@@ -161,12 +161,12 @@ describe('writeIncorrectResolution', () => {
     expect(result.error).toContain('connection refused');
   });
 
-  test('writer throws GBrainError(GSTACK_BINARY_NOT_FOUND) → reason="binary_missing"', async () => {
+  test('writer throws ModusBrainError(GSTACK_BINARY_NOT_FOUND) → reason="binary_missing"', async () => {
     const result = await writeIncorrectResolution({
       event: buildEvent(),
       enabled: true,
       writer: () => {
-        throw new GBrainError(
+        throw new ModusBrainError(
           'GSTACK_BINARY_NOT_FOUND',
           'gstack-learnings-log binary not on PATH',
           'install gstack',

@@ -19,7 +19,7 @@ export const collectChronicle: AdvisorCollector = {
           severity: 'warn',
           title: `${conflicts.length} entity dimension(s) have conflicting current values`,
           detail: conflicts.slice(0, 5).map((c) => `${c.entity_slug}.${c.dimension}`).join(', '),
-          fix: { command_argv: ['gbrain', 'ontology-contradictions'] },
+          fix: { command_argv: ['modusbrain', 'ontology-contradictions'] },
           collector: 'chronicle',
           ask_user: false,
         });
@@ -45,8 +45,8 @@ export const collectChronicle: AdvisorCollector = {
           id: 'chronicle_coverage_gap',
           severity: 'info',
           title: `${gap} recent meeting(s) aren't in the timeline yet`,
-          detail: 'Sweep them into events with `gbrain chronicle-backfill`, or enable auto_chronicle.',
-          fix: { command_argv: ['gbrain', 'chronicle-backfill'] },
+          detail: 'Sweep them into events with `modusbrain chronicle-backfill`, or enable auto_chronicle.',
+          fix: { command_argv: ['modusbrain', 'chronicle-backfill'] },
           collector: 'chronicle',
           ask_user: true,
         });

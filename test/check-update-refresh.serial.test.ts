@@ -41,15 +41,15 @@ function stubReleaseFetch(tag: string | null, ok = true): void {
 }
 
 beforeEach(() => {
-  priorHome = process.env.GBRAIN_HOME;
-  homeDir = mkdtempSync(join(tmpdir(), 'gbrain-refresh-'));
-  process.env.GBRAIN_HOME = homeDir;
+  priorHome = process.env.MODUSBRAIN_HOME;
+  homeDir = mkdtempSync(join(tmpdir(), 'modusbrain-refresh-'));
+  process.env.MODUSBRAIN_HOME = homeDir;
 });
 
 afterEach(() => {
   globalThis.fetch = realFetch;
-  if (priorHome === undefined) delete process.env.GBRAIN_HOME;
-  else process.env.GBRAIN_HOME = priorHome;
+  if (priorHome === undefined) delete process.env.MODUSBRAIN_HOME;
+  else process.env.MODUSBRAIN_HOME = priorHome;
   rmSync(homeDir, { recursive: true, force: true });
 });
 

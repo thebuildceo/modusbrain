@@ -43,16 +43,16 @@ beforeEach(async () => {
 
 describe('inspectLock', () => {
   test('returns null when no row exists', async () => {
-    const snap = await inspectLock(engine, 'gbrain-sync:test-source');
+    const snap = await inspectLock(engine, 'modusbrain-sync:test-source');
     expect(snap).toBeNull();
   });
 
   test('returns LockSnapshot shape after tryAcquireDbLock', async () => {
-    const handle = await tryAcquireDbLock(engine, 'gbrain-sync:default');
+    const handle = await tryAcquireDbLock(engine, 'modusbrain-sync:default');
     expect(handle).not.toBeNull();
-    const snap = await inspectLock(engine, 'gbrain-sync:default');
+    const snap = await inspectLock(engine, 'modusbrain-sync:default');
     expect(snap).not.toBeNull();
-    expect(snap!.id).toBe('gbrain-sync:default');
+    expect(snap!.id).toBe('modusbrain-sync:default');
     expect(snap!.holder_pid).toBe(process.pid);
     expect(typeof snap!.holder_host).toBe('string');
     expect(snap!.holder_host.length).toBeGreaterThan(0);
@@ -67,11 +67,11 @@ describe('inspectLock', () => {
   test('ttl_expired=true after the TTL has elapsed', async () => {
     // Use a 0-minute TTL via raw INSERT to simulate an expired lock.
     await (engine as any).db.query(
-      `INSERT INTO gbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at)
+      `INSERT INTO modusbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at)
        VALUES ($1, $2, $3, NOW() - INTERVAL '1 hour', NOW() - INTERVAL '30 minutes')`,
-      ['gbrain-sync:stale', 99999, 'old-host'],
+      ['modusbrain-sync:stale', 99999, 'old-host'],
     );
-    const snap = await inspectLock(engine, 'gbrain-sync:stale');
+    const snap = await inspectLock(engine, 'modusbrain-sync:stale');
     expect(snap).not.toBeNull();
     expect(snap!.ttl_expired).toBe(true);
     expect(snap!.age_ms).toBeGreaterThan(3000_000); // > 50 min in ms
@@ -80,7 +80,7 @@ describe('inspectLock', () => {
 
 describe('listStaleLocks', () => {
   test('returns empty when no stale rows exist', async () => {
-    const handle = await tryAcquireDbLock(engine, 'gbrain-sync:fresh');
+    const handle = await tryAcquireDbLock(engine, 'modusbrain-sync:fresh');
     expect(handle).not.toBeNull();
     const stale = await listStaleLocks(engine);
     expect(stale).toEqual([]);
@@ -89,53 +89,53 @@ describe('listStaleLocks', () => {
 
   test('returns only rows where ttl_expires_at < NOW()', async () => {
     // Insert one fresh + one stale.
-    const handle = await tryAcquireDbLock(engine, 'gbrain-sync:still-live');
+    const handle = await tryAcquireDbLock(engine, 'modusbrain-sync:still-live');
     expect(handle).not.toBeNull();
     await (engine as any).db.query(
-      `INSERT INTO gbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at)
+      `INSERT INTO modusbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at)
        VALUES ($1, $2, $3, NOW() - INTERVAL '1 hour', NOW() - INTERVAL '30 minutes')`,
-      ['gbrain-sync:stale-A', 11111, 'host-A'],
+      ['modusbrain-sync:stale-A', 11111, 'host-A'],
     );
     await (engine as any).db.query(
-      `INSERT INTO gbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at)
+      `INSERT INTO modusbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at)
        VALUES ($1, $2, $3, NOW() - INTERVAL '2 hours', NOW() - INTERVAL '1 hour')`,
-      ['gbrain-sync:stale-B', 22222, 'host-B'],
+      ['modusbrain-sync:stale-B', 22222, 'host-B'],
     );
 
     const stale = await listStaleLocks(engine);
     const ids = stale.map(s => s.id).sort();
-    expect(ids).toEqual(['gbrain-sync:stale-A', 'gbrain-sync:stale-B']);
+    expect(ids).toEqual(['modusbrain-sync:stale-A', 'modusbrain-sync:stale-B']);
     expect(stale.every(s => s.ttl_expired)).toBe(true);
     await handle!.release();
   });
 
   test('orders by acquired_at ascending', async () => {
     await (engine as any).db.query(
-      `INSERT INTO gbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at)
+      `INSERT INTO modusbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at)
        VALUES ($1, $2, $3, NOW() - INTERVAL '1 hour', NOW() - INTERVAL '30 minutes')`,
-      ['gbrain-sync:newer-stale', 11111, 'h1'],
+      ['modusbrain-sync:newer-stale', 11111, 'h1'],
     );
     await (engine as any).db.query(
-      `INSERT INTO gbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at)
+      `INSERT INTO modusbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at)
        VALUES ($1, $2, $3, NOW() - INTERVAL '5 hours', NOW() - INTERVAL '4 hours')`,
-      ['gbrain-sync:older-stale', 22222, 'h2'],
+      ['modusbrain-sync:older-stale', 22222, 'h2'],
     );
 
     const stale = await listStaleLocks(engine);
     // Older-stale was acquired first → ordered first.
-    expect(stale[0].id).toBe('gbrain-sync:older-stale');
-    expect(stale[1].id).toBe('gbrain-sync:newer-stale');
+    expect(stale[0].id).toBe('modusbrain-sync:older-stale');
+    expect(stale[1].id).toBe('modusbrain-sync:newer-stale');
   });
 });
 
 describe('deleteLockRow', () => {
   test('deletes the row + RETURNING returns it when (id, pid) matches', async () => {
-    const handle = await tryAcquireDbLock(engine, 'gbrain-sync:to-delete');
+    const handle = await tryAcquireDbLock(engine, 'modusbrain-sync:to-delete');
     expect(handle).not.toBeNull();
-    const result = await deleteLockRow(engine, 'gbrain-sync:to-delete', process.pid);
+    const result = await deleteLockRow(engine, 'modusbrain-sync:to-delete', process.pid);
     expect(result.deleted).toBe(true);
     // Row should be gone.
-    const snap = await inspectLock(engine, 'gbrain-sync:to-delete');
+    const snap = await inspectLock(engine, 'modusbrain-sync:to-delete');
     expect(snap).toBeNull();
     // handle.release() would also have run a DELETE — verify it's idempotent.
     await handle!.release();
@@ -144,28 +144,28 @@ describe('deleteLockRow', () => {
   test('returns deleted=false when row was already cleared (race)', async () => {
     // Insert a row, then delete it directly, then call deleteLockRow.
     await (engine as any).db.query(
-      `INSERT INTO gbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at)
+      `INSERT INTO modusbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at)
        VALUES ($1, $2, $3, NOW(), NOW() + INTERVAL '30 minutes')`,
-      ['gbrain-sync:race-target', 11111, 'h1'],
+      ['modusbrain-sync:race-target', 11111, 'h1'],
     );
     await (engine as any).db.query(
-      `DELETE FROM gbrain_cycle_locks WHERE id = $1`,
-      ['gbrain-sync:race-target'],
+      `DELETE FROM modusbrain_cycle_locks WHERE id = $1`,
+      ['modusbrain-sync:race-target'],
     );
-    const result = await deleteLockRow(engine, 'gbrain-sync:race-target', 11111);
+    const result = await deleteLockRow(engine, 'modusbrain-sync:race-target', 11111);
     expect(result.deleted).toBe(false);
   });
 
   test('refuses to delete when pid does not match (preserves cross-host safety)', async () => {
     await (engine as any).db.query(
-      `INSERT INTO gbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at)
+      `INSERT INTO modusbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at)
        VALUES ($1, $2, $3, NOW(), NOW() + INTERVAL '30 minutes')`,
-      ['gbrain-sync:wrong-pid', 11111, 'h1'],
+      ['modusbrain-sync:wrong-pid', 11111, 'h1'],
     );
-    const result = await deleteLockRow(engine, 'gbrain-sync:wrong-pid', 22222);
+    const result = await deleteLockRow(engine, 'modusbrain-sync:wrong-pid', 22222);
     expect(result.deleted).toBe(false);
     // Row should still exist.
-    const snap = await inspectLock(engine, 'gbrain-sync:wrong-pid');
+    const snap = await inspectLock(engine, 'modusbrain-sync:wrong-pid');
     expect(snap).not.toBeNull();
     expect(snap!.holder_pid).toBe(11111);
   });
@@ -175,12 +175,12 @@ describe('deleteLockRow', () => {
     // there is no separate SELECT-then-DELETE pattern visible to callers.
     // This test exists as a regression guard against splitting the
     // DELETE...RETURNING into a SELECT-check + DELETE later.
-    const handle = await tryAcquireDbLock(engine, 'gbrain-sync:atomic-test');
+    const handle = await tryAcquireDbLock(engine, 'modusbrain-sync:atomic-test');
     expect(handle).not.toBeNull();
-    const r = await deleteLockRow(engine, 'gbrain-sync:atomic-test', process.pid);
+    const r = await deleteLockRow(engine, 'modusbrain-sync:atomic-test', process.pid);
     expect(r.deleted).toBe(true);
     // Calling again is a no-op (idempotent).
-    const r2 = await deleteLockRow(engine, 'gbrain-sync:atomic-test', process.pid);
+    const r2 = await deleteLockRow(engine, 'modusbrain-sync:atomic-test', process.pid);
     expect(r2.deleted).toBe(false);
     await handle!.release();
   });
@@ -205,7 +205,7 @@ describe('liveSyncStatus (#1950)', () => {
 
   test('returns null for a stale (TTL-expired) lock — structurally available, not running', async () => {
     await (engine as any).db.query(
-      `INSERT INTO gbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at)
+      `INSERT INTO modusbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at)
        VALUES ($1, $2, $3, NOW() - INTERVAL '2 hours', NOW() - INTERVAL '1 hour')`,
       [syncLockId('wedged-dead'), 31337, 'old-host'],
     );

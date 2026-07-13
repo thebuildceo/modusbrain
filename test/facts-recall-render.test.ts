@@ -1,5 +1,5 @@
 /**
- * v0.31 Phase 6 — `gbrain recall --today` markdown render shape.
+ * v0.31 Phase 6 — `modusbrain recall --today` markdown render shape.
  *
  * Pins kind icons present in the output, entity grouping, and the empty
  * state. Captures stdout via process.stdout.write override.
@@ -32,7 +32,7 @@ beforeEach(() => {
   }) as typeof process.stdout.write;
 });
 
-describe('gbrain recall --today', () => {
+describe('modusbrain recall --today', () => {
   test('empty state prints "No facts captured today yet."', async () => {
     await runRecall(engine, ['--today', '--source', 'empty-source-x']);
     expect(captured).toContain('Hot memory — ');
@@ -80,7 +80,7 @@ describe('gbrain recall --today', () => {
   });
 });
 
-describe('gbrain recall --json', () => {
+describe('modusbrain recall --json', () => {
   test('emits valid JSON with effective_confidence per row', async () => {
     captured = '';
     process.stdout.write = ((chunk: string | Uint8Array) => {
@@ -106,7 +106,7 @@ describe('gbrain recall --json', () => {
   });
 });
 
-describe('gbrain recall --as-context', () => {
+describe('modusbrain recall --as-context', () => {
   test('emits markdown comment-wrapped block', async () => {
     captured = '';
     process.stdout.write = ((chunk: string | Uint8Array) => {
@@ -117,6 +117,6 @@ describe('gbrain recall --as-context', () => {
     await runRecall(engine, ['--as-context', '--limit', '5']);
     process.stdout.write = origWrite;
 
-    expect(captured.startsWith('<!-- gbrain hot memory') || captured.includes('gbrain hot memory')).toBe(true);
+    expect(captured.startsWith('<!-- modusbrain hot memory') || captured.includes('modusbrain hot memory')).toBe(true);
   });
 });

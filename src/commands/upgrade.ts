@@ -4,12 +4,12 @@ import { basename, join, dirname, resolve } from 'path';
 import { brandHelp } from '../core/branding.ts';
 import { VERSION } from '../version.ts';
 
-const GBRAIN_GITHUB_REPO = 'garrytan/gbrain';
+const MODUSBRAIN_GITHUB_REPO = 'garrytan/modusbrain';
 const BUN = process.execPath;
 
 export async function runUpgrade(args: string[]) {
   if (args.includes('--help') || args.includes('-h')) {
-    console.log(brandHelp('Usage: gbrain upgrade [--swap-only]\n\nSelf-update the CLI.\n\nDetects install method (bun, binary, clawhub) and runs the appropriate update.\nAfter upgrading, shows what\'s new and offers to set up new features.\n\n--swap-only  Perform ONLY the binary/source swap and skip post-upgrade\n             (migrations run on the next launch). Used by the autopilot\n             silent self-upgrade channel so the daemon can swap + relaunch\n             without a 30-min blocking post-upgrade inside its tick.'));
+    console.log(brandHelp('Usage: modusbrain upgrade [--swap-only]\n\nSelf-update the CLI.\n\nDetects install method (bun, binary, clawhub) and runs the appropriate update.\nAfter upgrading, shows what\'s new and offers to set up new features.\n\n--swap-only  Perform ONLY the binary/source swap and skip post-upgrade\n             (migrations run on the next launch). Used by the autopilot\n             silent self-upgrade channel so the daemon can swap + relaunch\n             without a 30-min blocking post-upgrade inside its tick.'));
     return;
   }
 
@@ -47,11 +47,11 @@ export async function runUpgrade(args: string[]) {
       console.log('Upgrading via bun...');
       const bunGlobalRoot = resolveBunGlobalRoot();
       try {
-        execFileSync(BUN, ['update', 'gbrain'], { cwd: bunGlobalRoot, stdio: 'inherit', timeout: 120_000 });
+        execFileSync(BUN, ['update', 'modusbrain'], { cwd: bunGlobalRoot, stdio: 'inherit', timeout: 120_000 });
         upgraded = true;
       } catch {
         console.error('Upgrade failed. Try running manually:');
-        console.error(`  cd ${bunGlobalRoot} && bun update gbrain`);
+        console.error(`  cd ${bunGlobalRoot} && bun update modusbrain`);
       }
       break;
     }
@@ -60,24 +60,24 @@ export async function runUpgrade(args: string[]) {
       // v0.42: real atomic self-update on the published targets
       // (darwin-arm64, linux-x64). Other platforms have no asset → notify.
       const { runBinarySelfUpdate } = await import('../core/binary-self-update.ts');
-      console.log('Updating gbrain binary (atomic download + replace)...');
+      console.log('Updating modusbrain binary (atomic download + replace)...');
       const result = await runBinarySelfUpdate();
       if (result.ok) {
         upgraded = true;
       } else if (result.reason === 'unsupported_platform' || result.reason === 'no_asset') {
         console.log('No published binary for this platform/arch.');
         console.log('Download the latest binary from GitHub Releases:');
-        console.log('  https://github.com/garrytan/gbrain/releases');
+        console.log('  https://github.com/thebuildceo/modusbrain/releases');
       } else {
         console.error(`Binary self-update failed (${result.reason}${result.error ? `: ${result.error}` : ''}).`);
         console.error('Your existing binary is unchanged. Download manually if needed:');
-        console.error('  https://github.com/garrytan/gbrain/releases');
+        console.error('  https://github.com/thebuildceo/modusbrain/releases');
         recordUpgradeError({
           phase: 'binary-self-update',
           fromVersion: oldVersion,
           toVersion: '',
           error: `${result.reason}${result.error ? `: ${result.error}` : ''}`,
-          hint: 'Download from https://github.com/garrytan/gbrain/releases',
+          hint: 'Download from https://github.com/thebuildceo/modusbrain/releases',
         });
       }
       break;
@@ -86,19 +86,19 @@ export async function runUpgrade(args: string[]) {
     case 'clawhub':
       console.log('Upgrading via ClawHub...');
       try {
-        execSync('clawhub update gbrain', { stdio: 'inherit', timeout: 120_000 });
+        execSync('clawhub update modusbrain', { stdio: 'inherit', timeout: 120_000 });
         upgraded = true;
       } catch {
-        console.error('ClawHub upgrade failed. Try: clawhub update gbrain');
+        console.error('ClawHub upgrade failed. Try: clawhub update modusbrain');
       }
       break;
 
     default:
       console.error('Could not detect installation method.');
       console.log('Try one of:');
-      console.log('  bun update gbrain');
-      console.log('  clawhub update gbrain');
-      console.log('  Download from https://github.com/garrytan/gbrain/releases');
+      console.log('  bun update modusbrain');
+      console.log('  clawhub update modusbrain');
+      console.log('  Download from https://github.com/thebuildceo/modusbrain/releases');
   }
 
   if (upgraded) {
@@ -133,15 +133,15 @@ export async function runUpgrade(args: string[]) {
     // backfill on 50K+ brains regularly exceeded the old ceiling. The heartbeat
     // wiring added in v0.15.2 makes the long wait observable; a hard 300s
     // cap would still kill legit migrations mid-run. Override via
-    // GBRAIN_POST_UPGRADE_TIMEOUT_MS env var.
+    // MODUSBRAIN_POST_UPGRADE_TIMEOUT_MS env var.
     const postUpgradeTimeoutMs = Number(
-      process.env.GBRAIN_POST_UPGRADE_TIMEOUT_MS || 1_800_000,
+      process.env.MODUSBRAIN_POST_UPGRADE_TIMEOUT_MS || 1_800_000,
     );
     try {
-      execSync('gbrain post-upgrade', { stdio: 'inherit', timeout: postUpgradeTimeoutMs });
+      execSync('modusbrain post-upgrade', { stdio: 'inherit', timeout: postUpgradeTimeoutMs });
     } catch (e) {
       // post-upgrade is best-effort, don't fail the upgrade. BUT leave a
-      // trail so `gbrain doctor` can surface it and give the user a clear
+      // trail so `modusbrain doctor` can surface it and give the user a clear
       // paste-ready recovery command. Silent failure here is how users end
       // up with half-upgraded brains and no signal.
       recordUpgradeError({
@@ -149,12 +149,12 @@ export async function runUpgrade(args: string[]) {
         fromVersion: oldVersion,
         toVersion: newVersion,
         error: e instanceof Error ? e.message : String(e),
-        hint: 'Run: gbrain apply-migrations --yes',
+        hint: 'Run: modusbrain apply-migrations --yes',
       });
     }
     // Run features scan to show what's new and what to fix
     try {
-      execSync('gbrain features', { stdio: 'inherit', timeout: 30_000 });
+      execSync('modusbrain features', { stdio: 'inherit', timeout: 30_000 });
     } catch {
       // features scan is best-effort
     }
@@ -187,7 +187,7 @@ function findBunInstallRootFromArgv(): string | null {
 
     let dir = dirname(realpathSync(argv1));
     for (let i = 0; i < 10; i++) {
-      if (basename(dir) === 'gbrain' && basename(dirname(dir)) === 'node_modules') {
+      if (basename(dir) === 'modusbrain' && basename(dirname(dir)) === 'node_modules') {
         const root = dirname(dirname(dir));
         if (isBunGlobalRoot(root)) return root;
       }
@@ -203,9 +203,9 @@ function findBunInstallRootFromArgv(): string | null {
 
 function verifyUpgrade(): string {
   try {
-    const output = execSync('gbrain --version', { encoding: 'utf-8', timeout: 10_000 }).trim();
+    const output = execSync('modusbrain --version', { encoding: 'utf-8', timeout: 10_000 }).trim();
     console.log(`Upgrade complete. Now running: ${output}`);
-    return output.replace(/^gbrain\s*/i, '').trim();
+    return output.replace(/^modusbrain\s*/i, '').trim();
   } catch {
     console.log('Upgrade complete. Could not verify new version.');
     return '';
@@ -213,10 +213,10 @@ function verifyUpgrade(): string {
 }
 
 /**
- * Append a structured record to ~/.gbrain/upgrade-errors.jsonl when a
- * best-effort phase of the upgrade fails (e.g., `gbrain post-upgrade`
+ * Append a structured record to ~/.modusbrain/upgrade-errors.jsonl when a
+ * best-effort phase of the upgrade fails (e.g., `modusbrain post-upgrade`
  * silently bombing). Without this trail, users end up with half-upgraded
- * brains and no signal. `gbrain doctor` reads this file and surfaces the
+ * brains and no signal. `modusbrain doctor` reads this file and surfaces the
  * paste-ready recovery hint. Failures here are themselves best-effort.
  */
 export function recordUpgradeError(record: {
@@ -227,7 +227,7 @@ export function recordUpgradeError(record: {
   hint: string;
 }): void {
   try {
-    const dir = join(process.env.HOME || '', '.gbrain');
+    const dir = join(process.env.HOME || '', '.modusbrain');
     mkdirSync(dir, { recursive: true });
     const path = join(dir, 'upgrade-errors.jsonl');
     const line = JSON.stringify({
@@ -247,7 +247,7 @@ export function recordUpgradeError(record: {
 
 function saveUpgradeState(oldVersion: string, newVersion: string) {
   try {
-    const dir = join(process.env.HOME || '', '.gbrain');
+    const dir = join(process.env.HOME || '', '.modusbrain');
     mkdirSync(dir, { recursive: true });
     const statePath = join(dir, 'upgrade-state.json');
     const state: Record<string, unknown> = existsSync(statePath)
@@ -271,7 +271,7 @@ function saveUpgradeState(oldVersion: string, newVersion: string) {
  *   1. Print feature_pitch headlines for migrations newer than the prior
  *      binary (cosmetic; runs only when upgrade-state.json is readable and
  *      has a from/to pair).
- *   2. Invoke `gbrain apply-migrations --yes` so the mechanical side of
+ *   2. Invoke `modusbrain apply-migrations --yes` so the mechanical side of
  *      every outstanding migration actually executes (schema, smoke, prefs,
  *      host rewrites, autopilot install). This is the Codex H8 fix:
  *      previously runPostUpgrade early-returned when upgrade-state.json
@@ -304,13 +304,13 @@ async function applySelfUpgradeSetup(): Promise<void> {
       if (!su.mode_prompted) {
         console.log('');
         console.log('═══════════════════════════════════════════════════════════════');
-        console.log('[gbrain] Self-upgrade is ON in NOTIFY mode.');
-        console.log('[gbrain] Every gbrain invocation now checks for new versions and');
-        console.log('[gbrain] nudges when one is available. Apply with: gbrain self-upgrade');
-        console.log('[gbrain]');
-        console.log('[gbrain] Hands-off (silent quiet-hours auto-upgrade for always-on installs):');
-        console.log('[gbrain]   gbrain config set self_upgrade.mode auto');
-        console.log('[gbrain] Turn it off entirely: gbrain config set self_upgrade.mode off');
+        console.log('[modusbrain] Self-upgrade is ON in NOTIFY mode.');
+        console.log('[modusbrain] Every modusbrain invocation now checks for new versions and');
+        console.log('[modusbrain] nudges when one is available. Apply with: modusbrain self-upgrade');
+        console.log('[modusbrain]');
+        console.log('[modusbrain] Hands-off (silent quiet-hours auto-upgrade for always-on installs):');
+        console.log('[modusbrain]   modusbrain config set self_upgrade.mode auto');
+        console.log('[modusbrain] Turn it off entirely: modusbrain config set self_upgrade.mode off');
         console.log('═══════════════════════════════════════════════════════════════');
         console.log('');
         su.mode_prompted = true;
@@ -328,7 +328,7 @@ async function applySelfUpgradeSetup(): Promise<void> {
     const { migrateSystemdUnitToRestartAlways } = await import('./autopilot.ts');
     const r = migrateSystemdUnitToRestartAlways();
     if (r.rewritten) {
-      console.log('[gbrain] Updated autopilot systemd unit to Restart=always (self-upgrade relaunch).');
+      console.log('[modusbrain] Updated autopilot systemd unit to Restart=always (self-upgrade relaunch).');
     }
   } catch {
     /* best-effort */
@@ -337,14 +337,14 @@ async function applySelfUpgradeSetup(): Promise<void> {
 
 export async function runPostUpgrade(args: string[] = []): Promise<void> {
   if (args.includes('--help') || args.includes('-h')) {
-    console.log(brandHelp('Usage: gbrain post-upgrade'));
+    console.log(brandHelp('Usage: modusbrain post-upgrade'));
     console.log('Prints feature pitches for new migrations and runs apply-migrations.');
     console.log('Idempotent — safe to re-run any time.');
     return;
   }
 
-  // v0.35.8.0: lay down ~/.gbrain/.gitignore retroactively. Existing users
-  // never re-run `gbrain init`, so init-only coverage misses them entirely
+  // v0.35.8.0: lay down ~/.modusbrain/.gitignore retroactively. Existing users
+  // never re-run `modusbrain init`, so init-only coverage misses them entirely
   // (codex F-CDX-8). Idempotent + non-clobbering — safe to run every upgrade.
   try {
     const { ensureGitignore } = await import('../core/config.ts');
@@ -360,7 +360,7 @@ export async function runPostUpgrade(args: string[] = []): Promise<void> {
   await applySelfUpgradeSetup();
   // Cosmetic: print feature pitches for migrations newer than the prior binary.
   try {
-    const statePath = join(process.env.HOME || '', '.gbrain', 'upgrade-state.json');
+    const statePath = join(process.env.HOME || '', '.modusbrain', 'upgrade-state.json');
     if (existsSync(statePath)) {
       const state = JSON.parse(readFileSync(statePath, 'utf-8'));
       const from = state?.last_upgrade?.from;
@@ -372,7 +372,7 @@ export async function runPostUpgrade(args: string[] = []): Promise<void> {
             console.log(`NEW: ${m.featurePitch.headline}`);
             if (m.featurePitch.description) console.log(m.featurePitch.description);
             if (m.featurePitch.recipe) {
-              console.log(`Run \`gbrain integrations show ${m.featurePitch.recipe}\` to set it up.`);
+              console.log(`Run \`modusbrain integrations show ${m.featurePitch.recipe}\` to set it up.`);
             }
             console.log('');
           }
@@ -391,18 +391,18 @@ export async function runPostUpgrade(args: string[] = []): Promise<void> {
     await runApplyMigrations(['--yes', '--non-interactive']);
   } catch (e) {
     // Surface the error but don't throw — post-upgrade is best-effort.
-    // Users can re-run `gbrain apply-migrations` manually if they want
+    // Users can re-run `modusbrain apply-migrations` manually if they want
     // to retry.
     const msg = e instanceof Error ? e.message : String(e);
     console.error(`\napply-migrations failed: ${msg}`);
-    console.error('Run `gbrain apply-migrations --yes` manually to retry.');
+    console.error('Run `modusbrain apply-migrations --yes` manually to retry.');
   }
 
   // v0.28.5 (X1): explicitly apply pending schema migrations.
   // apply-migrations runs orchestrator migrations and only WARNs about
   // schema-version drift (apply-migrations.ts:296-302). Without this hook,
-  // `gbrain upgrade` leaves wedged brains wedged — the user has to read
-  // the WARN and run `gbrain init --migrate-only` themselves. We've shipped
+  // `modusbrain upgrade` leaves wedged brains wedged — the user has to read
+  // the WARN and run `modusbrain init --migrate-only` themselves. We've shipped
   // 11 wedge incidents asking users to read warnings; close the loop here.
   // A1's hasPendingMigrations probe in connectEngine is belt-and-suspenders
   // for any path that bypasses upgrade (autopilot, direct CLI on stale brain).
@@ -428,14 +428,14 @@ export async function runPostUpgrade(args: string[] = []): Promise<void> {
           if (shown !== 'true' && !existingMode) {
             console.log('');
             console.log('═══════════════════════════════════════════════════════════════');
-            console.log('[gbrain] v0.32.3 added named search modes (conservative/balanced/tokenmax).');
-            console.log('[gbrain] Your current behavior is unchanged — the `query` op still defaults');
-            console.log('[gbrain] expand=true and limit=20, same as v0.31.x.');
+            console.log('[modusbrain] v0.32.3 added named search modes (conservative/balanced/tokenmax).');
+            console.log('[modusbrain] Your current behavior is unchanged — the `query` op still defaults');
+            console.log('[modusbrain] expand=true and limit=20, same as v0.31.x.');
             console.log('═══════════════════════════════════════════════════════════════');
             console.log('');
             console.log('[AGENT] Relay this matrix to your operator and ask which mode they want.');
             console.log('[AGENT] Recommended default: tokenmax (preserves current retrieval shape).');
-            console.log('[AGENT] Run `gbrain config set search.mode <mode>` after they decide.');
+            console.log('[AGENT] Run `modusbrain config set search.mode <mode>` after they decide.');
             console.log('');
             console.log('Per-query cost @ 10K queries/mo (typical single-user volume):');
             console.log('');
@@ -449,14 +449,14 @@ export async function runPostUpgrade(args: string[] = []): Promise<void> {
             console.log('  25x corner-to-corner spread. Natural diagonal pairings span ~4x.');
             console.log('');
             console.log('To pick:');
-            console.log('  gbrain search modes              # see what is running');
-            console.log('  gbrain config set search.mode <conservative|balanced|tokenmax>');
-            console.log('  gbrain search tune               # data-driven recommendations');
+            console.log('  modusbrain search modes              # see what is running');
+            console.log('  modusbrain config set search.mode <conservative|balanced|tokenmax>');
+            console.log('  modusbrain search tune               # data-driven recommendations');
             console.log('');
             console.log('tokenmax bumps limit to 50 (current default is 20). To preserve');
             console.log('your EXACT current shape:');
-            console.log('  gbrain config set search.mode tokenmax');
-            console.log('  gbrain config set search.searchLimit 20');
+            console.log('  modusbrain config set search.mode tokenmax');
+            console.log('  modusbrain config set search.searchLimit 20');
             console.log('');
             await engine.setConfig('search.mode_upgrade_notice_shown', 'true');
           }
@@ -465,7 +465,7 @@ export async function runPostUpgrade(args: string[] = []): Promise<void> {
         }
 
         // PR1: skill-catalog publish consent. New installs default ON at
-        // `gbrain init`; EXISTING installs stay OFF (default-OFF runtime = no
+        // `modusbrain init`; EXISTING installs stay OFF (default-OFF runtime = no
         // silent capability grant on upgrade) until the owner opts in HERE.
         // One-time, gated by `mcp.publish_skills_prompted`. Strongly recommended.
         try {
@@ -476,17 +476,17 @@ export async function runPostUpgrade(args: string[] = []): Promise<void> {
             const det = autoDetectSkillsDir();
             const dirLine = det.dir
               ? `Skills dir: ${det.dir} (source: ${det.source})`
-              : 'Skills dir: not auto-detected — set $GBRAIN_SKILLS_DIR or mcp.skills_dir before enabling.';
+              : 'Skills dir: not auto-detected — set $MODUSBRAIN_SKILLS_DIR or mcp.skills_dir before enabling.';
             console.log('');
             console.log('═══════════════════════════════════════════════════════════════');
-            console.log('[gbrain] Publish your skills to MCP clients?');
-            console.log('[gbrain] Codex desktop, Claude Code/Cowork, and Perplexity can then');
-            console.log("[gbrain] DISCOVER and FOLLOW your agent's skills over `gbrain serve`.");
-            console.log('[gbrain] This makes your MCP server dramatically more useful.');
-            console.log('[gbrain]');
-            console.log(`[gbrain] ${dirLine}`);
-            console.log('[gbrain] Effect: the CONTENTS of your SKILL.md files become readable by');
-            console.log('[gbrain] remote MCP callers you have authorized. Source code is NOT exposed.');
+            console.log('[modusbrain] Publish your skills to MCP clients?');
+            console.log('[modusbrain] Codex desktop, Claude Code/Cowork, and Perplexity can then');
+            console.log("[modusbrain] DISCOVER and FOLLOW your agent's skills over `modusbrain serve`.");
+            console.log('[modusbrain] This makes your MCP server dramatically more useful.');
+            console.log('[modusbrain]');
+            console.log(`[modusbrain] ${dirLine}`);
+            console.log('[modusbrain] Effect: the CONTENTS of your SKILL.md files become readable by');
+            console.log('[modusbrain] remote MCP callers you have authorized. Source code is NOT exposed.');
             console.log('═══════════════════════════════════════════════════════════════');
             const isTty = Boolean(process.stdin.isTTY && process.stdout.isTTY);
             let enabled = false;
@@ -494,7 +494,7 @@ export async function runPostUpgrade(args: string[] = []): Promise<void> {
               const { createInterface } = await import('readline');
               enabled = await new Promise<boolean>((resolveAns) => {
                 const rl = createInterface({ input: process.stdin, output: process.stdout });
-                rl.question('[gbrain] Enable skill publishing now? (recommended) [Y/n] ', (answer) => {
+                rl.question('[modusbrain] Enable skill publishing now? (recommended) [Y/n] ', (answer) => {
                   rl.close();
                   const a = answer.trim().toLowerCase();
                   resolveAns(a === '' || a === 'y' || a === 'yes');
@@ -503,13 +503,13 @@ export async function runPostUpgrade(args: string[] = []): Promise<void> {
               });
             } else {
               console.log('[AGENT] Relay this to your operator. Recommended: enable it.');
-              console.log('[AGENT] Enable with: gbrain config set mcp.publish_skills true');
+              console.log('[AGENT] Enable with: modusbrain config set mcp.publish_skills true');
             }
             if (enabled) {
               await engine.setConfig('mcp.publish_skills', 'true');
-              console.log('[gbrain] Skill publishing ENABLED. Disable anytime: gbrain config set mcp.publish_skills false');
+              console.log('[modusbrain] Skill publishing ENABLED. Disable anytime: modusbrain config set mcp.publish_skills false');
             } else if (isTty) {
-              console.log('[gbrain] Left disabled. Enable later: gbrain config set mcp.publish_skills true');
+              console.log('[modusbrain] Left disabled. Enable later: modusbrain config set mcp.publish_skills true');
             }
             await engine.setConfig('mcp.publish_skills_prompted', 'true');
           }
@@ -532,7 +532,7 @@ export async function runPostUpgrade(args: string[] = []): Promise<void> {
         } catch (re) {
           const msg = re instanceof Error ? re.message : String(re);
           console.warn(`\nChunker-bump reindex skipped: ${msg}`);
-          console.warn('Run `gbrain reindex --markdown` manually when ready.');
+          console.warn('Run `modusbrain reindex --markdown` manually when ready.');
         }
       } finally {
         try { await engine.disconnect(); } catch { /* best-effort */ }
@@ -541,10 +541,10 @@ export async function runPostUpgrade(args: string[] = []): Promise<void> {
   } catch (e) {
     // Non-fatal: connection or DDL failure here falls back to the existing
     // user-facing WARN. apply-migrations.ts:296-302 already surfaces the
-    // hint to run `gbrain init --migrate-only`.
+    // hint to run `modusbrain init --migrate-only`.
     const msg = e instanceof Error ? e.message : String(e);
     console.warn(`\nSchema auto-apply skipped: ${msg}`);
-    console.warn('Run `gbrain init --migrate-only` manually if your brain is wedged.');
+    console.warn('Run `modusbrain init --migrate-only` manually if your brain is wedged.');
   }
 
   // v0.25.1: agent-readable advisory listing recommended skills the
@@ -557,22 +557,22 @@ export async function runPostUpgrade(args: string[] = []): Promise<void> {
     // Best-effort cosmetic surface; never block post-upgrade.
   }
 
-  // v0.36 DX: skillpack reference sweep. After an upgrade, the gbrain bundle
+  // v0.36 DX: skillpack reference sweep. After an upgrade, the modusbrain bundle
   // may have shipped changes to scaffolded skills the host already has on
   // disk. Run `reference --all` automatically and print a one-line-per-skill
   // summary so the agent + operator see what drifted without manually
   // running the sweep. Skipped silently when:
-  //   - GBRAIN_SKIP_REFERENCE_SWEEP=1 in env
-  //   - no target workspace can be auto-detected (gbrain installed but
+  //   - MODUSBRAIN_SKIP_REFERENCE_SWEEP=1 in env
+  //   - no target workspace can be auto-detected (modusbrain installed but
   //     never scaffolded anywhere)
-  //   - the detected workspace IS the gbrain repo (dev-mode, would just
-  //     compare gbrain against itself)
+  //   - the detected workspace IS the modusbrain repo (dev-mode, would just
+  //     compare modusbrain against itself)
   //   - every scaffolded skill is identical (nothing to say)
   await postUpgradeReferenceSweep();
 
   // v0.41.18.0 (A4 + A18, T14): post-upgrade onboard banner. Fail-open;
   // doesn't engine-connect (lightweight TTY check only). The actual
-  // recommendations need engine access via `gbrain onboard --check`;
+  // recommendations need engine access via `modusbrain onboard --check`;
   // the banner just nudges the user to run it.
   try {
     const { runUpgradeBanner } = await import('../core/onboard/init-nudge.ts');
@@ -595,12 +595,12 @@ export async function runPostUpgrade(args: string[] = []): Promise<void> {
  * auto-detected.
  */
 export async function postUpgradeReferenceSweep(
-  opts: { gbrainRoot?: string; targetWorkspace?: string } = {},
+  opts: { modusbrainRoot?: string; targetWorkspace?: string } = {},
 ): Promise<void> {
-  if (process.env.GBRAIN_SKIP_REFERENCE_SWEEP) return;
+  if (process.env.MODUSBRAIN_SKIP_REFERENCE_SWEEP) return;
   try {
     const { autoDetectSkillsDirReadOnly } = await import('../core/repo-root.ts');
-    const { findGbrainRoot } = await import('../core/skillpack/bundle.ts');
+    const { findModusbrainRoot } = await import('../core/skillpack/bundle.ts');
     const { runReferenceAll } = await import('../core/skillpack/reference.ts');
     const path = await import('path');
 
@@ -612,14 +612,14 @@ export async function postUpgradeReferenceSweep(
       targetWorkspace = path.resolve(detected.dir, '..');
     }
 
-    const gbrainRoot = opts.gbrainRoot ?? findGbrainRoot();
-    if (!gbrainRoot) return;
+    const modusbrainRoot = opts.modusbrainRoot ?? findModusbrainRoot();
+    if (!modusbrainRoot) return;
 
-    // Dev-mode guard: the detected workspace IS the gbrain repo. Sweeping
-    // gbrain against itself is always identical — print nothing.
-    if (path.resolve(targetWorkspace) === path.resolve(gbrainRoot)) return;
+    // Dev-mode guard: the detected workspace IS the modusbrain repo. Sweeping
+    // modusbrain against itself is always identical — print nothing.
+    if (path.resolve(targetWorkspace) === path.resolve(modusbrainRoot)) return;
 
-    const result = runReferenceAll({ gbrainRoot, targetWorkspace });
+    const result = runReferenceAll({ modusbrainRoot, targetWorkspace });
     // Print only skills that (a) the host has actually scaffolded, AND
     // (b) have at least one differs or missing entry. Pure-`missing`
     // skills the host never scaffolded are noise; skip them.
@@ -639,7 +639,7 @@ export async function postUpgradeReferenceSweep(
     }
     console.log('');
     console.log(
-      'Run `gbrain skillpack reference <slug>` to inspect per-skill diffs.\nSee `skills/_AGENT_README.md` for what your agent should do on update.\nSkip this sweep: `GBRAIN_SKIP_REFERENCE_SWEEP=1`.',
+      'Run `modusbrain skillpack reference <slug>` to inspect per-skill diffs.\nSee `skills/_AGENT_README.md` for what your agent should do on update.\nSkip this sweep: `MODUSBRAIN_SKIP_REFERENCE_SWEEP=1`.',
     );
   } catch {
     // Best-effort. Never block post-upgrade.
@@ -665,7 +665,7 @@ export function detectInstallMethod(): 'bun' | 'bun-link' | 'binary' | 'clawhub'
   const execPath = process.execPath || '';
 
   // v0.28.5 cluster D: bun-link signal first.
-  // bun link puts a symlink at ~/.bun/bin/gbrain → either the source's bin
+  // bun link puts a symlink at ~/.bun/bin/modusbrain → either the source's bin
   // entry (compiled CLI) OR src/cli.ts directly. Either way, realpath
   // resolves into a directory we can walk up from to find a .git/config
   // pointing at our repo.
@@ -673,7 +673,7 @@ export function detectInstallMethod(): 'bun' | 'bun-link' | 'binary' | 'clawhub'
   if (bunLinkResult) return 'bun-link';
 
   // Check if running from node_modules (bun/npm install). Could be canonical
-  // (we publish under garrytan/gbrain) OR the squatter (npm `gbrain@1.3.x`).
+  // (we publish under garrytan/modusbrain) OR the squatter (npm `modusbrain@1.3.x`).
   // Sub-classify and warn loudly on suspect installs (#658).
   if (execPath.includes('node_modules') || process.argv[1]?.includes('node_modules')) {
     const verdict = classifyBunInstall();
@@ -684,7 +684,7 @@ export function detectInstallMethod(): 'bun' | 'bun-link' | 'binary' | 'clawhub'
   }
 
   // Check if running as compiled binary
-  if (execPath.endsWith('/gbrain') || execPath.endsWith('\\gbrain.exe')) {
+  if (execPath.endsWith('/modusbrain') || execPath.endsWith('\\modusbrain.exe')) {
     return 'binary';
   }
 
@@ -703,7 +703,7 @@ export function detectInstallMethod(): 'bun' | 'bun-link' | 'binary' | 'clawhub'
  * Detect bun-link source-clone installs (closes #656, fixes #368).
  *
  * Walk up from argv[1] looking for a `.git/config` whose remote url
- * contains `garrytan/gbrain` (case-insensitive substring).
+ * contains `garrytan/modusbrain` (case-insensitive substring).
  *
  * v0.28.5 gated on lstatSync(argv1).isSymbolicLink(), but bun resolves
  * the entire symlink chain before setting process.argv[1], so the check
@@ -725,7 +725,7 @@ function detectBunLink(): { repoRoot: string } | null {
       if (existsSync(gitConfigPath)) {
         try {
           const cfg = readFileSync(gitConfigPath, 'utf-8');
-          if (cfg.toLowerCase().includes(GBRAIN_GITHUB_REPO.toLowerCase())) {
+          if (cfg.toLowerCase().includes(MODUSBRAIN_GITHUB_REPO.toLowerCase())) {
             return { repoRoot: dir };
           }
         } catch { /* unreadable config — not our case */ }
@@ -744,11 +744,11 @@ function detectBunLink(): { repoRoot: string } | null {
 /**
  * v0.28.5 cluster D, signal 2 — bun install authenticity check (closes #658).
  *
- * When `bun add -g gbrain` (or `npm install -g gbrain`) installs from
- * npm, the package is the squatter — an unrelated `gbrain@1.3.x` that
+ * When `bun add -g modusbrain` (or `npm install -g modusbrain`) installs from
+ * npm, the package is the squatter — an unrelated `modusbrain@1.3.x` that
  * silently overwrites our binary. This function reads the install
  * directory's package.json and checks two non-spoofable signals:
- *   - `repository.url` contains `garrytan/gbrain` (case-insensitive)
+ *   - `repository.url` contains `garrytan/modusbrain` (case-insensitive)
  *   - the install dir contains a `src/cli.ts` file (squatter ships
  *     compiled binary, not source)
  *
@@ -756,7 +756,7 @@ function detectBunLink(): { repoRoot: string } | null {
  * recovery message. Codex's plan-review noted these signals are spoofable
  * by a determined squatter — accepted; this is best-effort warning, not
  * an assertion. The right structural fix is publishing under a scoped
- * name like `@garrytan/gbrain` (tracked v0.29 follow-up).
+ * name like `@garrytan/modusbrain` (tracked v0.29 follow-up).
  */
 function classifyBunInstall(): 'canonical' | 'suspect' {
   try {
@@ -773,7 +773,7 @@ function classifyBunInstall(): 'canonical' | 'suspect' {
           const repoUrl = (typeof pkg.repository === 'string'
             ? pkg.repository
             : pkg.repository?.url) ?? '';
-          if (repoUrl.toLowerCase().includes(GBRAIN_GITHUB_REPO.toLowerCase())) {
+          if (repoUrl.toLowerCase().includes(MODUSBRAIN_GITHUB_REPO.toLowerCase())) {
             return 'canonical';
           }
           // Source-marker fallback: our published-as-source install always
@@ -798,18 +798,18 @@ function classifyBunInstall(): 'canonical' | 'suspect' {
 
 function printSquatterRecovery(): void {
   console.warn('');
-  console.warn('  WARNING: gbrain install does not appear to be from garrytan/gbrain.');
+  console.warn('  WARNING: modusbrain install does not appear to be from garrytan/modusbrain.');
   console.warn('  This is likely the npm-name collision tracked in issue #658:');
-  console.warn('    https://www.npmjs.com/package/gbrain (an unrelated package).');
+  console.warn('    https://www.npmjs.com/package/modusbrain (an unrelated package).');
   console.warn('');
   console.warn('  Recovery options:');
   console.warn('    1. Install from source:');
-  console.warn('         bun remove -g gbrain');
-  console.warn('         git clone https://github.com/garrytan/gbrain.git');
-  console.warn('         cd gbrain && bun install && bun link');
+  console.warn('         bun remove -g modusbrain');
+  console.warn('         git clone https://github.com/thebuildceo/modusbrain.git');
+  console.warn('         cd modusbrain && bun install && bun link');
   console.warn('');
   console.warn('    2. Download a release binary:');
-  console.warn('         https://github.com/garrytan/gbrain/releases');
+  console.warn('         https://github.com/thebuildceo/modusbrain/releases');
   console.warn('');
   console.warn('  See docs/INSTALL_FOR_AGENTS.md for the canonical install paths.');
   console.warn('');

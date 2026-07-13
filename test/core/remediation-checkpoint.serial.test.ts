@@ -28,14 +28,14 @@ let homeBackup: string | undefined;
 let tmp: string;
 
 beforeEach(() => {
-  tmp = mkdtempSync(join(tmpdir(), 'gbrain-remediate-cp-'));
-  homeBackup = process.env.GBRAIN_HOME;
-  process.env.GBRAIN_HOME = tmp;
+  tmp = mkdtempSync(join(tmpdir(), 'modusbrain-remediate-cp-'));
+  homeBackup = process.env.MODUSBRAIN_HOME;
+  process.env.MODUSBRAIN_HOME = tmp;
 });
 
 afterEach(() => {
-  if (homeBackup === undefined) delete process.env.GBRAIN_HOME;
-  else process.env.GBRAIN_HOME = homeBackup;
+  if (homeBackup === undefined) delete process.env.MODUSBRAIN_HOME;
+  else process.env.MODUSBRAIN_HOME = homeBackup;
   rmSync(tmp, { recursive: true, force: true });
 });
 

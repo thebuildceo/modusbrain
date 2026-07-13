@@ -3,8 +3,8 @@
 On-demand reference (see CLAUDE.md Reference map). Current behavior + invariants
 only; release history lives in `CHANGELOG.md` + git.
 
-`gbrain init --mcp-only` (v0.29.2) sets up a thin-client install: no local
-brain content, just an OAuth client pointing at a remote `gbrain serve --http`.
+`modusbrain init --mcp-only` (v0.29.2) sets up a thin-client install: no local
+brain content, just an OAuth client pointing at a remote `modusbrain serve --http`.
 v0.29.2/v0.30.0 only refused 9 obvious local-only commands; the other ~25
 silently fell through to `connectEngine()` and opened the empty local PGLite,
 returning "No results." against a populated remote brain. v0.31.1 fixes the
@@ -18,7 +18,7 @@ Key files:
   so thin-client installs never open the empty PGLite. localOnly ops on
   thin-client refuse via `refuseThinClient` (with pinpoint hint table
   `THIN_CLIENT_REFUSE_HINTS`). Banner via `printIdentityBannerBestEffort`
-  before each routed call (suppressed by `--quiet`, `GBRAIN_NO_BANNER=1`,
+  before each routed call (suppressed by `--quiet`, `MODUSBRAIN_NO_BANNER=1`,
   non-TTY default). Exhaustive TS `never` switch on `RemoteMcpError.reason`
   for canned, actionable error messages. ENG-2 renderer parity: local-engine
   path runs `JSON.parse(JSON.stringify(result))` so renderers see the same
@@ -36,12 +36,12 @@ Key files:
 - `src/core/cli-options.ts` — `parseGlobalFlags` adds `--timeout=Ns` (accepts
   `30s`, `2m`, `500ms`, plain ms). Default `null` = per-command default (30s
   for most ops, 180s for `think`). `parseTimeout(s)` exported helper.
-- `src/core/doctor-remote.ts` — `gbrain remote doctor` adds the
+- `src/core/doctor-remote.ts` — `modusbrain remote doctor` adds the
   `oauth_client_scopes_probe` check (CDX-5). Probes the read tier via
   `get_brain_identity` and admin tier via `get_health`; reports per-tier
   status with pinpoint remediation when admin is missing. `buildScopeCheck`
   + `ScopeProbeResult` exported for test access. Skippable via
-  `GBRAIN_DOCTOR_SKIP_SCOPE_PROBE=1` for fixtures that mock /mcp at JSON-RPC
+  `MODUSBRAIN_DOCTOR_SKIP_SCOPE_PROBE=1` for fixtures that mock /mcp at JSON-RPC
   initialize level only (MCP SDK Client hangs on shape mismatch).
 - `src/core/ssrf-validate.ts` (v0.36 Commit 0) — DNS-rebinding-defended URL validation. `validateAndResolveUrl(url)` resolves the hostname via `dns.lookup({all: true, family: 0})`, checks EVERY A AND AAAA record against the internal-IP deny list, returns the resolved IP so callers fetch by IP (defeats DNS rebinding: validation IP === fetch IP). `fetchWithSSRFGuard(url, opts)` does redirect-aware fetching with per-hop re-validation, max 3 hops by default. Reusable across all URL-fetching features. Test seam `__setDnsLookupForTests` for hermetic tests.
 - `src/core/search/query-intent.ts` extension (v0.36 cross-modal wave) — new `suggestedModality: 'text' | 'image' | 'both'` axis on `QuerySuggestions`. Module-scope `CROSS_MODAL_PATTERNS` regex array (compiles once at module load). `isAmbiguousModalityQuery(query)` heuristic gate fires when a visual noun + reference marker combination indicates genuinely ambiguous routing — used by the Commit 4 LLM tie-break to bound LLM calls to <1% of queries.
@@ -51,7 +51,7 @@ Key files:
 - `src/core/search/by-image.ts` (v0.36 Phase 2) — `searchByImage(engine, input, opts)`. Always runs image branch (`embedQueryMultimodalImage` + `searchVector(embedding_image)`). D13 hybrid intersect: when caller provides optional `query`, runs parallel text branch via `embedQueryMultimodal(query)` and merges via `rrfFusionWeighted` with weights from resolved mode. Phase 3 widens to unified column once `search.unified_multimodal=true` (transparently upgrades the retrieval quality post-reindex).
 - `src/core/spend-log.ts` (v0.36 Phase 2 D23-#6) — per-OAuth-client paid-API spend tracking against the `mcp_spend_log` table (migration v74). `checkBudget(engine, clientId, capCents)` is the pre-flight gate; throws `BudgetExceededError` when today's spend has hit the cap. `recordSpend(engine, entry)` is best-effort post-call. UTC day-aligned aggregation so caps roll over deterministically regardless of server timezone. Local CLI callers (no clientId) bypass the gate. Pre-v0.36 brains without the table fail open to spend=0. `VOYAGE_MULTIMODAL_3_PER_IMAGE_CENTS` = 0.12 cents per image embed.
 - `src/core/search/llm-intent.ts` (v0.36 Commit 4) — opt-in LLM tie-break. `classifyModalityWithLLM(query, fallback)` routes through `gateway.chat()` with a fixed single-word-output system prompt. 1s timeout via AbortController. `parseModality(raw, fallback)` is the pure parser — tolerates trailing punctuation + casing. Fail-open on every error (gateway unavailable, timeout, parse failure, unrecognized output) — returns fallback so a misbehaving LLM can never break search. Cost-bounded by the ambiguity heuristic in `query-intent.ts` (fires <1% of queries when on).
-- `src/commands/reindex-multimodal.ts` (v0.36 Phase 3) — `gbrain reindex --multimodal [--limit N] [--dry-run] [--cost-estimate] [--no-embed] [--yes] [--json]`. Walks `content_chunks WHERE embedding_multimodal IS NULL`, batches via `embedMultimodalSafe` (Commit 0 partial-failure-aware), persists. D7 lock acquisition via `tryAcquireDbLock('gbrain-reindex-multimodal', 360min)`. Cost prompt + 10s Ctrl-C grace window in TTY. `GBRAIN_NO_REEMBED=1` bypass. Checkpoint at `~/.gbrain/reindex-multimodal-checkpoint.json` for resume. D23-#2 auto-flip prompt at coverage=100% completion (TTY: interactive; non-TTY: stderr hint with paste-ready command).
+- `src/commands/reindex-multimodal.ts` (v0.36 Phase 3) — `modusbrain reindex --multimodal [--limit N] [--dry-run] [--cost-estimate] [--no-embed] [--yes] [--json]`. Walks `content_chunks WHERE embedding_multimodal IS NULL`, batches via `embedMultimodalSafe` (Commit 0 partial-failure-aware), persists. D7 lock acquisition via `tryAcquireDbLock('modusbrain-reindex-multimodal', 360min)`. Cost prompt + 10s Ctrl-C grace window in TTY. `MODUSBRAIN_NO_REEMBED=1` bypass. Checkpoint at `~/.modusbrain/reindex-multimodal-checkpoint.json` for resume. D23-#2 auto-flip prompt at coverage=100% completion (TTY: interactive; non-TTY: stderr hint with paste-ready command).
 - `src/core/backfill-registry.ts` extension (v0.36) — new `modality` backfill kind. SQL filter requires `chunk_source='image_asset'` AND `embedding_image IS NOT NULL` AND `(modality IS NULL OR modality != 'image')`. D22-7 defensive guard: never flag a non-image chunk that happens to have `embedding_image` populated. Idempotent — second run finds zero rows.
 - `src/core/migrate.ts` v74 (`mcp_spend_log`) + v75 (`embedding_multimodal_column`) — Phase 2 spend-log table + Phase 3 unified column ALTER. v75 is column-only (no HNSW index — deferred to post-reindex per pgvector best practice). v74 uses BTREE on `(client_id, created_at)` + `(token_name, created_at)` — `date_trunc('day', TIMESTAMPTZ)` is NOT IMMUTABLE so can't appear in index expressions; range scan on created_at covers the per-day rollup query.
 - `src/core/operations.ts` — `get_brain_identity` op (read scope, no params,

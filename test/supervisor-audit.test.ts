@@ -1,6 +1,6 @@
 /**
- * Unit tests for the shared crash classifier used by `gbrain doctor` and
- * `gbrain jobs supervisor status`. Both surfaces import `isCrashExit` +
+ * Unit tests for the shared crash classifier used by `modusbrain doctor` and
+ * `modusbrain jobs supervisor status`. Both surfaces import `isCrashExit` +
  * `summarizeCrashes` from `src/core/minions/handlers/supervisor-audit.ts`;
  * pinning them here keeps the two CLI surfaces from drifting.
  *

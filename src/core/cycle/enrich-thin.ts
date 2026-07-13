@@ -2,7 +2,7 @@
  * v0.41.39 (issue #1700) — cycle phase `enrich_thin`.
  *
  * Opt-in autopilot trickle around `runEnrichCore`. Default OFF; enable with
- * `gbrain config set cycle.enrich_thin.enabled true`. Each tick develops a few
+ * `modusbrain config set cycle.enrich_thin.enabled true`. Each tick develops a few
  * thin (stub) pages per source so the brain gets smarter over time, not just
  * bigger — the issue's explicit payoff.
  *
@@ -146,7 +146,7 @@ export async function runPhaseEnrichThin(
       summary: 'cycle.enrich_thin.enabled=false (default OFF)',
       details: {
         reason: 'disabled',
-        enable_hint: 'gbrain config set cycle.enrich_thin.enabled true',
+        enable_hint: 'modusbrain config set cycle.enrich_thin.enabled true',
       },
     };
   }

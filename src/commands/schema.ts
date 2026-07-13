@@ -1,4 +1,4 @@
-// `gbrain schema` CLI surface.
+// `modusbrain schema` CLI surface.
 //
 // The active schema pack drives type inference, link verbs, expert
 // routing, extractable types, enrichment rubrics, and per-source
@@ -47,7 +47,7 @@ import {
 } from '../core/schema-pack/index.ts';
 import type { SchemaPackManifest, PackPrimitive } from '../core/schema-pack/manifest-v1.ts';
 import { PACK_PRIMITIVES } from '../core/schema-pack/manifest-v1.ts';
-import { gbrainPath, loadConfig, configPath } from '../core/config.ts';
+import { modusbrainPath, loadConfig, configPath } from '../core/config.ts';
 
 export async function runSchema(args: string[]): Promise<void> {
   const sub = args[0];
@@ -91,17 +91,17 @@ export async function runSchema(args: string[]): Promise<void> {
       return printHelp();
     default:
       console.error(`Unknown schema subcommand: ${sub}`);
-      console.error('Run `gbrain schema --help` for available commands.');
+      console.error('Run `modusbrain schema --help` for available commands.');
       process.exit(2);
   }
 }
 
 function printHelp(): void {
-  console.log(`gbrain schema — active schema pack management
+  console.log(`modusbrain schema — active schema pack management
 
 Inspection:
   active                  Show resolved pack + which tier provided it
-  list                    List installed packs (bundled + ~/.gbrain/schema-packs/)
+  list                    List installed packs (bundled + ~/.modusbrain/schema-packs/)
   show [<pack>]           Pretty-print a manifest (default: active pack)
   validate [<pack>]       Validate manifest shape against the v1 schema
   graph                   Show type/primitive graph with link-verb edges
@@ -111,7 +111,7 @@ Inspection:
   usage [--since N(d|w|m)] CLI invocation telemetry summary
 
 Activation:
-  use <pack>              Activate pack (writes ~/.gbrain/config.json schema_pack)
+  use <pack>              Activate pack (writes ~/.modusbrain/config.json schema_pack)
   downgrade [--to <pack>] Restore the previous active pack
   reload [--pack <name>]  Flush the in-process pack cache; --pack scopes
 
@@ -139,7 +139,7 @@ Authoring (v0.40.6.0):
                           Generates prompts/extract/<type>.md and
                           fixtures/extract/<type>.jsonl stubs the
                           pack-author edits, then pairs with
-                          \`gbrain extract benchmark\` for the iteration loop.
+                          \`modusbrain extract benchmark\` for the iteration loop.
 
 Discovery + repair:
   detect                  Cluster pages by source_path → candidate page_types
@@ -154,11 +154,11 @@ Pass --force to bypass per-pack lock contention on writes.
 
 Resolution chain (7-tier, tier 1 trust-gated):
   1. Per-call --schema-pack flag (CLI only)
-  2. GBRAIN_SCHEMA_PACK env var
+  2. MODUSBRAIN_SCHEMA_PACK env var
   3. Per-source DB config schema_pack.source.<id>
   4. Brain-wide DB config schema_pack
-  5. gbrain.yml schema: section
-  6. ~/.gbrain/config.json schema_pack
+  5. modusbrain.yml schema: section
+  6. ~/.modusbrain/config.json schema_pack
   7. Default: gbrain-base
 `);
 }
@@ -179,8 +179,8 @@ async function runActive(_args: string[]): Promise<void> {
 }
 
 function runList(_args: string[]): void {
-  const bundled = ['gbrain-base', 'gbrain-recommended'];
-  const installedDir = gbrainPath('schema-packs');
+  const bundled = ['gbrain-base', 'modusbrain-recommended'];
+  const installedDir = modusbrainPath('schema-packs');
   const installed: string[] = [];
   if (existsSync(installedDir)) {
     for (const entry of readdirSync(installedDir)) {
@@ -196,15 +196,15 @@ function runList(_args: string[]): void {
   console.log('Bundled packs:');
   for (const name of bundled) console.log(`  ${name}`);
   if (installed.length > 0) {
-    console.log('\nInstalled packs (~/.gbrain/schema-packs/):');
+    console.log('\nInstalled packs (~/.modusbrain/schema-packs/):');
     for (const name of installed) console.log(`  ${name}`);
   } else {
-    console.log('\nNo user-installed packs (~/.gbrain/schema-packs/ empty or missing).');
+    console.log('\nNo user-installed packs (~/.modusbrain/schema-packs/ empty or missing).');
   }
 }
 
 async function runShow(args: string[]): Promise<void> {
-  // v0.39 T18 — `gbrain schema show --as-filing-rules` emits the JSON
+  // v0.39 T18 — `modusbrain schema show --as-filing-rules` emits the JSON
   // shape currently maintained by hand at `skills/_brain-filing-rules.json`.
   // First step of the 4-step T18 sequence (per codex finding #3): ship
   // the alternative source, then migrate consumers, then update tests,
@@ -220,7 +220,7 @@ async function runShow(args: string[]): Promise<void> {
     const path = packPathByName(packName);
     if (!path) {
       console.error(`Unknown pack: ${packName}`);
-      console.error('Run `gbrain schema list` to see available packs.');
+      console.error('Run `modusbrain schema list` to see available packs.');
       process.exit(1);
     }
     manifest = loadPackFromFile(path);
@@ -235,7 +235,7 @@ async function runShow(args: string[]): Promise<void> {
     // their reads to this output without re-shaping.
     const filingRules = {
       schema_version: 1,
-      source: 'gbrain schema show --as-filing-rules',
+      source: 'modusbrain schema show --as-filing-rules',
       pack: { name: manifest.name, version: manifest.version },
       page_types: manifest.page_types.map((pt) => ({
         name: pt.name,
@@ -336,13 +336,13 @@ function runValidate(args: string[]): void {
 function runUse(args: string[]): void {
   const packName = args[0];
   if (!packName) {
-    console.error('Usage: gbrain schema use <pack-name>');
+    console.error('Usage: modusbrain schema use <pack-name>');
     process.exit(2);
   }
   const path = packPathByName(packName);
   if (!path) {
     console.error(`Unknown pack: ${packName}`);
-    console.error('Run `gbrain schema list` to see available packs.');
+    console.error('Run `modusbrain schema list` to see available packs.');
     process.exit(1);
   }
   // Validate before activating — refuse to set a broken pack.
@@ -352,7 +352,7 @@ function runUse(args: string[]): void {
     console.error(`Refusing to activate ${packName}: ${(e as Error).message}`);
     process.exit(1);
   }
-  // Write to file-plane config (~/.gbrain/config.json schema_pack field).
+  // Write to file-plane config (~/.modusbrain/config.json schema_pack field).
   // Tier 6 in the resolution chain — tiers 1-5 (per-call, env, DB) can
   // still override this without editing the file.
   const cfg = loadConfig() ?? { engine: 'pglite' as const };
@@ -362,7 +362,7 @@ function runUse(args: string[]): void {
   writeFileSync(cfgPath, JSON.stringify(updated, null, 2) + '\n', 'utf-8');
   console.log(`✓ Active schema pack set to: ${packName}`);
   console.log(`  Written to: ${cfgPath}`);
-  console.log(`\nRun \`gbrain schema active\` to verify resolution.`);
+  console.log(`\nRun \`modusbrain schema active\` to verify resolution.`);
 }
 
 function packPathByName(name: string): string | null {
@@ -378,7 +378,7 @@ function packPathByName(name: string): string | null {
     }
     return null;
   }
-  const baseDir = gbrainPath('schema-packs', name);
+  const baseDir = modusbrainPath('schema-packs', name);
   for (const c of ['pack.yaml', 'pack.yml', 'pack.json']) {
     const candidate = join(baseDir, c);
     if (existsSync(candidate)) return candidate;
@@ -471,8 +471,8 @@ async function runDetectCmd(args: string[]): Promise<void> {
     console.log(`  ${p.prefix.padEnd(30)} ${String(p.page_count).padStart(6)} pages → suggest type \`${p.suggested_type}\`${samples}`);
   }
   console.log('');
-  console.log('Next: gbrain schema review-candidates  (decide promote / rename / ignore)');
-  console.log('      gbrain schema suggest             (LLM refinement on this candidate)');
+  console.log('Next: modusbrain schema review-candidates  (decide promote / rename / ignore)');
+  console.log('      modusbrain schema suggest             (LLM refinement on this candidate)');
 }
 
 // ------------- T3: schema suggest ---------------------------------
@@ -511,7 +511,7 @@ async function runReviewCandidatesCmd(args: string[]): Promise<void> {
   // Codex finding #10: CLI must surface that this is DISK-derived, not
   // audit-log review. Make this loud so users understand drift semantics.
   console.log('Disk-derived candidates from current brain state.');
-  console.log(`Audit history (cross-reference): ~/.gbrain/audit/schema-candidates-*.jsonl`);
+  console.log(`Audit history (cross-reference): ~/.modusbrain/audit/schema-candidates-*.jsonl`);
   console.log('');
   if (result.applied) {
     console.log(`Applied: ${result.applied}`);
@@ -538,10 +538,10 @@ async function runInitCmd(args: string[]): Promise<void> {
   const { json, positional } = parseFlags(args);
   const name = positional[0];
   if (!name) {
-    console.error('Usage: gbrain schema init <pack-name>  (experimental)');
+    console.error('Usage: modusbrain schema init <pack-name>  (experimental)');
     process.exit(2);
   }
-  const baseDir = gbrainPath('schema-packs', name);
+  const baseDir = modusbrainPath('schema-packs', name);
   if (existsSync(baseDir)) {
     console.error(`Pack \`${name}\` already exists at ${baseDir}`);
     process.exit(1);
@@ -550,12 +550,12 @@ async function runInitCmd(args: string[]): Promise<void> {
   // Cast through Partial — the validate verb is the authoritative shape check.
   // The YAML written below has the minimum fields; lint/validate catch gaps.
   const stub = {
-    api_version: 'gbrain-schema-pack-v1' as const,
+    api_version: 'modusbrain-schema-pack-v1' as const,
     name,
     version: '0.0.1',
-    gbrain_min_version: '0.39.0',
+    modusbrain_min_version: '0.39.0',
     extends: 'gbrain-base',
-    description: `Stub pack scaffolded by 'gbrain schema init ${name}'. Edit ${baseDir}/pack.yaml then 'gbrain schema validate' + 'gbrain schema use ${name}'.`,
+    description: `Stub pack scaffolded by 'modusbrain schema init ${name}'. Edit ${baseDir}/pack.yaml then 'modusbrain schema validate' + 'modusbrain schema use ${name}'.`,
     page_types: [] as SchemaPackManifest['page_types'],
     link_types: [] as SchemaPackManifest['link_types'],
     takes_kinds: ['fact', 'take', 'bet', 'hunch'] as string[],
@@ -568,7 +568,7 @@ async function runInitCmd(args: string[]): Promise<void> {
 api_version: ${stub.api_version}
 name: ${stub.name}
 version: ${stub.version}
-gbrain_min_version: ${stub.gbrain_min_version}
+modusbrain_min_version: ${stub.modusbrain_min_version}
 extends: gbrain-base
 description: ${JSON.stringify(stub.description)}
 
@@ -587,7 +587,7 @@ borrow_from: []
     return;
   }
   console.log(`(experimental) Scaffolded pack \`${name}\` at ${baseDir}/pack.yaml`);
-  console.log(`Next: edit pack.yaml, then run \`gbrain schema validate ${name}\` and \`gbrain schema use ${name}\`.`);
+  console.log(`Next: edit pack.yaml, then run \`modusbrain schema validate ${name}\` and \`modusbrain schema use ${name}\`.`);
 }
 
 async function runForkCmd(args: string[]): Promise<void> {
@@ -595,7 +595,7 @@ async function runForkCmd(args: string[]): Promise<void> {
   const from = positional[0];
   const to = positional[1];
   if (!from || !to) {
-    console.error('Usage: gbrain schema fork <source-pack> <new-name>  (experimental)');
+    console.error('Usage: modusbrain schema fork <source-pack> <new-name>  (experimental)');
     process.exit(2);
   }
   const fromPath = packPathByName(from);
@@ -603,7 +603,7 @@ async function runForkCmd(args: string[]): Promise<void> {
     console.error(`Source pack \`${from}\` not found.`);
     process.exit(1);
   }
-  const toDir = gbrainPath('schema-packs', to);
+  const toDir = modusbrainPath('schema-packs', to);
   if (existsSync(toDir)) {
     console.error(`Pack \`${to}\` already exists at ${toDir}`);
     process.exit(1);
@@ -623,7 +623,7 @@ async function runEditCmd(args: string[]): Promise<void> {
   const { json, positional } = parseFlags(args);
   const name = positional[0];
   if (!name) {
-    console.error('Usage: gbrain schema edit <pack-name>  (experimental)');
+    console.error('Usage: modusbrain schema edit <pack-name>  (experimental)');
     process.exit(2);
   }
   const p = packPathByName(name);
@@ -636,7 +636,7 @@ async function runEditCmd(args: string[]): Promise<void> {
     return;
   }
   console.log(`(experimental) Pack file: ${p}`);
-  console.log(`Open it in your editor; then run \`gbrain schema validate ${name}\`.`);
+  console.log(`Open it in your editor; then run \`modusbrain schema validate ${name}\`.`);
 }
 
 async function runDiffCmd(args: string[]): Promise<void> {
@@ -644,7 +644,7 @@ async function runDiffCmd(args: string[]): Promise<void> {
   const a = positional[0];
   const b = positional[1];
   if (!a || !b) {
-    console.error('Usage: gbrain schema diff <pack-a> <pack-b>  (experimental)');
+    console.error('Usage: modusbrain schema diff <pack-a> <pack-b>  (experimental)');
     process.exit(2);
   }
   const aPath = packPathByName(a);
@@ -747,7 +747,7 @@ async function runExplainCmd(args: string[]): Promise<void> {
   const { json, positional } = parseFlags(args);
   const typeName = positional[0];
   if (!typeName) {
-    console.error('Usage: gbrain schema explain <type-name>  (experimental)');
+    console.error('Usage: modusbrain schema explain <type-name>  (experimental)');
     process.exit(2);
   }
   const cfg = loadConfig();
@@ -799,8 +799,8 @@ async function runDowngradeCmd(args: string[]): Promise<void> {
   const target = positional.includes('--to')
     ? positional[positional.indexOf('--to') + 1]
     : undefined;
-  // Find the previous pack from ~/.gbrain/schema-pack-history.jsonl OR honor --to <pack>.
-  const historyPath = gbrainPath('schema-pack-history.jsonl');
+  // Find the previous pack from ~/.modusbrain/schema-pack-history.jsonl OR honor --to <pack>.
+  const historyPath = modusbrainPath('schema-pack-history.jsonl');
   let restoredTo: string | null = null;
   if (target) {
     restoredTo = target;
@@ -829,12 +829,12 @@ async function runDowngradeCmd(args: string[]): Promise<void> {
     return;
   }
   console.log(`Active pack restored to \`${restoredTo}\` in ${path}`);
-  console.log('Run `gbrain schema active` to verify. Note: this command restores CONFIG only.');
+  console.log('Run `modusbrain schema active` to verify. Note: this command restores CONFIG only.');
   console.log('Custom-typed pages, cache rows, and eval rows from v0.39 are not auto-cleaned.');
   console.log('See docs/architecture/schema-packs.md for the full revert procedure.');
 }
 
-// ------------- T23: gbrain schema usage ---------------------------
+// ------------- T23: modusbrain schema usage ---------------------------
 
 async function runUsageCmd(args: string[]): Promise<void> {
   const { json, positional } = parseFlags(args);
@@ -993,7 +993,7 @@ async function runSyncCmd(args: string[]): Promise<void> {
     }
     console.log(`\nTotal: would_apply=${result.total_would_apply} applied=${result.total_applied}`);
     if (!apply && result.total_would_apply > 0) {
-      console.log(`\nRun \`gbrain schema sync --apply\` to backfill page.type.`);
+      console.log(`\nRun \`modusbrain schema sync --apply\` to backfill page.type.`);
     }
   });
 }
@@ -1022,7 +1022,7 @@ async function runAddTypeCmd(args: string[]): Promise<void> {
   const packName = pickPackName({}, args);
   const positional = args.filter((a) => !a.startsWith('--'));
   const name = positional[0];
-  if (!name) { console.error('Usage: gbrain schema add-type <name> --primitive <p> --prefix <dir/>'); process.exit(2); }
+  if (!name) { console.error('Usage: modusbrain schema add-type <name> --primitive <p> --prefix <dir/>'); process.exit(2); }
   let primitive: string | undefined;
   let prefix: string | undefined;
   let extractable = false;
@@ -1057,7 +1057,7 @@ async function runRemoveTypeCmd(args: string[]): Promise<void> {
   const { json } = parseFlags(args);
   const packName = pickPackName({}, args);
   const name = args.filter((a) => !a.startsWith('--'))[0];
-  if (!name) { console.error('Usage: gbrain schema remove-type <name>'); process.exit(2); }
+  if (!name) { console.error('Usage: modusbrain schema remove-type <name>'); process.exit(2); }
   try { emitMutateResult(await removeTypeFromPack(packName, name), json); }
   catch (e) { handleMutationError(e); }
 }
@@ -1066,7 +1066,7 @@ async function runUpdateTypeCmd(args: string[]): Promise<void> {
   const { json } = parseFlags(args);
   const packName = pickPackName({}, args);
   const name = args.filter((a) => !a.startsWith('--'))[0];
-  if (!name) { console.error('Usage: gbrain schema update-type <name> [--extractable BOOL] [--expert BOOL] [--primitive P]'); process.exit(2); }
+  if (!name) { console.error('Usage: modusbrain schema update-type <name> [--extractable BOOL] [--expert BOOL] [--primitive P]'); process.exit(2); }
   const patch: Record<string, unknown> = {};
   for (let i = 0; i < args.length; i++) {
     const a = args[i];
@@ -1090,7 +1090,7 @@ async function runAddAliasCmd(args: string[]): Promise<void> {
   const { json } = parseFlags(args);
   const packName = pickPackName({}, args);
   const pos = args.filter((a) => !a.startsWith('--'));
-  if (pos.length < 2) { console.error('Usage: gbrain schema add-alias <type> <alias>'); process.exit(2); }
+  if (pos.length < 2) { console.error('Usage: modusbrain schema add-alias <type> <alias>'); process.exit(2); }
   try { emitMutateResult(await addAliasToType(packName, pos[0]!, pos[1]!), json); }
   catch (e) { handleMutationError(e); }
 }
@@ -1099,7 +1099,7 @@ async function runRemoveAliasCmd(args: string[]): Promise<void> {
   const { json } = parseFlags(args);
   const packName = pickPackName({}, args);
   const pos = args.filter((a) => !a.startsWith('--'));
-  if (pos.length < 2) { console.error('Usage: gbrain schema remove-alias <type> <alias>'); process.exit(2); }
+  if (pos.length < 2) { console.error('Usage: modusbrain schema remove-alias <type> <alias>'); process.exit(2); }
   try { emitMutateResult(await removeAliasFromType(packName, pos[0]!, pos[1]!), json); }
   catch (e) { handleMutationError(e); }
 }
@@ -1108,7 +1108,7 @@ async function runAddPrefixCmd(args: string[]): Promise<void> {
   const { json } = parseFlags(args);
   const packName = pickPackName({}, args);
   const pos = args.filter((a) => !a.startsWith('--'));
-  if (pos.length < 2) { console.error('Usage: gbrain schema add-prefix <type> <prefix>'); process.exit(2); }
+  if (pos.length < 2) { console.error('Usage: modusbrain schema add-prefix <type> <prefix>'); process.exit(2); }
   try { emitMutateResult(await addPrefixToType(packName, pos[0]!, pos[1]!), json); }
   catch (e) { handleMutationError(e); }
 }
@@ -1117,7 +1117,7 @@ async function runRemovePrefixCmd(args: string[]): Promise<void> {
   const { json } = parseFlags(args);
   const packName = pickPackName({}, args);
   const pos = args.filter((a) => !a.startsWith('--'));
-  if (pos.length < 2) { console.error('Usage: gbrain schema remove-prefix <type> <prefix>'); process.exit(2); }
+  if (pos.length < 2) { console.error('Usage: modusbrain schema remove-prefix <type> <prefix>'); process.exit(2); }
   try { emitMutateResult(await removePrefixFromType(packName, pos[0]!, pos[1]!), json); }
   catch (e) { handleMutationError(e); }
 }
@@ -1126,7 +1126,7 @@ async function runAddLinkTypeCmd(args: string[]): Promise<void> {
   const { json } = parseFlags(args);
   const packName = pickPackName({}, args);
   const name = args.filter((a) => !a.startsWith('--'))[0];
-  if (!name) { console.error('Usage: gbrain schema add-link-type <name> [--inverse <verb>] [--page-type <t>] [--target-type <t>]'); process.exit(2); }
+  if (!name) { console.error('Usage: modusbrain schema add-link-type <name> [--inverse <verb>] [--page-type <t>] [--target-type <t>]'); process.exit(2); }
   let inverse: string | undefined;
   let pageType: string | undefined;
   let targetType: string | undefined;
@@ -1146,7 +1146,7 @@ async function runRemoveLinkTypeCmd(args: string[]): Promise<void> {
   const { json } = parseFlags(args);
   const packName = pickPackName({}, args);
   const name = args.filter((a) => !a.startsWith('--'))[0];
-  if (!name) { console.error('Usage: gbrain schema remove-link-type <name>'); process.exit(2); }
+  if (!name) { console.error('Usage: modusbrain schema remove-link-type <name>'); process.exit(2); }
   try { emitMutateResult(await removeLinkTypeFromPack(packName, name), json); }
   catch (e) { handleMutationError(e); }
 }
@@ -1155,7 +1155,7 @@ async function runSetExtractableCmd(args: string[]): Promise<void> {
   const { json } = parseFlags(args);
   const packName = pickPackName({}, args);
   const pos = args.filter((a) => !a.startsWith('--'));
-  if (pos.length < 2) { console.error('Usage: gbrain schema set-extractable <type> <true|false>'); process.exit(2); }
+  if (pos.length < 2) { console.error('Usage: modusbrain schema set-extractable <type> <true|false>'); process.exit(2); }
   const v = parseBool(pos[1]);
   if (v === null) { console.error('Second argument must be true|false'); process.exit(2); }
   try { emitMutateResult(await setExtractableOnType(packName, pos[0]!, v), json); }
@@ -1166,7 +1166,7 @@ async function runSetExpertRoutingCmd(args: string[]): Promise<void> {
   const { json } = parseFlags(args);
   const packName = pickPackName({}, args);
   const pos = args.filter((a) => !a.startsWith('--'));
-  if (pos.length < 2) { console.error('Usage: gbrain schema set-expert-routing <type> <true|false>'); process.exit(2); }
+  if (pos.length < 2) { console.error('Usage: modusbrain schema set-expert-routing <type> <true|false>'); process.exit(2); }
   const v = parseBool(pos[1]);
   if (v === null) { console.error('Second argument must be true|false'); process.exit(2); }
   try { emitMutateResult(await setExpertRoutingOnType(packName, pos[0]!, v), json); }
@@ -1178,7 +1178,7 @@ async function runScaffoldExtractableCmd(args: string[]): Promise<void> {
   const packName = pickPackName({}, args);
   const pos = args.filter((a) => !a.startsWith('--'));
   if (pos.length < 1) {
-    console.error('Usage: gbrain schema scaffold-extractable <type> [--pack <name>] [--dims a,b,c] [--force]');
+    console.error('Usage: modusbrain schema scaffold-extractable <type> [--pack <name>] [--dims a,b,c] [--force]');
     process.exit(2);
   }
   const typeName = pos[0]!;
@@ -1215,7 +1215,7 @@ async function runScaffoldExtractableCmd(args: string[]): Promise<void> {
       console.log('Next steps:');
       console.log(`  1. Edit prompts/extract/${typeName}.md to specify your domain.`);
       console.log(`  2. Replace fixture placeholders in fixtures/extract/${typeName}.jsonl with real cases.`);
-      console.log(`  3. Run: gbrain extract benchmark --pack ${packName} --kind ${typeName}`);
+      console.log(`  3. Run: modusbrain extract benchmark --pack ${packName} --kind ${typeName}`);
     }
   } catch (e) {
     handleMutationError(e);

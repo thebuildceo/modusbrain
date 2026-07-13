@@ -42,7 +42,7 @@ afterAll(async () => {
 beforeEach(async () => {
   await resetPgliteState(engine);
   resetGateway();
-  tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'gbrain-bs-save-'));
+  tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'modusbrain-bs-save-'));
   brainDir = path.join(tmpRoot, 'brain');
   fs.mkdirSync(brainDir, { recursive: true });
 });

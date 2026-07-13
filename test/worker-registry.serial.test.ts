@@ -5,7 +5,7 @@
  *   - ESRCH entries pruned, EPERM entries kept alive (#9).
  *   - PID-reuse guard: an entry whose pid started long after registration is
  *     not reported (#8).
- *   - Registry path is brain-isolated under gbrainPath (#7).
+ *   - Registry path is brain-isolated under modusbrainPath (#7).
  *   - Corrupt JSON skipped; cleanup unlinks.
  */
 
@@ -15,20 +15,20 @@ import { join } from 'path';
 import { tmpdir } from 'os';
 
 let home: string;
-const origHome = process.env.GBRAIN_HOME;
+const origHome = process.env.MODUSBRAIN_HOME;
 
 beforeEach(() => {
-  home = mkdtempSync(join(tmpdir(), 'gbrain-reg-'));
-  process.env.GBRAIN_HOME = home;
+  home = mkdtempSync(join(tmpdir(), 'modusbrain-reg-'));
+  process.env.MODUSBRAIN_HOME = home;
 });
 
 afterEach(() => {
-  if (origHome === undefined) delete process.env.GBRAIN_HOME;
-  else process.env.GBRAIN_HOME = origHome;
+  if (origHome === undefined) delete process.env.MODUSBRAIN_HOME;
+  else process.env.MODUSBRAIN_HOME = origHome;
   try { rmSync(home, { recursive: true, force: true }); } catch { /* ignore */ }
 });
 
-// Imported lazily AFTER GBRAIN_HOME is set so gbrainPath resolves to the temp dir.
+// Imported lazily AFTER MODUSBRAIN_HOME is set so modusbrainPath resolves to the temp dir.
 async function reg() {
   return await import('../src/core/minions/worker-registry.ts');
 }
@@ -44,9 +44,9 @@ describe('classifyLiveness (Codex #9)', () => {
 });
 
 describe('register + read round trip', () => {
-  test('registerWorker writes under gbrainPath; readWorkers returns the live worker', async () => {
+  test('registerWorker writes under modusbrainPath; readWorkers returns the live worker', async () => {
     const { registerWorker, readWorkers, workerRegistryDir } = await reg();
-    expect(workerRegistryDir()).toBe(join(home, '.gbrain', 'workers'));
+    expect(workerRegistryDir()).toBe(join(home, '.modusbrain', 'workers'));
 
     const cleanup = registerWorker({
       pid: process.pid, // a definitely-alive pid

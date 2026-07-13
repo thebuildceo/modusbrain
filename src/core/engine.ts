@@ -110,7 +110,7 @@ export interface FileSpec {
  * attempts under failure, amplifying load on a recovering circuit breaker.
  * CI lint guard `scripts/check-no-double-retry.sh` enforces the rule.
  *
- * - `auditSite`: typed label for the JSONL audit emission (`~/.gbrain/audit/
+ * - `auditSite`: typed label for the JSONL audit emission (`~/.modusbrain/audit/
  *   batch-retry-YYYY-Www.jsonl`). Must be a member of `BATCH_AUDIT_SITES`
  *   in `src/core/retry.ts`. The CI lint guard `scripts/check-batch-audit-
  *   site.sh` validates every string-literal value at build time.
@@ -510,7 +510,7 @@ export interface NewFact {
   embedding?: Float32Array | null;     // pre-computed; if null, insertFact computes via gateway
   /**
    * v0.35.4 (D-CDX-5) — typed-claim fields. Optional. When populated,
-   * `gbrain eval trajectory` + `find_trajectory` MCP op consume them for
+   * `modusbrain eval trajectory` + `find_trajectory` MCP op consume them for
    * chronological regression detection and drift_score. `claim_metric` is
    * normalized to lowercase snake_case by the extraction layer before
    * this method sees it; the engine stores verbatim.
@@ -544,7 +544,7 @@ export interface FactListOpts {
   visibility?: FactVisibility[];
 }
 
-/** Per-source operational health snapshot consumed by `gbrain doctor`. */
+/** Per-source operational health snapshot consumed by `modusbrain doctor`. */
 export interface FactsHealth {
   source_id: string;
   total_active: number;          // facts where expired_at IS NULL
@@ -676,7 +676,7 @@ export interface BrainEngine {
    * Fetch a page by slug.
    * v0.26.5: by default soft-deleted rows return null (matches the search
    * filter contract). Pass `opts.includeDeleted: true` to surface them with
-   * `deleted_at` populated — used by `gbrain pages purge-deleted` listing,
+   * `deleted_at` populated — used by `modusbrain pages purge-deleted` listing,
    * by `restore_page` flow, and by operator diagnostics.
    */
   getPage(slug: string, opts?: GetPageOpts): Promise<Page | null>;
@@ -700,8 +700,8 @@ export interface BrainEngine {
    *     AND `deleted_at IS NULL`
    *
    * Background: the overlapping-ingest-roots bug class (infiniteGameExp,
-   * issue #1309) created two pages per file when a user ran `gbrain import
-   * /vault/Subdir/` then `gbrain import /vault/` — the slug-shape changed
+   * issue #1309) created two pages per file when a user ran `modusbrain import
+   * /vault/Subdir/` then `modusbrain import /vault/` — the slug-shape changed
    * but the content + external ID were identical. Pre-fix, the import
    * pipeline dedup-checked by `getPage(slug)` alone and missed the
    * cross-slug duplicate. This method gives the importer a deterministic
@@ -733,10 +733,10 @@ export interface BrainEngine {
    * Cascades through content_chunks / page_links / chunk_relations via FKs.
    *
    * v0.41.19.0 (CDX-11): single-row primitive used by `purgeDeletedPages`,
-   * `gbrain sync` (one path per call), test setup teardown, and the v0.41.19.0
+   * `modusbrain sync` (one path per call), test setup teardown, and the v0.41.19.0
    * sync-delete decompose path (when `deletePages` throws on a 500-row batch,
    * the sync loop falls back to per-slug `deletePage` to log unrecoverable
-   * failures to `failedFiles`). `gbrain sync` calls this on EVERY run that
+   * failures to `failedFiles`). `modusbrain sync` calls this on EVERY run that
    * sees a deleted file — it is NOT admin-only.
    */
   deletePage(slug: string, opts?: { sourceId?: string }): Promise<void>;
@@ -762,7 +762,7 @@ export interface BrainEngine {
    * the whole batch rolls back. Coarser than the per-row `deletePage`
    * cadence — a mid-loop abort or transient connection failure can roll
    * back up to `DELETE_BATCH_SIZE - 1` successful deletes from the
-   * in-flight batch. `gbrain sync` is idempotent (next run picks them up
+   * in-flight batch. `modusbrain sync` is idempotent (next run picks them up
    * via git diff); other callers should account for the contract.
    *
    * sourceId is REQUIRED (no `'default'` fallback). This is asymmetric with
@@ -807,7 +807,7 @@ export interface BrainEngine {
   restorePage(slug: string, opts?: { sourceId?: string }): Promise<boolean>;
   /**
    * v0.26.5 — hard-delete pages whose `deleted_at` is older than the cutoff.
-   * Called by the autopilot purge phase and by the `gbrain pages purge-deleted`
+   * Called by the autopilot purge phase and by the `modusbrain pages purge-deleted`
    * CLI escape hatch. Cascades through existing FKs.
    */
   purgeDeletedPages(olderThanHours: number): Promise<{ slugs: string[]; count: number }>;
@@ -826,7 +826,7 @@ export interface BrainEngine {
    * Source-bleed via fuzzy resolution was the bug class infiniteGameExp
    * reported as #1436. When neither opt is set, the original unscoped
    * behavior is preserved for back-compat with internal callers (the
-   * `gbrain query --resolve` CLI path, etc.). Field names match the
+   * `modusbrain query --resolve` CLI path, etc.). Field names match the
    * `sourceScopeOpts(ctx)` helper output so callers can spread directly.
    */
   resolveSlugs(partial: string, opts?: { sourceId?: string; sourceIds?: string[] }): Promise<string[]>;
@@ -895,7 +895,7 @@ export interface BrainEngine {
   updateSourceConfig(sourceId: string, patch: Record<string, unknown>): Promise<boolean>;
 
   /**
-   * v0.37.0 — prefix-stratified page sampling for `gbrain brainstorm` / `gbrain lsd`
+   * v0.37.0 — prefix-stratified page sampling for `modusbrain brainstorm` / `modusbrain lsd`
    * domain-bank module. Takes a caller-supplied prefix list (cached at the domain-bank
    * layer per D3), returns one page per prefix tiebroken by `connection_count`
    * (LEFT JOIN to page_links, count of inbound links).
@@ -914,7 +914,7 @@ export interface BrainEngine {
   listPrefixSampledPages(opts: DomainBankSampleOpts): Promise<DomainBankRow[]>;
 
   /**
-   * v0.37.0 — corpus-sampling fallback for `gbrain brainstorm` when prefix-stratified
+   * v0.37.0 — corpus-sampling fallback for `modusbrain brainstorm` when prefix-stratified
    * can't fill M (small brain, single-prefix corpus). Random sample of N pages with
    * the same exclusion + source-scope semantics as `listPrefixSampledPages`.
    * Deterministic with `opts.seed` set; falls back to RANDOM() otherwise.
@@ -972,7 +972,7 @@ export interface BrainEngine {
    *
    * `opts.sourceId` scopes the count to a single source. When omitted,
    * counts across every source in the brain. Operators running
-   * `gbrain embed --stale --source media-corpus` expect only that
+   * `modusbrain embed --stale --source media-corpus` expect only that
    * source's NULLs touched; the caller threads `sourceId` here.
    */
   countStaleChunks(opts?: { sourceId?: string; signature?: string }): Promise<number>;
@@ -980,7 +980,7 @@ export interface BrainEngine {
    * Sum of LENGTH(chunk_text) over stale chunks — the character-count
    * backlog the embed phase / embed-backfill will process. Sibling of
    * countStaleChunks (same stale predicate + embed_skip filter + optional
-   * sourceId scope); used by the `gbrain sync --all` cost preview to price
+   * sourceId scope); used by the `modusbrain sync --all` cost preview to price
    * the embedding backlog via estimateCostFromChars. Returns 0 on an
    * empty/fully-embedded brain.
    *
@@ -1051,7 +1051,7 @@ export interface BrainEngine {
   // A page is stale for extraction when its links_extracted_at is NULL,
   // older than the extractor version stamp, or older than its updated_at
   // (edited-since-extract — the MCP put_page / sync --no-extract path).
-  // Powers `gbrain extract --stale` + the `links_extraction_lag` doctor check.
+  // Powers `modusbrain extract --stale` + the `links_extraction_lag` doctor check.
   // ============================================================
   /**
    * Count pages needing (re)extraction. `versionTs` is the ISO-8601
@@ -1080,7 +1080,7 @@ export interface BrainEngine {
    * crash mid-batch leaves pages unstamped and they re-extract next run.
    *
    * Each ref may carry its own `extractedAt`; refs that omit it use the
-   * `defaultExtractedAt` arg. `gbrain extract --stale` passes the row's READ
+   * `defaultExtractedAt` arg. `modusbrain extract --stale` passes the row's READ
    * `updated_at` per ref (v0.42.7 D4 race fix) so a concurrent edit landing
    * between the SELECT and this stamp advances `updated_at` past the stamped
    * value → the page stays stale → re-extracted next run, never marked
@@ -1167,7 +1167,7 @@ export interface BrainEngine {
   getBacklinks(slug: string, opts?: { sourceId?: string; sourceIds?: string[] }): Promise<Link[]>;
   /**
    * v114 (#1941): distinct link_source provenances with edge counts, for
-   * `gbrain link-sources`. Source-scoped via `{sourceId?, sourceIds?}` (both
+   * `modusbrain link-sources`. Source-scoped via `{sourceId?, sourceIds?}` (both
    * forms, so federated `allowedSources` reads don't leak cross-source counts).
    * Deterministic order `count DESC, link_source ASC NULLS LAST` for PG/PGLite
    * parity. `link_source` may be NULL (legacy/unknown rows).
@@ -1319,10 +1319,10 @@ export interface BrainEngine {
    * Return every page with no inbound links.
    * Domain comes from the frontmatter `domain` field (null if unset).
    * The caller filters pseudo-pages + derives display domain.
-   * Used by `gbrain orphans` and `runCycle`'s orphan sweep phase.
+   * Used by `modusbrain orphans` and `runCycle`'s orphan sweep phase.
    *
    * v0.41.29.0: scopes the CANDIDATE set to one source (`sourceId`, from
-   * `gbrain doctor/orphans --source` + single-source MCP clients) or a
+   * `modusbrain doctor/orphans --source` + single-source MCP clients) or a
    * federated set (`sourceIds`, from `allowedSources` MCP clients). The
    * inbound-link side is NOT scoped — a page in source X linked FROM
    * source Y is genuinely reachable, so it is not an orphan of X. Omit
@@ -1487,7 +1487,7 @@ export interface BrainEngine {
   /** Look up embeddings by take id (mirrors getEmbeddingsByChunkIds). */
   getTakeEmbeddings(ids: number[]): Promise<Map<number, Float32Array>>;
 
-  /** Pre-flight count for `gbrain embed --stale`. WHERE active AND embedding IS NULL. */
+  /** Pre-flight count for `modusbrain embed --stale`. WHERE active AND embedding IS NULL. */
   countStaleTakes(): Promise<number>;
 
   /** List stale takes (no embedding column in payload — same pattern as listStaleChunks). */
@@ -1610,7 +1610,7 @@ export interface BrainEngine {
 
   /**
    * Load contradiction-probe run history within the last N days, ordered
-   * newest first. Used by `gbrain eval suspected-contradictions trend` and
+   * newest first. Used by `modusbrain eval suspected-contradictions trend` and
    * by the doctor `contradictions` check. `report_json` and
    * `source_tier_breakdown` are parsed JSONB columns.
    */
@@ -1786,7 +1786,7 @@ export interface BrainEngine {
 
   /**
    * Audit log: facts that were superseded (expired_at + superseded_by both set),
-   * newest first. Drives `gbrain recall --supersessions`.
+   * newest first. Drives `modusbrain recall --supersessions`.
    */
   listSupersessions(
     source_id: string,
@@ -1795,7 +1795,7 @@ export interface BrainEngine {
 
   /**
    * v0.32: count facts that haven't been promoted to takes by the consolidate
-   * phase yet (active + unconsolidated). Drives `gbrain recall --pending`.
+   * phase yet (active + unconsolidated). Drives `modusbrain recall --pending`.
    * Single SQL: COUNT(*) WHERE consolidated_at IS NULL AND expired_at IS NULL.
    */
   countUnconsolidatedFacts(source_id: string): Promise<number>;
@@ -1834,7 +1834,7 @@ export interface BrainEngine {
    */
   findTrajectory(opts: TrajectoryOpts): Promise<TrajectoryPoint[]>;
 
-  /** Per-source operational metrics for `gbrain doctor` facts_health check. */
+  /** Per-source operational metrics for `modusbrain doctor` facts_health check. */
   getFactsHealth(source_id: string): Promise<FactsHealth>;
 
   // Versions
@@ -1941,7 +1941,7 @@ export interface BrainEngine {
    * Used by the phantom-redirect pass in `extract_facts` after appending
    * migrated fact rows to a canonical page's disk fence: we just rewrote the
    * `.md` on disk, so the DB body must match before the next reconcile reads
-   * stale state. content_hash is included so the next `gbrain sync` sees the
+   * stale state. content_hash is included so the next `modusbrain sync` sees the
    * canonical as unchanged and skips re-import (round-14 + codex #7 — the
    * "second cycle is a no-op" premise depends on all three columns moving
    * together).
@@ -2006,13 +2006,13 @@ export interface BrainEngine {
   setConfig(key: string, value: string): Promise<void>;
   /**
    * v0.32.3 — delete a config row. Returns the number of rows deleted (0 or 1).
-   * No-op when the key doesn't exist. Used by `gbrain config unset` and by
-   * `gbrain search modes --reset`. Engine-agnostic.
+   * No-op when the key doesn't exist. Used by `modusbrain config unset` and by
+   * `modusbrain search modes --reset`. Engine-agnostic.
    */
   unsetConfig(key: string): Promise<number>;
   /**
    * v0.32.3 — list config keys matching a literal prefix (e.g. "search.").
-   * Used by `gbrain config unset --pattern` and the search-modes --reset path.
+   * Used by `modusbrain config unset --pattern` and the search-modes --reset path.
    * Does NOT support glob/regex on purpose — the caller knows the prefix.
    */
   listConfigKeys(prefix: string): Promise<string[]>;
@@ -2115,18 +2115,18 @@ export interface BrainEngine {
 
   // Eval capture (v0.25.0 — BrainBench-Real substrate).
   // Captured at the op-layer wrapper in src/core/operations.ts; reads via
-  // `gbrain eval export` (NDJSON) for sibling gbrain-evals consumption.
+  // `modusbrain eval export` (NDJSON) for sibling modusbrain-evals consumption.
   // Adding these to BrainEngine is a breaking-interface change for third-
   // party engine implementers — this is why v0.25.0 is a minor bump.
   /** Insert a captured candidate. Returns the new row id. Best-effort: callers swallow failures and route them through `logEvalCaptureFailure`. */
   logEvalCandidate(input: EvalCandidateInput): Promise<number>;
-  /** Read candidates by time window / limit / tool filter. Used by `gbrain eval export`. */
+  /** Read candidates by time window / limit / tool filter. Used by `modusbrain eval export`. */
   listEvalCandidates(filter?: { since?: Date; limit?: number; tool?: 'query' | 'search' }): Promise<EvalCandidate[]>;
-  /** Delete candidates created before `date`. Returns rows deleted. Used by `gbrain eval prune`. */
+  /** Delete candidates created before `date`. Returns rows deleted. Used by `modusbrain eval prune`. */
   deleteEvalCandidatesBefore(date: Date): Promise<number>;
-  /** Log a capture failure so `gbrain doctor` can surface drops cross-process. Best-effort; symmetric with logEvalCandidate (failure-of-failure is lost). */
+  /** Log a capture failure so `modusbrain doctor` can surface drops cross-process. Best-effort; symmetric with logEvalCandidate (failure-of-failure is lost). */
   logEvalCaptureFailure(reason: EvalCaptureFailureReason): Promise<void>;
-  /** Read capture failures within an optional time window. Used by `gbrain doctor`. */
+  /** Read capture failures within an optional time window. Used by `modusbrain doctor`. */
   listEvalCaptureFailures(filter?: { since?: Date }): Promise<EvalCaptureFailure[]>;
 
   // ============================================================
@@ -2174,7 +2174,7 @@ export interface BrainEngine {
 
   /**
    * v0.41.39 (issue #1700) — enrich candidate selection for
-   * `gbrain enrich --thin`. ONE source-aware SQL query: thin-filter +
+   * `modusbrain enrich --thin`. ONE source-aware SQL query: thin-filter +
    * per-page inbound-link count (source-correct via `to_page_id = p.id`,
    * `link_source='mentions'` excluded) + optional `enriched_at` recency
    * guard + whitelisted ORDER BY (ENRICH_ORDER_SQL) + LIMIT. Returns a

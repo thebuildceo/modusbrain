@@ -34,9 +34,9 @@ function baseInputs(over: Partial<DecideSelfUpgradeInputs> = {}): DecideSelfUpgr
 }
 
 async function withTmpHome<T>(fn: () => T | Promise<T>): Promise<T> {
-  const dir = mkdtempSync(join(tmpdir(), 'gbrain-selfupgrade-'));
+  const dir = mkdtempSync(join(tmpdir(), 'modusbrain-selfupgrade-'));
   try {
-    return await withEnv({ GBRAIN_HOME: dir, GBRAIN_SELF_UPGRADE_MODE: undefined }, fn);
+    return await withEnv({ MODUSBRAIN_HOME: dir, MODUSBRAIN_SELF_UPGRADE_MODE: undefined }, fn);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -191,9 +191,9 @@ describe('snooze', () => {
   test('corrupt snooze file → null', async () => {
     await withTmpHome(async () => {
       const { writeFileSync, mkdirSync } = await import('node:fs');
-      const { gbrainPath } = await import('../src/core/config.ts');
-      mkdirSync(gbrainPath(), { recursive: true });
-      writeFileSync(gbrainPath('update-snoozed'), 'garbage not three fields here');
+      const { modusbrainPath } = await import('../src/core/config.ts');
+      mkdirSync(modusbrainPath(), { recursive: true });
+      writeFileSync(modusbrainPath('update-snoozed'), 'garbage not three fields here');
       expect(readSnooze()).toBeNull();
     });
   });
@@ -222,9 +222,9 @@ describe('cache', () => {
   test('corrupt cache file → null (fail-open)', async () => {
     await withTmpHome(async () => {
       const { writeFileSync, mkdirSync } = await import('node:fs');
-      const { gbrainPath } = await import('../src/core/config.ts');
-      mkdirSync(gbrainPath(), { recursive: true });
-      writeFileSync(gbrainPath('last-update-check'), 'EVIL not a marker');
+      const { modusbrainPath } = await import('../src/core/config.ts');
+      mkdirSync(modusbrainPath(), { recursive: true });
+      writeFileSync(modusbrainPath('last-update-check'), 'EVIL not a marker');
       expect(readUpdateCache()).toBeNull();
     });
   });
@@ -266,20 +266,20 @@ describe('reconcileBreadcrumb', () => {
 
 describe('resolveSelfUpgradeMode', () => {
   test('defaults to notify', async () => {
-    await withEnv({ GBRAIN_SELF_UPGRADE_MODE: undefined }, () => {
+    await withEnv({ MODUSBRAIN_SELF_UPGRADE_MODE: undefined }, () => {
       expect(resolveSelfUpgradeMode(null)).toBe('notify');
       expect(resolveSelfUpgradeMode({})).toBe('notify');
       expect(resolveSelfUpgradeMode({ self_upgrade: { mode: 'bogus' } })).toBe('notify');
     });
   });
   test('config plane honored', async () => {
-    await withEnv({ GBRAIN_SELF_UPGRADE_MODE: undefined }, () => {
+    await withEnv({ MODUSBRAIN_SELF_UPGRADE_MODE: undefined }, () => {
       expect(resolveSelfUpgradeMode({ self_upgrade: { mode: 'auto' } })).toBe('auto');
       expect(resolveSelfUpgradeMode({ self_upgrade: { mode: 'off' } })).toBe('off');
     });
   });
   test('env overrides config', async () => {
-    await withEnv({ GBRAIN_SELF_UPGRADE_MODE: 'off' }, () => {
+    await withEnv({ MODUSBRAIN_SELF_UPGRADE_MODE: 'off' }, () => {
       expect(resolveSelfUpgradeMode({ self_upgrade: { mode: 'auto' } })).toBe('off');
     });
   });

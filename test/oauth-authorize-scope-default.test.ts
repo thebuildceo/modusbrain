@@ -11,11 +11,11 @@
  */
 import { describe, test, expect, beforeAll, afterAll, beforeEach } from 'bun:test';
 import { PGLiteEngine } from '../src/core/pglite-engine.ts';
-import { GBrainOAuthProvider } from '../src/core/oauth-provider.ts';
+import { ModusBrainOAuthProvider } from '../src/core/oauth-provider.ts';
 import { sqlQueryForEngine } from '../src/core/sql-query.ts';
 
 let engine: PGLiteEngine;
-let provider: GBrainOAuthProvider;
+let provider: ModusBrainOAuthProvider;
 let sql: ReturnType<typeof sqlQueryForEngine>;
 
 beforeAll(async () => {
@@ -23,7 +23,7 @@ beforeAll(async () => {
   await engine.connect({});
   await engine.initSchema();
   sql = sqlQueryForEngine(engine);
-  provider = new GBrainOAuthProvider({ sql });
+  provider = new ModusBrainOAuthProvider({ sql });
 });
 
 afterAll(async () => {

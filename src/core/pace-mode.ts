@@ -5,10 +5,10 @@
  * operator picks once and stops thinking about it. Mirrors the v0.32.3
  * search-mode pattern at `src/core/search/mode.ts` (named bundle + per-key
  * overrides + per-call opts), with ONE deliberate difference: the resolution
- * chain puts ENV ABOVE CONFIG so `GBRAIN_PACE_*` is a real incident escape
+ * chain puts ENV ABOVE CONFIG so `MODUSBRAIN_PACE_*` is a real incident escape
  * hatch — an operator can override bad production config without a redeploy.
  *
- *   per-call flag → GBRAIN_PACE_* env → config (pace.*) → MODE_BUNDLES[mode] → off
+ *   per-call flag → MODUSBRAIN_PACE_* env → config (pace.*) → MODE_BUNDLES[mode] → off
  *
  * `DEFAULT_PACE_MODE` is `'off'`: pacing is strictly opt-in and never changes
  * default behavior. `off` resolves to `enabled: false`, which the DB-pacer
@@ -58,7 +58,7 @@ export interface PaceBundle {
  * its numeric fields are inert (the pacer short-circuits on `enabled: false`).
  *
  * Concurrency picks are deliberately well below the default embed concurrency
- * (`GBRAIN_EMBED_CONCURRENCY`, 20) — the whole point is to hold fewer pooler
+ * (`MODUSBRAIN_EMBED_CONCURRENCY`, 20) — the whole point is to hold fewer pooler
  * slots than an unpaced run.
  */
 export const PACE_BUNDLES: Readonly<Record<PaceMode, Readonly<PaceBundle>>> = Object.freeze({
@@ -120,13 +120,13 @@ export interface PaceKeyOverrides {
 export interface ResolvePaceModeInput {
   /** `config.pace.mode`. */
   mode?: string;
-  /** `GBRAIN_PACE_MODE`. */
+  /** `MODUSBRAIN_PACE_MODE`. */
   envMode?: string;
   /** `--pace=<mode>` (or bare `--pace` resolved to 'balanced' by the caller). */
   perCallMode?: string;
   /** Per-key overrides from the config table. */
   configOverrides?: PaceKeyOverrides;
-  /** Per-key overrides from `GBRAIN_PACE_*` env. */
+  /** Per-key overrides from `MODUSBRAIN_PACE_*` env. */
   envOverrides?: PaceKeyOverrides;
   /** Per-call overrides (e.g. `--pace-max-concurrency`). */
   perCall?: PaceKeyOverrides;
@@ -212,19 +212,19 @@ export function loadOverridesFromConfig(
   });
 }
 
-/** Build PaceKeyOverrides from `GBRAIN_PACE_*` env (incident escape hatch). */
+/** Build PaceKeyOverrides from `MODUSBRAIN_PACE_*` env (incident escape hatch). */
 export function readPaceEnv(env: Record<string, string | undefined> = process.env): {
   envMode?: string;
   envOverrides: PaceKeyOverrides;
 } {
   const overrides = parseOverrides((k) => env[k], {
-    enabled: 'GBRAIN_PACE_ENABLED',
-    maxConcurrency: 'GBRAIN_PACE_MAX_CONCURRENCY',
-    paceAtMs: 'GBRAIN_PACE_AT_MS',
-    maxSleepMs: 'GBRAIN_PACE_MAX_SLEEP_MS',
-    ewmaAlpha: 'GBRAIN_PACE_EWMA_ALPHA',
+    enabled: 'MODUSBRAIN_PACE_ENABLED',
+    maxConcurrency: 'MODUSBRAIN_PACE_MAX_CONCURRENCY',
+    paceAtMs: 'MODUSBRAIN_PACE_AT_MS',
+    maxSleepMs: 'MODUSBRAIN_PACE_MAX_SLEEP_MS',
+    ewmaAlpha: 'MODUSBRAIN_PACE_EWMA_ALPHA',
   });
-  return { envMode: env.GBRAIN_PACE_MODE, envOverrides: overrides };
+  return { envMode: env.MODUSBRAIN_PACE_MODE, envOverrides: overrides };
 }
 
 function parseOverrides(

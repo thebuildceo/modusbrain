@@ -2,25 +2,25 @@
 
 You are installing the `agent-voice` reference (Mars + Venus voice personas, WebRTC-first browser client) into a freshly-prepared scratch host repo. This is a **friction-discovery** test, not a production install — find anything confusing and log it.
 
-The scratch repo at `$OPENCLAW_WORKSPACE` is pre-seeded as a minimal git repo with an `AGENTS.md` stub. Everything else needs to come from `gbrain integrations install agent-voice`.
+The scratch repo at `$OPENCLAW_WORKSPACE` is pre-seeded as a minimal git repo with an `AGENTS.md` stub. Everything else needs to come from `modusbrain integrations install agent-voice`.
 
 ## Steps
 
-1. **Confirm gbrain is reachable:**
+1. **Confirm modusbrain is reachable:**
    ```bash
-   gbrain --version && gbrain integrations show agent-voice
+   modusbrain --version && modusbrain integrations show agent-voice
    ```
-   If `gbrain` is not on PATH, look for it at `$GBRAIN_BIN` or the local source-tree CLI (`bun run /path/to/gbrain/src/cli.ts`).
+   If `modusbrain` is not on PATH, look for it at `$MODUSBRAIN_BIN` or the local source-tree CLI (`bun run /path/to/modusbrain/src/cli.ts`).
 
 2. **Install agent-voice into the scratch repo:**
    ```bash
-   gbrain integrations install agent-voice --target $OPENCLAW_WORKSPACE
+   modusbrain integrations install agent-voice --target $OPENCLAW_WORKSPACE
    ```
 
 3. **Verify the install:**
    ```bash
    ls $OPENCLAW_WORKSPACE/services/voice-agent/
-   cat $OPENCLAW_WORKSPACE/services/voice-agent/.gbrain-source.json | head -10
+   cat $OPENCLAW_WORKSPACE/services/voice-agent/.modusbrain-source.json | head -10
    grep -c "voice-persona" $OPENCLAW_WORKSPACE/AGENTS.md
    ```
 
@@ -50,7 +50,7 @@ The scratch repo at `$OPENCLAW_WORKSPACE` is pre-seeded as a minimal git repo wi
 If anything is confusing, missing, surprising, or wrong, run:
 
 ```
-gbrain friction log --severity {confused|error|blocker|nit} --phase <which-step> --message "<what-happened>" [--hint "<what-could-be-better>"]
+modusbrain friction log --severity {confused|error|blocker|nit} --phase <which-step> --message "<what-happened>" [--hint "<what-could-be-better>"]
 ```
 
 Severity guide:
@@ -60,7 +60,7 @@ Severity guide:
 - `nit` — minor polish opportunity
 
 Common friction points to watch for:
-- `gbrain integrations install` not in scope or unknown subcommand → likely a stale gbrain binary
+- `modusbrain integrations install` not in scope or unknown subcommand → likely a stale modusbrain binary
 - Missing `OPENAI_API_KEY` env var when starting the server → expected, log a `nit`
 - Host repo uses npm instead of bun → the recipe should detect and pick the right command
 - `AGENTS.md` already has resolver rows → install should append, not overwrite (verify)

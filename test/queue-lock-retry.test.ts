@@ -22,12 +22,12 @@ function connEndedError(): Error & { code: string } {
   return e;
 }
 
-const AUDIT_DIR = join(tmpdir(), `gbrain-queue-lock-retry-${process.pid}-${Date.now()}`);
-// Fast retry + isolated audit dir so the test doesn't sleep ~1s or pollute ~/.gbrain.
+const AUDIT_DIR = join(tmpdir(), `modusbrain-queue-lock-retry-${process.pid}-${Date.now()}`);
+// Fast retry + isolated audit dir so the test doesn't sleep ~1s or pollute ~/.modusbrain.
 const FAST_ENV = {
-  GBRAIN_BULK_RETRY_BASE_MS: '1',
-  GBRAIN_BULK_RETRY_MAX_MS: '2',
-  GBRAIN_AUDIT_DIR: AUDIT_DIR,
+  MODUSBRAIN_BULK_RETRY_BASE_MS: '1',
+  MODUSBRAIN_BULK_RETRY_MAX_MS: '2',
+  MODUSBRAIN_AUDIT_DIR: AUDIT_DIR,
 };
 
 describe('MinionQueue lock-path recovery (issue #1678)', () => {

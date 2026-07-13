@@ -5,12 +5,12 @@ import { detectInstallMethod, runUpgrade } from './upgrade.ts';
 import { writeUpdateCache } from '../core/self-upgrade.ts';
 
 /**
- * `gbrain self-upgrade [--check-only] [--force] [--json]`
+ * `modusbrain self-upgrade [--check-only] [--force] [--json]`
  *
  * The universal substrate every agent ecosystem (Codex / Claude Code / Hermes /
  * OpenClaw / Perplexity-server) can call to stay current. The CLI startup hook
  * emits a marker; the agent skill / autopilot daemon act on it by running THIS
- * command. The action is always the hardcoded `gbrain upgrade` — never
+ * command. The action is always the hardcoded `modusbrain upgrade` — never
  * parameterized by any marker content (forged-marker guard).
  *
  *   --check-only  Report whether an upgrade is available; never apply.
@@ -20,9 +20,9 @@ import { writeUpdateCache } from '../core/self-upgrade.ts';
 export async function runSelfUpgrade(args: string[]): Promise<void> {
   if (args.includes('--help') || args.includes('-h')) {
     console.log(
-      'Usage: gbrain self-upgrade [--check-only] [--force] [--json]\n\n' +
-        'Check for and apply gbrain updates. The shared entry point used by the\n' +
-        'CLI startup marker, the gbrain-upgrade agent skill, and the autopilot\n' +
+      'Usage: modusbrain self-upgrade [--check-only] [--force] [--json]\n\n' +
+        'Check for and apply modusbrain updates. The shared entry point used by the\n' +
+        'CLI startup marker, the modusbrain-upgrade agent skill, and the autopilot\n' +
         'silent channel.\n\n' +
         '  --check-only  Report whether an upgrade is available; do not apply.\n' +
         '  --force       Apply even when not behind.\n' +
@@ -80,20 +80,20 @@ export async function runSelfUpgrade(args: string[]): Promise<void> {
         ),
       );
     } else if (behind) {
-      console.log(`Update available: ${VERSION} -> ${latest}. Run: gbrain self-upgrade`);
+      console.log(`Update available: ${VERSION} -> ${latest}. Run: modusbrain self-upgrade`);
       if (changelogDiff) {
         console.log('\nWhat changed:\n');
         console.log(changelogDiff);
       }
       if (release?.url) console.log(`\nRelease: ${release.url}`);
     } else {
-      console.log(`gbrain ${VERSION} is up to date.`);
+      console.log(`modusbrain ${VERSION} is up to date.`);
     }
     return;
   }
 
   if (!behind && !force) {
-    console.log(`gbrain ${VERSION} is up to date.`);
+    console.log(`modusbrain ${VERSION} is up to date.`);
     return;
   }
 

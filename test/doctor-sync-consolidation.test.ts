@@ -1,7 +1,7 @@
 // v0.41.19.0 — T6 of ops-fix-wave.
 //
 // Pins the sync_consolidation doctor check (Issue 5 — surface the
-// `gbrain sync --all --parallel` recommendation to operators with
+// `modusbrain sync --all --parallel` recommendation to operators with
 // multi-source brains).
 //
 // Coverage:
@@ -70,7 +70,7 @@ describe('checkSyncConsolidation (Issue 5)', () => {
     expect(result.status).toBe('ok');
     expect(result.message).toMatch(/3 active sources/);
     // Paste-ready command embedded in message
-    expect(result.message).toMatch(/gbrain sync --all --parallel 4 --workers 4 --skip-failed/);
+    expect(result.message).toMatch(/modusbrain sync --all --parallel 4 --workers 4 --skip-failed/);
   });
 
   test('2 sources both archived → "not applicable" (archived excluded)', async () => {

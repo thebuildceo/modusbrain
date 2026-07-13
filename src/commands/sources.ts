@@ -1,5 +1,5 @@
 /**
- * gbrain sources — manage multi-source brain configuration (v0.18.0).
+ * modusbrain sources — manage multi-source brain configuration (v0.18.0).
  *
  * A source is a logical brain-within-the-DB: wiki, gstack, yc-media, etc.
  * Every page/file/ingest_log row is scoped to a sources(id) row. Slugs
@@ -7,15 +7,15 @@
  * full story.
  *
  * Subcommands:
- *   gbrain sources add <id> --path <path> [--name <display>] [--federated|--no-federated]
- *   gbrain sources list [--json]
- *   gbrain sources remove <id> [--yes] [--dry-run] [--keep-storage]
- *   gbrain sources rename <id> <new-name>
- *   gbrain sources default <id>
- *   gbrain sources attach <id>   — write .gbrain-source in CWD
- *   gbrain sources detach        — remove .gbrain-source from CWD
- *   gbrain sources federate <id>   — sources.config.federated = true
- *   gbrain sources unfederate <id> — sources.config.federated = false
+ *   modusbrain sources add <id> --path <path> [--name <display>] [--federated|--no-federated]
+ *   modusbrain sources list [--json]
+ *   modusbrain sources remove <id> [--yes] [--dry-run] [--keep-storage]
+ *   modusbrain sources rename <id> <new-name>
+ *   modusbrain sources default <id>
+ *   modusbrain sources attach <id>   — write .modusbrain-source in CWD
+ *   modusbrain sources detach        — remove .modusbrain-source from CWD
+ *   modusbrain sources federate <id>   — sources.config.federated = true
+ *   modusbrain sources unfederate <id> — sources.config.federated = false
  *
  * NOT in scope for Step 6 (deferred per plan):
  *   - import-from-github (needs SSRF + clone integration)
@@ -119,7 +119,7 @@ async function runAdd(engine: BrainEngine, args: string[]): Promise<void> {
   const id = args[0];
   if (!id) {
     console.error(
-      'Usage: gbrain sources add <id> [--path <path> | --url <https-url>] ' +
+      'Usage: modusbrain sources add <id> [--path <path> | --url <https-url>] ' +
         '[--name <display>] [--federated|--no-federated] [--clone-dir <path>]',
     );
     process.exit(2);
@@ -188,31 +188,31 @@ async function runAdd(engine: BrainEngine, args: string[]): Promise<void> {
 
   // v0.42.44 — auto-harden managed clones for git durability the moment a brain
   // repo is added with a PAT. Best-effort: NEVER fail `add` if hardening fails.
-  // Only managed clones (gbrain owns the working tree); --path repos are unowned.
+  // Only managed clones (modusbrain owns the working tree); --path repos are unowned.
   if (finalRemoteUrl && created.local_path && !noHarden) {
     try {
       const { hardenBrainRepo, acceptPat } = await import('../core/brain-repo-durability.ts');
       const pat = acceptPat({ patFile });
-      for (const w of pat?.warnings ?? []) console.error(`[gbrain] ${w}`);
+      for (const w of pat?.warnings ?? []) console.error(`[modusbrain] ${w}`);
       if (!pat) {
-        console.error('[gbrain] No PAT provided (--pat-file or GBRAIN_GITHUB_PAT) — skipping durability hardening.');
-        console.error(`         Run \`gbrain sources harden ${id} --pat-file <p>\` later to enable auto-push.`);
+        console.error('[modusbrain] No PAT provided (--pat-file or MODUSBRAIN_GITHUB_PAT) — skipping durability hardening.');
+        console.error(`         Run \`modusbrain sources harden ${id} --pat-file <p>\` later to enable auto-push.`);
       } else {
-        console.error('[gbrain] Hardening brain repo for durability…');
+        console.error('[modusbrain] Hardening brain repo for durability…');
         const report = await hardenBrainRepo({
           repoPath: created.local_path, sourceId: id, pat: pat.token,
           logger: (l) => console.error(`  ${l}`),
         });
         if (report.needs_attention.length) {
-          console.error('[gbrain] Durability hardened with warnings:');
+          console.error('[modusbrain] Durability hardened with warnings:');
           for (const n of report.needs_attention) console.error(`  - ${n}`);
         } else {
-          console.error('[gbrain] Durability hardened ✓');
+          console.error('[modusbrain] Durability hardened ✓');
         }
       }
     } catch (e) {
-      console.error(`[gbrain] Durability hardening skipped (non-fatal): ${(e as Error).message}`);
-      console.error(`         Run \`gbrain sources harden ${id}\` to retry.`);
+      console.error(`[modusbrain] Durability hardening skipped (non-fatal): ${(e as Error).message}`);
+      console.error(`         Run \`modusbrain sources harden ${id}\` to retry.`);
     }
   }
 }
@@ -255,7 +255,7 @@ async function maybeAnnounceBrainPack(engine: BrainEngine, created: OpsSourceRow
       activeSchemaPack = null;
     }
 
-    const noNagFlag = process.env.GBRAIN_NO_SKILL_NAG === '1';
+    const noNagFlag = process.env.MODUSBRAIN_NO_SKILL_NAG === '1';
     const brainId = deriveBrainId(created, localPath);
     const key = { brain_id: brainId, source_id: created.id, pack_name: manifest.name };
     const nagState = loadNagState();
@@ -357,7 +357,7 @@ async function runList(engine: BrainEngine, args: string[]): Promise<void> {
 async function runRemove(engine: BrainEngine, args: string[]): Promise<void> {
   const id = args[0];
   if (!id) {
-    console.error('Usage: gbrain sources remove <id> [--yes] [--confirm-destructive] [--dry-run] [--keep-storage]');
+    console.error('Usage: modusbrain sources remove <id> [--yes] [--confirm-destructive] [--dry-run] [--keep-storage]');
     process.exit(2);
   }
   const yes = args.includes('--yes');
@@ -407,7 +407,7 @@ async function runRemove(engine: BrainEngine, args: string[]): Promise<void> {
     const { unhardenBrainRepo } = await import('../core/brain-repo-durability.ts');
     await unhardenBrainRepo({ repoPath: src.local_path ?? '', sourceId: id, logger: (l) => console.error(l) });
   } catch (e) {
-    console.error(`[gbrain] durability teardown skipped (non-fatal): ${(e as Error).message}`);
+    console.error(`[modusbrain] durability teardown skipped (non-fatal): ${(e as Error).message}`);
   }
 
   await engine.executeRaw(`DELETE FROM sources WHERE id = $1`, [id]);
@@ -419,7 +419,7 @@ async function runRemove(engine: BrainEngine, args: string[]): Promise<void> {
 
 // ── Subcommand: set-cr-mode (v0.40.3.0 — D5) ────────────────
 //
-// `gbrain sources set-cr-mode <id> <none|title|per_chunk_synopsis>`
+// `modusbrain sources set-cr-mode <id> <none|title|per_chunk_synopsis>`
 // writes sources.contextual_retrieval_mode for the per-source override
 // resolver. Empty value / "unset" / "default" clears the column (NULL
 // falls through to the global mode).
@@ -441,7 +441,7 @@ async function runSetCrMode(engine: BrainEngine, args: string[]): Promise<void> 
   const mode = args[1];
 
   if (!id || !mode) {
-    console.error('Usage: gbrain sources set-cr-mode <id> <none|title|per_chunk_synopsis>');
+    console.error('Usage: modusbrain sources set-cr-mode <id> <none|title|per_chunk_synopsis>');
     console.error('  Pass "unset" or "default" to clear the override (NULL falls through).');
     process.exit(2);
   }
@@ -465,7 +465,7 @@ async function runSetCrMode(engine: BrainEngine, args: string[]): Promise<void> 
   );
   if (exists.length === 0) {
     console.error(`Error: source "${id}" not found.`);
-    console.error(`  Run 'gbrain sources list' to see registered sources.`);
+    console.error(`  Run 'modusbrain sources list' to see registered sources.`);
     process.exit(4);
   }
 
@@ -484,7 +484,7 @@ async function runSetCrMode(engine: BrainEngine, args: string[]): Promise<void> 
 async function runArchive(engine: BrainEngine, args: string[]): Promise<void> {
   const id = args[0];
   if (!id) {
-    console.error('Usage: gbrain sources archive <id>');
+    console.error('Usage: modusbrain sources archive <id>');
     process.exit(2);
   }
 
@@ -515,7 +515,7 @@ async function runRestore(engine: BrainEngine, args: string[]): Promise<void> {
   const id = args[0];
   const noFederate = args.includes('--no-federate');
   if (!id) {
-    console.error('Usage: gbrain sources restore <id> [--no-federate]');
+    console.error('Usage: modusbrain sources restore <id> [--no-federate]');
     process.exit(2);
   }
 
@@ -529,7 +529,7 @@ async function runRestore(engine: BrainEngine, args: string[]): Promise<void> {
   console.log(`All pages, chunks, and embeddings are intact.`);
 
   // T4 (eng-review): if the source has a remote_url AND its clone dir was
-  // autopurged (e.g. operator rm -rf'd $GBRAIN_HOME/clones/), re-clone
+  // autopurged (e.g. operator rm -rf'd $MODUSBRAIN_HOME/clones/), re-clone
   // before declaring restore success. Without this, restore returns green
   // but the source is unsyncable until a later sync path discovers the gap.
   try {
@@ -539,16 +539,16 @@ async function runRestore(engine: BrainEngine, args: string[]): Promise<void> {
     }
   } catch (e) {
     if (e instanceof SourceOpError && e.code === 'unmanaged_path') {
-      // #1881: local_path is the user's own working tree, not a clone gbrain
-      // created. gbrain won't re-clone over it, and `gbrain sync` will refuse it
+      // #1881: local_path is the user's own working tree, not a clone modusbrain
+      // created. modusbrain won't re-clone over it, and `modusbrain sync` will refuse it
       // too — so the generic "missing clone, try sync to recover" guidance below
       // would be actively misleading. Surface the real situation instead.
       console.error(`  WARN: ${e.message}`);
-      console.error(`  The DB row is restored; gbrain syncs this path read-only.`);
+      console.error(`  The DB row is restored; modusbrain syncs this path read-only.`);
     } else if (e instanceof SourceOpError) {
       console.error(`  WARN: could not re-clone: ${e.message}`);
       console.error(`  The DB row is restored but the on-disk clone is missing.`);
-      console.error(`  Try \`gbrain sync --source ${id}\` to recover, or remove + re-add.`);
+      console.error(`  Try \`modusbrain sync --source ${id}\` to recover, or remove + re-add.`);
     } else {
       throw e;
     }
@@ -610,7 +610,7 @@ async function runListArchived(engine: BrainEngine, args: string[]): Promise<voi
   console.log('───────────────────────────────');
   for (const a of archived) {
     const hours = Math.max(0, Math.round((a.expiresAt.getTime() - Date.now()) / (1000 * 60 * 60)));
-    console.log(`  ${a.id.padEnd(20)}  ${String(a.pageCount).padStart(6)} pages  expires in ${hours}h  (restore: gbrain sources restore ${a.id})`);
+    console.log(`  ${a.id.padEnd(20)}  ${String(a.pageCount).padStart(6)} pages  expires in ${hours}h  (restore: modusbrain sources restore ${a.id})`);
   }
 }
 
@@ -620,7 +620,7 @@ async function runRename(engine: BrainEngine, args: string[]): Promise<void> {
   const id = args[0];
   const newName = args[1];
   if (!id || !newName) {
-    console.error('Usage: gbrain sources rename <id> <new-display-name>');
+    console.error('Usage: modusbrain sources rename <id> <new-display-name>');
     process.exit(2);
   }
   const src = await fetchSource(engine, id);
@@ -637,7 +637,7 @@ async function runRename(engine: BrainEngine, args: string[]): Promise<void> {
 async function runDefault(engine: BrainEngine, args: string[]): Promise<void> {
   const id = args[0];
   if (!id) {
-    console.error('Usage: gbrain sources default <id>');
+    console.error('Usage: modusbrain sources default <id>');
     process.exit(2);
   }
   const src = await fetchSource(engine, id);
@@ -656,24 +656,24 @@ async function runDefault(engine: BrainEngine, args: string[]): Promise<void> {
 function runAttach(args: string[]): void {
   const id = args[0];
   if (!id) {
-    console.error('Usage: gbrain sources attach <id>');
+    console.error('Usage: modusbrain sources attach <id>');
     process.exit(2);
   }
   validateSourceId(id);
-  const dotfile = join(process.cwd(), '.gbrain-source');
+  const dotfile = join(process.cwd(), '.modusbrain-source');
   writeFileSync(dotfile, id + '\n', 'utf8');
-  console.log(`Attached ${process.cwd()} to source "${id}" via .gbrain-source.`);
+  console.log(`Attached ${process.cwd()} to source "${id}" via .modusbrain-source.`);
   console.log(`Commands run from this directory (or any subdirectory) will default to this source.`);
 }
 
 function runDetach(): void {
-  const dotfile = join(process.cwd(), '.gbrain-source');
+  const dotfile = join(process.cwd(), '.modusbrain-source');
   if (!existsSync(dotfile)) {
-    console.log(`No .gbrain-source file in ${process.cwd()}.`);
+    console.log(`No .modusbrain-source file in ${process.cwd()}.`);
     return;
   }
   unlinkSync(dotfile);
-  console.log(`Detached ${process.cwd()} (removed .gbrain-source).`);
+  console.log(`Detached ${process.cwd()} (removed .modusbrain-source).`);
 }
 
 // ── Subcommand: federate / unfederate ───────────────────────
@@ -681,7 +681,7 @@ function runDetach(): void {
 async function runFederate(engine: BrainEngine, args: string[], value: boolean): Promise<void> {
   const id = args[0];
   if (!id) {
-    console.error(`Usage: gbrain sources ${value ? 'federate' : 'unfederate'} <id>`);
+    console.error(`Usage: modusbrain sources ${value ? 'federate' : 'unfederate'} <id>`);
     process.exit(2);
   }
   const src = await fetchSource(engine, id);
@@ -719,7 +719,7 @@ async function runFederate(engine: BrainEngine, args: string[], value: boolean):
       const missing = m.total_chunks - m.embedded_chunks;
       console.log(`  → embed-backfill job ${sub.jobId} queued for missing ${missing} chunks.`);
     } else if (sub.status === 'cooldown') {
-      console.log(`  → embed-backfill skipped (cooldown). Manually trigger with: gbrain jobs submit embed-backfill --params '{"sourceId":"${id}"}'`);
+      console.log(`  → embed-backfill skipped (cooldown). Manually trigger with: modusbrain jobs submit embed-backfill --params '{"sourceId":"${id}"}'`);
     } else if (sub.status === 'spend_capped') {
       console.log(`  → embed-backfill skipped (24h spend cap $${sub.spendCapUsd} reached for this source).`);
     }
@@ -739,7 +739,7 @@ async function runStatus(engine: BrainEngine, args: string[]): Promise<void> {
     if (json) {
       console.log(JSON.stringify({ schema_version: 1, sources: [] }, null, 2));
     } else {
-      console.log('No sources registered. Use `gbrain sources add <id> --path <path>` first.');
+      console.log('No sources registered. Use `modusbrain sources add <id> --path <path>` first.');
     }
     return;
   }
@@ -749,7 +749,7 @@ async function runStatus(engine: BrainEngine, args: string[]): Promise<void> {
 
   // #1950: a source holding a live (non-TTL-expired) per-source sync lock is
   // actively syncing RIGHT NOW. Without this it printed "idle" while a sync
-  // proc was live (the bug reported). Read the SAME live-lock signal `gbrain
+  // proc was live (the bug reported). Read the SAME live-lock signal `modusbrain
   // doctor` uses, via the shared helper, so the two surfaces never disagree.
   const { liveSyncStatus } = await import('../core/db-lock.ts');
   const syncRunning = new Map<string, { holder_pid: number; holder_host: string }>();
@@ -804,13 +804,13 @@ async function runStatus(engine: BrainEngine, args: string[]): Promise<void> {
     if (!m.local_path) warns.push('no local_path');
     // #1950: don't cry "never synced" while a sync lock is live — it's syncing now.
     if (m.lag_seconds === null && !syncRunning.has(m.source_id)) {
-      warns.push(`never synced — run \`gbrain sync --source ${m.source_id}\``);
+      warns.push(`never synced — run \`modusbrain sync --source ${m.source_id}\``);
     }
     if (m.embed_coverage_pct < 95 && m.total_chunks > 100) {
-      warns.push(`${(100 - m.embed_coverage_pct).toFixed(1)}% un-embedded — run \`gbrain embed --stale --source ${m.source_id}\``);
+      warns.push(`${(100 - m.embed_coverage_pct).toFixed(1)}% un-embedded — run \`modusbrain embed --stale --source ${m.source_id}\``);
     }
     if (m.failed_jobs_24h >= 3) {
-      warns.push(`${m.failed_jobs_24h} failures in 24h — check \`gbrain jobs list --status failed\``);
+      warns.push(`${m.failed_jobs_24h} failures in 24h — check \`modusbrain jobs list --status failed\``);
     }
     if (warns.length > 0) {
       console.log(`  ⚠ ${m.source_id}: ${warns.join('; ')}`);
@@ -837,7 +837,7 @@ async function runWebhook(engine: BrainEngine, args: string[]): Promise<void> {
     case undefined:
     case '--help':
     case '-h':
-      console.log(`Usage: gbrain sources webhook <subcommand> <source-id> [options]
+      console.log(`Usage: modusbrain sources webhook <subcommand> <source-id> [options]
 
 Subcommands:
   set <id>    [--secret VAL] [--github-repo owner/name]   One-time reveal
@@ -854,7 +854,7 @@ Subcommands:
 async function runWebhookSet(engine: BrainEngine, args: string[]): Promise<void> {
   const id = args[0];
   if (!id) {
-    console.error('Usage: gbrain sources webhook set <id> [--secret VAL] [--github-repo owner/name]');
+    console.error('Usage: modusbrain sources webhook set <id> [--secret VAL] [--github-repo owner/name]');
     process.exit(2);
   }
   const src = await fetchSource(engine, id);
@@ -888,19 +888,19 @@ async function runWebhookSet(engine: BrainEngine, args: string[]): Promise<void>
   console.log(`  webhook_secret: ${secret}`);
   console.log('');
   console.log('--- Paste this into GitHub repo settings → Webhooks → Add webhook ---');
-  console.log('  Payload URL:  <your gbrain serve --http URL>/webhooks/github');
+  console.log('  Payload URL:  <your modusbrain serve --http URL>/webhooks/github');
   console.log('  Content type: application/json');
   console.log(`  Secret:       ${secret}`);
   console.log('  Events:       Just the push event');
   console.log('  Active:       checked');
   console.log('');
-  console.log('⚠ This secret is shown ONCE. Save it now; subsequent `gbrain sources webhook show` will NOT display it.');
+  console.log('⚠ This secret is shown ONCE. Save it now; subsequent `modusbrain sources webhook show` will NOT display it.');
 }
 
 async function runWebhookShow(engine: BrainEngine, args: string[]): Promise<void> {
   const id = args[0];
   if (!id) {
-    console.error('Usage: gbrain sources webhook show <id>');
+    console.error('Usage: modusbrain sources webhook show <id>');
     process.exit(2);
   }
   const src = await fetchSource(engine, id);
@@ -922,7 +922,7 @@ async function runWebhookShow(engine: BrainEngine, args: string[]): Promise<void
 async function runWebhookRotate(engine: BrainEngine, args: string[]): Promise<void> {
   const id = args[0];
   if (!id) {
-    console.error('Usage: gbrain sources webhook rotate <id>');
+    console.error('Usage: modusbrain sources webhook rotate <id>');
     process.exit(2);
   }
   const src = await fetchSource(engine, id);
@@ -947,7 +947,7 @@ async function runWebhookRotate(engine: BrainEngine, args: string[]): Promise<vo
 async function runWebhookClear(engine: BrainEngine, args: string[]): Promise<void> {
   const id = args[0];
   if (!id) {
-    console.error('Usage: gbrain sources webhook clear <id>');
+    console.error('Usage: modusbrain sources webhook clear <id>');
     process.exit(2);
   }
   const src = await fetchSource(engine, id);
@@ -969,7 +969,7 @@ async function runWebhookClear(engine: BrainEngine, args: string[]): Promise<voi
 async function runTrackedBranch(engine: BrainEngine, args: string[]): Promise<void> {
   const id = args[0];
   if (!id) {
-    console.error('Usage: gbrain sources tracked-branch <id> [--set <branch>] [--detect]');
+    console.error('Usage: modusbrain sources tracked-branch <id> [--set <branch>] [--detect]');
     process.exit(2);
   }
   const src = await fetchSource(engine, id);
@@ -1062,7 +1062,7 @@ async function runCurrent(engine: BrainEngine, args: string[]): Promise<void> {
 }
 
 /**
- * v0.41 — `gbrain sources audit <id>` dry-run scan.
+ * v0.41 — `modusbrain sources audit <id>` dry-run scan.
  *
  * Walks the source's `local_path` on disk, runs `assessContentSanity`
  * per `.md` file, and reports:
@@ -1085,14 +1085,14 @@ async function runAudit(engine: BrainEngine, args: string[]): Promise<void> {
   const includeWarns = args.includes('--include-warns');
 
   if (!sourceId) {
-    console.error('Usage: gbrain sources audit <source-id> [--json] [--include-warns]');
+    console.error('Usage: modusbrain sources audit <source-id> [--json] [--include-warns]');
     process.exit(2);
   }
 
   const { fetchSource } = await import('../core/sources-load.ts');
   const src = await fetchSource(engine, sourceId);
   if (!src) {
-    console.error(`Source not found: ${sourceId} (run \`gbrain sources list\` to see registered sources)`);
+    console.error(`Source not found: ${sourceId} (run \`modusbrain sources list\` to see registered sources)`);
     process.exit(1);
   }
   if (!src.local_path) {
@@ -1115,7 +1115,7 @@ async function runAudit(engine: BrainEngine, args: string[]): Promise<void> {
     process.exit(1);
   }
 
-  // Walk recursively. Mirror gbrain sync's descent rules so the file set
+  // Walk recursively. Mirror modusbrain sync's descent rules so the file set
   // we audit matches the file set that would actually be ingested.
   const files: string[] = [];
   function walk(dir: string): void {
@@ -1275,7 +1275,7 @@ async function runAudit(engine: BrainEngine, args: string[]): Promise<void> {
     console.log(
       `Facts backfill estimate: ${factsBackfillEstimate.pages} eligible page(s), ` +
       `~${factsBackfillEstimate.est_segments} segments, ~$${factsBackfillEstimate.est_cost_usd}. ` +
-      `Run: gbrain extract-conversation-facts --source-id ${sourceId} --max-cost-usd ${Math.max(factsBackfillEstimate.est_cost_usd, 1)}`,
+      `Run: modusbrain extract-conversation-facts --source-id ${sourceId} --max-cost-usd ${Math.max(factsBackfillEstimate.est_cost_usd, 1)}`,
     );
   }
   if (wouldHardBlock.length > 0) {
@@ -1351,7 +1351,7 @@ export async function runSources(engine: BrainEngine, args: string[]): Promise<v
 }
 
 function printHelp(): void {
-  console.log(`gbrain sources — manage multi-source brain configuration (v0.26.5)
+  console.log(`modusbrain sources — manage multi-source brain configuration (v0.26.5)
 
 Subcommands:
   add <id> --path <p> [--name <n>] [--federated|--no-federated]
@@ -1375,8 +1375,8 @@ Subcommands:
                                     With <id>: force-purge (requires --confirm-destructive).
   rename <id> <new-name>            Rename display name (id is immutable).
   default <id>                      Set the brain-level default source.
-  attach <id>                       Write .gbrain-source in CWD (like kubectl context).
-  detach                            Remove .gbrain-source from CWD.
+  attach <id>                       Write .modusbrain-source in CWD (like kubectl context).
+  detach                            Remove .modusbrain-source from CWD.
   current [--source <id>] [--json]  Echo the resolved source id + which tier
                                     won (flag/env/dotfile/local_path/
                                     brain_default/seed_default). Run this

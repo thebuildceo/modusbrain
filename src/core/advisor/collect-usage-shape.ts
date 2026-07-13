@@ -6,7 +6,7 @@
  * orphan pages (knowledge not connected), and a low composite brain_score.
  *
  * Perf note (eng-review): getHealth runs the orphan/dead-link scan — heavier
- * than getStats. The advisor calls it on explicit `gbrain advisor` / weekly
+ * than getStats. The advisor calls it on explicit `modusbrain advisor` / weekly
  * cron; the sync-cadence path uses getStats only (commands/advisor.ts /
  * the sync hook decide which collectors to run).
  */
@@ -35,7 +35,7 @@ export const collectUsageShape: AdvisorCollector = {
           severity: 'warn',
           title: `Only ${Math.round(health.embed_coverage * 100)}% of content is embedded — semantic search is degraded.`,
           detail: `${health.missing_embeddings} pages are missing embeddings. Backfill to restore full recall.`,
-          fix: { command_argv: ['gbrain', 'embed', '--all'] },
+          fix: { command_argv: ['modusbrain', 'embed', '--all'] },
           collector: 'usage-shape',
           ask_user: true,
         });
@@ -46,7 +46,7 @@ export const collectUsageShape: AdvisorCollector = {
           severity: 'info',
           title: `${health.orphan_pages} page${health.orphan_pages === 1 ? ' has' : 's have'} no links in or out.`,
           detail: 'Orphaned pages do not surface through graph traversal — connect or review them.',
-          fix: { command_argv: ['gbrain', 'orphans'] },
+          fix: { command_argv: ['modusbrain', 'orphans'] },
           collector: 'usage-shape',
           ask_user: true,
         });
@@ -56,7 +56,7 @@ export const collectUsageShape: AdvisorCollector = {
           id: 'dead_links',
           severity: 'info',
           title: `${health.dead_links} link${health.dead_links === 1 ? '' : 's'} point to a page that no longer exists.`,
-          fix: { command_argv: ['gbrain', 'doctor'] },
+          fix: { command_argv: ['modusbrain', 'doctor'] },
           collector: 'usage-shape',
           ask_user: true,
         });

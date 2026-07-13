@@ -2,7 +2,7 @@
 
 **Domain:** [modusbrain.com](https://modusbrain.com)  
 **Product:** ModusBrain — the company brain agents can safely execute against  
-**Engine:** Built on [GBrain](https://github.com/garrytan/gbrain) (MIT License)
+**Engine:** Built on [ModusBrain](https://github.com/garrytan/gbrain) (MIT License)
 
 This file is your single checklist for going public: copy, website structure, docs hosting, deployment, and user onboarding.
 
@@ -16,17 +16,17 @@ This file is your single checklist for going public: copy, website structure, do
 
 ### Elevator pitch (30 seconds)
 
-Most “company brain” tools stop at search and chat. ModusBrain compiles your policies, runbooks, and tribal knowledge into **approved operational skills** with version history, confidence scoring, human approval gates, conflict queues, and full action audit trails. Built on the open-source GBrain retrieval engine; extended for autonomous operations.
+Most “company brain” tools stop at search and chat. ModusBrain compiles your policies, runbooks, and tribal knowledge into **approved operational skills** with version history, confidence scoring, human approval gates, conflict queues, and full action audit trails. Built on the open-source ModusBrain retrieval engine; extended for autonomous operations.
 
 ### Honest attribution (footer + About page — required)
 
-> ModusBrain is built on GBrain, an open-source knowledge engine by Garry Tan (MIT License). We added the skill-compilation and safe-execution layer for company operations.
+> ModusBrain is built on ModusBrain, an open-source knowledge engine by Garry Tan (MIT License). We added the skill-compilation and safe-execution layer for company operations.
 
 
 
 ### Do NOT say
 
-- “We invented hybrid RAG / dream cycle / graph retrieval” (that’s GBrain)
+- “We invented hybrid RAG / dream cycle / graph retrieval” (that’s ModusBrain)
 - Garry Tan’s personal OpenClaw/Hermes deployment stories as your own
 
 ---
@@ -49,7 +49,7 @@ Most “company brain” tools stop at search and chat. ModusBrain compiles your
 | Pricing      | `/pricing`                       | Self-hosted free (OSS) + cloud/enterprise tiers |
 | Docs         | `docs.modusbrain.com`            | Mintlify (see §4)                               |
 | GitHub       | `github.com/your-org/modusbrain` | Source + issues                                 |
-| About        | `/about`                         | Team, GBrain attribution, MIT license           |
+| About        | `/about`                         | Team, ModusBrain attribution, MIT license           |
 | Blog         | `/blog`                          | Launch posts, customer stories                  |
 | Contact      | `/contact`                       | Demo request, enterprise sales                  |
 
@@ -74,7 +74,7 @@ ModusBrain compiles your policies and runbooks into versioned skills with confid
 3. **Prove** — Action audit trail: which skill, which version, what happened.
 
 **Trust bar:**  
-Built on GBrain (MIT) · Postgres-native · Self-hostable · SOC2-ready audit exports
+Built on ModusBrain (MIT) · Postgres-native · Self-hostable · SOC2-ready audit exports
 
 **Social proof placeholders (fill when ready):**  
 “Used by [design partner] for refund handling” · “X skills compiled · Y agent actions audited”
@@ -174,8 +174,8 @@ mint dev
 | `quickstart.md`        | 5-minute: init → compile → approve → execute |
 | `install.md`           | Bun install, PGLite vs Supabase              |
 | `opskill-workflow.md`  | Full refund-handling walkthrough             |
-| `env-vars.md`          | MODUSBRAIN_* with GBRAIN_* legacy aliases    |
-| `rebrand-migration.md` | ~/.gbrain → ~/.modusbrain migration          |
+| `env-vars.md`          | MODUSBRAIN_* with MODUSBRAIN_* legacy aliases    |
+| `rebrand-migration.md` | ~/.modusbrain → ~/.modusbrain migration          |
 
 
 ---
@@ -187,12 +187,12 @@ mint dev
 
 | Asset           | Where                          | Notes                                      |
 | --------------- | ------------------------------ | ------------------------------------------ |
-| Source code     | GitHub `your-org/modusbrain`   | Public repo; keep LICENSE + GBrain NOTICE  |
+| Source code     | GitHub `your-org/modusbrain`   | Public repo; keep LICENSE + ModusBrain NOTICE  |
 | Website         | Vercel or Cloudflare Pages     | Connect to `website/` Next.js or Astro app |
 | Docs            | Mintlify → docs.modusbrain.com | Auto-deploy on push to `main`              |
 | npm/bun package | `bun publish` as `modusbrain`  | package.json already named modusbrain      |
 | Binary releases | GitHub Releases                | `bun run build` → upload `bin/modusbrain`  |
-| Docker          | `ghcr.io/your-org/modusbrain`  | Optional; Dockerfile from gbrain base      |
+| Docker          | `ghcr.io/your-org/modusbrain`  | Optional; Dockerfile from modusbrain base      |
 | Demo brain      | Supabase + hosted MCP          | Enterprise tier later                      |
 
 
@@ -249,7 +249,7 @@ mint dev
 # Install
 curl -fsSL https://bun.sh/install | bash
 bun install -g github.com/your-org/modusbrain
-# Legacy alias still works: `gbrain` → same binary
+# Legacy alias still works: `modusbrain` → same binary
 
 # Initialize
 modusbrain init
@@ -264,8 +264,8 @@ modusbrain opskill execute refund-handling \
 modusbrain opskill audit --json
 ```
 
-**Config directory:** `~/.modusbrain` (falls back to `~/.gbrain` for existing installs)  
-**Env vars:** `MODUSBRAIN_`* preferred; `GBRAIN_*` still honored
+**Config directory:** `~/.modusbrain` (falls back to `~/.modusbrain` for existing installs)  
+**Env vars:** `MODUSBRAIN_`* preferred; `MODUSBRAIN_*` still honored
 
 ---
 
@@ -274,7 +274,7 @@ modusbrain opskill audit --json
 ## 8. SEO & metadata
 
 **Title tag:** ModusBrain — Company brain for safe AI agent execution  
-**Meta description:** Compile company knowledge into versioned operational skills. Confidence gating, approval workflows, and audit trails for autonomous agents. Built on GBrain.  
+**Meta description:** Compile company knowledge into versioned operational skills. Confidence gating, approval workflows, and audit trails for autonomous agents. Built on ModusBrain.  
 **Keywords:** company brain, AI agents, operational skills, knowledge base, RAG, YC RFS, agent safety, audit trail
 
 **Open Graph image:** Dashboard mock showing skill versions + audit log (1200×630)
@@ -294,7 +294,7 @@ modusbrain opskill audit --json
 - [ ] GitHub Release with compiled binaries (macOS, Linux)
 - [ ] Write launch blog post (Product Hunt / HN / LinkedIn)
 - [ ] One design partner case study (refund handling)
-- [ ] Add GBrain MIT attribution to LICENSE + NOTICE file
+- [ ] Add ModusBrain MIT attribution to LICENSE + NOTICE file
 - [ ] Run `bun test test/operational-skills.test.ts` before every release
 
 ---
@@ -309,7 +309,7 @@ modusbrain opskill audit --json
 ModusBrain
 Copyright (c) 2026 [Your Company Name]
 
-This product includes software from GBrain (https://github.com/garrytan/gbrain)
+This product includes software from ModusBrain (https://github.com/garrytan/gbrain)
 Copyright (c) Garry Tan
 Licensed under the MIT License.
 ```
@@ -355,10 +355,10 @@ Keep the existing MIT LICENSE file; add NOTICE for attribution chain.
 
 | Old              | New                                |
 | ---------------- | ---------------------------------- |
-| CLI `gbrain`     | `modusbrain` (`gbrain` alias kept) |
-| `~/.gbrain`      | `~/.modusbrain` (auto-fallback)    |
-| `GBRAIN_*` env   | `MODUSBRAIN_*` (+ legacy fallback) |
-| `.gbrain-source` | `.modusbrain-source` (+ legacy)    |
+| CLI `modusbrain`     | `modusbrain` (`modusbrain` alias kept) |
+| `~/.modusbrain`      | `~/.modusbrain` (auto-fallback)    |
+| `MODUSBRAIN_*` env   | `MODUSBRAIN_*` (+ legacy fallback) |
+| `.modusbrain-source` | `.modusbrain-source` (+ legacy)    |
 | package name     | `modusbrain`                       |
 | Branding module  | `src/core/branding.ts`             |
 

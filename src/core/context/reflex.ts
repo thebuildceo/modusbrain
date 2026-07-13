@@ -17,7 +17,7 @@
 
 import { dirname } from 'node:path';
 import { mkdirSync, appendFileSync } from 'node:fs';
-import { gbrainPath, loadConfig, type GBrainConfig } from '../config.ts';
+import { modusbrainPath, loadConfig, type ModusBrainConfig } from '../config.ts';
 import type { BrainEngine } from '../engine.ts';
 import {
   extractCandidates,
@@ -77,15 +77,15 @@ export interface ReflexParams {
 /** Default extraction window (turns). 1 = legacy current-turn-only. */
 export const DEFAULT_WINDOW_TURNS = 4;
 
-export function windowTurnCount(cfg: GBrainConfig | null): number {
+export function windowTurnCount(cfg: ModusBrainConfig | null): number {
   // Env plane is read DIRECTLY here (mirroring reflexEnabled's direct
   // process.env read), not just via loadConfig's env→config mapping. When
   // there's no config file AND no DATABASE_URL, loadConfig() returns null and
   // drops that mapping entirely — so without this, the documented
-  // GBRAIN_RETRIEVAL_REFLEX_WINDOW_TURNS escape hatch would be silently
+  // MODUSBRAIN_RETRIEVAL_REFLEX_WINDOW_TURNS escape hatch would be silently
   // ignored and the window would fall back to the default of 4 (a real
   // config-less-environment bug, e.g. a clean CI shard with no brain).
-  const env = process.env.GBRAIN_RETRIEVAL_REFLEX_WINDOW_TURNS;
+  const env = process.env.MODUSBRAIN_RETRIEVAL_REFLEX_WINDOW_TURNS;
   if (env != null && env !== '') {
     const e = Number(env);
     if (Number.isFinite(e) && e >= 1) return Math.floor(e);
@@ -97,17 +97,17 @@ export function windowTurnCount(cfg: GBrainConfig | null): number {
 
 const TIMEOUT_MS = 1500; // generous per-turn ceiling; the work is usually <100ms
 function heartbeatPath(): string {
-  return gbrainPath('integrations', 'retrieval-reflex', 'heartbeat.jsonl');
+  return modusbrainPath('integrations', 'retrieval-reflex', 'heartbeat.jsonl');
 }
 
 /** File-plane + env gate. Default ON. DB-plane does NOT gate (assemble() is sync). */
-export function reflexEnabled(cfg: GBrainConfig | null): boolean {
-  const env = process.env.GBRAIN_RETRIEVAL_REFLEX;
+export function reflexEnabled(cfg: ModusBrainConfig | null): boolean {
+  const env = process.env.MODUSBRAIN_RETRIEVAL_REFLEX;
   if (env != null && env !== '') return !(env === 'false' || env === '0');
   return cfg?.retrieval_reflex !== false;
 }
 
-function maxPointers(cfg: GBrainConfig | null): number {
+function maxPointers(cfg: ModusBrainConfig | null): number {
   const n = cfg?.retrieval_reflex_max_pointers;
   return typeof n === 'number' && n > 0 ? n : DEFAULT_MAX_POINTERS;
 }
@@ -161,7 +161,7 @@ export async function buildReflexAddition(params: ReflexParams): Promise<string 
 
 async function resolve(
   params: ReflexParams,
-  cfg: GBrainConfig | null,
+  cfg: ModusBrainConfig | null,
   candidates: EntityCandidate[],
   opts: ResolveEntitiesOpts,
 ): Promise<PointerBlock | null> {
@@ -187,7 +187,7 @@ async function resolve(
   return null;
 }
 
-function isPostgres(cfg: GBrainConfig | null): boolean {
+function isPostgres(cfg: ModusBrainConfig | null): boolean {
   if (cfg?.engine === 'postgres') return true;
   // engine unset but a database_url present → postgres (createEngine default).
   return !cfg?.engine && !!cfg?.database_url;
@@ -200,7 +200,7 @@ let _pgEngine: BrainEngine | null = null;
 let _pgPending: Promise<BrainEngine | null> | null = null;
 let _pgFailedUntil = 0; // cooldown so a transient connect failure doesn't storm
 
-async function getPostgresEngine(cfg: GBrainConfig | null): Promise<BrainEngine | null> {
+async function getPostgresEngine(cfg: ModusBrainConfig | null): Promise<BrainEngine | null> {
   if (_pgEngine) return _pgEngine;
   if (Date.now() < _pgFailedUntil) return null;
   if (_pgPending) return _pgPending;
@@ -250,7 +250,7 @@ export async function disposeReflex(): Promise<void> {
   }
 }
 
-function writeHeartbeat(cfg: GBrainConfig | null, count: number): void {
+function writeHeartbeat(cfg: ModusBrainConfig | null, count: number): void {
   try {
     const path = heartbeatPath();
     mkdirSync(dirname(path), { recursive: true });

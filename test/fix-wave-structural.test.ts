@@ -104,7 +104,7 @@ describe('v0.41.37.0 #1605 — v0.11.0 phaseASchema routes in-process for ALL en
     // The eng.initSchema() call moved into src/commands/migrations/in-process.ts.
     const src = readFileSync('src/commands/migrations/v0_11_0.ts', 'utf8');
     expect(src).toContain('runMigrateOnlyCore()');
-    expect(src).not.toContain("execSync('gbrain init --migrate-only'");
+    expect(src).not.toContain("execSync('modusbrain init --migrate-only'");
     expect(src).toMatch(/await\s+phaseASchema/);
   });
 
@@ -224,7 +224,7 @@ describe('#2084 — cli.ts owns process-exit teardown via finishCliTeardown', ()
     expect(src).toMatch(/preservingProcessExitCode\(\(\)\s*=>\s*\n?\s*PGlite\.create/);
     // close stays UNWRAPPED by design: its status write is baseline behavior
     // test runners depend on; the CLI's verdict is immune because it lives in
-    // the gbrain-owned channel, never read back from process.exitCode.
+    // the modusbrain-owned channel, never read back from process.exitCode.
     const helper = readFileSync('src/core/cli-force-exit.ts', 'utf8');
     expect(helper).toMatch(/let cliVerdict: number \| null = null/);
     expect(helper).toMatch(/return cliVerdict \?\? 0/);

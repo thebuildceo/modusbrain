@@ -2,8 +2,8 @@
  * Shared supervisor PID-file read + liveness check (issue #1815, Q4).
  *
  * The `existsSync → readFileSync → parseInt → process.kill(pid,0)` block was
- * copy-pasted across `gbrain jobs supervisor status` and `gbrain doctor`; the
- * #1815 niceness work would have added a third copy in `gbrain jobs stats`.
+ * copy-pasted across `modusbrain jobs supervisor status` and `modusbrain doctor`; the
+ * #1815 niceness work would have added a third copy in `modusbrain jobs stats`.
  * Extracted here so all three share one regression point.
  */
 

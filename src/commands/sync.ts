@@ -126,7 +126,7 @@ const SYNC_CHECKPOINT_SECONDS_DEFAULT = 10;
 const SYNC_MAX_CHECKPOINT_FAILURES_DEFAULT = 3;
 
 function resolveSyncCheckpointEvery(): number {
-  const raw = process.env.GBRAIN_SYNC_CHECKPOINT_EVERY;
+  const raw = process.env.MODUSBRAIN_SYNC_CHECKPOINT_EVERY;
   if (!raw) return SYNC_CHECKPOINT_EVERY_DEFAULT;
   const n = Number(raw);
   return Number.isInteger(n) && n > 0 ? n : SYNC_CHECKPOINT_EVERY_DEFAULT;
@@ -138,7 +138,7 @@ function resolveSyncCheckpointEvery(): number {
  * import work even when `checkpointEvery` files haven't accumulated yet.
  */
 function resolveSyncCheckpointSeconds(): number {
-  const raw = process.env.GBRAIN_SYNC_CHECKPOINT_SECONDS;
+  const raw = process.env.MODUSBRAIN_SYNC_CHECKPOINT_SECONDS;
   if (!raw) return SYNC_CHECKPOINT_SECONDS_DEFAULT;
   const n = Number(raw);
   return Number.isInteger(n) && n > 0 ? n : SYNC_CHECKPOINT_SECONDS_DEFAULT;
@@ -150,7 +150,7 @@ function resolveSyncCheckpointSeconds(): number {
  * sync aborts rather than burning CPU importing work it can never bank.
  */
 function resolveSyncMaxCheckpointFailures(): number {
-  const raw = process.env.GBRAIN_SYNC_MAX_CHECKPOINT_FAILURES;
+  const raw = process.env.MODUSBRAIN_SYNC_MAX_CHECKPOINT_FAILURES;
   if (!raw) return SYNC_MAX_CHECKPOINT_FAILURES_DEFAULT;
   const n = Number(raw);
   return Number.isInteger(n) && n > 0 ? n : SYNC_MAX_CHECKPOINT_FAILURES_DEFAULT;
@@ -166,7 +166,7 @@ const SYNC_YIELD_EVERY_DEFAULT = 64;
  * lock (the #1794 thrash). A `setImmediate` every N files lets the timer fire.
  */
 function resolveSyncYieldEvery(): number {
-  const raw = process.env.GBRAIN_SYNC_YIELD_EVERY;
+  const raw = process.env.MODUSBRAIN_SYNC_YIELD_EVERY;
   if (!raw) return SYNC_YIELD_EVERY_DEFAULT;
   const n = Number(raw);
   return Number.isInteger(n) && n > 0 ? n : SYNC_YIELD_EVERY_DEFAULT;
@@ -509,8 +509,8 @@ async function promptYesNo(question: string): Promise<boolean> {
 // spend-control surface is discoverable at the moment of need (humans + agents),
 // not only after reading source. Closes the issue's "takes archaeology" complaint.
 const SPEND_HINT =
-  'widen: gbrain config set sync.cost_gate_min_usd 5 | ' +
-  'never gate: gbrain config set spend.posture tokenmax | ' +
+  'widen: modusbrain config set sync.cost_gate_min_usd 5 | ' +
+  'never gate: modusbrain config set spend.posture tokenmax | ' +
   'docs: docs/operations/spend-controls.md';
 
 /** Honest token label — delta vs full-tree ceiling, with the ceiling reasons. */
@@ -634,7 +634,7 @@ async function runInlineCostGate(
     ? ` (includes ~${staleChars.toLocaleString()} stale-backlog chars swept by --full)`
     : '';
   const staleNote = !full && staleChars > 0
-    ? ` (plus ~${staleChars.toLocaleString()} stale-backlog chars pending \`gbrain embed --stale\`)`
+    ? ` (plus ~${staleChars.toLocaleString()} stale-backlog chars pending \`modusbrain embed --stale\`)`
     : '';
   const previewMsg =
     `${label} preview (inline embed): ${inline.changedSources} changed source(s), ` +
@@ -671,7 +671,7 @@ async function runInlineCostGate(
     const sm = await engine.getConfig('search.mode');
     if (typeof sm === 'string' && sm.trim().toLowerCase() === 'tokenmax') {
       searchModeHint =
-        ` (search.mode=tokenmax detected — \`gbrain config set spend.posture tokenmax\` ` +
+        ` (search.mode=tokenmax detected — \`modusbrain config set spend.posture tokenmax\` ` +
         `makes cost gates informational)`;
     }
   } catch {
@@ -698,7 +698,7 @@ async function runInlineCostGate(
       console.log(
         `${previewMsg} Exceeds floor $${formatUsdLimit(floorUsd)} in a non-interactive ` +
         `session — importing now, deferring embeds to capped backfill jobs. ` +
-        `Drain: run the jobs worker or \`gbrain embed --stale\`. Pass --yes to embed inline.\n${SPEND_HINT}`,
+        `Drain: run the jobs worker or \`modusbrain embed --stale\`. Pass --yes to embed inline.\n${SPEND_HINT}`,
       );
     }
     return { action: 'proceed', autoDeferEmbeds: true };
@@ -756,8 +756,8 @@ export interface SyncOpts {
    */
   concurrency?: number;
   /**
-   * Internal: skip acquiring the gbrain-sync DB lock. Set by the cycle
-   * handler (cycle.ts) which already holds gbrain-cycle and therefore
+   * Internal: skip acquiring the modusbrain-sync DB lock. Set by the cycle
+   * handler (cycle.ts) which already holds modusbrain-cycle and therefore
    * already serializes against other cycle runs. CLI sync, jobs handler,
    * and any external caller leave this undefined so they take the lock.
    *
@@ -770,17 +770,17 @@ export interface SyncOpts {
    * callers that already know which lock id they want.
    *
    * Defaults to:
-   *   - `gbrain-sync:<sourceId>` when `opts.sourceId` is set
+   *   - `modusbrain-sync:<sourceId>` when `opts.sourceId` is set
    *     (multi-source / federated brains; the per-source invariant)
-   *   - `gbrain-sync` (the legacy global lock) when `sourceId` is unset
+   *   - `modusbrain-sync` (the legacy global lock) when `sourceId` is unset
    *     (single-default-source brains; preserves bit-for-bit behavior
    *      for installs that never set up multiple sources)
    *
    * Why source-id keyed by default (v0.40.3.0):
    *   PR #1314 originally only changed the lock id inside the parallel
    *   `sync --all` fan-out. That introduced a worse race than the global
-   *   lock fixes — `gbrain sync --all` (per-source lock) running
-   *   concurrently with `gbrain sync --source foo` (global lock) would
+   *   lock fixes — `modusbrain sync --all` (per-source lock) running
+   *   concurrently with `modusbrain sync --source foo` (global lock) would
    *   both write source foo simultaneously. The fix: every source-scoped
    *   sync (CLI, --all fan-out, cycle, jobs handler) defaults to the
    *   per-source lock. Same source = same lock id, always.
@@ -1040,12 +1040,12 @@ async function writeChunkerVersion(
 }
 
 /**
- * v0.40 Federated Sync v2: `gbrain sync trigger --source <id> [--priority high|normal|low]`
+ * v0.40 Federated Sync v2: `modusbrain sync trigger --source <id> [--priority high|normal|low]`
  *
  * Push-trigger entry point. Wraps `queue.add('sync', ...)` with priority -10
  * (above autopilot's 0) so push-triggered syncs preempt scheduled ones.
  * Use cases: GitHub webhook handler (POST /webhooks/github), CLI nudge after
- * a manual git pull, scripted dispatch from `gbrain sources federate`.
+ * a manual git pull, scripted dispatch from `modusbrain sources federate`.
  *
  * Sets `auto_embed_backfill: true` so the extended sync handler (T6/T7)
  * auto-enqueues an embed-backfill job after the sync settles.
@@ -1054,7 +1054,7 @@ async function writeChunkerVersion(
  */
 export async function runSyncTrigger(engine: BrainEngine, args: string[]): Promise<void> {
   if (args.includes('--help') || args.includes('-h')) {
-    console.log(`Usage: gbrain sync trigger --source <id> [--priority high|normal|low]
+    console.log(`Usage: modusbrain sync trigger --source <id> [--priority high|normal|low]
 
 Queue a push-triggered sync job for one source. Prints the resulting job id
 on stdout. The autopilot worker picks it up and runs performSync against the
@@ -1062,13 +1062,13 @@ named source; if the sync added/modified pages, an embed-backfill job is
 auto-enqueued (subject to D6 budget cap + D19 source-level cooldown).
 
 Use cases:
-  - GitHub webhook → 'gbrain sync trigger --source <repo>'
+  - GitHub webhook → 'modusbrain sync trigger --source <repo>'
   - Manual nudge after 'git pull' inside a federated source
   - Programmatic triggers from CI / shell automation
 
 See also:
-  gbrain sources webhook set <id>   Set up GitHub-signed push webhook
-  gbrain sources status             Per-source sync + embed coverage
+  modusbrain sources webhook set <id>   Set up GitHub-signed push webhook
+  modusbrain sources status             Per-source sync + embed coverage
 `);
     return;
   }
@@ -1076,7 +1076,7 @@ See also:
   const sourceIdArg = args.find((a, i) => args[i - 1] === '--source') ?? null;
   if (!sourceIdArg) {
     console.error('Error: --source <id> is required');
-    console.error("Usage: gbrain sync trigger --source <id> [--priority high|normal|low]");
+    console.error("Usage: modusbrain sync trigger --source <id> [--priority high|normal|low]");
     process.exit(2);
   }
 
@@ -1092,7 +1092,7 @@ See also:
   const { fetchSource } = await import('../core/sources-load.ts');
   const source = await fetchSource(engine, sourceIdArg);
   if (!source) {
-    console.error(`Source "${sourceIdArg}" not found. List with: gbrain sources list`);
+    console.error(`Source "${sourceIdArg}" not found. List with: modusbrain sources list`);
     process.exit(1);
   }
 
@@ -1149,7 +1149,7 @@ export async function performSync(engine: BrainEngine, opts: SyncOpts): Promise<
   // the lock and race on the final commit + bookmark write.
   //
   // skipLock is reserved for callers that already serialize via another
-  // mechanism (e.g. cycle.ts holds gbrain-cycle for the broader scope).
+  // mechanism (e.g. cycle.ts holds modusbrain-cycle for the broader scope).
   if (opts.skipLock) {
     return await performSyncInner(engine, opts);
   }
@@ -1157,7 +1157,7 @@ export async function performSync(engine: BrainEngine, opts: SyncOpts): Promise<
   const lockKey = opts.lockId ?? syncLockId(opts.sourceId ?? 'default');
 
   // v0.42.x (#1794): ALL non-skipLock syncs use the TTL-refreshing lock — the
-  // bare `gbrain sync` path (no --source/--lockId) included. The pre-v0.42 code
+  // bare `modusbrain sync` path (no --source/--lockId) included. The pre-v0.42 code
   // gave that path a NON-refreshing tryAcquireDbLock, so a long hand-run sync
   // (exactly what you'd run during an incident on the 204K brain) could have its
   // lock TTL lapse and be stolen mid-run. withRefreshingLock keeps the heartbeat
@@ -1188,14 +1188,14 @@ async function formatLockBusyMessage(engine: BrainEngine, lockKey: string): Prom
   if (!snap) {
     return (
       `Another sync is in progress (lock ${lockKey} held). ` +
-      `Wait for it to finish, or run 'gbrain doctor' if it has been more than 30 minutes.`
+      `Wait for it to finish, or run 'modusbrain doctor' if it has been more than 30 minutes.`
     );
   }
 
   const ageHuman = formatAgeHuman(snap.age_ms);
-  const breakHint = lockKey.startsWith('gbrain-sync:')
-    ? `gbrain sync --break-lock --source ${lockKey.slice('gbrain-sync:'.length)}`
-    : `gbrain sync --break-lock`;
+  const breakHint = lockKey.startsWith('modusbrain-sync:')
+    ? `modusbrain sync --break-lock --source ${lockKey.slice('modusbrain-sync:'.length)}`
+    : `modusbrain sync --break-lock`;
   const ttlNote = snap.ttl_expired ? ' [TTL expired]' : '';
   return (
     `Another sync is in progress (lock ${lockKey} held by pid ${snap.holder_pid} on ${snap.holder_host}, ` +
@@ -1207,7 +1207,7 @@ async function formatLockBusyMessage(engine: BrainEngine, lockKey: string): Prom
 }
 
 /**
- * v0.41.6.0 D3: `gbrain sync --break-lock` / `--force-break-lock` worker.
+ * v0.41.6.0 D3: `modusbrain sync --break-lock` / `--force-break-lock` worker.
  * Returns the process exit code (0 = lock cleared or absent; 1 = refused).
  *
  * Safe path (`force=false`): refuses unless the holder is on this host
@@ -1255,7 +1255,7 @@ export async function runBreakLock(
       const wedgeHint =
         `No lock is held on ${lockKey} — nothing to break. If a sync still ` +
         `appears wedged, the cause is not a held lock; inspect checkpoint/resume ` +
-        `state with \`gbrain sync --source ${sourceId}\` or \`gbrain doctor\`.`;
+        `state with \`modusbrain sync --source ${sourceId}\` or \`modusbrain doctor\`.`;
       if (opts.json) {
         console.log(JSON.stringify({ status: 'absent', lock: lockKey, source_id: sourceId, wedge_hint: wedgeHint }));
       } else {
@@ -1312,7 +1312,7 @@ export async function runBreakLock(
       // Distinguish the two cases for the operator.
       if (snap.last_refreshed_at === null) {
         console.error(`Lock ${lockKey} has NULL last_refreshed_at (pre-v98 brain or migration window).`);
-        console.error('Run `gbrain apply-migrations --yes` to land v98, OR use --force-break-lock if you know the holder is dead.');
+        console.error('Run `modusbrain apply-migrations --yes` to land v98, OR use --force-break-lock if you know the holder is dead.');
       } else {
         const ageStr = snap.ms_since_last_refresh != null ? formatAgeHuman(snap.ms_since_last_refresh) : 'unknown';
         console.error(`Refusing to break lock ${lockKey}: last refresh was ${ageStr} ago, within --max-age=${opts.maxAgeSeconds}s window.`);
@@ -1333,7 +1333,7 @@ export async function runBreakLock(
       }));
     } else if (deleted) {
       console.log(`Force-broke lock ${lockKey} (was held by pid ${snap.holder_pid} on ${snap.holder_host}, age ${formatAgeHuman(snap.age_ms)}).`);
-      console.log('WARNING: the holder may still be writing. Verify with `gbrain doctor` before re-running.');
+      console.log('WARNING: the holder may still be writing. Verify with `modusbrain doctor` before re-running.');
     } else {
       console.log(`Lock ${lockKey} was already cleared by another process between our check and DELETE (race-safe).`);
     }
@@ -1464,21 +1464,21 @@ function buildPartialResult(opts: {
 async function performSyncInner(engine: BrainEngine, opts: SyncOpts): Promise<SyncResult> {
   // v0.41.8.0 (D9 / #1342): phase breadcrumbs. The #1342 reporter saw
   // ZERO stderr output before their sync hang, which made the bug
-  // impossible to triage. Mirror the existing `[gbrain phase] sync.git_pull`
+  // impossible to triage. Mirror the existing `[modusbrain phase] sync.git_pull`
   // pattern at the major phase boundaries so the next #1342-shaped
   // report names WHICH phase spun. Doesn't fix #1342 but converts
   // "hung with no output" into actionable diagnostic data.
-  serr(`[gbrain phase] sync.resolve_repo`);
+  serr(`[modusbrain phase] sync.resolve_repo`);
   // Resolve repo path
   const repoPath = opts.repoPath || await readSyncAnchor(engine, opts.sourceId, 'repo_path');
   if (!repoPath) {
     const hint = opts.sourceId
-      ? `Source "${opts.sourceId}" has no local_path. Run: gbrain sources add ${opts.sourceId} --path <path>`
-      : `No repo path specified. Use --repo or run gbrain init with --repo first.`;
+      ? `Source "${opts.sourceId}" has no local_path. Run: modusbrain sources add ${opts.sourceId} --path <path>`
+      : `No repo path specified. Use --repo or run modusbrain init with --repo first.`;
     throw new Error(hint);
   }
 
-  serr(`[gbrain phase] sync.load_active_pack`);
+  serr(`[modusbrain phase] sync.load_active_pack`);
   // v0.39 T1.5: load active pack ONCE at sync entry; pass to every per-file
   // importFile call below. Codex perf finding #7: per-file loadActivePack adds
   // disk/YAML/hash overhead × thousands of files. Best-effort: pack load
@@ -1510,7 +1510,7 @@ async function performSyncInner(engine: BrainEngine, opts: SyncOpts): Promise<Sy
   // we recover from missing/no-git/not-a-dir by re-cloning, refuse on
   // url-drift or corruption with structured hints.
   if (opts.sourceId) {
-    serr(`[gbrain phase] sync.validate_repo_state`);
+    serr(`[modusbrain phase] sync.validate_repo_state`);
     const { validateRepoState } = await import('../core/git-remote.ts');
     const { recloneIfMissing, isOwnedClone, unownedHint } = await import(
       '../core/sources-ops.ts'
@@ -1540,13 +1540,13 @@ async function performSyncInner(engine: BrainEngine, opts: SyncOpts): Promise<Sy
         case 'missing':
         case 'no-git':
         case 'not-a-dir':
-          // #1881: only re-clone a clone gbrain owns. An unowned local_path
+          // #1881: only re-clone a clone modusbrain owns. An unowned local_path
           // (the user's working tree) is refused loudly, never deleted.
           if (!isOwnedClone(ownSrc)) {
             throw new Error(unownedHint(ownSrc, state));
           }
           serr(
-            `[gbrain] auto-recovery: re-cloning "${opts.sourceId}" (clone state: ${state}).`,
+            `[modusbrain] auto-recovery: re-cloning "${opts.sourceId}" (clone state: ${state}).`,
           );
           await recloneIfMissing(engine, opts.sourceId);
           break;
@@ -1554,14 +1554,14 @@ async function performSyncInner(engine: BrainEngine, opts: SyncOpts): Promise<Sy
           throw new Error(
             `Source "${opts.sourceId}" clone at ${repoPath} is corrupted ` +
               `(\`git remote get-url origin\` failed). Run: ` +
-              `gbrain sources remove ${opts.sourceId} --confirm-destructive && ` +
-              `gbrain sources add ${opts.sourceId} --url ${remoteUrl}`,
+              `modusbrain sources remove ${opts.sourceId} --confirm-destructive && ` +
+              `modusbrain sources add ${opts.sourceId} --url ${remoteUrl}`,
           );
         case 'url-drift':
           throw new Error(
             `Source "${opts.sourceId}" clone at ${repoPath} has a remote ` +
               `that differs from config.remote_url=${remoteUrl}. ` +
-              `Re-clone with: gbrain sources rebase-clone ${opts.sourceId} ` +
+              `Re-clone with: modusbrain sources rebase-clone ${opts.sourceId} ` +
               `(if available, else: sources remove + sources add).`,
           );
       }
@@ -1570,10 +1570,10 @@ async function performSyncInner(engine: BrainEngine, opts: SyncOpts): Promise<Sy
 
   // Validate git repo
   if (!existsSync(join(repoPath, '.git'))) {
-    throw new Error(`Not a git repository: ${repoPath}. GBrain sync requires a git-initialized repo.`);
+    throw new Error(`Not a git repository: ${repoPath}. ModusBrain sync requires a git-initialized repo.`);
   }
 
-  serr(`[gbrain phase] sync.detect_head`);
+  serr(`[modusbrain phase] sync.detect_head`);
   // Detect detached HEAD up front so the working-tree fallback fires for both
   // the default sync and `--no-pull` callers. Only the actual git pull is
   // gated on opts.noPull.
@@ -1619,7 +1619,7 @@ async function performSyncInner(engine: BrainEngine, opts: SyncOpts): Promise<Sy
 
   if (!opts.noPull && !detachedHead && originRemotePresent) {
     const _t0 = Date.now();
-    serr(`[gbrain phase] sync.git_pull start`);
+    serr(`[modusbrain phase] sync.git_pull start`);
     try {
       const { pullRepo } = await import('../core/git-remote.ts');
       // v0.41.13.0 (T3 / D-V4-mech-7): if the operator set --timeout,
@@ -1629,10 +1629,10 @@ async function performSyncInner(engine: BrainEngine, opts: SyncOpts): Promise<Sy
       // timeout (ETIMEDOUT / SIGTERM on err.cause) from ordinary pull
       // failure.
       pullRepo(repoPath);
-      serr(`[gbrain phase] sync.git_pull done ${Date.now() - _t0}ms`);
+      serr(`[modusbrain phase] sync.git_pull done ${Date.now() - _t0}ms`);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
-      serr(`[gbrain phase] sync.git_pull error ${Date.now() - _t0}ms (${msg.slice(0, 80)})`);
+      serr(`[modusbrain phase] sync.git_pull error ${Date.now() - _t0}ms (${msg.slice(0, 80)})`);
       // v0.41.13.0 (T3 / D-V4-mech-7): pullRepo wraps execFileSync errors
       // in GitOperationError, so `error.code === 'ETIMEDOUT'` and
       // `error.signal === 'SIGTERM'` live on `.cause`, NOT on the top-
@@ -1868,7 +1868,7 @@ async function performSyncInner(engine: BrainEngine, opts: SyncOpts): Promise<Sy
   // `index.md`, `README.md` — files that fail `isSyncable` precisely
   // because they're metafiles by convention, not because the user
   // "removed" them from the strategy. infiniteGameExp's domain `log.md`
-  // pages had been indexed by an older gbrain version (or via direct
+  // pages had been indexed by an older modusbrain version (or via direct
   // put_page) and were silently dropped on every subsequent sync. The
   // fix uses `unsyncableReason` (factored from `isSyncable` so they
   // cannot drift) to skip the delete when the reason is `'metafile'`.
@@ -1877,8 +1877,8 @@ async function performSyncInner(engine: BrainEngine, opts: SyncOpts): Promise<Sy
   // `manifest.deleted` is filtered upstream at sync.ts:757 via the same
   // `isSyncable` call, so `rm log.md` followed by sync also doesn't
   // delete the page. That's the same pre-fix behavior — removing the
-  // page requires `gbrain pages purge-deleted` or a direct MCP delete.
-  // Filed as v0.42+ follow-up for a `gbrain pages remove <slug>` surface.
+  // page requires `modusbrain pages purge-deleted` or a direct MCP delete.
+  // Filed as v0.42+ follow-up for a `modusbrain pages remove <slug>` surface.
   const unsyncableModified = manifest.modified.filter(p => !isSyncable(p, syncOpts));
   // v0.18.0+ multi-source: scope getPage + deletePage to opts.sourceId so
   // unsyncable cleanup in source A doesn't accidentally sweep same-slug
@@ -2058,7 +2058,7 @@ async function performSyncInner(engine: BrainEngine, opts: SyncOpts): Promise<Sy
     }
     const banked = bankedFiles;
     serr(
-      `[sync] banked ${banked} file(s) this run; next 'gbrain sync' resumes from ` +
+      `[sync] banked ${banked} file(s) this run; next 'modusbrain sync' resumes from ` +
       `the checkpoint (last_commit unchanged at ${(lastCommit ?? '').slice(0, 8)}).`,
     );
     return buildPartialResult({
@@ -2355,7 +2355,7 @@ async function performSyncInner(engine: BrainEngine, opts: SyncOpts): Promise<Sy
   // auto path returns DEFAULT_PARALLEL_WORKERS only when fileCount > 100.
   const explicitConcurrency = opts.concurrency !== undefined;
   let effectiveConcurrency = autoConcurrency(engine, importsToDo.length, opts.concurrency);
-  // v0.42.x (#1794, 4A): clamp the worker fan-out under GBRAIN_MAX_CONNECTIONS
+  // v0.42.x (#1794, 4A): clamp the worker fan-out under MODUSBRAIN_MAX_CONNECTIONS
   // (opt-in; no-op when unset). The parent engine holds ~resolvePoolSize()
   // connections; each parallel worker opens its own pool of
   // min(2, resolvePoolSize(2)). When the budget can't fit even one extra
@@ -2374,7 +2374,7 @@ async function performSyncInner(engine: BrainEngine, opts: SyncOpts): Promise<Sy
     });
     if (clampResult.clamped) {
       serr(
-        `  [sync] GBRAIN_MAX_CONNECTIONS=${maxConnections}: clamped workers ` +
+        `  [sync] MODUSBRAIN_MAX_CONNECTIONS=${maxConnections}: clamped workers ` +
         `${effectiveConcurrency} -> ${clampResult.workers} ` +
         `(parent ${parentPool} + ${clampResult.workers}x${perWorkerPool} per-worker).`,
       );
@@ -2441,7 +2441,7 @@ async function performSyncInner(engine: BrainEngine, opts: SyncOpts): Promise<Sy
         if (Date.now() - progressAt.last >= stallMs) {
           serr(
             `[sync] no import progress for ${stallSeconds}s — aborting (stall watchdog). ` +
-            `The per-source lock will release; the next 'gbrain sync' resumes from the checkpoint.`,
+            `The per-source lock will release; the next 'modusbrain sync' resumes from the checkpoint.`,
           );
           stallAborted = true;
           stallController.abort();
@@ -2479,10 +2479,10 @@ async function performSyncInner(engine: BrainEngine, opts: SyncOpts): Promise<Sy
       // v0.41.37.0 #1569: per-file BEGIN heartbeat, emitted BEFORE importFile so a
       // hang names the stalling file (the progress.tick below only fires AFTER
       // importFile returns — useless when one file wedges). Off by default
-      // (GBRAIN_SYNC_TRACE=1) to avoid a line per file on huge brains. serr is
+      // (MODUSBRAIN_SYNC_TRACE=1) to avoid a line per file on huge brains. serr is
       // source-prefix-aware, so under --workers>1 / --all the stuck file is the
       // begin-line with no matching completion in the in-flight set.
-      if (process.env.GBRAIN_SYNC_TRACE) serr(`[sync] begin import: ${path}`);
+      if (process.env.MODUSBRAIN_SYNC_TRACE) serr(`[sync] begin import: ${path}`);
       // paced-backfill: acquire a DB-write permit (caps total concurrent writes
       // across all worker engines). Throws AbortError on cancel while waiting —
       // treat as a clean skip; the worker loop sees signal.aborted next tick.
@@ -2766,7 +2766,7 @@ async function performSyncInner(engine: BrainEngine, opts: SyncOpts): Promise<Sy
       serr(
         `\nSync blocked: ${fileFailCount} file(s) failed to parse:\n` +
         `${codeBreakdown}\n\n` +
-        `Fix the frontmatter and re-run, or use 'gbrain sync --skip-failed' to ` +
+        `Fix the frontmatter and re-run, or use 'modusbrain sync --skip-failed' to ` +
         `acknowledge and move on. A file that keeps failing auto-skips after ` +
         `${resolveAutoSkipThreshold()} consecutive syncs.`,
       );
@@ -2779,7 +2779,7 @@ async function performSyncInner(engine: BrainEngine, opts: SyncOpts): Promise<Sy
     // v0.42.x (#1794): surface banked progress so a blocked run doesn't read as
     // total loss (last_commit is unchanged by design; the checkpoint is banked).
     serr(
-      `[sync] banked ${bankedFiles} file(s) this run; next 'gbrain sync' resumes ` +
+      `[sync] banked ${bankedFiles} file(s) this run; next 'modusbrain sync' resumes ` +
       `from the checkpoint (last_commit unchanged at ${(lastCommit ?? '').slice(0, 8)}).`,
     );
     return {
@@ -2808,7 +2808,7 @@ async function performSyncInner(engine: BrainEngine, opts: SyncOpts): Promise<Sy
       `${resolveAutoSkipThreshold()} consecutive syncs:\n` +
       gate.autoSkipped.map(p => `    ${p}`).join('\n') + '\n' +
       `  Bookmark advanced; these pages are NOT indexed and remain in ` +
-      `sync-failures.jsonl. 'gbrain doctor' will warn until they're fixed.`,
+      `sync-failures.jsonl. 'modusbrain doctor' will warn until they're fixed.`,
     );
   }
 
@@ -2839,7 +2839,7 @@ async function performSyncInner(engine: BrainEngine, opts: SyncOpts): Promise<Sy
   if (!opts.noExtract && totalChanges > 100 && pagesAffected.length > 0) {
     slog(
       `  Large sync: deferring link/timeline extraction. ` +
-      `Run 'gbrain extract --stale${opts.sourceId ? ` --source-id ${opts.sourceId}` : ''}' ` +
+      `Run 'modusbrain extract --stale${opts.sourceId ? ` --source-id ${opts.sourceId}` : ''}' ` +
       `(or let the autopilot cycle's extract phase sweep it).`,
     );
   }
@@ -2928,12 +2928,12 @@ async function performSyncInner(engine: BrainEngine, opts: SyncOpts): Promise<Sy
       if (e instanceof EmbeddingDimMismatchError) {
         serr('\n' + e.recipeMessage + '\n');
         serr(`Tip: pass --no-embed to sync without embedding, then`);
-        serr(`run 'gbrain embed --stale' after fixing the schema.\n`);
+        serr(`run 'modusbrain embed --stale' after fixing the schema.\n`);
       }
       // Other errors stay best-effort — rate limits, transient network.
     }
   } else if (noEmbed || totalChanges > 100) {
-    slog(`Text imported. Run 'gbrain embed --stale' to generate embeddings.`);
+    slog(`Text imported. Run 'modusbrain embed --stale' to generate embeddings.`);
   }
 
   return {
@@ -2962,7 +2962,7 @@ async function performFullSync(
   //
   // v0.31.2 (codex C6): use the strategy-aware walker. Pre-fix this
   // hardcoded `collectMarkdownFiles(repoPath)` and filtered with
-  // default-markdown `isSyncable(rel)`, so `gbrain sync --strategy
+  // default-markdown `isSyncable(rel)`, so `modusbrain sync --strategy
   // code --dry-run` always reported zero files even when ~1500 code
   // files were waiting.
   if (opts.dryRun) {
@@ -3003,7 +3003,7 @@ async function performFullSync(
   // v0.30.x: thread sourceId so performFullSync routes pages to the named
   // source (incremental path already does this).
   const _fullImportT0 = Date.now();
-  serr(`[gbrain phase] sync.fullsync.import start strategy=${opts.strategy ?? 'markdown'}`);
+  serr(`[modusbrain phase] sync.fullsync.import start strategy=${opts.strategy ?? 'markdown'}`);
   const result = await runImport(engine, importArgs, {
     commit: headCommit,
     strategy: opts.strategy,
@@ -3013,7 +3013,7 @@ async function performFullSync(
     managedBookmark: true,
   });
   serr(
-    `[gbrain phase] sync.fullsync.import done ${Date.now() - _fullImportT0}ms ` +
+    `[modusbrain phase] sync.fullsync.import done ${Date.now() - _fullImportT0}ms ` +
     `imported=${result.imported} skipped=${result.skipped} errors=${result.errors}`,
   );
 
@@ -3079,7 +3079,7 @@ async function performFullSync(
     serr(
       `\n  Auto-skipped ${fullGate.autoSkipped.length} file(s) that failed >= ` +
       `${resolveAutoSkipThreshold()} consecutive syncs. These pages are NOT indexed; ` +
-      `'gbrain doctor' will warn until they're fixed.`,
+      `'modusbrain doctor' will warn until they're fixed.`,
     );
   }
 
@@ -3160,7 +3160,7 @@ async function performFullSync(
       if (e instanceof EmbeddingDimMismatchError) {
         serr('\n' + e.recipeMessage + '\n');
         serr(`Tip: pass --no-embed to sync without embedding, then`);
-        serr(`run 'gbrain embed --stale' after fixing the schema.\n`);
+        serr(`run 'modusbrain embed --stale' after fixing the schema.\n`);
       }
       // Other errors stay best-effort.
     }
@@ -3206,7 +3206,7 @@ export const DEFAULT_SYNC_STALL_ABORT_SEC = 900;
 export function resolveStallAbortSeconds(
   env: Record<string, string | undefined> = process.env,
 ): number {
-  const raw = env.GBRAIN_SYNC_STALL_ABORT_SECONDS;
+  const raw = env.MODUSBRAIN_SYNC_STALL_ABORT_SECONDS;
   if (raw === undefined || raw === '') return DEFAULT_SYNC_STALL_ABORT_SEC;
   const n = Number(raw);
   if (!Number.isFinite(n)) return DEFAULT_SYNC_STALL_ABORT_SEC;
@@ -3214,11 +3214,11 @@ export function resolveStallAbortSeconds(
 }
 
 /**
- * Resolve the out-of-band hard-deadline for a `gbrain sync` invocation (#1633).
+ * Resolve the out-of-band hard-deadline for a `modusbrain sync` invocation (#1633).
  * Pure + argv/env-only so it runs BEFORE `connectEngine` (so a connect-phase hang
  * is also bounded — `timeout-layer-vs-connectengine` learning). DB-plane config
- * (`gbrain config set`) is unreadable pre-connect, so the operator knob is the
- * `GBRAIN_SYNC_MAX_RUNTIME_SECONDS` env var; bare cron is covered by the non-TTY
+ * (`modusbrain config set`) is unreadable pre-connect, so the operator knob is the
+ * `MODUSBRAIN_SYNC_MAX_RUNTIME_SECONDS` env var; bare cron is covered by the non-TTY
  * default. Returns null when no watchdog should arm (TTY interactive with no
  * flag, or an explicit opt-out / 0).
  *
@@ -3252,10 +3252,10 @@ export function resolveSyncHardDeadline(
     if (sec && sec > 0) return mk(sec, 'flag:--timeout');
   }
 
-  const envRaw = env.GBRAIN_SYNC_MAX_RUNTIME_SECONDS;
+  const envRaw = env.MODUSBRAIN_SYNC_MAX_RUNTIME_SECONDS;
   if (envRaw !== undefined && envRaw !== '') {
     const n = Number(envRaw);
-    if (Number.isFinite(n)) return mk(n, 'env:GBRAIN_SYNC_MAX_RUNTIME_SECONDS'); // n<=0 disables
+    if (Number.isFinite(n)) return mk(n, 'env:MODUSBRAIN_SYNC_MAX_RUNTIME_SECONDS'); // n<=0 disables
   }
 
   if (!opts.isTty) return mk(opts.defaultNonTtySec ?? 3600, 'default:non-tty');
@@ -3280,7 +3280,7 @@ export function composeAbortSignals(
 }
 
 export async function runSync(engine: BrainEngine, args: string[]) {
-  // v0.40 Federated Sync v2: `gbrain sync trigger` subcommand
+  // v0.40 Federated Sync v2: `modusbrain sync trigger` subcommand
   // Routes to runSyncTrigger which queues a 'sync' minion job with
   // auto_embed_backfill=true. Falls through to the normal sync path
   // if 'trigger' isn't the first arg.
@@ -3292,24 +3292,24 @@ export async function runSync(engine: BrainEngine, args: string[]) {
   // passed. Pre-fix this was unreachable because the dispatcher's generic
   // CLI-only short-circuit fired first; sync is now in CLI_ONLY_SELF_HELP.
   if (args.includes('--help') || args.includes('-h')) {
-    console.log(brandHelp(`Usage: gbrain sync [options]
+    console.log(brandHelp(`Usage: modusbrain sync [options]
 
 Sync the brain repo's text content into the engine, then embed.
 
 Options:
   --no-embed           Skip the embed step. Use this when the embed
                        provider is misconfigured or you want to defer
-                       embedding (run 'gbrain embed --stale' later).
+                       embedding (run 'modusbrain embed --stale' later).
   --no-extract         Skip the link/timeline extraction step. Pages will
-                       show as stale in 'gbrain doctor'; run
-                       'gbrain extract --stale' later to catch up.
+                       show as stale in 'modusbrain doctor'; run
+                       'modusbrain extract --stale' later to catch up.
   --workers N          Run the import phase with N parallel workers
                        (alias: --concurrency). Default: 4 when the
                        diff is >100 files, else serial.
   --source <id>        Scope sync to a single source. Defaults to the
                        brain's default source.
   --repo <path>        Path to the brain repo. Defaults to the path
-                       saved by 'gbrain init'.
+                       saved by 'modusbrain init'.
   --full               Force a full re-sync (rare; usually incremental).
   --dry-run            Show what would be synced without writing.
   --skip-failed        Acknowledge previously-recorded sync failures so
@@ -3321,15 +3321,15 @@ Options:
   --no-schema-pack     Skip loading the active schema pack (no per-file pack
                        regex runs; pages use legacy prefix typing). Escape
                        hatch if a suspect pack regex is wedging sync.
-                       PGLite is single-writer: stop 'gbrain serve' before a
+                       PGLite is single-writer: stop 'modusbrain serve' before a
                        large sync (see docs/architecture/serve-sync-concurrency.md).
-                       GBRAIN_SYNC_TRACE=1 names the file being imported (hang triage).
+                       MODUSBRAIN_SYNC_TRACE=1 names the file being imported (hang triage).
   --all                Sync every registered source instead of just the
                        default (multi-source brains).
   --parallel N         (with --all) Run up to N sources concurrently.
                        Default: min(sourceCount, --workers, 4). Each
                        source takes its own per-source DB lock
-                       (gbrain-sync:<source_id>) so independent sources
+                       (modusbrain-sync:<source_id>) so independent sources
                        sync without contending. Total live Postgres
                        connections per wave ≈ parallel × workers × 2
                        (per-file pool) + parent pool. Pass --parallel 1
@@ -3343,8 +3343,8 @@ Options:
   --yes                Accept any interactive prompts (CI / non-TTY).
 
 See also:
-  gbrain embed --stale    Re-embed all stale chunks (post --no-embed).
-  gbrain doctor           Diagnose dim mismatches and other sync issues.
+  modusbrain embed --stale    Re-embed all stale chunks (post --no-embed).
+  modusbrain doctor           Diagnose dim mismatches and other sync issues.
 `));
     return;
   }
@@ -3368,7 +3368,7 @@ See also:
   // holder is local-host + (TTL-expired OR PID-dead+60s-old) before
   // deleting the row. --force-break-lock skips the liveness check. Both
   // are refused when combined with --all (per-source invocation required;
-  // v0.40 lock keys are gbrain-sync:<sourceId>).
+  // v0.40 lock keys are modusbrain-sync:<sourceId>).
   const breakLock = args.includes('--break-lock');
   const forceBreakLock = args.includes('--force-break-lock');
 
@@ -3414,7 +3414,7 @@ See also:
       }
       let worstExit = 0;
       for (const src of activeSources) {
-        const lockKey = `gbrain-sync:${src.id}`;
+        const lockKey = `modusbrain-sync:${src.id}`;
         const exit = await runBreakLock(engine, lockKey, src.id, {
           force: forceBreakLock,
           json: jsonOut,
@@ -3426,7 +3426,7 @@ See also:
     }
     const sourceArg = args.find((a, i) => args[i - 1] === '--source');
     const sourceId = sourceArg ?? 'default';
-    const lockKey = `gbrain-sync:${sourceId}`;
+    const lockKey = `modusbrain-sync:${sourceId}`;
     const exit = await runBreakLock(engine, lockKey, sourceId, {
       force: forceBreakLock,
       json: jsonOut,
@@ -3495,7 +3495,7 @@ See also:
   // combined with --all, each source gets its OWN AbortController + countdown
   // inside runOne so the budget is per-source, not shared across the fan-out.
   //
-  // Validation: --timeout requires --source OR --all. Bare `gbrain sync
+  // Validation: --timeout requires --source OR --all. Bare `modusbrain sync
   // --timeout 60` (no source scope) is rejected at parse time — the natural
   // single-source case requires the user to either name the source or opt
   // into the global fan-out, so the error message tells them which to add.
@@ -3528,7 +3528,7 @@ See also:
   // no flag, no env, no dotfile is present.
   //
   // v0.41.13 (#1434): always call the resolver, not just when explicit/env
-  // is set. Pre-fix, `gbrain sync` without --source skipped resolution and
+  // is set. Pre-fix, `modusbrain sync` without --source skipped resolution and
   // left sourceId undefined — which the engine treated as the seeded
   // 'default' source. Users with a single non-default registered source
   // (studiovault, etc.) silently routed every write to a source holding
@@ -3567,7 +3567,7 @@ See also:
   // v0.19.0 — `sync --all` iterates all registered sources with a
   // local_path. Sources are the canonical v0.18.0 abstraction: per-source
   // last_commit, last_sync_at, config.federated flags. Per-source
-  // bookmarks live in the sources table (not ~/.gbrain/config.json),
+  // bookmarks live in the sources table (not ~/.modusbrain/config.json),
   // which is why this path replaced Garry's OpenClaw `multi-repo.ts` shim.
   //
   // Only sources with a non-null local_path participate. A GitHub-only
@@ -3583,7 +3583,7 @@ See also:
       `SELECT id, name, local_path, config, last_commit, chunker_version FROM sources WHERE local_path IS NOT NULL`,
     );
     if (!sources || sources.length === 0) {
-      console.log('No sources with local_path configured. Use `gbrain sources add <id> --path <path>` first.');
+      console.log('No sources with local_path configured. Use `modusbrain sources add <id> --path <path>` first.');
       return;
     }
 
@@ -3920,7 +3920,7 @@ See also:
     signal: composeAbortSignals(singleSourceInterrupt.signal, singleSourceController?.signal),
   };
 
-  // v0.42.42.0 (#2139, Step 4b): single-source `gbrain sync` gets the SAME
+  // v0.42.42.0 (#2139, Step 4b): single-source `modusbrain sync` gets the SAME
   // inline cost gate as `--all`. Previously single-source embedded inline with
   // NO gate (only rail: the ≤100-file inline cap). Single-source always embeds
   // INLINE (not the parallel-deferred fan-out), so mode is forced 'inline'.
@@ -3992,7 +3992,7 @@ See also:
     // until next clean run). v0.41.13.0 (T7 / D-V3-5): partial also skips —
     // conservative posture matches blocked_by_failures. Resolve the effective
     // repo path so the wire-up fires in the common case where the user runs
-    // `gbrain sync` without passing --repo every time.
+    // `modusbrain sync` without passing --repo every time.
     if (
       result.status !== 'dry_run' &&
       result.status !== 'blocked_by_failures' &&
@@ -4018,7 +4018,7 @@ See also:
         if (sub.status === 'submitted') {
           process.stderr.write(`  → embed-backfill job ${sub.jobId} queued (deferred inline embed).\n`);
         } else if (sub.status === 'cooldown') {
-          process.stderr.write(`  → embed-backfill skipped (cooldown); run \`gbrain embed --stale\` to drain now.\n`);
+          process.stderr.write(`  → embed-backfill skipped (cooldown); run \`modusbrain embed --stale\` to drain now.\n`);
         }
       } catch (e) {
         process.stderr.write(`  → embed-backfill submission failed: ${e instanceof Error ? e.message : String(e)}\n`);
@@ -4159,7 +4159,7 @@ export async function syncOneSource(
     sourceId: src.id,
     strategy: cfg.strategy,
     concurrency: shared.concurrency,
-    // lockId defaults to `gbrain-sync:${src.id}` via the invariant in
+    // lockId defaults to `modusbrain-sync:${src.id}` via the invariant in
     // performSync (no explicit override needed — sourceId triggers it).
   };
   const result = await withSourcePrefix(src.id, () => performSync(engine, repoOpts));
@@ -4167,7 +4167,7 @@ export async function syncOneSource(
 }
 
 /**
- * v0.40.3.0 — read-only per-source dashboard for `gbrain sources status`.
+ * v0.40.3.0 — read-only per-source dashboard for `modusbrain sources status`.
  *
  * Aggregates from existing tables (no schema changes):
  *   - sources:        last_commit, last_sync_at, archived, config.syncEnabled
@@ -4181,7 +4181,7 @@ export async function syncOneSource(
  *   - sync-failures.jsonl: unacknowledged failures (brain-global; the
  *     JSONL log isn't per-source. v0.40.4 TODO source-scopes it.)
  *
- * Staleness thresholds match `gbrain doctor`'s sync-freshness rule
+ * Staleness thresholds match `modusbrain doctor`'s sync-freshness rule
  * (24h / 72h). Sources that have NEVER synced (last_sync_at IS NULL)
  * report `staleness_hours: null` so callers can disambiguate "first run
  * pending" from "32h since last successful sync".
@@ -4233,7 +4233,7 @@ export async function buildSyncStatusReport(
   // at Voyage / multimodal / any non-default column get accurate counts
   // for the column they actually use (D16 → A, Codex P2 #10).
   const { resolveEmbeddingColumn, quoteIdentifier } = await import('../core/search/embedding-column.ts');
-  // loadConfig() returns null when ~/.gbrain/config.json is missing.
+  // loadConfig() returns null when ~/.modusbrain/config.json is missing.
   // resolveEmbeddingColumn handles missing fields via its own
   // gateway-fallback chain, so a minimal stub satisfies the call shape.
   const cfg = loadConfig() ?? ({ engine: engine.kind } as Parameters<typeof resolveEmbeddingColumn>[1]);
@@ -4426,7 +4426,7 @@ export async function buildSyncStatusReport(
 /**
  * v0.40.3.0 — render a `SyncStatusReport` as a human-readable table.
  *
- * `sink` defaults to `process.stdout` so the bare `gbrain sources status`
+ * `sink` defaults to `process.stdout` so the bare `modusbrain sources status`
  * invocation writes its table to stdout. `--json` callers don't use
  * this — they emit `JSON.stringify(report)` to stdout directly.
  */
@@ -4480,7 +4480,7 @@ export function printSyncStatusReport(
   write(`\nUnacknowledged sync failures (brain-wide): ${report.unacknowledged_failures}`);
   const severe = report.sources.filter((s) => s.staleness_class === 'severe').length;
   if (severe > 0) {
-    write(`WARNING: ${severe} source(s) are SEVERELY stale (>72h). Run \`gbrain sync --all\` to refresh.`);
+    write(`WARNING: ${severe} source(s) are SEVERELY stale (>72h). Run \`modusbrain sync --all\` to refresh.`);
   }
 }
 
@@ -4494,7 +4494,7 @@ export function printSyncStatusReport(
  * a stable comment header so it's grep-able and editable.
  *
  * Skipped (with actionable warning) when:
- *   - GBRAIN_NO_GITIGNORE=1 — D23 escape hatch for shared-repo setups
+ *   - MODUSBRAIN_NO_GITIGNORE=1 — D23 escape hatch for shared-repo setups
  *   - The repo is a git submodule (`.git` is a file not a directory) —
  *     D49 lock; submodule .gitignore changes don't survive parent updates
  *
@@ -4515,7 +4515,7 @@ export function manageGitignore(
   repoPath: string,
   engineKind?: 'pglite' | 'postgres',
 ): void {
-  if (process.env.GBRAIN_NO_GITIGNORE === '1') {
+  if (process.env.MODUSBRAIN_NO_GITIGNORE === '1') {
     return;
   }
 
@@ -4607,7 +4607,7 @@ export function manageGitignore(
   if (gitignoreContent && !gitignoreContent.endsWith('\n')) {
     gitignoreContent += '\n';
   }
-  gitignoreContent += '\n# Auto-managed by gbrain (db_only directories)\n';
+  gitignoreContent += '\n# Auto-managed by modusbrain (db_only directories)\n';
   gitignoreContent += linesToAdd.join('\n') + '\n';
 
   try {
@@ -4623,14 +4623,14 @@ export function manageGitignore(
 /**
  * v0.42.7 (#1696): one-line end-of-sync nudge when the brain (or a source)
  * carries a meaningful link/timeline extraction backlog. Reuses the same warn
- * threshold (GBRAIN_EXTRACTION_LAG_WARN_PCT, default 20%) the doctor check uses
+ * threshold (MODUSBRAIN_EXTRACTION_LAG_WARN_PCT, default 20%) the doctor check uses
  * so the nudge fires iff doctor would warn — one source of truth. Always
  * stderr (never stdout — keeps `--json` clean), suppressible via
- * GBRAIN_SYNC_NO_EXTRACT_NUDGE, best-effort (never throws). Source-prefix-aware
+ * MODUSBRAIN_SYNC_NO_EXTRACT_NUDGE, best-effort (never throws). Source-prefix-aware
  * via serr when called inside a withSourcePrefix scope.
  */
 async function maybeExtractionNudge(engine: BrainEngine, sourceId?: string): Promise<void> {
-  if (process.env.GBRAIN_SYNC_NO_EXTRACT_NUDGE) return;
+  if (process.env.MODUSBRAIN_SYNC_NO_EXTRACT_NUDGE) return;
   try {
     const { LINK_EXTRACTOR_VERSION_TS } = await import('../core/link-extraction.ts');
     // D3/C4: resolve the warn threshold + vacuous-skip floor through the SAME
@@ -4648,9 +4648,9 @@ async function maybeExtractionNudge(engine: BrainEngine, sourceId?: string): Pro
     // source-scoped (a small explicit source IS assessed, like orphan_ratio).
     if (total < EXTRACTION_LAG_MIN_PAGES && !sourceId) return;
     const stale = await engine.countStalePagesForExtraction({ sourceId, versionTs: LINK_EXTRACTOR_VERSION_TS });
-    const warnPct = _resolveEnvNumber('GBRAIN_EXTRACTION_LAG_WARN_PCT', EXTRACTION_LAG_WARN_PCT_DEFAULT, { unit: '%' });
+    const warnPct = _resolveEnvNumber('MODUSBRAIN_EXTRACTION_LAG_WARN_PCT', EXTRACTION_LAG_WARN_PCT_DEFAULT, { unit: '%' });
     if ((stale / total) * 100 > warnPct) {
-      serr(`[sync] ${stale} page(s) have un-extracted edges — run 'gbrain extract --stale'`);
+      serr(`[sync] ${stale} page(s) have un-extracted edges — run 'modusbrain extract --stale'`);
     }
   } catch { /* nudge is best-effort — never block sync on it */ }
 }
@@ -4682,8 +4682,8 @@ function printSyncResult(result: SyncResult, sink: NodeJS.WriteStream = process.
       break; // already printed in performSync
     case 'blocked_by_failures':
       write(`Sync BLOCKED at ${result.toCommit.slice(0, 8)}: ${result.failedFiles ?? 0} file(s) failed to parse.`);
-      write(`  See ~/.gbrain/sync-failures.jsonl for details, or run 'gbrain doctor'.`);
-      write(`  Fix the files then re-run 'gbrain sync', or 'gbrain sync --skip-failed' to move on.`);
+      write(`  See ~/.modusbrain/sync-failures.jsonl for details, or run 'modusbrain doctor'.`);
+      write(`  Fix the files then re-run 'modusbrain sync', or 'modusbrain sync --skip-failed' to move on.`);
       break;
     case 'partial':
       // v0.41.13.0 (T7 / D-V3-5): --timeout fired before the bookmark write
@@ -4696,7 +4696,7 @@ function printSyncResult(result: SyncResult, sink: NodeJS.WriteStream = process.
         `imported ${result.filesImported ?? 0} of ${result.added + result.modified} file(s), ` +
         `reason=${result.reason ?? 'timeout'}.`,
       );
-      write(`  Re-run 'gbrain sync' to continue (last_commit unchanged; safe to retry).`);
+      write(`  Re-run 'modusbrain sync' to continue (last_commit unchanged; safe to retry).`);
       break;
   }
 }

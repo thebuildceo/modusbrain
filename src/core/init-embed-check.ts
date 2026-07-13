@@ -1,7 +1,7 @@
 /**
- * Embedding-key validation at `gbrain init` (issue #1780 Gap 2).
+ * Embedding-key validation at `modusbrain init` (issue #1780 Gap 2).
  *
- * Before this, `gbrain init` persisted `--embedding-model` to config.json but
+ * Before this, `modusbrain init` persisted `--embedding-model` to config.json but
  * never checked the provider key was present/working. The failure surfaced only
  * at first sync (`embedBatch` throws, pages import but `embedded=0`), and
  * combined with Gap 1 the call graph silently never built.
@@ -22,12 +22,12 @@
  * wrong endpoint (custom OpenAI base URL, llama-server, etc.).
  *
  * Skips entirely on `--no-embedding`, `--skip-embed-check`, or
- * `GBRAIN_INIT_SKIP_EMBED_CHECK=1`. Warnings go to stderr; the caller folds the
+ * `MODUSBRAIN_INIT_SKIP_EMBED_CHECK=1`. Warnings go to stderr; the caller folds the
  * returned `InitEmbedCheckResult` into init's `--json` envelope as
  * `embedding_check`.
  */
 
-import type { GBrainConfig } from './config.ts';
+import type { ModusBrainConfig } from './config.ts';
 import { loadConfigFileOnly } from './config.ts';
 import { buildGatewayConfig } from './ai/build-gateway-config.ts';
 import type { EmbeddingDiagnosis } from './ai/gateway.ts';
@@ -56,7 +56,7 @@ export interface RunInitEmbedCheckOpts {
   /** --skip-embed-check flag. */
   skipFlag?: boolean;
   // ── test seams ──
-  loadFileConfig?: () => GBrainConfig | null;
+  loadFileConfig?: () => ModusBrainConfig | null;
   /** default: console.error (stderr). */
   warn?: (msg: string) => void;
   /** skip the network probe (config-only); tests for the diagnose path. */
@@ -104,7 +104,7 @@ function formatInitEmbedWarning(d: Exclude<EmbeddingDiagnosis, { ok: true }>): s
   const lines: string[] = ['', '  Heads up: embedding is configured but not ready.'];
   switch (d.reason) {
     case 'missing_env':
-      lines.push(`  Model "${d.model}" needs ${d.missingEnvVars.join(', ')} — not set in your shell or ~/.gbrain/config.json.`);
+      lines.push(`  Model "${d.model}" needs ${d.missingEnvVars.join(', ')} — not set in your shell or ~/.modusbrain/config.json.`);
       lines.push('  Set it before first sync:');
       lines.push(`    export ${d.missingEnvVars[0]}=...`);
       break;
@@ -125,11 +125,11 @@ function formatInitEmbedWarning(d: Exclude<EmbeddingDiagnosis, { ok: true }>): s
       lines.push('  Embedding gateway is not configured (startup-order bug — please file an issue).');
       break;
   }
-  lines.push('  Without it, `gbrain sync` imports pages but embeds 0 (search + code graph stay empty).');
+  lines.push('  Without it, `modusbrain sync` imports pages but embeds 0 (search + code graph stay empty).');
   lines.push('  Fixes:');
-  lines.push('    • Set the key above, then run `gbrain sync`.');
+  lines.push('    • Set the key above, then run `modusbrain sync`.');
   lines.push('    • Or defer embedding entirely: re-run init with --no-embedding.');
-  lines.push('    • Or skip this check: --skip-embed-check (or GBRAIN_INIT_SKIP_EMBED_CHECK=1).');
+  lines.push('    • Or skip this check: --skip-embed-check (or MODUSBRAIN_INIT_SKIP_EMBED_CHECK=1).');
   return lines.join('\n');
 }
 
@@ -139,7 +139,7 @@ function formatLiveProbeWarning(p: { reason: string; message: string }, model: s
     `  Heads up: an embedding key is set but a test embed failed (${p.reason}).`,
     `  Model: ${model}`,
     `  Error: ${p.message}`,
-    '  `gbrain sync` may fail to embed. Verify the key/endpoint, or re-run init',
+    '  `modusbrain sync` may fail to embed. Verify the key/endpoint, or re-run init',
     '  with --skip-embed-check to bypass this probe.',
   ].join('\n');
 }
@@ -155,7 +155,7 @@ export async function runInitEmbedCheck(opts: RunInitEmbedCheckOpts): Promise<In
 
   if (opts.noEmbedding) return { ok: true, skipped: 'no_embedding' };
   if (opts.skipFlag) return { ok: true, skipped: 'flag' };
-  if (process.env.GBRAIN_INIT_SKIP_EMBED_CHECK === '1') return { ok: true, skipped: 'env' };
+  if (process.env.MODUSBRAIN_INIT_SKIP_EMBED_CHECK === '1') return { ok: true, skipped: 'env' };
   // No model resolved means resolveAIOptions already fail-loud'd (or deferred);
   // nothing to validate here.
   if (!opts.resolvedModel) return { ok: true, skipped: 'no_model' };
@@ -163,8 +163,8 @@ export async function runInitEmbedCheck(opts: RunInitEmbedCheckOpts): Promise<In
   // Build the effective gateway config the SAME way runtime does so the check
   // sees the same keys AND provider base URLs (D1A + D7A).
   const loadFile = opts.loadFileConfig ?? loadConfigFileOnly;
-  const fileCfg = loadFile() ?? ({} as GBrainConfig);
-  const effective: GBrainConfig = {
+  const fileCfg = loadFile() ?? ({} as ModusBrainConfig);
+  const effective: ModusBrainConfig = {
     ...fileCfg,
     embedding_model: opts.resolvedModel,
     embedding_dimensions: opts.resolvedDim,

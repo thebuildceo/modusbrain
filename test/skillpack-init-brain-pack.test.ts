@@ -17,7 +17,7 @@ import { VERSION } from '../src/version.ts';
 
 let dir: string;
 beforeEach(() => {
-  dir = mkdtempSync(join(tmpdir(), 'gbrain-brainpack-'));
+  dir = mkdtempSync(join(tmpdir(), 'modusbrain-brainpack-'));
 });
 afterEach(() => {
   rmSync(dir, { recursive: true, force: true });
@@ -28,7 +28,7 @@ describe('runInitBrainPack', () => {
     const result = runInitBrainPack({ targetDir: dir, name: 'deal-brain', schemaPack: 'gbrain-base' });
     expect(result.manifest.brain_resident).toBe(true);
     expect(result.manifest.schema_pack).toBe('gbrain-base');
-    expect(result.manifest.gbrain_min_version).toBe(VERSION); // exact, not major.minor.0
+    expect(result.manifest.modusbrain_min_version).toBe(VERSION); // exact, not major.minor.0
     // round-trips through the validator
     const raw = JSON.parse(readFileSync(join(dir, 'skillpack.json'), 'utf-8'));
     expect(() => validateSkillpackManifest(raw)).not.toThrow();

@@ -1,6 +1,6 @@
 /**
  * Tests for the half-migrated Minions detection checks added to
- * `gbrain doctor` in v0.11.1.
+ * `modusbrain doctor` in v0.11.1.
  *
  * Two branches:
  *   - Filesystem-only (check #3): `completed.jsonl` has a status:"partial"
@@ -30,7 +30,7 @@ function run(args: string[]): { exitCode: number; stdout: string; stderr: string
   // Half-migrated checks run in the filesystem section; no DB needed.
   const env = { ...process.env, HOME: tmp } as Record<string, string | undefined>;
   delete env.DATABASE_URL;
-  delete env.GBRAIN_DATABASE_URL;
+  delete env.MODUSBRAIN_DATABASE_URL;
   try {
     const stdout = bunExecFileSync(['run', CLI, ...args], {
       env: env as Record<string, string>,
@@ -49,7 +49,7 @@ function run(args: string[]): { exitCode: number; stdout: string; stderr: string
 
 beforeEach(() => {
   origHome = process.env.HOME;
-  tmp = mkdtempSync(join(tmpdir(), 'gbrain-doctor-minions-test-'));
+  tmp = mkdtempSync(join(tmpdir(), 'modusbrain-doctor-minions-test-'));
 });
 
 afterEach(() => {
@@ -58,11 +58,11 @@ afterEach(() => {
   try { rmSync(tmp, { recursive: true, force: true }); } catch { /* best-effort */ }
 });
 
-describe('gbrain doctor — half-migrated Minions detection', () => {
+describe('modusbrain doctor — half-migrated Minions detection', () => {
   test('filesystem: partial completed.jsonl entry with no matching complete → FAIL', () => {
-    // Seed ~/.gbrain/migrations/completed.jsonl with a single status:"partial"
+    // Seed ~/.modusbrain/migrations/completed.jsonl with a single status:"partial"
     // entry — the classic signal the stopgap ran but apply-migrations didn't.
-    const migrationsDir = join(tmp, '.gbrain', 'migrations');
+    const migrationsDir = join(tmp, '.modusbrain', 'migrations');
     mkdirSync(migrationsDir, { recursive: true });
     writeFileSync(
       join(migrationsDir, 'completed.jsonl'),
@@ -85,14 +85,14 @@ describe('gbrain doctor — half-migrated Minions detection', () => {
     expect(minions).toBeDefined();
     expect(minions!.status).toBe('fail');
     expect(minions!.message).toContain('MINIONS HALF-INSTALLED');
-    expect(minions!.message).toContain('gbrain apply-migrations --yes');
+    expect(minions!.message).toContain('modusbrain apply-migrations --yes');
     expect(minions!.message).toContain('0.11.0');
   });
 
   test('filesystem: partial followed by complete → NO warning', () => {
     // The stopgap wrote partial, then v0.11.1 apply-migrations wrote
     // complete. Doctor should stay quiet.
-    const migrationsDir = join(tmp, '.gbrain', 'migrations');
+    const migrationsDir = join(tmp, '.modusbrain', 'migrations');
     mkdirSync(migrationsDir, { recursive: true });
     writeFileSync(
       join(migrationsDir, 'completed.jsonl'),
@@ -125,13 +125,13 @@ describe('gbrain doctor — half-migrated Minions detection', () => {
   });
 
   test('regression: fresh install with schema-applied DB but no prefs must NOT fail', () => {
-    // CI regression. `gbrain init` against Postgres applies schema v7 but
+    // CI regression. `modusbrain init` against Postgres applies schema v7 but
     // doesn't write preferences.json (the migration orchestrator does that
     // via apply-migrations). For that brief window, schema is v7 with no
     // prefs — a valid state that must NOT trigger a FAIL check.
     //
     // This pins the bug that broke Tier 1 CI (mechanical.test.ts
-    // "gbrain doctor exits 0 on healthy DB"): the old "schema v7+ no
+    // "modusbrain doctor exits 0 on healthy DB"): the old "schema v7+ no
     // preferences.json → FAIL" rule was too aggressive. Only a concrete
     // "partial without complete" entry in completed.jsonl counts as
     // half-migrated.
@@ -150,7 +150,7 @@ describe('gbrain doctor — half-migrated Minions detection', () => {
     // flag v0.11 by name. The forward-progress override only kicks in
     // when a NEWER version completed; v0.10 is older than v0.11 so the
     // partial still stands.
-    const migrationsDir = join(tmp, '.gbrain', 'migrations');
+    const migrationsDir = join(tmp, '.modusbrain', 'migrations');
     mkdirSync(migrationsDir, { recursive: true });
     writeFileSync(
       join(migrationsDir, 'completed.jsonl'),
@@ -177,11 +177,11 @@ describe('gbrain doctor — half-migrated Minions detection', () => {
     // Without this override, every install that ever went through a
     // v0.11.0 stopgap and then upgraded carries the FAIL flag forever,
     // even on installs that have been at v0.22+ for months. Real cause:
-    // long-running gbrain installs accumulate partial entries from
+    // long-running modusbrain installs accumulate partial entries from
     // historical stopgap runs; a doctor flag with no time decay or
     // forward-progress detection becomes meaningless once you've
     // moved past those versions.
-    const migrationsDir = join(tmp, '.gbrain', 'migrations');
+    const migrationsDir = join(tmp, '.modusbrain', 'migrations');
     mkdirSync(migrationsDir, { recursive: true });
     writeFileSync(
       join(migrationsDir, 'completed.jsonl'),
@@ -210,7 +210,7 @@ describe('gbrain doctor — half-migrated Minions detection', () => {
     // The override only fires when a >= partial version has completed.
     // Older completes (e.g. v0.10 complete + v0.16 partial) do NOT
     // supersede the partial; the partial still indicates a real problem.
-    const migrationsDir = join(tmp, '.gbrain', 'migrations');
+    const migrationsDir = join(tmp, '.modusbrain', 'migrations');
     mkdirSync(migrationsDir, { recursive: true });
     writeFileSync(
       join(migrationsDir, 'completed.jsonl'),
@@ -232,7 +232,7 @@ describe('gbrain doctor — half-migrated Minions detection', () => {
     // Same fixture as the first test, but check the human-readable output
     // includes the exact banner phrase an OpenClaw host's cron script
     // can grep for.
-    const migrationsDir = join(tmp, '.gbrain', 'migrations');
+    const migrationsDir = join(tmp, '.modusbrain', 'migrations');
     mkdirSync(migrationsDir, { recursive: true });
     writeFileSync(
       join(migrationsDir, 'completed.jsonl'),
@@ -242,6 +242,6 @@ describe('gbrain doctor — half-migrated Minions detection', () => {
     const result = run(['doctor', '--fast']);
     expect(result.exitCode).toBe(1);
     expect(result.stdout).toContain('MINIONS HALF-INSTALLED');
-    expect(result.stdout).toContain('gbrain apply-migrations --yes');
+    expect(result.stdout).toContain('modusbrain apply-migrations --yes');
   });
 });

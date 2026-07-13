@@ -34,7 +34,7 @@ function writeDoc(rel: string, content: string) {
 function run(extraEnv: Record<string, string> = {}) {
   return spawnSync("bash", [SCRIPT], {
     encoding: "utf8",
-    env: { ...process.env, GBRAIN_DOC_GUARD_ROOT: root, ...extraEnv },
+    env: { ...process.env, MODUSBRAIN_DOC_GUARD_ROOT: root, ...extraEnv },
   });
 }
 
@@ -82,7 +82,7 @@ describe("check-key-files-current-state.sh", () => {
   it("FAILS when CLAUDE.md exceeds the size cap", () => {
     seedClean();
     writeDoc("CLAUDE.md", "x".repeat(200_000));
-    const r = run({ GBRAIN_CLAUDE_MD_MAX_BYTES: "90000" });
+    const r = run({ MODUSBRAIN_CLAUDE_MD_MAX_BYTES: "90000" });
     expect(r.status).toBe(1);
     expect(r.stderr).toContain("over the");
   });
@@ -90,8 +90,8 @@ describe("check-key-files-current-state.sh", () => {
   it("size cap is configurable via env", () => {
     seedClean();
     writeDoc("CLAUDE.md", "x".repeat(5_000));
-    expect(run({ GBRAIN_CLAUDE_MD_MAX_BYTES: "1000" }).status).toBe(1);
-    expect(run({ GBRAIN_CLAUDE_MD_MAX_BYTES: "10000" }).status).toBe(0);
+    expect(run({ MODUSBRAIN_CLAUDE_MD_MAX_BYTES: "1000" }).status).toBe(1);
+    expect(run({ MODUSBRAIN_CLAUDE_MD_MAX_BYTES: "10000" }).status).toBe(0);
   });
 
   it("soft-warns (non-fatal) on prose history markers", () => {

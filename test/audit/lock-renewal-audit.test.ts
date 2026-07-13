@@ -33,7 +33,7 @@ afterEach(() => {
 
 describe('lockRenewalAudit: 4-outcome contract', () => {
   test('case 1 — logFailure writes outcome=failure with error_summary and error_code', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: tmpDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: tmpDir }, async () => {
       const err = Object.assign(new Error('Connection terminated'), { code: '08006' });
       lockRenewalAudit.logFailure(42, 'sync', 1, err);
       const result = readRecentLockRenewalEvents(24);
@@ -48,7 +48,7 @@ describe('lockRenewalAudit: 4-outcome contract', () => {
   });
 
   test('case 2 — logSuccessAfterFailure writes outcome with attempt=recovery count, no error fields', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: tmpDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: tmpDir }, async () => {
       lockRenewalAudit.logSuccessAfterFailure(99, 'embed', 3);
       const result = readRecentLockRenewalEvents(24);
       expect(result.events).toHaveLength(1);
@@ -62,7 +62,7 @@ describe('lockRenewalAudit: 4-outcome contract', () => {
   });
 
   test('case 3 — logGaveUp writes outcome=gave_up with full error context', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: tmpDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: tmpDir }, async () => {
       const err = Object.assign(new Error('renewLock timed out after 10000ms'), { code: 'TIMEOUT' });
       lockRenewalAudit.logGaveUp(777, 'subagent', 5, err);
       const result = readRecentLockRenewalEvents(24);
@@ -74,7 +74,7 @@ describe('lockRenewalAudit: 4-outcome contract', () => {
   });
 
   test('case 4 — logExecuteJobRejected writes outcome with no attempt field', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: tmpDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: tmpDir }, async () => {
       lockRenewalAudit.logExecuteJobRejected(123, 'shell', new Error('failJob threw during outage'));
       const result = readRecentLockRenewalEvents(24);
       expect(result.events).toHaveLength(1);
@@ -87,9 +87,9 @@ describe('lockRenewalAudit: 4-outcome contract', () => {
 
 describe('lockRenewalAudit: privacy via redactor (D9)', () => {
   test('case 5a — logFailure with PG connection-failure error: no DSN/IP in JSONL', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: tmpDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: tmpDir }, async () => {
       const err = new Error(
-        'connection failed: postgres://garry:hunter2@db.example.com:5432/gbrain (192.168.1.42)',
+        'connection failed: postgres://garry:hunter2@db.example.com:5432/modusbrain (192.168.1.42)',
       );
       lockRenewalAudit.logFailure(1, 'sync', 1, err);
       // Read raw JSONL — covers the wire format an operator would
@@ -105,7 +105,7 @@ describe('lockRenewalAudit: privacy via redactor (D9)', () => {
   });
 
   test('case 5b — logGaveUp redacts password=secret form', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: tmpDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: tmpDir }, async () => {
       const err = new Error('FATAL: password=hunter2 authentication failed');
       lockRenewalAudit.logGaveUp(1, 'sync', 3, err);
       const file = path.join(tmpDir, computeIsoWeekFilename(LOCK_RENEWAL_FEATURE_NAME));
@@ -118,7 +118,7 @@ describe('lockRenewalAudit: privacy via redactor (D9)', () => {
 
 describe('lockRenewalAudit: readback semantics', () => {
   test('case 6 — readRecentLockRenewalEvents applies hours cutoff', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: tmpDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: tmpDir }, async () => {
       lockRenewalAudit.logFailure(1, 'sync', 1, new Error('blip 1'));
       // 48h ago event is older than 24h cutoff and should be filtered.
       const file = path.join(tmpDir, computeIsoWeekFilename(LOCK_RENEWAL_FEATURE_NAME));
@@ -138,7 +138,7 @@ describe('lockRenewalAudit: readback semantics', () => {
   });
 
   test('case 7 — corrupted JSONL line increments corrupted_lines, doesn\'t throw', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: tmpDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: tmpDir }, async () => {
       const file = path.join(tmpDir, computeIsoWeekFilename(LOCK_RENEWAL_FEATURE_NAME));
       // Mix valid + invalid JSONL.
       lockRenewalAudit.logFailure(1, 'sync', 1, new Error('valid'));
@@ -151,10 +151,10 @@ describe('lockRenewalAudit: readback semantics', () => {
   });
 
   test('case 7b — readback with no audit dir returns empty + zero file counts', async () => {
-    // tmpDir for GBRAIN_AUDIT_DIR points at an empty dir; no audit
+    // tmpDir for MODUSBRAIN_AUDIT_DIR points at an empty dir; no audit
     // files exist, but the dir itself exists. Both ENOENT files
     // counted as "scanned: 0, unreadable: 0".
-    await withEnv({ GBRAIN_AUDIT_DIR: tmpDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: tmpDir }, async () => {
       const result = readRecentLockRenewalEvents(24);
       expect(result.events).toHaveLength(0);
       expect(result.corrupted_lines).toBe(0);
@@ -166,7 +166,7 @@ describe('lockRenewalAudit: readback semantics', () => {
 
 describe('lockRenewalAudit: pruning', () => {
   test('case 8 — pruneOldLockRenewalAuditFiles deletes files older than daysToKeep', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: tmpDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: tmpDir }, async () => {
       // Create an old file by writing then back-dating.
       const oldName = `${LOCK_RENEWAL_FEATURE_NAME}-2024-W01.jsonl`;
       const oldFile = path.join(tmpDir, oldName);
@@ -186,7 +186,7 @@ describe('lockRenewalAudit: pruning', () => {
 
   test('case 8b — pruning a non-existent dir is a graceful no-op', async () => {
     const ghostDir = path.join(tmpDir, 'does-not-exist');
-    await withEnv({ GBRAIN_AUDIT_DIR: ghostDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: ghostDir }, async () => {
       const result = pruneOldLockRenewalAuditFiles(30);
       expect(result.removed).toBe(0);
       expect(result.kept).toBe(0);

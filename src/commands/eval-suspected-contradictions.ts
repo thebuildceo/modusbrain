@@ -10,7 +10,7 @@
  * confirmation; primitive's stage-report subsumes it in v0.41.14.0+.
  * Filed in TODOS.md.
  *
- * `gbrain eval suspected-contradictions` — v0.32.6 contradiction probe CLI.
+ * `modusbrain eval suspected-contradictions` — v0.32.6 contradiction probe CLI.
  *
  * Three sub-subcommands:
  *   - run (default): execute one probe pass; --queries-file / --query /
@@ -162,7 +162,7 @@ export function parseFlags(args: string[]): ParsedFlags {
 
 function printHelp(): void {
   console.error(`Usage:
-  gbrain eval suspected-contradictions [run]
+  modusbrain eval suspected-contradictions [run]
     [--queries-file FILE.jsonl | --query "..." | --from-capture]
     [--top-k N=5] [--judge MODEL]   (default routes via resolveModel →
                                      models.eval.contradictions_judge →
@@ -171,9 +171,9 @@ function printHelp(): void {
     [--max-pair-chars N=1500] [--sampling deterministic|score-first]
     [--no-cache] [--refresh-cache] [--json] [--yes]
 
-  gbrain eval suspected-contradictions trend [--days N=30] [--json]
+  modusbrain eval suspected-contradictions trend [--days N=30] [--json]
 
-  gbrain eval suspected-contradictions review
+  modusbrain eval suspected-contradictions review
     [--severity info|low|medium|high] [--since YYYY-MM-DD]
 
 The probe samples top-K retrieval pairs and asks an LLM judge to classify
@@ -183,7 +183,7 @@ temporal_regression, temporal_evolution, negation_artifact. Outputs JSON
 
 Cost guardrails:
   - When PROMPT_VERSION changes, the runner prints a cost estimate and waits
-    10s in TTY for Ctrl-C (auto-proceeds non-TTY). Skip with GBRAIN_NO_PROBE_PROMPT=1.
+    10s in TTY for Ctrl-C (auto-proceeds non-TTY). Skip with MODUSBRAIN_NO_PROBE_PROMPT=1.
   - --budget-usd N halts the run when cumulative cost exceeds the cap.
   - --judge MODEL overrides the resolveModel chain; pair with --yes when
     automating.
@@ -223,8 +223,8 @@ async function loadFromCapture(engine: BrainEngine, limit?: number): Promise<str
     console.error(
       `--from-capture: no rows in eval_candidates. Captures are off by default in v0.25.0+.\n` +
         `Enable with:\n` +
-        `  export GBRAIN_CONTRIBUTOR_MODE=1\n` +
-        `or set 'eval.capture: true' in your gbrain config. Re-run queries to populate, then try again.`,
+        `  export MODUSBRAIN_CONTRIBUTOR_MODE=1\n` +
+        `or set 'eval.capture: true' in your modusbrain config. Re-run queries to populate, then try again.`,
     );
     process.exit(2);
   }
@@ -267,7 +267,7 @@ async function runRun(engine: BrainEngine, f: ParsedFlags): Promise<void> {
     cliFlag: f.judge,
     configKey: 'models.eval.contradictions_judge',
     tier: 'utility',
-    envVar: 'GBRAIN_CONTRADICTIONS_JUDGE_MODEL',
+    envVar: 'MODUSBRAIN_CONTRADICTIONS_JUDGE_MODEL',
     fallback: 'anthropic:claude-haiku-4-5',
   });
 

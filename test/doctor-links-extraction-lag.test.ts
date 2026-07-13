@@ -55,7 +55,7 @@ describe('links_extraction_lag doctor check', () => {
     const c = await checkLinksExtractionLag(engine);
     expect(c.status).toBe('warn');
     expect(c.message).toContain('un-extracted edges');
-    expect(c.message).toContain('gbrain extract --stale');
+    expect(c.message).toContain('modusbrain extract --stale');
     expect((c.details as any).pct).toBe(100);
   });
 
@@ -73,22 +73,22 @@ describe('links_extraction_lag doctor check', () => {
     expect(c.status).toBe('warn'); // never 'fail' by default
   });
 
-  test('GBRAIN_EXTRACTION_LAG_FAIL_PCT opts into hard fail', async () => {
+  test('MODUSBRAIN_EXTRACTION_LAG_FAIL_PCT opts into hard fail', async () => {
     await seedPages(120);
-    await withEnv({ GBRAIN_EXTRACTION_LAG_FAIL_PCT: '50' }, async () => {
+    await withEnv({ MODUSBRAIN_EXTRACTION_LAG_FAIL_PCT: '50' }, async () => {
       const c = await checkLinksExtractionLag(engine);
       expect(c.status).toBe('fail');
       expect(c.message).toContain('fail threshold');
     });
   });
 
-  test('GBRAIN_EXTRACTION_LAG_WARN_PCT raises the warn bar', async () => {
+  test('MODUSBRAIN_EXTRACTION_LAG_WARN_PCT raises the warn bar', async () => {
     // 10 of 120 stale = ~8%. Default warn 20% → ok. Lower to 5% → warn.
     await seedPages(120);
     await engine.executeRaw(`UPDATE pages SET links_extracted_at = now() WHERE slug NOT IN (SELECT slug FROM pages ORDER BY id LIMIT 10)`);
     const ok = await checkLinksExtractionLag(engine);
     expect(ok.status).toBe('ok');
-    await withEnv({ GBRAIN_EXTRACTION_LAG_WARN_PCT: '5' }, async () => {
+    await withEnv({ MODUSBRAIN_EXTRACTION_LAG_WARN_PCT: '5' }, async () => {
       const warn = await checkLinksExtractionLag(engine);
       expect(warn.status).toBe('warn');
     });

@@ -1,15 +1,15 @@
 /**
- * gbrain claw-test — end-to-end "fresh user" test harness.
+ * modusbrain claw-test — end-to-end "fresh user" test harness.
  *
  * Two tiers:
- *   gbrain claw-test                              — scripted (no LLM, CI gate)
- *   gbrain claw-test --live --agent openclaw      — real agent, friction discovery
+ *   modusbrain claw-test                              — scripted (no LLM, CI gate)
+ *   modusbrain claw-test --live --agent openclaw      — real agent, friction discovery
  *
  * Phases (scripted mode):
  *   setup → install_brain → import → query → extract → verify → render
  *
- * The harness sets GBRAIN_HOME=<tempdir> so the run is hermetic. Each child
- * gbrain invocation runs with --progress-json and the harness captures stderr
+ * The harness sets MODUSBRAIN_HOME=<tempdir> so the run is hermetic. Each child
+ * modusbrain invocation runs with --progress-json and the harness captures stderr
  * to assert expected_phases from scenario.json fired.
  *
  * See ~/.claude/plans/system-instruction-you-are-working-noble-biscuit.md
@@ -38,8 +38,8 @@ interface HarnessOpts {
   keepTempdir: boolean;
   listAgents: boolean;
   help: boolean;
-  /** Path to the gbrain binary used to invoke child commands. Defaults to argv[0]. */
-  gbrainBin?: string;
+  /** Path to the modusbrain binary used to invoke child commands. Defaults to argv[0]. */
+  modusbrainBin?: string;
 }
 
 interface PhaseOutcome {
@@ -78,7 +78,7 @@ export async function runClawTest(args: string[]): Promise<number> {
 
   const runId = newRunId(opts.agent);
   const runRoot = mkdtempSync(join(tmpdir(), `claw-test-${runId}-`));
-  const gbrainHome = runRoot; // configDir() appends '.gbrain' itself
+  const modusbrainHome = runRoot; // configDir() appends '.modusbrain' itself
   const transcriptPath = join(runRoot, 'transcript.jsonl');
   console.log(`run-id: ${runId}`);
   console.log(`tempdir: ${runRoot}`);
@@ -104,9 +104,9 @@ export async function runClawTest(args: string[]): Promise<number> {
   let exitCode = 0;
   try {
     if (opts.live) {
-      exitCode = await runLive(opts, scenario, { runId, runRoot, gbrainHome, transcriptPath });
+      exitCode = await runLive(opts, scenario, { runId, runRoot, modusbrainHome, transcriptPath });
     } else {
-      exitCode = await runScripted(opts, scenario, { runId, runRoot, gbrainHome });
+      exitCode = await runScripted(opts, scenario, { runId, runRoot, modusbrainHome });
     }
   } finally {
     process.off('SIGINT', onSignal);
@@ -121,7 +121,7 @@ export async function runClawTest(args: string[]): Promise<number> {
   // Always render at the end so the operator can immediately see the report.
   console.log('---');
   console.log(`friction log:    ${join(frictionDir(), runId + '.jsonl')}`);
-  console.log(`render report:   gbrain friction render --run-id ${runId}`);
+  console.log(`render report:   modusbrain friction render --run-id ${runId}`);
 
   if (interrupted) return 130;
   return exitCode;
@@ -134,7 +134,7 @@ export async function runClawTest(args: string[]): Promise<number> {
 /**
  * v0.32.x: env vars that, when inherited from the parent process, would
  * break the claw-test scripted harness's "hermetic PGLite tempdir"
- * contract. The harness runs `gbrain init --pglite` then a sequence of
+ * contract. The harness runs `modusbrain init --pglite` then a sequence of
  * subsequent phases that ALL must hit the same tempdir brain. If the
  * parent process (e.g. a CI runner with DATABASE_URL set for OTHER e2e
  * tests) leaks DATABASE_URL into the children, loadConfig sees the env
@@ -146,28 +146,28 @@ export async function runClawTest(args: string[]): Promise<number> {
  * Strip these on entry so the child env carries no Postgres-pointing
  * variable. PGLite-only by design.
  */
-const POSTGRES_POLLUTION_ENV_VARS = ['DATABASE_URL', 'GBRAIN_DATABASE_URL'];
+const POSTGRES_POLLUTION_ENV_VARS = ['DATABASE_URL', 'MODUSBRAIN_DATABASE_URL'];
 
 async function runScripted(
   opts: HarnessOpts,
   scenario: ScenarioConfig,
-  ctx: { runId: string; runRoot: string; gbrainHome: string },
+  ctx: { runId: string; runRoot: string; modusbrainHome: string },
 ): Promise<number> {
   // Filter out Postgres-pointing env vars before forwarding to children.
   // The harness is PGLite-only by design; an inherited DATABASE_URL
   // would force loadConfig() to flip the engine to 'postgres' at the
   // next phase boundary and break the hermetic-tempdir contract.
   const parentEnv = process.env as Record<string, string | undefined>;
-  const childEnv: Record<string, string> = { GBRAIN_HOME: ctx.gbrainHome, GBRAIN_FRICTION_RUN_ID: ctx.runId };
+  const childEnv: Record<string, string> = { MODUSBRAIN_HOME: ctx.modusbrainHome, MODUSBRAIN_FRICTION_RUN_ID: ctx.runId };
   for (const [k, v] of Object.entries(parentEnv)) {
     if (v === undefined) continue;
     if (POSTGRES_POLLUTION_ENV_VARS.includes(k)) continue;
     childEnv[k] = v;
   }
-  // Re-apply the explicit overrides so a parent GBRAIN_HOME / GBRAIN_FRICTION_RUN_ID
+  // Re-apply the explicit overrides so a parent MODUSBRAIN_HOME / MODUSBRAIN_FRICTION_RUN_ID
   // can't accidentally win the merge.
-  childEnv.GBRAIN_HOME = ctx.gbrainHome;
-  childEnv.GBRAIN_FRICTION_RUN_ID = ctx.runId;
+  childEnv.MODUSBRAIN_HOME = ctx.modusbrainHome;
+  childEnv.MODUSBRAIN_FRICTION_RUN_ID = ctx.runId;
 
   const phases: { name: string; argv: string[] }[] = [];
   // Phase 2: install_brain. `--no-embedding` defers embedding setup so the
@@ -179,7 +179,7 @@ async function runScripted(
   // Phase 3: import (only when scenario has a brain dir)
   // Capture brainDir for downstream phases that need an explicit --dir
   // (extract requires it post-#688 — defaults to configured source, and
-  // gbrain init --pglite doesn't register a fs source).
+  // modusbrain init --pglite doesn't register a fs source).
   let brainDir: string | undefined;
   if (scenario.brainRelative) {
     brainDir = join(scenario.dir, scenario.brainRelative);
@@ -204,8 +204,8 @@ async function runScripted(
   if (scenario.kind === 'upgrade' && scenario.seedRelative) {
     const seedSql = join(scenario.dir, scenario.seedRelative, 'dump.sql');
     if (existsSync(seedSql)) {
-      const dbPath = join(ctx.gbrainHome, '.gbrain', 'brain.pglite');
-      mkdirSync(join(ctx.gbrainHome, '.gbrain'), { recursive: true });
+      const dbPath = join(ctx.modusbrainHome, '.modusbrain', 'brain.pglite');
+      mkdirSync(join(ctx.modusbrainHome, '.modusbrain'), { recursive: true });
       const { seedPgliteFromFile } = await import('../core/claw-test/seed-pglite.ts');
       try {
         await seedPgliteFromFile({ dbPath, sqlPath: seedSql });
@@ -228,7 +228,7 @@ async function runScripted(
   const allStderr: string[] = [];
   const outcomes: PhaseOutcome[] = [];
   for (const phase of phases) {
-    const outcome = await invokeGbrain(opts.gbrainBin ?? 'gbrain', phase.argv, ctx.runRoot, childEnv);
+    const outcome = await invokeModusbrain(opts.modusbrainBin ?? 'modusbrain', phase.argv, ctx.runRoot, childEnv);
     outcome.phase = phase.name;
     outcomes.push(outcome);
     allStderr.push(outcome.stderrTail);
@@ -236,7 +236,7 @@ async function runScripted(
       logFriction({
         runId: ctx.runId,
         phase: phase.name,
-        message: `command failed (exit ${outcome.exitCode}): gbrain ${phase.argv.join(' ')}`,
+        message: `command failed (exit ${outcome.exitCode}): modusbrain ${phase.argv.join(' ')}`,
         severity: 'error',
         hint: outcome.stderrTail.trim().slice(0, 500),
         source: 'harness',
@@ -284,7 +284,7 @@ async function runScripted(
 async function runLive(
   opts: HarnessOpts,
   scenario: ScenarioConfig,
-  ctx: { runId: string; runRoot: string; gbrainHome: string; transcriptPath: string },
+  ctx: { runId: string; runRoot: string; modusbrainHome: string; transcriptPath: string },
 ): Promise<number> {
   let runner;
   try {
@@ -311,8 +311,8 @@ async function runLive(
 
   const sink = createTranscriptSink(ctx.transcriptPath);
   const env: Record<string, string> = {
-    GBRAIN_HOME: ctx.gbrainHome,
-    GBRAIN_FRICTION_RUN_ID: ctx.runId,
+    MODUSBRAIN_HOME: ctx.modusbrainHome,
+    MODUSBRAIN_FRICTION_RUN_ID: ctx.runId,
   };
 
   const brief = readBrief(scenario);
@@ -347,7 +347,7 @@ async function runLive(
 // Subprocess helpers
 // ---------------------------------------------------------------------------
 
-function invokeGbrain(
+function invokeModusbrain(
   bin: string,
   argv: string[],
   cwd: string,
@@ -402,7 +402,7 @@ function parseArgs(args: string[]): HarnessOpts {
     keepTempdir: false,
     listAgents: false,
     help: args.includes('--help') || args.includes('-h'),
-    gbrainBin: process.env.GBRAIN_BIN_OVERRIDE || process.execPath,
+    modusbrainBin: process.env.MODUSBRAIN_BIN_OVERRIDE || process.execPath,
   };
   for (let i = 0; i < args.length; i++) {
     const a = args[i];
@@ -443,11 +443,11 @@ function cmdListAgents(): number {
 }
 
 function printHelp() {
-  console.log(`gbrain claw-test — end-to-end claw-setup friction harness
+  console.log(`modusbrain claw-test — end-to-end claw-setup friction harness
 
 Usage:
-  gbrain claw-test [--scenario <name>] [--live --agent <name>] [--keep-tempdir]
-  gbrain claw-test --list-agents
+  modusbrain claw-test [--scenario <name>] [--live --agent <name>] [--keep-tempdir]
+  modusbrain claw-test --list-agents
 
 Defaults:
   --scenario fresh-install
@@ -457,7 +457,7 @@ Scripted mode runs canonical commands without an LLM (CI gate).
 Live mode spawns a real agent and lets it drive (~5–10 min, costs tokens).
 
 Examples:
-  gbrain claw-test --scenario fresh-install
-  gbrain claw-test --scenario upgrade-from-v0.18 --keep-tempdir
-  gbrain claw-test --live --agent openclaw`);
+  modusbrain claw-test --scenario fresh-install
+  modusbrain claw-test --scenario upgrade-from-v0.18 --keep-tempdir
+  modusbrain claw-test --live --agent openclaw`);
 }

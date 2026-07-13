@@ -3,7 +3,7 @@
  *
  * The #1678 incident's DB-cascade noise looked like a connection bug. In
  * reality a transaction-mode pooler reaps idle sockets between lock-renewal
- * ticks; gbrain self-heals via `PostgresEngine.reconnect()`. The thing an
+ * ticks; modusbrain self-heals via `PostgresEngine.reconnect()`. The thing an
  * operator actually needs to know — and that no existing signal expresses — is
  * "the pool was reaped N times in the last hour AND is NOT auto-recovering."
  * `batch_retry_health` surfaces connection retries but can't split
@@ -22,7 +22,7 @@
  *
  * Built on the shared `audit-writer.ts` cathedral — same ISO-week rotation,
  * same best-effort write semantics. File:
- * `~/.gbrain/audit/pool-recovery-YYYY-Www.jsonl` (honors `GBRAIN_AUDIT_DIR`).
+ * `~/.modusbrain/audit/pool-recovery-YYYY-Www.jsonl` (honors `MODUSBRAIN_AUDIT_DIR`).
  *
  * Privacy: `error_summary` is the error message truncated to 200 chars. It can
  * carry a DSN/host in a connection-failure message — routed through the shared

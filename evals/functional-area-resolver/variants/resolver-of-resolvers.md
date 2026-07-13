@@ -17,11 +17,11 @@ This folder is home. Treat it that way.
 
 ⛔ **NO WIKILINKS.** Standard markdown links only: `[Name](path)`. Never `[[wikilinks]]`.
 
-⛔ **GBRAIN MASTER READ-ONLY.** Never push to master on <owner>/gbrain. Never merge PRs. Branch → push → PR only. See `skills/github-agents/SKILL.md`.
+⛔ **MODUSBRAIN MASTER READ-ONLY.** Never push to master on <owner>/modusbrain. Never merge PRs. Branch → push → PR only. See `skills/github-agents/SKILL.md`.
 
 ⛔ **PUBLIC REPO GUARD.** Before ANY public GitHub interaction: read `skills/public-repo-guard/SKILL.md`. Run PII scanner on ALL content.
 
-⚡ **MINIONS OVER SUB-AGENTS.** Use gbrain Minions (shell jobs) for batch/deterministic work. Sub-agents only when LLM reasoning is required mid-task. Always set `--timeout-ms 900000` for long jobs.
+⚡ **MINIONS OVER SUB-AGENTS.** Use modusbrain Minions (shell jobs) for batch/deterministic work. Sub-agents only when LLM reasoning is required mid-task. Always set `--timeout-ms 900000` for long jobs.
 
 ## Gate -1 — Acknowledge Immediately
 
@@ -44,7 +44,7 @@ If the owner mentions a **death, funeral, birth, hospitalization, emergency, dia
 
 Every the owner message: scan for entity mentions (people, companies, deals, YC batches). For each: search brain, load context, update if stale. Read `skills/entity-detector/ENTITY-DETECTION.md` for the full protocol.
 
-**Brain-First Content Resolution (MANDATORY):** When the owner references ANY content — article, essay, concept, tweet, meeting, book, person, company — by name or description, search gbrain FIRST. Never ask "which article?" or "can you share the link?" The brain has 100K pages. Search it. Only ask the owner if gbrain + memory + web all fail.
+**Brain-First Content Resolution (MANDATORY):** When the owner references ANY content — article, essay, concept, tweet, meeting, book, person, company — by name or description, search modusbrain FIRST. Never ask "which article?" or "can you share the link?" The brain has 100K pages. Search it. Only ask the owner if modusbrain + memory + web all fail.
 
 ## Gate 2 — Session Startup
 
@@ -58,7 +58,7 @@ Before first substantive reply:
 
 **After every brain write:** `bash scripts/brain-commit-link.sh "<message>"`. Always absolute paths for brain writes (`/your/brain/path/...`).
 
-**Repo dev:** `/your/gbrain`, `/your/gstack`, `/your/brain/path` are PRODUCTION READ-ONLY for code changes. All dev work → `/your/git-projects/<repo>-<feature>/`. See `skills/repo-dev/SKILL.md`.
+**Repo dev:** `/your/modusbrain`, `/your/gstack`, `/your/brain/path` are PRODUCTION READ-ONLY for code changes. All dev work → `/your/git-projects/<repo>-<feature>/`. See `skills/repo-dev/SKILL.md`.
 
 ## Gate 3 — Outbound Link Gate
 
@@ -138,9 +138,9 @@ Key rules always in effect:
 
 ## Coding Tasks — GStack Integration
 
-Coding on gstack/gbrain/GL/any dev project: read `skills/acp-coding/SKILL.md`, spawn Codex via ACP, give full context, monitor+relay. Slash: `/code`, `/codex`, `/ship`, `/qa`, `/review`, `/investigate`.
+Coding on gstack/modusbrain/GL/any dev project: read `skills/acp-coding/SKILL.md`, spawn Codex via ACP, give full context, monitor+relay. Slash: `/code`, `/codex`, `/ship`, `/qa`, `/review`, `/investigate`.
 
-<!-- gbrain:skillpack:begin -->
-<!-- Installed by gbrain 0.25.1. All 35 skills in this pack are already referenced in the resolver tables above. -->
-<!-- gbrain:skillpack:manifest cumulative-slugs="academic-verify,archive-crawler,article-enrichment,book-mirror,brain-ops,brain-pdf,briefing,citation-fixer,concept-synthesis,cron-scheduler,cross-modal-review,daily-task-manager,daily-task-prep,data-research,enrich,idea-ingest,ingest,maintain,media-ingest,meeting-ingestion,minion-orchestrator,perplexity-research,query,repo-architecture,reports,signal-detector,skill-creator,skillify,skillpack-check,soul-audit,strategic-reading,testing,voice-note-ingest,webhook-transforms" version="0.25.1" -->
-<!-- gbrain:skillpack:end -->
+<!-- modusbrain:skillpack:begin -->
+<!-- Installed by modusbrain 0.25.1. All 35 skills in this pack are already referenced in the resolver tables above. -->
+<!-- modusbrain:skillpack:manifest cumulative-slugs="academic-verify,archive-crawler,article-enrichment,book-mirror,brain-ops,brain-pdf,briefing,citation-fixer,concept-synthesis,cron-scheduler,cross-modal-review,daily-task-manager,daily-task-prep,data-research,enrich,idea-ingest,ingest,maintain,media-ingest,meeting-ingestion,minion-orchestrator,perplexity-research,query,repo-architecture,reports,signal-detector,skill-creator,skillify,skillpack-check,soul-audit,strategic-reading,testing,voice-note-ingest,webhook-transforms" version="0.25.1" -->
+<!-- modusbrain:skillpack:end -->

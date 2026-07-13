@@ -184,7 +184,7 @@ export function currentEmbeddingSignature(): string {
 }
 
 /**
- * Whether a `gbrain sync --all` invocation will embed at sync time
+ * Whether a `modusbrain sync --all` invocation will embed at sync time
  * ('inline') or defer embedding to per-source `embed-backfill` minion jobs
  * ('deferred'). Under federated_v2 the default path defers; the backfill
  * jobs carry their own 10-min cooldown + $25/source/24h spend cap, so the

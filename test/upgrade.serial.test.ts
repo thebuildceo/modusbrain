@@ -45,12 +45,12 @@ describe('detectInstallMethod heuristic (source analysis)', () => {
 
   test('checks node_modules before binary', () => {
     const nodeModulesIdx = source.indexOf('node_modules');
-    const binaryIdx = source.indexOf("endsWith('/gbrain')");
+    const binaryIdx = source.indexOf("endsWith('/modusbrain')");
     expect(nodeModulesIdx).toBeLessThan(binaryIdx);
   });
 
   test('checks binary before clawhub', () => {
-    const binaryIdx = source.indexOf("endsWith('/gbrain')");
+    const binaryIdx = source.indexOf("endsWith('/modusbrain')");
     const clawhubIdx = source.indexOf("clawhub --version");
     expect(binaryIdx).toBeLessThan(clawhubIdx);
   });
@@ -78,9 +78,9 @@ describe('detectInstallMethod heuristic (source analysis)', () => {
   });
 
   // v0.28.5 cluster D: 3-signal layered detection.
-  test('bun-link signal walks .git/config for garrytan/gbrain match', () => {
+  test('bun-link signal walks .git/config for garrytan/modusbrain match', () => {
     expect(source).toContain('function detectBunLink');
-    expect(source).toContain('GBRAIN_GITHUB_REPO');
+    expect(source).toContain('MODUSBRAIN_GITHUB_REPO');
     expect(source).toContain('toLowerCase()');
   });
 
@@ -111,7 +111,7 @@ describe('detectInstallMethod heuristic (source analysis)', () => {
 
   test('bun global upgrade passes cwd to bun update', () => {
     expect(source).toContain('const bunGlobalRoot = resolveBunGlobalRoot()');
-    expect(source).toContain("execFileSync(BUN, ['update', 'gbrain'], { cwd: bunGlobalRoot");
+    expect(source).toContain("execFileSync(BUN, ['update', 'modusbrain'], { cwd: bunGlobalRoot");
   });
 
   test('classifyBunInstall checks repository.url AND src/cli.ts marker', () => {
@@ -157,7 +157,7 @@ describe('resolveBunGlobalRoot', () => {
   });
 
   test('uses canonical ~/.bun/install/global when present', () => {
-    const home = mkdtempSync(join(tmpdir(), 'gbrain-upgrade-home-'));
+    const home = mkdtempSync(join(tmpdir(), 'modusbrain-upgrade-home-'));
     try {
       delete process.env.BUN_INSTALL;
       process.env.HOME = home;
@@ -172,13 +172,13 @@ describe('resolveBunGlobalRoot', () => {
     }
   });
 
-  test('falls back to the package root above node_modules/gbrain', () => {
-    const home = mkdtempSync(join(tmpdir(), 'gbrain-upgrade-home-'));
-    const globalRoot = mkdtempSync(join(tmpdir(), 'gbrain-upgrade-global-'));
+  test('falls back to the package root above node_modules/modusbrain', () => {
+    const home = mkdtempSync(join(tmpdir(), 'modusbrain-upgrade-home-'));
+    const globalRoot = mkdtempSync(join(tmpdir(), 'modusbrain-upgrade-global-'));
     try {
       delete process.env.BUN_INSTALL;
       process.env.HOME = home;
-      const cliPath = join(globalRoot, 'node_modules', 'gbrain', 'src', 'cli.ts');
+      const cliPath = join(globalRoot, 'node_modules', 'modusbrain', 'src', 'cli.ts');
       mkdirSync(dirname(cliPath), { recursive: true });
       mkdirSync(join(globalRoot, 'node_modules'), { recursive: true });
       writeFileSync(join(globalRoot, 'package.json'), '{}');

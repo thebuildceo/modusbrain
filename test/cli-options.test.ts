@@ -106,7 +106,7 @@ describe('getCliOptions / setCliOptions singleton', () => {
 describe('cli.ts global-flag stripping (integration)', () => {
   const CLI = join(import.meta.dir, '..', 'src', 'cli.ts');
 
-  test('gbrain --progress-json --version works (global flag stripped before dispatch)', () => {
+  test('modusbrain --progress-json --version works (global flag stripped before dispatch)', () => {
     const res = bunSpawnSync( [CLI, '--progress-json', '--version'], {
       encoding: 'utf-8',
       env: { ...process.env, NO_COLOR: '1' },
@@ -115,7 +115,7 @@ describe('cli.ts global-flag stripping (integration)', () => {
     expect(res.stdout).toContain('modusbrain ');
   });
 
-  test('gbrain --quiet --progress-interval=500 version works (flags interleaved, all stripped)', () => {
+  test('modusbrain --quiet --progress-interval=500 version works (flags interleaved, all stripped)', () => {
     const res = bunSpawnSync( [CLI, '--quiet', '--progress-interval=500', 'version'], {
       encoding: 'utf-8',
       env: { ...process.env, NO_COLOR: '1' },
@@ -128,7 +128,7 @@ describe('cli.ts global-flag stripping (integration)', () => {
 describe('CLI integration: progress streams to the right channel', () => {
   const CLI = join(import.meta.dir, '..', 'src', 'cli.ts');
 
-  test('gbrain --progress-json --version emits only the version on stdout', () => {
+  test('modusbrain --progress-json --version emits only the version on stdout', () => {
     // `version` is a single-shot command that goes through the main()
     // dispatch path. We want to confirm --progress-json doesn't force
     // stray progress onto stdout for commands that don't use a reporter.
@@ -142,7 +142,7 @@ describe('CLI integration: progress streams to the right channel', () => {
     expect(res.stdout).not.toContain('"event":"start"');
   });
 
-  test('gbrain --quiet skillpack-check returns exit code with no stdout', () => {
+  test('modusbrain --quiet skillpack-check returns exit code with no stdout', () => {
     // Regression guard for the flag-collision that skillpack-check hit
     // when --quiet briefly passed through argv. Now it reads the singleton.
     const res = bunSpawnSync( [CLI, '--quiet', 'skillpack-check'], {

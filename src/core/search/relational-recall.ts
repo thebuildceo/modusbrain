@@ -56,7 +56,7 @@ interface RelationalFailureEvent {
 
 const failureWriter = createAuditWriter<RelationalFailureEvent>({
   featureName: 'relational-recall-failures',
-  errorLabel: 'gbrain',
+  errorLabel: 'modusbrain',
   errorTrailer: '; search continues',
 });
 

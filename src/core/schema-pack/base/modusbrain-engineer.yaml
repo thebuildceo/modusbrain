@@ -1,4 +1,4 @@
-# gbrain-engineer — engineer / code-author lens pack
+# modusbrain-engineer — engineer / code-author lens pack
 #
 # v0.41 lens packs wave. Bridge-only pack (D8-C — locked at plan time
 # after assessing what already exists in gstack):
@@ -7,10 +7,10 @@
 #     qa, retro, learn, cso skills with a typed JSONL learnings system
 #     at ~/.gstack/projects/{repo}/learnings.jsonl (pattern, pitfall,
 #     preference, architecture, tool, operational, investigation).
-#   - gbrain already ships `type: code` + code-def/code-refs/code-callers.
-#   - gbrain already ships `type: project` + brain/projects/ directory.
+#   - modusbrain already ships `type: code` + code-def/code-refs/code-callers.
+#   - modusbrain already ships `type: project` + brain/projects/ directory.
 #
-# What's missing: the gstack learnings JSONL never reaches gbrain. T8
+# What's missing: the gstack learnings JSONL never reaches modusbrain. T8
 # fixes that with an IngestionSource bridge that watches the JSONL files
 # and emits IngestionEvent per line typed as `learning` page.
 #
@@ -32,11 +32,11 @@
 # loop, augmented by the gstack-learnings IngestionSource (T8) running in
 # the v0.38 daemon when this pack is active.
 
-api_version: gbrain-schema-pack-v1
-name: gbrain-engineer
+api_version: modusbrain-schema-pack-v1
+name: modusbrain-engineer
 version: 1.0.0
-description: "Engineer / code-author lens. Bridges gstack's typed JSONL learnings system (pattern, pitfall, architecture, tool, operational, investigation) into gbrain as first-class `learning` pages. Declares architecture_calls, effort_estimates, risk_assessment calibration domains. Reuses gbrain-base's `code` page type unchanged."
-gbrain_min_version: 0.41.0
+description: "Engineer / code-author lens. Bridges gstack's typed JSONL learnings system (pattern, pitfall, architecture, tool, operational, investigation) into modusbrain as first-class `learning` pages. Declares architecture_calls, effort_estimates, risk_assessment calibration domains. Reuses gbrain-base's `code` page type unchanged."
+modusbrain_min_version: 0.41.0
 extends: gbrain-base
 
 # Reuse `code` + `project` from base. The gstack-learnings bridge writes

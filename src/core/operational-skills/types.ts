@@ -1,6 +1,6 @@
 /**
  * Operational skills — versioned, confidence-gated procedures for agent execution.
- * Extends GBrain's knowledge layer with the "Company Brain" compile → approve → execute loop.
+ * Extends ModusBrain's knowledge layer with the "Company Brain" compile → approve → execute loop.
  */
 
 /** Risk tier determines approval and conflict-handling behavior. */

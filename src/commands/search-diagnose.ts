@@ -1,5 +1,5 @@
 /**
- * `gbrain search diagnose "<query>" --target <slug> [--json] [--source <id>]`
+ * `modusbrain search diagnose "<query>" --target <slug> [--json] [--source <id>]`
  * (T0 — Phase-0 retrieval diagnostic).
  *
  * Traces WHERE a target page surfaces (or fails to) across the retrieval
@@ -42,7 +42,7 @@ export async function runSearchDiagnose(engine: BrainEngine, args: string[]): Pr
   const query = args.slice(1).find((a, i) => !a.startsWith('--') && args.slice(1)[i - 1] !== '--target' && args.slice(1)[i - 1] !== '--source');
 
   if (!query || !target) {
-    console.error('Usage: gbrain search diagnose "<query>" --target <slug> [--json] [--source <id>]');
+    console.error('Usage: modusbrain search diagnose "<query>" --target <slug> [--json] [--source <id>]');
     process.exit(2);
   }
 

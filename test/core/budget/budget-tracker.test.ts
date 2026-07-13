@@ -14,7 +14,7 @@
  *
  * Hermetic: no DB, no network, no real audit dir. We override `auditPath`
  * to a tmpdir-scoped JSONL so tests can read it back without touching
- * `~/.gbrain`. `withEnv` covers the GBRAIN_AUDIT_DIR escape hatch.
+ * `~/.modusbrain`. `withEnv` covers the MODUSBRAIN_AUDIT_DIR escape hatch.
  */
 
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
@@ -34,7 +34,7 @@ let stderrCapture: string;
 let origStderrWrite: typeof process.stderr.write;
 
 beforeEach(() => {
-  tmp = mkdtempSync(join(tmpdir(), 'gbrain-budget-test-'));
+  tmp = mkdtempSync(join(tmpdir(), 'modusbrain-budget-test-'));
   auditPath = join(tmp, 'budget.jsonl');
   _resetBudgetTrackerWarningsForTest();
   stderrCapture = '';
@@ -140,7 +140,7 @@ describe('BudgetTracker.reserve', () => {
 
   test('v0.41.20.0: slash-prefix anthropic/claude-* under --max-cost does NOT no_pricing throw (THE FIX)', () => {
     // Pre-v0.41.20.0: lookupPricing only split modelId on ':'. CLI users
-    // running `gbrain brainstorm --judge-model anthropic/claude-sonnet-4-6
+    // running `modusbrain brainstorm --judge-model anthropic/claude-sonnet-4-6
     // --max-cost 5` hit TX2 no_pricing because the slash-form id silently
     // missed ANTHROPIC_PRICING (closes #1540).
     const t = new BudgetTracker({ maxCostUsd: 10.0, label: 'test', auditPath });

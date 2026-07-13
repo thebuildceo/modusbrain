@@ -7,7 +7,7 @@ import { lstatSync, realpathSync } from 'fs';
 import { resolve, relative, sep } from 'path';
 import type { BrainEngine } from './engine.ts';
 import { clampSearchLimit } from './engine.ts';
-import type { GBrainConfig } from './config.ts';
+import type { ModusBrainConfig } from './config.ts';
 import type { PageType } from './types.ts';
 import { importFromContent } from './import-file.ts';
 import { writePageThrough } from './write-through.ts';
@@ -52,8 +52,8 @@ import { operationalSkillOperations } from './operational-skills/operations.ts';
 /**
  * v0.31 (eD6 / eE7): ErrorCode is now an OPEN union via the
  * `(string & {})` autocomplete-friendly hack. Downstream consumers (e.g.
- * gbrain-evals) get autocomplete on the named codes AND remain TS-forward-
- * compatible when gbrain adds new codes in future releases. This shape is
+ * modusbrain-evals) get autocomplete on the named codes AND remain TS-forward-
+ * compatible when modusbrain adds new codes in future releases. This shape is
  * the standard Anthropic-API/OpenAI-API pattern.
  *
  * v0.31 added: 'rate_limited', 'extraction_failed', 'fact_not_found'.
@@ -257,7 +257,7 @@ export interface AuthInfo {
    * NULL → 'default' for pre-existing rows so this field is populated
    * on the upgrade path; brand-new public-client registrations may
    * still leave it null until an operator explicitly scopes via
-   * `gbrain auth scope-client`.
+   * `modusbrain auth scope-client`.
    */
   sourceId?: string;
   /**
@@ -277,12 +277,12 @@ export interface AuthInfo {
 
 export interface OperationContext {
   engine: BrainEngine;
-  config: GBrainConfig;
+  config: ModusBrainConfig;
   logger: Logger;
   dryRun: boolean;
   /**
    * OAuth auth info (v0.8+). Present when the caller authenticated via OAuth 2.1
-   * through `gbrain serve --http`. Contains clientId and granted scopes for
+   * through `modusbrain serve --http`. Contains clientId and granted scopes for
    * per-operation scope enforcement.
    */
   auth?: AuthInfo;
@@ -356,9 +356,9 @@ export interface OperationContext {
    */
   takesHoldersAllowList?: string[];
   /**
-   * Connected-gbrains brain id (v0.19+ / v0.26 mounts). Identifies which brain
+   * Connected-modusbrains brain id (v0.19+ / v0.26 mounts). Identifies which brain
    * this op is targeting. 'host' for the default brain configured in
-   * ~/.gbrain/config.json; otherwise a mount id registered in ~/.gbrain/mounts.json.
+   * ~/.modusbrain/config.json; otherwise a mount id registered in ~/.modusbrain/mounts.json.
    *
    * `ctx.engine` is the resolved BrainEngine for this id (populated by
    * BrainRegistry at dispatch time). `brainId` exists alongside for:
@@ -378,7 +378,7 @@ export interface OperationContext {
    * `sources.id` is TEXT (not INTEGER) — keep this as a string.
    *
    * Resolved once in the dispatcher from CLI flag (--source) / env
-   * (GBRAIN_SOURCE) / `.gbrain-source` dotfile / per-token sources scope
+   * (MODUSBRAIN_SOURCE) / `.modusbrain-source` dotfile / per-token sources scope
    * (HTTP). Defaults to 'default' when nothing else applies.
    *
    * Every facts read/write filter starts with `WHERE source_id = $X`
@@ -548,7 +548,7 @@ export function resolvePerCallMode(ctx: OperationContext, raw: unknown): string 
     throw new OperationError(
       'invalid_params',
       `Unknown search mode '${raw}'. Valid: conservative, balanced, tokenmax.`,
-      `gbrain search "<query>" --mode balanced`,
+      `modusbrain search "<query>" --mode balanced`,
     );
   }
   return raw;
@@ -724,7 +724,7 @@ const get_page: Operation = {
 
 const put_page: Operation = {
   name: 'put_page',
-  description: 'Write/update a page (markdown with frontmatter). Chunks, embeds, reconciles tags, and (when auto_link/auto_timeline are enabled) extracts + reconciles graph links and timeline entries. For large content on Windows (pipe-buffer limit ~45KB) or any file-as-input workflow, use `gbrain capture --file PATH --slug SLUG` — capture reads the file as a Buffer with a binary-NUL guard and adds provenance write-through (v0.39.3.0).',
+  description: 'Write/update a page (markdown with frontmatter). Chunks, embeds, reconciles tags, and (when auto_link/auto_timeline are enabled) extracts + reconciles graph links and timeline entries. For large content on Windows (pipe-buffer limit ~45KB) or any file-as-input workflow, use `modusbrain capture --file PATH --slug SLUG` — capture reads the file as a Buffer with a binary-NUL guard and adds provenance write-through (v0.39.3.0).',
   params: {
     slug: { type: 'string', required: true, description: 'Page slug' },
     content: { type: 'string', required: true, description: 'Full markdown content with YAML frontmatter' },
@@ -880,7 +880,7 @@ const put_page: Operation = {
           if (process.stderr.isTTY && ctx.remote === false) {
             console.error(
               `[schema] put_page wrote type=\`${pageType}\` which isn't in active pack \`${activePack.page_types.length ? '<configured>' : 'gbrain-base'}\`. ` +
-              `Run \`gbrain schema review-candidates\` to promote or ignore.`,
+              `Run \`modusbrain schema review-candidates\` to promote or ignore.`,
             );
           }
         }
@@ -904,7 +904,7 @@ const put_page: Operation = {
     if (!ctx.dryRun && result.status !== 'error' && !isSandboxSubagent) {
       const sourceId = ctx.sourceId ?? 'default';
       const provenanceVia = ctx.remote === false ? 'put_page' : 'mcp:put_page';
-      // Shared canonical write-through (also used by `gbrain brainstorm/lsd
+      // Shared canonical write-through (also used by `modusbrain brainstorm/lsd
       // --save`). Renders the file from the saved DB row and writes it
       // atomically; never throws (failures land in skipped/error).
       writeThrough = await writePageThrough(ctx.engine, result.slug, {
@@ -1066,7 +1066,7 @@ const put_page: Operation = {
     // Post-write validator lint (PR 2.5): feature-flag-gated, non-blocking.
     // When `writer.lint_on_put_page` is enabled, runs the BrainWriter's
     // validators on the freshly-written page and logs findings to
-    // ingest_log + ~/.gbrain/validator-lint.jsonl. Does NOT reject the
+    // ingest_log + ~/.modusbrain/validator-lint.jsonl. Does NOT reject the
     // write — that's the deferred strict-mode flip after the 7-day soak.
     let writerLint: { error_count: number; warning_count: number } | { skipped: string } | undefined;
     try {
@@ -1511,7 +1511,7 @@ const query: Operation = {
         "  'off' — default for entity / canonical / definitional queries\n" +
         "  'on'  — surface emotionally-weighted + take-rich pages\n" +
         "  'strong' — aggressive mattering tilt\n" +
-        "Omit and gbrain auto-detects from query text. Independent of `recency`.",
+        "Omit and modusbrain auto-detects from query text. Independent of `recency`.",
     },
     recency: {
       type: 'string',
@@ -1521,7 +1521,7 @@ const query: Operation = {
         "  'off' — default for canonical truth\n" +
         "  'on'  — daily/, media/x/, chat/ decay aggressively; concepts/, originals/, writing/ stay evergreen\n" +
         "  'strong' — multiplies the recency factor by 1.5 (use for 'today' / 'right now')\n" +
-        "Omit and gbrain auto-detects. Independent of `salience` (orthogonal axes).",
+        "Omit and modusbrain auto-detects. Independent of `salience` (orthogonal axes).",
     },
     since: {
       type: 'string',
@@ -1536,7 +1536,7 @@ const query: Operation = {
     source_id: {
       type: 'string',
       description:
-        "v0.34: scope search to a single source. Defaults to OperationContext.sourceId (set from CLI --source / GBRAIN_SOURCE / .gbrain-source dotfile). Pass '__all__' to span every source for trusted local callers; for remote callers '__all__' spans only your granted sources.",
+        "v0.34: scope search to a single source. Defaults to OperationContext.sourceId (set from CLI --source / MODUSBRAIN_SOURCE / .modusbrain-source dotfile). Pass '__all__' to span every source for trusted local callers; for remote callers '__all__' spans only your granted sources.",
     },
     cross_modal: {
       type: 'string',
@@ -1679,7 +1679,7 @@ const query: Operation = {
     // search handler — fire-and-forget, internal callers bypass this path.
     bumpLastRetrievedAt(ctx.engine, results.map((r) => r.page_id));
 
-    // Op-layer capture (v0.25.0). Fire-and-forget. meta tells gbrain-evals
+    // Op-layer capture (v0.25.0). Fire-and-forget. meta tells modusbrain-evals
     // what hybridSearch *actually* did so replay can distinguish "with API
     // key" from "keyword-only fallback" and "expansion fired" from
     // "expansion requested + silently fell back."
@@ -1828,7 +1828,7 @@ const think: Operation = {
     rounds: { type: 'number', description: 'Multi-pass: 1 (default). Round-loop scaffolding is in place; gap-driven retrieval ships in v0.29.' },
     save: { type: 'boolean', description: 'Persist a synthesis page (local-CLI only; ignored for MCP)' },
     take: { type: 'boolean', description: 'Append a take row to the anchor page (requires anchor)' },
-    model: { type: 'string', description: 'Model override (alias or full id). Falls through models.think → models.default → GBRAIN_MODEL → opus.' },
+    model: { type: 'string', description: 'Model override (alias or full id). Falls through models.think → models.default → MODUSBRAIN_MODEL → opus.' },
     since: { type: 'string', description: 'Start of temporal window (YYYY-MM-DD or YYYY-MM)' },
     until: { type: 'string', description: 'End of temporal window' },
   },
@@ -1988,7 +1988,7 @@ const add_link: Operation = {
     const linkOpts = ctx.sourceId
       ? { fromSourceId: ctx.sourceId, toSourceId: ctx.sourceId, originSourceId: ctx.sourceId }
       : undefined;
-    await ctx.engine.addLink( // gbrain-allow-direct-insert: add_link MCP op is the explicit canonical surface for manual link creation; auto-link reconciliation runs separately via auto_link post-hook
+    await ctx.engine.addLink( // modusbrain-allow-direct-insert: add_link MCP op is the explicit canonical surface for manual link creation; auto-link reconciliation runs separately via auto_link post-hook
       p.from as string, p.to as string,
       (p.context as string) || '', (p.link_type as string) || '',
       linkSource, undefined, undefined,
@@ -2097,7 +2097,7 @@ const traverse_graph: Operation = {
     const slug = p.slug as string;
     const requestedDepth = (p.depth as number) || 5;
     if (requestedDepth > TRAVERSE_DEPTH_CAP) {
-      ctx.logger.warn(`[gbrain] traverse_graph depth clamped from ${requestedDepth} to ${TRAVERSE_DEPTH_CAP}`);
+      ctx.logger.warn(`[modusbrain] traverse_graph depth clamped from ${requestedDepth} to ${TRAVERSE_DEPTH_CAP}`);
     }
     const depth = Math.max(1, Math.min(requestedDepth, TRAVERSE_DEPTH_CAP));
     const linkType = p.link_type as string | undefined;
@@ -2152,7 +2152,7 @@ const add_timeline_entry: Operation = {
     }
     // v0.31.8 (D7): thread ctx.sourceId.
     const sourceOpts = ctx.sourceId ? { sourceId: ctx.sourceId } : {};
-    await ctx.engine.addTimelineEntry(p.slug as string, { // gbrain-allow-direct-insert: add_timeline_entry MCP op is the explicit canonical surface for manual timeline entries
+    await ctx.engine.addTimelineEntry(p.slug as string, { // modusbrain-allow-direct-insert: add_timeline_entry MCP op is the explicit canonical surface for manual timeline entries
       date,
       source: (p.source as string) || '',
       summary: p.summary as string,
@@ -2222,7 +2222,7 @@ const get_brain_identity: Operation = {
   handler: async (ctx) => {
     const stats = await ctx.engine.getStats();
     // v0.42 self-upgrade: surface a pending update on the thin-client banner
-    // (bonus channel; the CLI stderr marker + `gbrain self-upgrade` are the
+    // (bonus channel; the CLI stderr marker + `modusbrain self-upgrade` are the
     // load-bearing surface). Cache-read-only, no network, fail-open.
     let update_available = false;
     let latest_version: string | null = null;
@@ -2321,7 +2321,7 @@ const list_brain_skillpack: Operation = {
     'List brain-resident skillpacks this brain ships (per-source). Returns each pack\'s skills, ' +
     'one-line descriptions, the schema pack it targets + whether that matches this brain, and a ' +
     'git scaffold spec. Read-only; gated by mcp.publish_skills. After orienting, call this and ' +
-    'ask the user whether to install any pack the brain offers (gbrain skillpack scaffold <spec>).',
+    'ask the user whether to install any pack the brain offers (modusbrain skillpack scaffold <spec>).',
   params: {},
   handler: async (ctx) => {
     const sc = await import('./skill-catalog.ts');
@@ -2358,7 +2358,7 @@ const advisor: Operation = {
         throw new OperationError(
           'permission_denied',
           'The advisor is not published over MCP by the brain owner.',
-          'The owner can enable it with `gbrain config set mcp.publish_advisor true`.',
+          'The owner can enable it with `modusbrain config set mcp.publish_advisor true`.',
         );
       }
     }
@@ -2380,16 +2380,16 @@ const advisor: Operation = {
   },
   scope: 'read',
   // NOT localOnly — exposed over MCP (E1) behind mcp.publish_advisor.
-  // No cliHints: the CLI surface is the richer `gbrain advisor` command
+  // No cliHints: the CLI surface is the richer `modusbrain advisor` command
   // (commands/advisor.ts) which adds --json exit codes + --apply.
   cliHints: { name: 'advisor', hidden: true },
 };
 
 /**
- * v0.41.19.0 — `gbrain status` thin-client surface.
+ * v0.41.19.0 — `modusbrain status` thin-client surface.
  *
  * Returns a snapshot of sync freshness + last cycle state for thin-client
- * `gbrain status` callers. Per D2/D10 in the plan:
+ * `modusbrain status` callers. Per D2/D10 in the plan:
  *
  *   - Scope: admin (NOT localOnly). The op exposes operational state
  *     including sync timestamps and cycle metadata. Locking it to admin
@@ -2400,15 +2400,15 @@ const advisor: Operation = {
  *   - Payload: `{schema_version: 1, sync, cycle}` ONLY. Locks, Workers,
  *     Queue, and Autopilot sections are deliberately omitted from the
  *     remote payload — they are local-host concerns that thin-client
- *     callers shouldn't see at all (and the local `gbrain status` renders
+ *     callers shouldn't see at all (and the local `modusbrain status` renders
  *     them as "N/A on remote brain" instead of pretending they exist).
  *
  *   - The local CLI composes the same data plus the local-only sections
- *     directly (no MCP round-trip when running against ~/.gbrain).
+ *     directly (no MCP round-trip when running against ~/.modusbrain).
  */
 const get_status_snapshot: Operation = {
   name: 'get_status_snapshot',
-  description: 'Snapshot for `gbrain status` thin-client mode: sync freshness + last cycle. Admin-scope.',
+  description: 'Snapshot for `modusbrain status` thin-client mode: sync freshness + last cycle. Admin-scope.',
   params: {},
   handler: async (ctx) => {
     const { buildSyncStatusReport } = await import('../commands/sync.ts');
@@ -2447,7 +2447,7 @@ const get_status_snapshot: Operation = {
     }
     const sync = await buildSyncStatusReport(ctx.engine, sources);
     const cycle = await buildCycleSnapshot(ctx.engine);
-    // #1984: report the brain server's version so a thin-client `gbrain status`
+    // #1984: report the brain server's version so a thin-client `modusbrain status`
     // can surface remote_version alongside its own local CLI version.
     const { VERSION } = await import('../version.ts');
     return { schema_version: 1 as const, version: VERSION, sync, cycle };
@@ -2462,7 +2462,7 @@ const get_status_snapshot: Operation = {
  * First read-only diagnostic op exposed over HTTP MCP. Wraps the focused
  * thin-client check set in `src/commands/doctor.ts:doctorReportRemote()` and
  * returns the structured `DoctorReport` JSON verbatim. The matching client-
- * side renderer lives in `src/commands/remote.ts` (used by `gbrain remote
+ * side renderer lives in `src/commands/remote.ts` (used by `modusbrain remote
  * doctor`). Local doctor is unchanged — operators on the host still get the
  * full check set.
  *
@@ -2781,7 +2781,7 @@ const file_url: Operation = {
       throw new OperationError('storage_error', `File not found: ${p.storage_path}`);
     }
     // TODO: generate signed URL from Supabase Storage
-    return { storage_path: rows[0].storage_path, url: `gbrain:files/${rows[0].storage_path}` };
+    return { storage_path: rows[0].storage_path, url: `modusbrain:files/${rows[0].storage_path}` };
   },
 };
 
@@ -2808,7 +2808,7 @@ const submit_job: Operation = {
     // Submit-side MCP guard: reject protected job names from untrusted callers
     // BEFORE we touch the DB. This is the first of the two security layers
     // (the second is MinionQueue.add's check). Independent of the worker-side
-    // GBRAIN_ALLOW_SHELL_JOBS env flag — even if that flag is on, MCP callers
+    // MODUSBRAIN_ALLOW_SHELL_JOBS env flag — even if that flag is on, MCP callers
     // cannot submit protected-type jobs.
     const { isProtectedJobName } = await import('./minions/protected-names.ts');
     // F7b fail-closed: anything that is not strictly false (i.e., remote=true OR
@@ -2902,10 +2902,10 @@ const submit_agent: Operation = {
   handler: async (ctx, p) => {
     // Remote-callable but only when the OAuth client has scope=agent AND
     // a binding row. Local CLI callers (ctx.remote === false) skip the
-    // binding check — `gbrain agent run` already runs through subagent.ts
+    // binding check — `modusbrain agent run` already runs through subagent.ts
     // directly without going through this op.
     if (ctx.remote === false) {
-      throw new OperationError('invalid_request', 'submit_agent over the local CLI: use `gbrain agent run` instead.');
+      throw new OperationError('invalid_request', 'submit_agent over the local CLI: use `modusbrain agent run` instead.');
     }
 
     const clientId = (ctx as { auth?: { clientId?: string } }).auth?.clientId;
@@ -3219,7 +3219,7 @@ const find_orphans: Operation = {
     // ctx.auth.allowedSources) via the canonical sourceScopeOpts ladder.
     // Pre-fix, find_orphans returned brain-wide orphans regardless of a
     // source-bound OAuth client's scope — a read leak in the v0.34.1
-    // source-isolation class. Local CLI callers route through `gbrain
+    // source-isolation class. Local CLI callers route through `modusbrain
     // orphans --source` instead (ctx.remote === false → empty scope here).
     return findOrphans(ctx.engine, {
       includePseudo: (p.include_pseudo as boolean) || false,
@@ -3416,7 +3416,7 @@ const find_anomalies: Operation = {
   cliHints: { name: 'anomalies' },
 };
 
-// v0.33: expertise + relationship-proximity routing. CLI: gbrain whoknows.
+// v0.33: expertise + relationship-proximity routing. CLI: modusbrain whoknows.
 const find_experts: Operation = {
   name: 'find_experts',
   description: FIND_EXPERTS_DESCRIPTION,
@@ -3494,7 +3494,7 @@ const find_contradictions: Operation = {
       : null;
     const rows = await ctx.engine.loadContradictionsTrend(30);
     if (rows.length === 0) {
-      return { contradictions: [], note: 'No probe runs in the last 30 days; run `gbrain eval suspected-contradictions` first.' };
+      return { contradictions: [], note: 'No probe runs in the last 30 days; run `modusbrain eval suspected-contradictions` first.' };
     }
     const latest = rows[0];
     const report = latest.report_json as Record<string, unknown> | null;
@@ -3647,7 +3647,7 @@ const get_recent_transcripts: Operation = {
     if (ctx.remote === true) {
       throw new OperationError(
         'permission_denied',
-        'get_recent_transcripts is local-only — call via the gbrain CLI.',
+        'get_recent_transcripts is local-only — call via the modusbrain CLI.',
       );
     }
     const { listRecentTranscripts } = await import('./transcripts.ts');
@@ -3690,10 +3690,10 @@ const whoami: Operation = {
           'or set ctx.remote === false.',
       );
     }
-    // OAuth tokens have client_id starting with 'gbrain_cl_'; legacy
+    // OAuth tokens have client_id starting with 'modusbrain_cl_'; legacy
     // access_tokens reuse `name` as both clientId and clientName (verifyAccessToken
     // at oauth-provider.ts:417-430). Detect by inspecting the prefix.
-    const isOauth = ctx.auth.clientId.startsWith('gbrain_cl_');
+    const isOauth = ctx.auth.clientId.startsWith('modusbrain_cl_');
     if (isOauth) {
       return {
         transport: 'oauth',
@@ -3718,7 +3718,7 @@ const sources_add: Operation = {
   description:
     'Register a new source. Supports either --path (existing v0.17 behavior) ' +
     'or --url (v0.28 federated remote-clone path: parses the URL through the ' +
-    'SSRF gate, clones into $GBRAIN_HOME/clones/<id>/ via temp-dir + rename ' +
+    'SSRF gate, clones into $MODUSBRAIN_HOME/clones/<id>/ via temp-dir + rename ' +
     'atomicity, and stores remote_url in sources.config). Pre-flight collision ' +
     'check on id; rollback on either-side failure.',
   params: {
@@ -3732,7 +3732,7 @@ const sources_add: Operation = {
     url: {
       type: 'string',
       description:
-        'HTTPS git URL. Cloned into $GBRAIN_HOME/clones/<id>/. SSRF-guarded.',
+        'HTTPS git URL. Cloned into $MODUSBRAIN_HOME/clones/<id>/. SSRF-guarded.',
     },
     federated: {
       type: 'boolean',
@@ -3741,7 +3741,7 @@ const sources_add: Operation = {
     clone_dir: {
       type: 'string',
       description:
-        'Override clone destination (only valid with url). Default: $GBRAIN_HOME/clones/<id>/.',
+        'Override clone destination (only valid with url). Default: $MODUSBRAIN_HOME/clones/<id>/.',
     },
   },
   mutating: true,
@@ -3753,7 +3753,7 @@ const sources_add: Operation = {
     // HTTP MCP must not be able to plant content at arbitrary host paths.
     //
     // - `path` lets a remote caller register `/etc/` (or any host dir) as a
-    //   "source"; later `gbrain sync --all` walks every sources.local_path,
+    //   "source"; later `modusbrain sync --all` walks every sources.local_path,
     //   which exfiltrates host content into the brain.
     // - `clone_dir` lets a remote caller name the destination directly;
     //   addSource's renameSync places the cloned tree there with no
@@ -3761,9 +3761,9 @@ const sources_add: Operation = {
     //   does rm -rf on src.local_path, so the same primitive doubles as
     //   arbitrary-delete.
     //
-    // Both fields are CLI-only (the operator runs `gbrain sources add --path
+    // Both fields are CLI-only (the operator runs `modusbrain sources add --path
     // /home/me/notes`). For HTTP MCP, ignore overrides — clone_dir defaults
-    // to $GBRAIN_HOME/clones/<id>/ and path is rejected. Local CLI callers
+    // to $MODUSBRAIN_HOME/clones/<id>/ and path is rejected. Local CLI callers
     // (ctx.remote === false, per F7b fail-closed contract) keep the override.
     const isLocal = ctx.remote === false;
     const remotePath = isLocal ? (p.path as string | undefined) ?? null : null;
@@ -3772,7 +3772,7 @@ const sources_add: Operation = {
       ctx.logger.warn(
         '[sources_add] ignoring path/clone_dir overrides on HTTP MCP transport ' +
           '(remote callers can only register a remote --url; the clone path is ' +
-          'fixed under $GBRAIN_HOME/clones/).',
+          'fixed under $MODUSBRAIN_HOME/clones/).',
       );
     }
 
@@ -3816,7 +3816,7 @@ const sources_remove: Operation = {
   description:
     'Hard-remove a source (cascades pages/chunks/embeddings). Refuses to ' +
     'delete the auto-managed clone dir unless its resolved path is confined ' +
-    'under $GBRAIN_HOME/clones/ (realpath+lstat — symlink-safe). For most ' +
+    'under $MODUSBRAIN_HOME/clones/ (realpath+lstat — symlink-safe). For most ' +
     'workflows prefer sources_archive for the soft-delete path.',
   params: {
     id: { type: 'string', required: true },
@@ -4038,7 +4038,7 @@ const recall: Operation = {
 
 const forget_fact: Operation = {
   name: 'forget_fact',
-  description: 'v0.32.2: forget a fact. Rewrites the page\'s `## Facts` fence to strike through the row and set valid_until=today (the DB\'s expired_at derives via valid_until + now() on the next reconcile so the forget survives `gbrain rebuild`). Falls back to legacy DB-only expire for pre-v51 / thin-client rows. Idempotent on already-expired or unknown ids.',
+  description: 'v0.32.2: forget a fact. Rewrites the page\'s `## Facts` fence to strike through the row and set valid_until=today (the DB\'s expired_at derives via valid_until + now() on the next reconcile so the forget survives `modusbrain rebuild`). Falls back to legacy DB-only expire for pre-v51 / thin-client rows. Idempotent on already-expired or unknown ids.',
   params: {
     id: { type: 'number', required: true, description: 'Fact id to forget.' },
     reason: { type: 'string', required: false, description: 'Optional reason; written to the fence row\'s context cell as "forgotten: <reason>". Default: "forgotten".' },
@@ -4096,7 +4096,7 @@ function parseSinceParam(raw: unknown): Date | null {
 // v0.34 Cathedral III — code-intelligence ops (MCP-exposed).
 //
 // Pre-v0.34 code-callers / code-callees / code-def / code-refs lived only in
-// the CLI_ONLY set at cli.ts:30 — agents calling gbrain via MCP couldn't reach
+// the CLI_ONLY set at cli.ts:30 — agents calling modusbrain via MCP couldn't reach
 // them and fell through to text search. These wrappers expose the existing
 // engine + library functions to the MCP surface with resolver-grade
 // descriptions (operations-descriptions.ts) so agents route to them
@@ -4329,7 +4329,7 @@ const search_by_image: Operation = {
     'v0.36 cross-modal Phase 2: image-as-query retrieval. Accepts a local path (CLI), data: URI, or http(s):// URL ' +
     '(SSRF-defended). Returns visually-similar image chunks plus any OCR text they carry. Optional `query` text ' +
     'refinement merges via weighted RRF (D13 hybrid intersect). True image→full-text-knowledge requires Phase 3 ' +
-    '(`gbrain reindex --multimodal` + `search.unified_multimodal: true`).',
+    '(`modusbrain reindex --multimodal` + `search.unified_multimodal: true`).',
   params: {
     image_path: { type: 'string', description: 'Absolute path to image (local CLI callers only — rejected for remote MCP per D18).' },
     image_url: { type: 'string', description: 'http(s):// URL to image. SSRF-defended; max 3 redirect hops; 10MB cap.' },
@@ -4516,9 +4516,9 @@ const list_schema_packs: Operation = {
   handler: async (_ctx) => {
     const { existsSync, readdirSync } = await import('node:fs');
     const { join } = await import('node:path');
-    const { gbrainPath } = await import('./config.ts');
-    const bundled = ['gbrain-base', 'gbrain-recommended'];
-    const installedDir = gbrainPath('schema-packs');
+    const { modusbrainPath } = await import('./config.ts');
+    const bundled = ['gbrain-base', 'modusbrain-recommended'];
+    const installedDir = modusbrainPath('schema-packs');
     const installed: string[] = [];
     if (existsSync(installedDir)) {
       for (const entry of readdirSync(installedDir)) {
@@ -4557,7 +4557,7 @@ const schema_lint: Operation = {
   handler: async (ctx, p) => {
     const { runAllLintRules } = await import('./schema-pack/lint-rules.ts');
     const { loadActivePack } = await import('./schema-pack/load-active.ts');
-    const { loadConfig, gbrainPath } = await import('./config.ts');
+    const { loadConfig, modusbrainPath } = await import('./config.ts');
     const { existsSync } = await import('node:fs');
     const { join } = await import('node:path');
     const cfg = loadConfig();
@@ -4569,7 +4569,7 @@ const schema_lint: Operation = {
       const candidates = ['pack.yaml', 'pack.yml', 'pack.json'];
       let path: string | null = null;
       for (const c of candidates) {
-        const candidate = join(gbrainPath('schema-packs', packName), c);
+        const candidate = join(modusbrainPath('schema-packs', packName), c);
         if (existsSync(candidate)) { path = candidate; break; }
       }
       if (!path) return { error: 'pack_not_found', pack: packName };
@@ -4818,7 +4818,7 @@ const reload_schema_pack: Operation = {
 };
 
 // v0.41.18.0 (A7 + T16, codex finding #5): MCP op for federated / thin-client
-// brain installs to drive `gbrain onboard --auto` over MCP. Admin scope
+// brain installs to drive `modusbrain onboard --auto` over MCP. Admin scope
 // (NOT localOnly) so remote agents authenticated via OAuth can probe
 // brain health + submit auto-eligible remediation handlers.
 //
@@ -4930,7 +4930,7 @@ const run_onboard: Operation = {
 // guard). NOT localOnly so admin HTTP MCP clients can invoke.
 const run_skillopt: Operation = {
   name: 'run_skillopt',
-  description: 'Run SkillOpt against a single skill. Admin scope; mutating; rate-limited per-skill via DB lock. See gbrain skillopt CLI for the full flag surface.',
+  description: 'Run SkillOpt against a single skill. Admin scope; mutating; rate-limited per-skill via DB lock. See modusbrain skillopt CLI for the full flag surface.',
   params: {
     skill_name: { type: 'string', required: true, description: 'Kebab-case skill name (resolves to skills/<name>/SKILL.md)' },
     benchmark_path: { type: 'string', description: 'Absolute path to benchmark JSONL; defaults to skills/<name>/skillopt-benchmark.jsonl' },
@@ -5051,14 +5051,14 @@ const run_skillopt: Operation = {
 
 // ── v0.42.x — Life Chronicle (#2390) timeline read ops ───────────────────
 // CLI names avoid the existing `timeline` (get_timeline, a page's own timeline):
-// `gbrain day <date>` / `gbrain since <date>` / `gbrain last-seen <entity>`.
+// `modusbrain day <date>` / `modusbrain since <date>` / `modusbrain last-seen <entity>`.
 // All route through sourceScopeOpts(ctx) so reads honor source isolation.
 const chronicle_day: Operation = {
   name: 'chronicle_day',
   description:
     'Life Chronicle: events + timeline entries on a given day (or its ISO week when week=true), ' +
     "ordered chronologically; each row backlinks to its depth page. Distinct from `get_timeline`/" +
-    "`gbrain timeline <slug>`, which shows ONE page's timeline. CLI: `gbrain day <date>`.",
+    "`modusbrain timeline <slug>`, which shows ONE page's timeline. CLI: `modusbrain day <date>`.",
   scope: 'read',
   params: {
     date: { type: 'string', required: true, description: 'Day as YYYY-MM-DD.' },
@@ -5085,7 +5085,7 @@ const chronicle_on_this_day: Operation = {
   name: 'chronicle_on_this_day',
   description:
     'Life Chronicle: events from the same calendar day in PRIOR years ("on this day"). ' +
-    'CLI: `gbrain on-this-day [--date YYYY-MM-DD]`.',
+    'CLI: `modusbrain on-this-day [--date YYYY-MM-DD]`.',
   scope: 'read',
   params: {
     date: { type: 'string', description: 'Anchor day YYYY-MM-DD (default today); matches its month-day in prior years.' },
@@ -5103,7 +5103,7 @@ const chronicle_since: Operation = {
   name: 'chronicle_since',
   description:
     'Life Chronicle: events + timeline entries on or after a date, optionally filtered by event kind. ' +
-    'CLI: `gbrain since <date> [--kind commitment]`.',
+    'CLI: `modusbrain since <date> [--kind commitment]`.',
   scope: 'read',
   params: {
     date: { type: 'string', required: true, description: 'Lower-bound day as YYYY-MM-DD (inclusive).' },
@@ -5124,7 +5124,7 @@ const chronicle_last_seen: Operation = {
   name: 'chronicle_last_seen',
   description:
     "Life Chronicle: when an entity was last seen — its own timeline rows OR an event's `who`. " +
-    'Returns last_date, the event slug, and days_ago. CLI: `gbrain last-seen <entity-slug>`.',
+    'Returns last_date, the event slug, and days_ago. CLI: `modusbrain last-seen <entity-slug>`.',
   scope: 'read',
   params: {
     entity: { type: 'string', required: true, description: 'Entity page slug (e.g. people/sarah-chen).' },
@@ -5143,7 +5143,7 @@ const ontology_get: Operation = {
   name: 'ontology_get',
   description:
     "Life Chronicle: the current resolved per-entity ontology (dimension → value) at `asof` " +
-    "(default now), with provenance + confidence + validity. CLI: `gbrain ontology <entity> [--asof YYYY-MM-DD]`.",
+    "(default now), with provenance + confidence + validity. CLI: `modusbrain ontology <entity> [--asof YYYY-MM-DD]`.",
   scope: 'read',
   params: {
     entity: { type: 'string', required: true, description: 'Entity page slug (e.g. people/sarah-chen).' },
@@ -5169,7 +5169,7 @@ const ontology_propose: Operation = {
   description:
     'Life Chronicle: record one ontology observation (entity has dimension=value), sourced + ' +
     'confidence-weighted + bi-temporal. Idempotent on (entity,dimension,value,source). A new value ' +
-    'supersedes the prior; a backdated conflict is flagged not rewritten. CLI: `gbrain ontology-add <entity> <dimension> <value>`.',
+    'supersedes the prior; a backdated conflict is flagged not rewritten. CLI: `modusbrain ontology-add <entity> <dimension> <value>`.',
   scope: 'write',
   mutating: true,
   params: {
@@ -5202,7 +5202,7 @@ const ontology_dimensions: Operation = {
   name: 'ontology_dimensions',
   description:
     'Life Chronicle meta-ontology: which dimensions the brain tracks across entities, with ' +
-    'entity + observation counts. CLI: `gbrain ontology-dimensions`.',
+    'entity + observation counts. CLI: `modusbrain ontology-dimensions`.',
   scope: 'read',
   params: {},
   handler: async (ctx) => ctx.engine.discoverOntologyDimensions(sourceScopeOpts(ctx)),
@@ -5213,7 +5213,7 @@ const ontology_conflicts: Operation = {
   name: 'ontology_conflicts',
   description:
     'Life Chronicle: dimensions with ≥2 distinct current values from ≥2 provenances (genuine ' +
-    'disagreement, not temporal supersession). CLI: `gbrain ontology-contradictions`.',
+    'disagreement, not temporal supersession). CLI: `modusbrain ontology-contradictions`.',
   scope: 'read',
   params: {
     min_confidence: { type: 'number', description: 'Only consider observations at/above this confidence (0..1).' },
@@ -5239,7 +5239,7 @@ const volunteer_chronicle: Operation = {
     'Life Chronicle agent-orientation: the recent timeline (last N days) + the current ' +
     'validity-resolved ontology for the named entities, in one zero-LLM payload, so an agent ' +
     'orients before acting. Diary-sourced ontology is redacted for remote callers. ' +
-    'CLI: `gbrain orient [--days 7] [--entities people/a,people/b]`.',
+    'CLI: `modusbrain orient [--days 7] [--entities people/a,people/b]`.',
   scope: 'read',
   params: {
     days: { type: 'number', description: 'Recent-timeline lookback in days (default 7).' },
@@ -5267,7 +5267,7 @@ const chronicle_backfill: Operation = {
   description:
     'Life Chronicle: sweep existing meeting/conversation/calendar pages into timeline events by ' +
     'enqueuing chronicle_extract jobs (one per eligible page). --dry-run counts without enqueuing. ' +
-    'Local-only bulk op. CLI: `gbrain chronicle-backfill [--since YYYY-MM-DD] [--limit N] [--dry-run]`.',
+    'Local-only bulk op. CLI: `modusbrain chronicle-backfill [--since YYYY-MM-DD] [--limit N] [--dry-run]`.',
   scope: 'admin',
   mutating: true,
   localOnly: true,
@@ -5335,7 +5335,7 @@ export const operations: Operation[] = [
   get_brain_identity,
   // PR1: skill catalog over MCP — discover + fetch host-repo skills (read-scope)
   list_skills, get_skill, list_brain_skillpack, advisor,
-  // v0.41.19.0: thin-client `gbrain status` payload (admin-scope, sync + cycle only)
+  // v0.41.19.0: thin-client `modusbrain status` payload (admin-scope, sync + cycle only)
   get_status_snapshot,
   // Sync
   sync_brain,

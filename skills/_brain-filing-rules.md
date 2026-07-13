@@ -95,7 +95,7 @@ silently pick one.
 
 Every ingested item should have its raw source preserved for provenance.
 
-**Size routing (automatic via `gbrain files upload-raw`):**
+**Size routing (automatic via `modusbrain files upload-raw`):**
 - **< 100 MB text/PDF**: stays in the brain repo (git-tracked) in a `.raw/`
   sidecar directory alongside the brain page
 - **>= 100 MB OR media files** (video, audio, images): uploaded to cloud
@@ -105,7 +105,7 @@ Every ingested item should have its raw source preserved for provenance.
 
 **Upload command:**
 ```bash
-gbrain files upload-raw <file> --page <page-slug> --type <type>
+modusbrain files upload-raw <file> --page <page-slug> --type <type>
 ```
 Returns JSON: `{storage: "git"}` for small files, `{storage: "supabase", storagePath, reference}` for cloud.
 
@@ -124,8 +124,8 @@ type: transcript
 
 **Accessing stored files:**
 ```bash
-gbrain files signed-url <storage-path>    # Generate 1-hour signed URL
-gbrain files restore <dir>                # Download back to local
+modusbrain files signed-url <storage-path>    # Generate 1-hour signed URL
+modusbrain files restore <dir>                # Download back to local
 ```
 
 This ensures any derived brain page can be traced back to its original source,
@@ -133,7 +133,7 @@ and large files don't bloat the git repo.
 
 ## Dream-cycle synthesize / patterns directories (v0.23)
 
-The `synthesize` and `patterns` phases of `gbrain dream` write to a
+The `synthesize` and `patterns` phases of `modusbrain dream` write to a
 **fixed allow-list** of paths sourced from `_brain-filing-rules.json`'s
 `dream_synthesize_paths.globs` array. Editing that JSON is the ONLY way
 to add a new directory the synthesis subagent may write to:
@@ -154,7 +154,7 @@ to add a new directory the synthesis subagent may write to:
 
 ## Takes attribution (v0.32+)
 
-When writing a `<!--- gbrain:takes:begin -->` fence, the **holder** column says
+When writing a `<!--- modusbrain:takes:begin -->` fence, the **holder** column says
 WHO BELIEVES the claim, not who it's ABOUT. Cross-modal eval over 100K
 production takes scored attribution at 6.5/10 — holder/subject confusion was
 the #1 error. These six rules are the contract. Long form with worked

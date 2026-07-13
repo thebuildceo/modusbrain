@@ -3,7 +3,7 @@
 // Coverage: preflight rejects missing mapping_rules; dry-run no mutation;
 // apply runs all 4 phases (retype-explicit, retype-catch-all, page-to-link,
 // page-to-alias) + final sync; active-pack flip (D13); celebration summary;
-// gbrain-unify lock held; verify-step thresholds.
+// modusbrain-unify lock held; verify-step thresholds.
 
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'bun:test';
 import { PGLiteEngine } from '../src/core/pglite-engine.ts';

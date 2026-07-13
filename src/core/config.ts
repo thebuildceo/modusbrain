@@ -6,8 +6,8 @@ import { brandConfigDir, brandEnv } from './branding.ts';
 
 /**
  * Where is the active DB URL coming from? Pure introspection, no connection
- * attempt. Used by `gbrain doctor --fast` so the user gets a precise message
- * instead of the misleading "No database configured" when GBRAIN_DATABASE_URL
+ * attempt. Used by `modusbrain doctor --fast` so the user gets a precise message
+ * instead of the misleading "No database configured" when MODUSBRAIN_DATABASE_URL
  * (or DATABASE_URL) is actually set.
  *
  * Precedence matches loadConfig(): env vars win over config-file URL. Returns
@@ -15,7 +15,7 @@ import { brandConfigDir, brandEnv } from './branding.ts';
  */
 export type DbUrlSource =
   | 'env:MODUSBRAIN_DATABASE_URL'
-  | 'env:GBRAIN_DATABASE_URL'
+  | 'env:MODUSBRAIN_DATABASE_URL'
   | 'env:DATABASE_URL'
   | 'config-file'
   | 'config-file-path' // PGLite: config file present, no URL but database_path set
@@ -23,11 +23,11 @@ export type DbUrlSource =
 
 // Internal aliases retained for backwards compatibility with the existing call
 // sites below. They forward to the exported configDir()/configPath() so
-// GBRAIN_HOME is honored uniformly. Lazy: never call homedir() at module scope.
+// MODUSBRAIN_HOME is honored uniformly. Lazy: never call homedir() at module scope.
 function getConfigDir() { return configDir(); }
 function getConfigPath() { return configPath(); }
 
-export interface GBrainConfig {
+export interface ModusBrainConfig {
   engine: 'postgres' | 'pglite';
   database_url?: string;
   database_path?: string;
@@ -36,7 +36,7 @@ export interface GBrainConfig {
   /**
    * ZeroEntropy API key. v0.37 fix wave (CDX2-5+6): ZE became the default
    * embedding + reranker provider in v0.36 but lacked a file-plane config
-   * slot. `gbrain config set zeroentropy_api_key X` wrote DB plane,
+   * slot. `modusbrain config set zeroentropy_api_key X` wrote DB plane,
    * `loadConfig` only merged OpenAI/Anthropic, and `buildGatewayConfig`
    * at cli.ts:1401 only mapped those two — so the key never reached the
    * embed pipeline. Now wired through: file plane → loadConfig env
@@ -48,8 +48,8 @@ export interface GBrainConfig {
   embedding_dimensions?: number;
   /**
    * v0.37 (D9): user opted into deferred-setup mode at init time via
-   * `gbrain init --no-embedding`. When true, embed callsites and `gbrain
-   * import` refuse with a `gbrain config set embedding_model <id>` hint
+   * `modusbrain init --no-embedding`. When true, embed callsites and `modusbrain
+   * import` refuse with a `modusbrain config set embedding_model <id>` hint
    * rather than proceeding with a default that may not match a real key.
    * Mutually exclusive with `embedding_model` being set — init writes one
    * or the other, never both.
@@ -78,8 +78,8 @@ export interface GBrainConfig {
   storage?: unknown;
   /**
    * v0.25.0 — session capture settings. Read via file-plane `loadConfig()`
-   * at process boot (NOT `gbrain config set` which writes the DB plane —
-   * those are different stores). Edit `~/.gbrain/config.json` directly.
+   * at process boot (NOT `modusbrain config set` which writes the DB plane —
+   * those are different stores). Edit `~/.modusbrain/config.json` directly.
    * All fields default to ON — capture and scrubbing both opt-out.
    */
   /**
@@ -102,7 +102,7 @@ export interface GBrainConfig {
      * v0.42.x (#1685 GAP D) — extract_atoms backlog auto-drain. Default ON so a
      * pack-gated silent backlog never piles up unseen; daily-spend-capped so the
      * Haiku spend stays bounded. Read via the DB plane (`engine.getConfig`) at
-     * each autopilot tick. Disable with `gbrain config set autopilot.auto_drain.enabled false`.
+     * each autopilot tick. Disable with `modusbrain config set autopilot.auto_drain.enabled false`.
      */
     auto_drain?: {
       /** Master switch. Default true. */
@@ -149,7 +149,7 @@ export interface GBrainConfig {
    *
    * Unlike `embedding_model` / `embedding_dimensions` (which size the
    * schema and must be set before initSchema), these flags only affect
-   * runtime behavior. They live in the DB plane primarily — `gbrain config
+   * runtime behavior. They live in the DB plane primarily — `modusbrain config
    * set embedding_multimodal true` flips the gate without touching the file.
    * loadConfigWithEngine() merges DB config on top of file/env. Env vars
    * still win as the operator escape hatch.
@@ -164,9 +164,9 @@ export interface GBrainConfig {
    *
    * IMPORTANT: this is a FILE-PLANE / env gate only. The context engine reads
    * it via the synchronous `loadConfig()` during `assemble()`, which never
-   * touches the DB. So `gbrain config set retrieval_reflex false` (DB plane)
-   * does NOT disable the reflex — set it in `~/.gbrain/config.json` or via
-   * `GBRAIN_RETRIEVAL_REFLEX=false`.
+   * touches the DB. So `modusbrain config set retrieval_reflex false` (DB plane)
+   * does NOT disable the reflex — set it in `~/.modusbrain/config.json` or via
+   * `MODUSBRAIN_RETRIEVAL_REFLEX=false`.
    */
   retrieval_reflex?: boolean;
   /** Max pointers injected per turn (default 3). File-plane only. */
@@ -175,7 +175,7 @@ export interface GBrainConfig {
    * v0.43 (#2095) — how many recent turns the reflex extracts entities from
    * (default 4). 1 reproduces the legacy current-turn-only behavior (and the
    * legacy slug+title suppression). File-plane / env
-   * (GBRAIN_RETRIEVAL_REFLEX_WINDOW_TURNS) only — same plane as the other
+   * (MODUSBRAIN_RETRIEVAL_REFLEX_WINDOW_TURNS) only — same plane as the other
    * reflex knobs.
    */
   retrieval_reflex_window_turns?: number;
@@ -185,7 +185,7 @@ export interface GBrainConfig {
   /**
    * v0.36 — embedding-column registry (D7). Maps a content_chunks column
    * name to its provider + dimensions + pgvector type. Both keys live in
-   * the DB plane (`gbrain config set ...`) so users can flip without
+   * the DB plane (`modusbrain config set ...`) so users can flip without
    * editing files. Resolver merges this with `BUILTIN_EMBEDDING_COLUMNS`
    * (which derive their provider from `embedding_model` /
    * `embedding_multimodal_model`).
@@ -209,24 +209,24 @@ export interface GBrainConfig {
    * env > file > DB > defaults from `src/core/content-sanity.ts`.
    *
    * Both lint AND ingest go through the same effective resolution so a
-   * `gbrain config set content_sanity.bytes_block N` flips both surfaces
-   * uniformly. CI without `~/.gbrain/` falls through to env/defaults.
+   * `modusbrain config set content_sanity.bytes_block N` flips both surfaces
+   * uniformly. CI without `~/.modusbrain/` falls through to env/defaults.
    */
   content_sanity?: {
     /** Stderr warn + lint `huge-page` rule fires above this (UTF-8 bytes
      *  of compiled_truth + timeline). Default: 50_000. Env override:
-     *  `GBRAIN_PAGE_WARN_BYTES`. */
+     *  `MODUSBRAIN_PAGE_WARN_BYTES`. */
     bytes_warn?: number;
     /** Soft-block: page writes with `frontmatter.embed_skip` set but
      *  embedder skips on next sweep. Default: 500_000. Env override:
-     *  `GBRAIN_PAGE_BLOCK_BYTES`. */
+     *  `MODUSBRAIN_PAGE_BLOCK_BYTES`. */
     bytes_block?: number;
     /** Master switch for the built-in junk-pattern set. Default: true.
-     *  Env override: `GBRAIN_NO_JUNK_PATTERNS=1` flips to false. */
+     *  Env override: `MODUSBRAIN_NO_JUNK_PATTERNS=1` flips to false. */
     junk_patterns_enabled?: boolean;
     /** Master kill-switch for all sanity checks. When true, ingest emits
      *  loud stderr per page but lets everything through. Default: false.
-     *  Env override: `GBRAIN_NO_SANITY=1` flips to true. */
+     *  Env override: `MODUSBRAIN_NO_SANITY=1` flips to true. */
     disabled?: boolean;
     /** Disposition for high-confidence junk (Cloudflare/CAPTCHA pattern or
      *  operator literal). `quarantine` (default) = page lands hidden +
@@ -235,7 +235,7 @@ export interface GBrainConfig {
     junk_disposition?: 'quarantine' | 'reject';
     /** Max markup:total ratio before the fuzzy markup-heavy FLAG fires
      *  (page stays searchable, agent warned). Default: 0.85. Env override:
-     *  `GBRAIN_MAX_MARKUP_RATIO`. */
+     *  `MODUSBRAIN_MAX_MARKUP_RATIO`. */
     max_markup_ratio?: number;
     /** Master switch for the prose/markup pass. Default: true. When false,
      *  no markup-heavy flagging happens (patterns + oversize still apply). */
@@ -245,7 +245,7 @@ export interface GBrainConfig {
   /**
    * v0.41.2.1 — dream cycle config (synthesize + patterns phases).
    * Read-precedence per key: file > DB > defaults. There are no
-   * `GBRAIN_DREAM_*` env vars; do not add an env layer without first
+   * `MODUSBRAIN_DREAM_*` env vars; do not add an env layer without first
    * extending `loadConfig()` to read them.
    *
    * Existing consumers (synthesize.ts, patterns.ts) read these keys
@@ -273,7 +273,7 @@ export interface GBrainConfig {
 
   /**
    * Thin-client mode (multi-topology v1). When set, this install does NOT
-   * have a local DB; it talks to a remote `gbrain serve --http` over MCP.
+   * have a local DB; it talks to a remote `modusbrain serve --http` over MCP.
    * The CLI dispatch guard in `src/cli.ts` checks for this field BEFORE
    * `connectEngine` and refuses any DB-bound subcommand. The `engine` field
    * above is still populated (default-inferred) but never used.
@@ -284,7 +284,7 @@ export interface GBrainConfig {
    * topologies work.
    *
    * `oauth_client_secret` can also be supplied via the
-   * `GBRAIN_REMOTE_CLIENT_SECRET` env var (preferred for headless agents);
+   * `MODUSBRAIN_REMOTE_CLIENT_SECRET` env var (preferred for headless agents);
    * env-var value wins when both are present.
    */
   remote_mcp?: {
@@ -302,14 +302,14 @@ export interface GBrainConfig {
    *
    * Resolution priority (highest → lowest, per D13):
    *   1. Per-call SearchOpts.schema_pack (CLI-only; rejected for remote callers)
-   *   2. GBRAIN_SCHEMA_PACK env var
+   *   2. MODUSBRAIN_SCHEMA_PACK env var
    *   3. Per-source DB config `schema_pack.source.<id>`
    *   4. Brain-wide DB config `schema_pack`
-   *   5. gbrain.yml `schema:` section
-   *   6. THIS field (~/.gbrain/config.json)
+   *   5. modusbrain.yml `schema:` section
+   *   6. THIS field (~/.modusbrain/config.json)
    *   7. Default 'gbrain-base'
    *
-   * `gbrain config set schema_pack <name>` writes the DB plane (tier 4);
+   * `modusbrain config set schema_pack <name>` writes the DB plane (tier 4);
    * editing this file directly writes tier 6. Env var (tier 2) is the
    * operator escape hatch.
    */
@@ -318,13 +318,13 @@ export interface GBrainConfig {
   /**
    * PR1 — MCP skill-catalog publishing. Lets a thin MCP client (Codex desktop,
    * Claude Code, Perplexity) discover and follow this agent repo's skills over
-   * `gbrain serve`. See `src/core/skill-catalog.ts` for the trust-boundary memo.
+   * `modusbrain serve`. See `src/core/skill-catalog.ts` for the trust-boundary memo.
    */
   mcp?: {
     /**
      * Gate for `list_skills` / `get_skill` over a REMOTE transport. Runtime
      * default is OFF (absent key → OFF) so an upgrade never silently grants
-     * existing read tokens host-skill read. `gbrain init` writes `true` for new
+     * existing read tokens host-skill read. `modusbrain init` writes `true` for new
      * installs; the upgrade migration prompts existing owners to enable it.
      * Local CLI callers (`ctx.remote === false`) bypass the gate entirely.
      */
@@ -340,7 +340,7 @@ export interface GBrainConfig {
      * Explicit skills-dir override. Wins over autodetect — makes which skills
      * get published deterministic across laptop / daemon / container launches.
      * When unset, the ops autodetect (remote callers exclude the install-path
-     * tier so a hosted gbrain never serves its own bundled dev skills).
+     * tier so a hosted modusbrain never serves its own bundled dev skills).
      */
     skills_dir?: string;
   };
@@ -348,11 +348,11 @@ export interface GBrainConfig {
 
 /**
  * True when this install is configured as a thin client of a remote
- * `gbrain serve --http`. Single source of truth for the "is this a
+ * `modusbrain serve --http`. Single source of truth for the "is this a
  * thin-client install?" check used by the CLI dispatch guard, doctor
  * branch, and remote subcommands.
  */
-export function isThinClient(config: GBrainConfig | null): boolean {
+export function isThinClient(config: ModusBrainConfig | null): boolean {
   return !!config?.remote_mcp;
 }
 
@@ -378,17 +378,17 @@ function migrateLegacyEmbeddingConfig(raw: Record<string, unknown>): Record<stri
   rest.embedding_model = `${provider}:${model}`;
   console.warn(
     `[config] legacy "provider" + "model" detected; using "${rest.embedding_model}".` +
-    ` Rewrite ~/.gbrain/config.json to: "embedding_model": "${rest.embedding_model}".`,
+    ` Rewrite ~/.modusbrain/config.json to: "embedding_model": "${rest.embedding_model}".`,
   );
   return rest;
 }
 
 /**
- * File-only config loader. Reads ~/.gbrain/config.json and applies the
+ * File-only config loader. Reads ~/.modusbrain/config.json and applies the
  * legacy embedding-config migration shim. Does NOT merge env vars, does
  * NOT infer engine kind from DATABASE_URL.
  *
- * Used by `gbrain init`'s config-merge path (B.4) where loading
+ * Used by `modusbrain init`'s config-merge path (B.4) where loading
  * `loadConfig()` would poison the saved file with transient env state
  * (e.g. a CI run with DATABASE_URL set writes a Postgres config.json
  * for a PGLite brain). Read-path callers should keep using `loadConfig()`
@@ -396,11 +396,11 @@ function migrateLegacyEmbeddingConfig(raw: Record<string, unknown>): Record<stri
  *
  * v0.37 fix wave (CDX-5 from round 1). Pinned by test/config-file-only-loader.test.ts.
  */
-export function loadConfigFileOnly(): GBrainConfig | null {
+export function loadConfigFileOnly(): ModusBrainConfig | null {
   try {
     const raw = readFileSync(getConfigPath(), 'utf-8');
     const parsed = JSON.parse(raw) as Record<string, unknown>;
-    return migrateLegacyEmbeddingConfig(parsed) as unknown as GBrainConfig;
+    return migrateLegacyEmbeddingConfig(parsed) as unknown as ModusBrainConfig;
   } catch {
     return null;
   }
@@ -411,9 +411,9 @@ export function loadConfigFileOnly(): GBrainConfig | null {
  *
  * Bun merges `.env` files from the process cwd into process.env before any
  * user code runs. For a globally-installed tool that is a footgun: running
- * gbrain inside any checkout whose `.env` defines DATABASE_URL (Next.js,
+ * modusbrain inside any checkout whose `.env` defines DATABASE_URL (Next.js,
  * Hono, Supabase, most web apps) silently retargets the brain at that app's
- * database. Reads hit the wrong DB; `apply-migrations` can write gbrain's
+ * database. Reads hit the wrong DB; `apply-migrations` can write modusbrain's
  * schema — including its DDL event trigger — into a production app database
  * (see the v0.42.8 report on #427).
  *
@@ -421,7 +421,7 @@ export function loadConfigFileOnly(): GBrainConfig | null {
  * happens before module load), so we re-parse the .env files Bun auto-loads
  * from cwd and treat DATABASE_URL as "not operator-provided" when its value
  * matches one of them. Deliberate overrides still work two ways:
- *   - GBRAIN_DATABASE_URL: namespaced to this tool, never auto-ignored;
+ *   - MODUSBRAIN_DATABASE_URL: namespaced to this tool, never auto-ignored;
  *   - exporting DATABASE_URL in the shell: exported vars win over .env in
  *     Bun, and a deliberate export that happens to EQUAL the cwd .env value
  *     would have selected the same database anyway — ignoring it changes
@@ -471,10 +471,10 @@ export function dotenvValuesForKey(key: string, dir: string = process.cwd()): Se
 let warnedCwdEnvDbUrlIgnored = false;
 
 /**
- * The env-provided DB URL gbrain should honor, with the #427 guard applied:
+ * The env-provided DB URL modusbrain should honor, with the #427 guard applied:
  * a DATABASE_URL whose value matches an assignment in a cwd .env file is
- * treated as belonging to the project in cwd, not to gbrain, and ignored
- * with a one-time stderr notice. GBRAIN_DATABASE_URL is always honored.
+ * treated as belonging to the project in cwd, not to modusbrain, and ignored
+ * with a one-time stderr notice. MODUSBRAIN_DATABASE_URL is always honored.
  * `dir` is injectable for tests; callers use the default.
  */
 export function effectiveEnvDatabaseUrl(dir: string = process.cwd()): string | undefined {
@@ -486,9 +486,9 @@ export function effectiveEnvDatabaseUrl(dir: string = process.cwd()): string | u
       warnedCwdEnvDbUrlIgnored = true;
       console.warn(
         '[config] Ignoring DATABASE_URL auto-loaded by Bun from a .env file in the current ' +
-        'directory — it belongs to the project here, not to gbrain. Using the engine from ' +
-        '~/.gbrain/config.json instead. To point gbrain at that database deliberately, set ' +
-        'GBRAIN_DATABASE_URL.',
+        'directory — it belongs to the project here, not to modusbrain. Using the engine from ' +
+        '~/.modusbrain/config.json instead. To point modusbrain at that database deliberately, set ' +
+        'MODUSBRAIN_DATABASE_URL.',
       );
     }
     return undefined;
@@ -496,12 +496,12 @@ export function effectiveEnvDatabaseUrl(dir: string = process.cwd()): string | u
   return url;
 }
 
-export function loadConfig(): GBrainConfig | null {
-  let fileConfig: GBrainConfig | null = null;
+export function loadConfig(): ModusBrainConfig | null {
+  let fileConfig: ModusBrainConfig | null = null;
   try {
     const raw = readFileSync(getConfigPath(), 'utf-8');
     const parsed = JSON.parse(raw) as Record<string, unknown>;
-    fileConfig = migrateLegacyEmbeddingConfig(parsed) as unknown as GBrainConfig;
+    fileConfig = migrateLegacyEmbeddingConfig(parsed) as unknown as ModusBrainConfig;
   } catch { /* no config file */ }
 
   // Try env vars (cwd-.env-origin DATABASE_URL excluded — see #427 guard above)
@@ -562,44 +562,44 @@ export function loadConfig(): GBrainConfig | null {
   // v0.41 content-sanity env overrides. Built up as a sparse object so
   // env presence wins over file/DB only for the specific keys set,
   // matching the precedence pattern used elsewhere in loadConfig.
-  // The env vars use natural names (GBRAIN_NO_SANITY=1 is more
-  // operator-friendly than GBRAIN_CONTENT_SANITY_DISABLED=true).
-  const envContentSanity: GBrainConfig['content_sanity'] = {};
-  if (process.env.GBRAIN_PAGE_WARN_BYTES) {
-    const n = parseInt(process.env.GBRAIN_PAGE_WARN_BYTES, 10);
+  // The env vars use natural names (MODUSBRAIN_NO_SANITY=1 is more
+  // operator-friendly than MODUSBRAIN_CONTENT_SANITY_DISABLED=true).
+  const envContentSanity: ModusBrainConfig['content_sanity'] = {};
+  if (process.env.MODUSBRAIN_PAGE_WARN_BYTES) {
+    const n = parseInt(process.env.MODUSBRAIN_PAGE_WARN_BYTES, 10);
     if (Number.isFinite(n) && n > 0) envContentSanity.bytes_warn = n;
   }
-  if (process.env.GBRAIN_PAGE_BLOCK_BYTES) {
-    const n = parseInt(process.env.GBRAIN_PAGE_BLOCK_BYTES, 10);
+  if (process.env.MODUSBRAIN_PAGE_BLOCK_BYTES) {
+    const n = parseInt(process.env.MODUSBRAIN_PAGE_BLOCK_BYTES, 10);
     if (Number.isFinite(n) && n > 0) envContentSanity.bytes_block = n;
   }
-  if (process.env.GBRAIN_NO_JUNK_PATTERNS === '1') {
+  if (process.env.MODUSBRAIN_NO_JUNK_PATTERNS === '1') {
     envContentSanity.junk_patterns_enabled = false;
   }
-  if (process.env.GBRAIN_NO_SANITY === '1') {
+  if (process.env.MODUSBRAIN_NO_SANITY === '1') {
     envContentSanity.disabled = true;
   }
-  if (process.env.GBRAIN_MAX_MARKUP_RATIO) {
-    const n = parseFloat(process.env.GBRAIN_MAX_MARKUP_RATIO);
+  if (process.env.MODUSBRAIN_MAX_MARKUP_RATIO) {
+    const n = parseFloat(process.env.MODUSBRAIN_MAX_MARKUP_RATIO);
     if (Number.isFinite(n) && n > 0 && n <= 1) envContentSanity.max_markup_ratio = n;
   }
   // Only attach the field when at least one env var was set, so the
   // sparse-merge semantics elsewhere in loadConfigWithEngine work
   // (env presence => "this key already has a value, don't read DB").
   if (Object.keys(envContentSanity).length > 0) {
-    (merged as GBrainConfig).content_sanity = {
+    (merged as ModusBrainConfig).content_sanity = {
       ...(fileConfig?.content_sanity ?? {}),
       ...envContentSanity,
     };
   }
 
-  return merged as GBrainConfig;
+  return merged as ModusBrainConfig;
 }
 
 /**
  * v0.27.1 — async config loader that overlays DB-plane config on top of the
- * file/env config. Used by `gbrain` CLI's connectEngine() AFTER engine.connect()
- * so flags written via `gbrain config set` actually take effect. Unlike the
+ * file/env config. Used by `modusbrain` CLI's connectEngine() AFTER engine.connect()
+ * so flags written via `modusbrain config set` actually take effect. Unlike the
  * sync loadConfig(), this needs an engine handle to read the config table.
  *
  * Precedence: env > file > DB > defaults. Env stays the operator escape hatch;
@@ -611,20 +611,20 @@ export function loadConfig(): GBrainConfig | null {
  */
 export async function loadConfigWithEngine(
   engine: { getConfig(key: string): Promise<string | null | undefined> },
-  base?: GBrainConfig | null,
-): Promise<GBrainConfig | null> {
+  base?: ModusBrainConfig | null,
+): Promise<ModusBrainConfig | null> {
   // Codex /ship finding #3: when there's no file config AND no env DB URL,
   // loadConfig() returns null and the DB merge would be skipped — env-only
   // installs (engine wired via direct SDK pass) wouldn't see DB-plane
   // overrides like `embedding_columns` / `search_embedding_column` set via
-  // `gbrain config set`. Since we have a live engine here, synthesize a
+  // `modusbrain config set`. Since we have a live engine here, synthesize a
   // minimal base config so the DB-plane merge still runs. The synthesized
   // config has no auth or model fields; DB-plane keys overlay correctly
   // and downstream callers either find them or fall through to defaults.
   // Also applies when callers pass an explicit null for `base`.
-  const fileConfig: GBrainConfig =
+  const fileConfig: ModusBrainConfig =
     (base !== undefined ? base : loadConfig()) ??
-    ({ engine: 'postgres' } as GBrainConfig);
+    ({ engine: 'postgres' } as ModusBrainConfig);
 
   // DB-plane reads. Quiet failures — if the config table doesn't exist yet
   // (pre-v36 brain mid-migration), treat as null and let file/env defaults
@@ -662,7 +662,7 @@ export async function loadConfigWithEngine(
   // DB applies only when env did NOT win. Env presence is detected by the
   // sync loadConfig() already setting the field. For each flag, prefer the
   // existing fileConfig value when defined; otherwise fall through to DB.
-  const merged: GBrainConfig = { ...fileConfig };
+  const merged: ModusBrainConfig = { ...fileConfig };
   if (merged.embedding_multimodal === undefined && dbMultimodal !== undefined) {
     merged.embedding_multimodal = dbMultimodal;
   }
@@ -681,10 +681,10 @@ export async function loadConfigWithEngine(
       if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
         merged.embedding_columns = parsed as Record<string, EmbeddingColumnConfig>;
       } else {
-        console.warn('[gbrain] config: embedding_columns DB value is not a JSON object; ignoring');
+        console.warn('[modusbrain] config: embedding_columns DB value is not a JSON object; ignoring');
       }
     } catch (err) {
-      console.warn(`[gbrain] config: embedding_columns DB value is not valid JSON; ignoring (${(err as Error).message})`);
+      console.warn(`[modusbrain] config: embedding_columns DB value is not valid JSON; ignoring (${(err as Error).message})`);
     }
   }
   if (merged.search_embedding_column === undefined && dbSearchEmbeddingColumn !== undefined) {
@@ -711,7 +711,7 @@ export async function loadConfigWithEngine(
   const dbProseCheckEnabled = await dbBool('content_sanity.prose_check_enabled');
 
   const existingCS = merged.content_sanity ?? {};
-  const mergedCS: NonNullable<GBrainConfig['content_sanity']> = { ...existingCS };
+  const mergedCS: NonNullable<ModusBrainConfig['content_sanity']> = { ...existingCS };
   if (mergedCS.bytes_warn === undefined && dbWarnBytes !== undefined) {
     mergedCS.bytes_warn = dbWarnBytes;
   }
@@ -742,10 +742,10 @@ export async function loadConfigWithEngine(
   }
 
   // v0.41.2.1 — dream.* DB-plane merge. Precedence is file > DB > defaults
-  // per key (NO env layer; see GBrainConfig.dream JSDoc). Without this,
+  // per key (NO env layer; see ModusBrainConfig.dream JSDoc). Without this,
   // `extract-atoms.ts` and any other consumer that reads the merged config
   // (vs calling `engine.getConfig()` directly) silently misses dream.*
-  // config set via `gbrain config set`.
+  // config set via `modusbrain config set`.
   const dbSessionCorpusDir = await dbStr('dream.synthesize.session_corpus_dir');
   const dbMeetingTranscriptsDir = await dbStr('dream.synthesize.meeting_transcripts_dir');
   const dbVerdictModel = await dbStr('dream.synthesize.verdict_model');
@@ -757,8 +757,8 @@ export async function loadConfigWithEngine(
   const existingDream = merged.dream ?? {};
   const existingSynth = existingDream.synthesize ?? {};
   const existingPatterns = existingDream.patterns ?? {};
-  const mergedSynth: NonNullable<NonNullable<GBrainConfig['dream']>['synthesize']> = { ...existingSynth };
-  const mergedPatterns: NonNullable<NonNullable<GBrainConfig['dream']>['patterns']> = { ...existingPatterns };
+  const mergedSynth: NonNullable<NonNullable<ModusBrainConfig['dream']>['synthesize']> = { ...existingSynth };
+  const mergedPatterns: NonNullable<NonNullable<ModusBrainConfig['dream']>['patterns']> = { ...existingPatterns };
 
   if (mergedSynth.session_corpus_dir === undefined && dbSessionCorpusDir !== undefined) {
     mergedSynth.session_corpus_dir = dbSessionCorpusDir;
@@ -786,7 +786,7 @@ export async function loadConfigWithEngine(
   // — mirrors the content_sanity pattern so empty brains keep `cfg.dream`
   // undefined.
   if (Object.keys(mergedSynth).length > 0 || Object.keys(mergedPatterns).length > 0) {
-    const mergedDream: NonNullable<GBrainConfig['dream']> = {};
+    const mergedDream: NonNullable<ModusBrainConfig['dream']> = {};
     if (Object.keys(mergedSynth).length > 0) mergedDream.synthesize = mergedSynth;
     if (Object.keys(mergedPatterns).length > 0) mergedDream.patterns = mergedPatterns;
     merged.dream = mergedDream;
@@ -796,8 +796,8 @@ export async function loadConfigWithEngine(
 }
 
 /**
- * v0.37 (D6): canonical list of known config keys for `gbrain config set`
- * validation. Includes both the static GBrainConfig fields (file plane)
+ * v0.37 (D6): canonical list of known config keys for `modusbrain config set`
+ * validation. Includes both the static ModusBrainConfig fields (file plane)
  * and well-known DB-plane keys.
  *
  * This is NOT a runtime allow-list applied to reads — gateway/reader code
@@ -805,13 +805,13 @@ export async function loadConfigWithEngine(
  * Levenshtein on `set`. Missing keys can be passed through with `--force`.
  *
  * When adding a new persistent config key:
- *   1. Add it to the GBrainConfig interface (if file-plane) OR document it
+ *   1. Add it to the ModusBrainConfig interface (if file-plane) OR document it
  *      below (if DB-plane).
- *   2. Add the canonical name to this list so `gbrain config set` accepts it
+ *   2. Add the canonical name to this list so `modusbrain config set` accepts it
  *      without `--force`.
  */
 export const KNOWN_CONFIG_KEYS: readonly string[] = [
-  // File-plane (GBrainConfig static fields)
+  // File-plane (ModusBrainConfig static fields)
   'engine',
   'database_url',
   'database_path',
@@ -933,7 +933,7 @@ export const KNOWN_CONFIG_KEYS: readonly string[] = [
 /**
  * v0.37 (D6): well-known prefix patterns for DB-plane keys that have
  * unbounded sub-keys. Used as a softer gate before falling back to
- * Levenshtein suggestion in `gbrain config set`.
+ * Levenshtein suggestion in `modusbrain config set`.
  */
 export const KNOWN_CONFIG_KEY_PREFIXES: readonly string[] = [
   'search.',           // search.* (mode, cache.*, etc.)
@@ -948,7 +948,7 @@ export const KNOWN_CONFIG_KEY_PREFIXES: readonly string[] = [
   'self_upgrade.',      // v0.42 self-upgrade (mode, quiet_hours, state)
 ];
 
-export function saveConfig(config: GBrainConfig): void {
+export function saveConfig(config: ModusBrainConfig): void {
   mkdirSync(getConfigDir(), { recursive: true });
   writeFileSync(getConfigPath(), JSON.stringify(config, null, 2) + '\n', { mode: 0o600 });
   try {
@@ -958,7 +958,7 @@ export function saveConfig(config: GBrainConfig): void {
   }
   // v0.35.8.0: ensure the per-home `.gitignore` exists on every config-write
   // path. Cheap, idempotent, doesn't clobber user edits. Catches the case
-  // where `~/.gbrain/` lives inside a git worktree (Conductor + gstack
+  // where `~/.modusbrain/` lives inside a git worktree (Conductor + gstack
   // workspaces hit this) so `git add` doesn't accidentally stage the brain.
   // The doctor check `home_dir_in_worktree` surfaces vectors this can't
   // close (already-tracked files, screenshots, backups, `git add -f`).
@@ -966,22 +966,22 @@ export function saveConfig(config: GBrainConfig): void {
 }
 
 /**
- * Idempotently lay down `~/.gbrain/.gitignore` containing the single line `*`.
- * Honors GBRAIN_HOME via `configDir()`. Best-effort: errors are logged to
+ * Idempotently lay down `~/.modusbrain/.gitignore` containing the single line `*`.
+ * Honors MODUSBRAIN_HOME via `configDir()`. Best-effort: errors are logged to
  * stderr and never block the caller. Never clobbers a `.gitignore` whose
  * content the user has customized.
  *
  * Called from:
  *   - `saveConfig()` so any config-writing path lays it down.
- *   - `gbrain post-upgrade` so existing users get it on next upgrade.
+ *   - `modusbrain post-upgrade` so existing users get it on next upgrade.
  *
- * What this DOES cover: a casual `git add ~/.gbrain` from inside an enclosing
+ * What this DOES cover: a casual `git add ~/.modusbrain` from inside an enclosing
  * worktree — the directory-local `.gitignore` blocks everything below it.
  *
  * What this does NOT cover (the CHANGELOG names these honestly):
  *   - Files already tracked before the .gitignore landed (no remediation here).
  *   - Screenshots, sync folders (Dropbox/iCloud), Time Machine backups.
- *   - `git add -f ~/.gbrain` (deliberate force-add bypasses .gitignore).
+ *   - `git add -f ~/.modusbrain` (deliberate force-add bypasses .gitignore).
  *   - Out-of-band copy operations (rsync, cp -r, scp).
  *
  * The doctor check `home_dir_in_worktree` surfaces these vectors at audit
@@ -1008,11 +1008,11 @@ export function ensureGitignore(): void {
   } catch (e) {
     // Best-effort: log to stderr, never block the caller.
     const msg = e instanceof Error ? e.message : String(e);
-    process.stderr.write(`[gbrain] ensureGitignore failed (${msg}); continuing\n`);
+    process.stderr.write(`[modusbrain] ensureGitignore failed (${msg}); continuing\n`);
   }
 }
 
-export function toEngineConfig(config: GBrainConfig): EngineConfig {
+export function toEngineConfig(config: ModusBrainConfig): EngineConfig {
   return {
     engine: config.engine,
     database_url: config.database_url,
@@ -1029,12 +1029,12 @@ export function configPath(): string {
 }
 
 /**
- * Sugar for joining paths under the active gbrain home. Use this anywhere you
- * would otherwise write `join(homedir(), '.gbrain', ...rest)`. Honors
- * GBRAIN_HOME, validates input, and centralizes the convention so future
+ * Sugar for joining paths under the active modusbrain home. Use this anywhere you
+ * would otherwise write `join(homedir(), '.modusbrain', ...rest)`. Honors
+ * MODUSBRAIN_HOME, validates input, and centralizes the convention so future
  * audits stay simple.
  */
-export function gbrainPath(...segments: string[]): string {
+export function modusbrainPath(...segments: string[]): string {
   return join(configDir(), ...segments);
 }
 
@@ -1053,7 +1053,7 @@ export function getDbUrlSource(): DbUrlSource {
   if (!existsSync(configPath())) return null;
   try {
     const raw = readFileSync(configPath(), 'utf-8');
-    const parsed = JSON.parse(raw) as Partial<GBrainConfig>;
+    const parsed = JSON.parse(raw) as Partial<ModusBrainConfig>;
     if (parsed.database_url) return 'config-file';
     if (parsed.database_path) return 'config-file-path';
     return null;

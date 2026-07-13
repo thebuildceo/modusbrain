@@ -3,7 +3,7 @@
  *
  * code-callers / code-callees used to call resolveDefaultSource directly,
  * which only knew "1 source → use it, else multiple_sources_ambiguous" and
- * ignored the .gbrain-source pin. The new helper runs the full 7-tier chain
+ * ignored the .modusbrain-source pin. The new helper runs the full 7-tier chain
  * (flag → env → dotfile → local_path → brain_default → sole_non_default →
  * seed_default) and only applies the ambiguity guard on the no-signal
  * seed_default tier.
@@ -49,16 +49,16 @@ async function addSource(id: string, localPath: string | null): Promise<void> {
 }
 
 /** A throwaway directory NOT under any registered source's local_path and
- * with no .gbrain-source, so the resolver falls through to the DB tiers. */
+ * with no .modusbrain-source, so the resolver falls through to the DB tiers. */
 function cleanCwd(): string {
-  return mkdtempSync(join(tmpdir(), 'gbrain-scoped-clean-'));
+  return mkdtempSync(join(tmpdir(), 'modusbrain-scoped-clean-'));
 }
 
 describe('resolveScopedSourceOrThrow', () => {
   test('single-source brain: returns default via seed_default tier (no throw)', async () => {
     const cwd = cleanCwd();
     try {
-      const r = await withEnv({ GBRAIN_SOURCE: undefined }, () =>
+      const r = await withEnv({ MODUSBRAIN_SOURCE: undefined }, () =>
         resolveScopedSourceOrThrow(engine, cwd));
       expect(r.source_id).toBe('default');
       expect(r.tier).toBe('seed_default');
@@ -67,13 +67,13 @@ describe('resolveScopedSourceOrThrow', () => {
     }
   });
 
-  test('.gbrain-source pin resolves on a multi-source brain (THE bug)', async () => {
+  test('.modusbrain-source pin resolves on a multi-source brain (THE bug)', async () => {
     await addSource('repo-a', '/fake/a');
     await addSource('repo-b', '/fake/b');
-    const cwd = mkdtempSync(join(tmpdir(), 'gbrain-scoped-pin-'));
-    writeFileSync(join(cwd, '.gbrain-source'), 'repo-a\n');
+    const cwd = mkdtempSync(join(tmpdir(), 'modusbrain-scoped-pin-'));
+    writeFileSync(join(cwd, '.modusbrain-source'), 'repo-a\n');
     try {
-      const r = await withEnv({ GBRAIN_SOURCE: undefined }, () =>
+      const r = await withEnv({ MODUSBRAIN_SOURCE: undefined }, () =>
         resolveScopedSourceOrThrow(engine, cwd));
       expect(r.source_id).toBe('repo-a');
       expect(r.tier).toBe('dotfile');
@@ -88,7 +88,7 @@ describe('resolveScopedSourceOrThrow', () => {
     const cwd = cleanCwd();
     let caught: unknown = null;
     try {
-      await withEnv({ GBRAIN_SOURCE: undefined }, () =>
+      await withEnv({ MODUSBRAIN_SOURCE: undefined }, () =>
         resolveScopedSourceOrThrow(engine, cwd));
     } catch (e) {
       caught = e;
@@ -107,7 +107,7 @@ describe('resolveScopedSourceOrThrow', () => {
     await addSource('repo-a', '/fake/a');
     const cwd = cleanCwd();
     try {
-      const r = await withEnv({ GBRAIN_SOURCE: undefined }, () =>
+      const r = await withEnv({ MODUSBRAIN_SOURCE: undefined }, () =>
         resolveScopedSourceOrThrow(engine, cwd));
       expect(r.source_id).toBe('repo-a');
       expect(r.tier).toBe('sole_non_default');
@@ -116,12 +116,12 @@ describe('resolveScopedSourceOrThrow', () => {
     }
   });
 
-  test('GBRAIN_SOURCE env tier wins on a multi-source brain', async () => {
+  test('MODUSBRAIN_SOURCE env tier wins on a multi-source brain', async () => {
     await addSource('repo-a', '/fake/a');
     await addSource('repo-b', '/fake/b');
     const cwd = cleanCwd();
     try {
-      const r = await withEnv({ GBRAIN_SOURCE: 'repo-b' }, () =>
+      const r = await withEnv({ MODUSBRAIN_SOURCE: 'repo-b' }, () =>
         resolveScopedSourceOrThrow(engine, cwd));
       expect(r.source_id).toBe('repo-b');
       expect(r.tier).toBe('env');
@@ -136,7 +136,7 @@ describe('resolveScopedSourceOrThrow', () => {
     await engine.setConfig('sources.default', 'repo-a');
     const cwd = cleanCwd();
     try {
-      const r = await withEnv({ GBRAIN_SOURCE: undefined }, () =>
+      const r = await withEnv({ MODUSBRAIN_SOURCE: undefined }, () =>
         resolveScopedSourceOrThrow(engine, cwd));
       expect(r.source_id).toBe('repo-a');
       expect(r.tier).toBe('brain_default');
@@ -150,7 +150,7 @@ describe('resolveScopedSourceOrThrow', () => {
     const cwd = cleanCwd();
     let caught: unknown = null;
     try {
-      await withEnv({ GBRAIN_SOURCE: undefined }, () =>
+      await withEnv({ MODUSBRAIN_SOURCE: undefined }, () =>
         resolveScopedSourceOrThrow(engine, cwd));
     } catch (e) {
       caught = e;
@@ -163,14 +163,14 @@ describe('resolveScopedSourceOrThrow', () => {
     }
   });
 
-  test('bad .gbrain-source pin (nonexistent source) throws a resolver user error', async () => {
+  test('bad .modusbrain-source pin (nonexistent source) throws a resolver user error', async () => {
     await addSource('repo-a', '/fake/a');
     await addSource('repo-b', '/fake/b');
-    const cwd = mkdtempSync(join(tmpdir(), 'gbrain-scoped-badpin-'));
-    writeFileSync(join(cwd, '.gbrain-source'), 'does-not-exist\n');
+    const cwd = mkdtempSync(join(tmpdir(), 'modusbrain-scoped-badpin-'));
+    writeFileSync(join(cwd, '.modusbrain-source'), 'does-not-exist\n');
     let caught: unknown = null;
     try {
-      await withEnv({ GBRAIN_SOURCE: undefined }, () =>
+      await withEnv({ MODUSBRAIN_SOURCE: undefined }, () =>
         resolveScopedSourceOrThrow(engine, cwd));
     } catch (e) {
       caught = e;

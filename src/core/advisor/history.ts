@@ -1,7 +1,7 @@
 /**
  * advisor/history.ts — E3 finding history (local-only, file-plane).
  *
- * Append-only `~/.gbrain/advisor-history.jsonl`, bounded/rotated. Chosen over a
+ * Append-only `~/.modusbrain/advisor-history.jsonl`, bounded/rotated. Chosen over a
  * DB migration table (eng-review): it removes the plan's only schema migration +
  * engine-parity burden and matches the nag-state/skillpack-state file-plane
  * pattern. The advisor only appends a snapshot and reads the most recent one for
@@ -14,7 +14,7 @@
 import { appendFileSync, existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'fs';
 import { dirname } from 'path';
 
-import { gbrainPath } from '../config.ts';
+import { modusbrainPath } from '../config.ts';
 import type { AdvisorReport } from './types.ts';
 
 /** Max snapshots retained before rotation trims the file to the newest half. */
@@ -28,7 +28,7 @@ export interface AdvisorRunSnapshot {
 }
 
 export function advisorHistoryPath(): string {
-  return gbrainPath('advisor-history.jsonl');
+  return modusbrainPath('advisor-history.jsonl');
 }
 
 function readSnapshots(path: string): AdvisorRunSnapshot[] {

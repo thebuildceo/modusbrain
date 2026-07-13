@@ -58,7 +58,7 @@ export const collectUninstalledBrainPack: AdvisorCollector = {
           severity: 'info',
           title: `Brain source "${src.id}" ships ${manifest.skills.length} skill${manifest.skills.length === 1 ? '' : 's'} you haven't installed (${manifest.name}).`,
           detail: 'These skills were authored for this brain. Install them to get its full operating manual.',
-          fix: { command_argv: ['gbrain', 'skillpack', 'scaffold', localPath] },
+          fix: { command_argv: ['modusbrain', 'skillpack', 'scaffold', localPath] },
           collector: 'uninstalled-brain-pack',
           ask_user: true,
           workspace_dependent: true,

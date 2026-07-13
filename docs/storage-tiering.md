@@ -2,13 +2,13 @@
 
 ## Overview
 
-GBrain supports storage tiering to separate version-controlled content from bulk machine-generated data. This prevents git repositories from becoming bloated with large amounts of automatically generated content while still preserving it in the database.
+ModusBrain supports storage tiering to separate version-controlled content from bulk machine-generated data. This prevents git repositories from becoming bloated with large amounts of automatically generated content while still preserving it in the database.
 
-> Note on naming: prior to v0.22.11 the keys were `git_tracked` / `supabase_only`. The canonical names are now `db_tracked` / `db_only` (engine-agnostic — works on both PGLite and Postgres). The deprecated keys still load with a once-per-process warning. Run `gbrain doctor --fix` for an automated rename when that path lands.
+> Note on naming: prior to v0.22.11 the keys were `git_tracked` / `supabase_only`. The canonical names are now `db_tracked` / `db_only` (engine-agnostic — works on both PGLite and Postgres). The deprecated keys still load with a once-per-process warning. Run `modusbrain doctor --fix` for an automated rename when that path lands.
 
 ## Configuration
 
-Add a `storage` section to your `gbrain.yml` file in the brain repository root:
+Add a `storage` section to your `modusbrain.yml` file in the brain repository root:
 
 ```yaml
 storage:
@@ -24,7 +24,7 @@ storage:
 
   # Directories persisted via the brain database only (bulk machine-generated
   # content). Written to disk as a local cache but not committed to git;
-  # `gbrain sync` auto-manages .gitignore for these paths. `gbrain export
+  # `modusbrain sync` auto-manages .gitignore for these paths. `modusbrain export
   # --restore-only` repopulates missing files from the database.
   db_only:
     - media/x/
@@ -35,13 +35,13 @@ storage:
 Path requirements:
 
 - Each directory must end with `/` for canonical form. The validator auto-normalizes missing trailing slashes (one-time info note shows what changed).
-- A directory cannot appear in both tiers — that's a tier-overlap error and `loadStorageConfig` throws `StorageConfigError`. Edit `gbrain.yml` to remove the overlap and try again.
+- A directory cannot appear in both tiers — that's a tier-overlap error and `loadStorageConfig` throws `StorageConfigError`. Edit `modusbrain.yml` to remove the overlap and try again.
 
 ## Behavior Changes
 
-### 1. `gbrain sync` — automatic .gitignore management
+### 1. `modusbrain sync` — automatic .gitignore management
 
-When storage configuration is present, `gbrain sync` automatically manages `.gitignore` entries on every successful sync:
+When storage configuration is present, `modusbrain sync` automatically manages `.gitignore` entries on every successful sync:
 
 - Adds missing `db_only` directory patterns to `.gitignore`.
 - Idempotent — re-running adds no duplicate entries.
@@ -49,32 +49,32 @@ When storage configuration is present, `gbrain sync` automatically manages `.git
 - Skipped on `--dry-run` (don't mutate disk in preview mode).
 - Skipped on `blocked_by_failures` status (sync state is inconsistent).
 - Skipped when the repo is a git submodule (`.git` is a file, not a directory) — submodule .gitignore changes don't survive parent updates. A warning explains.
-- Skipped entirely when `GBRAIN_NO_GITIGNORE=1` is set (escape hatch for shared-repo setups where a maintainer wants gbrain to leave .gitignore alone).
+- Skipped entirely when `MODUSBRAIN_NO_GITIGNORE=1` is set (escape hatch for shared-repo setups where a maintainer wants modusbrain to leave .gitignore alone).
 - Failures (write permission denied, etc.) are caught and logged, never crash sync.
 
 Example `.gitignore` addition:
 
 ```gitignore
-# Auto-managed by gbrain (db_only directories)
+# Auto-managed by modusbrain (db_only directories)
 media/x/
 media/articles/
 meetings/transcripts/
 ```
 
-### 2. `gbrain export --restore-only` — repopulate missing db_only files
+### 2. `modusbrain export --restore-only` — repopulate missing db_only files
 
 ```bash
 # Restore only missing db_only files from the database.
-gbrain export --restore-only --repo /path/to/brain
+modusbrain export --restore-only --repo /path/to/brain
 
 # Filter by page type.
-gbrain export --restore-only --type media --repo /path/to/brain
+modusbrain export --restore-only --type media --repo /path/to/brain
 
 # Filter by slug prefix.
-gbrain export --restore-only --slug-prefix media/x/ --repo /path/to/brain
+modusbrain export --restore-only --slug-prefix media/x/ --repo /path/to/brain
 
 # Combine filters.
-gbrain export --restore-only --type media --slug-prefix media/x/ --repo /path/to/brain
+modusbrain export --restore-only --type media --slug-prefix media/x/ --repo /path/to/brain
 ```
 
 The `--restore-only` flag:
@@ -84,14 +84,14 @@ The `--restore-only` flag:
 - Only exports pages that match `db_only` patterns AND are missing from disk.
 - Ideal for container restart recovery and fresh clones.
 
-### 3. `gbrain storage status` — storage-tier health dashboard
+### 3. `modusbrain storage status` — storage-tier health dashboard
 
 ```bash
 # Human-readable status.
-gbrain storage status --repo /path/to/brain
+modusbrain storage status --repo /path/to/brain
 
 # JSON output for scripts and orchestrators.
-gbrain storage status --repo /path/to/brain --json
+modusbrain storage status --repo /path/to/brain --json
 ```
 
 Output includes:
@@ -128,7 +128,7 @@ Missing Files (need restore):
   media/x/tweet-0987654321
   ... and 47 more
 
-Use: gbrain export --restore-only --repo "/data/brain"
+Use: modusbrain export --restore-only --repo "/data/brain"
 
 Configuration:
 --------------
@@ -169,7 +169,7 @@ Essential for ephemeral container environments:
 
 - Git repo contains only essential files.
 - Container restarts don't lose db_only data.
-- `gbrain export --restore-only` quickly restores bulk files when needed.
+- `modusbrain export --restore-only` quickly restores bulk files when needed.
 - Local disk acts as a cache layer.
 
 ### Multi-environment consistency
@@ -182,12 +182,12 @@ Enables consistent data access across environments:
 
 ## Migration strategy
 
-1. **Assess current repository**: use `gbrain storage status` to understand current distribution.
+1. **Assess current repository**: use `modusbrain storage status` to understand current distribution.
 2. **Plan directory structure**: identify which directories should be db_tracked vs db_only.
-3. **Create `gbrain.yml`**: add storage configuration to the repository root.
-4. **Test with dry-run**: `gbrain sync --dry-run` to verify behavior; `.gitignore` is NOT touched on dry-run.
-5. **Run a real sync**: `gbrain sync` updates `.gitignore` automatically on success.
-6. **Verify restore**: test `gbrain export --restore-only --repo .` against a small db_only directory.
+3. **Create `modusbrain.yml`**: add storage configuration to the repository root.
+4. **Test with dry-run**: `modusbrain sync --dry-run` to verify behavior; `.gitignore` is NOT touched on dry-run.
+5. **Run a real sync**: `modusbrain sync` updates `.gitignore` automatically on success.
+6. **Verify restore**: test `modusbrain export --restore-only --repo .` against a small db_only directory.
 
 ## Best practices
 
@@ -195,15 +195,15 @@ Enables consistent data access across environments:
 - **Start small**: begin with clearly machine-generated directories in `db_only`.
 - **Address validation errors**: tier overlap is an error, not a warning. Fix it before sync.
 - **Test restore**: regularly test `--restore-only` in staging environments.
-- **Document decisions**: comment your `gbrain.yml` to explain tier choices.
+- **Document decisions**: comment your `modusbrain.yml` to explain tier choices.
 
 ## PGLite engine note
 
-On the PGLite engine (gbrain's local-only embedded Postgres), the "DB" your db_only pages live in IS the local file gbrain uses for everything else. The `.gitignore` housekeeping still helps (keeps bulk content out of git history), but the offload-to-DB promise is technically vacuous. A once-per-process soft-warn explains when the engine is detected. To get full tiering, migrate to Postgres with `gbrain migrate --to supabase`.
+On the PGLite engine (modusbrain's local-only embedded Postgres), the "DB" your db_only pages live in IS the local file modusbrain uses for everything else. The `.gitignore` housekeeping still helps (keeps bulk content out of git history), but the offload-to-DB promise is technically vacuous. A once-per-process soft-warn explains when the engine is detected. To get full tiering, migrate to Postgres with `modusbrain migrate --to supabase`.
 
 ## Compatibility
 
-- **Backward compatible**: systems without `gbrain.yml` work unchanged.
+- **Backward compatible**: systems without `modusbrain.yml` work unchanged.
 - **Progressive enhancement**: add configuration when needed.
 - **Database unchanged**: all data remains in Postgres regardless of tier.
 - **Existing workflows**: all existing `sync` and `export` behavior preserved.

@@ -138,7 +138,7 @@ describe('advisor history (E3)', () => {
   let dir: string;
   let path: string;
   beforeEach(() => {
-    dir = mkdtempSync(join(tmpdir(), 'gbrain-advhist-'));
+    dir = mkdtempSync(join(tmpdir(), 'modusbrain-advhist-'));
     path = join(dir, 'advisor-history.jsonl');
   });
   afterEach(() => rmSync(dir, { recursive: true, force: true }));

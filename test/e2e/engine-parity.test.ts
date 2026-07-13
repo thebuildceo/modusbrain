@@ -228,7 +228,7 @@ describeBoth('Engine parity — Postgres vs PGLite', () => {
   // v0.39.3.0 T3 — provenance write+read parity (WARN-8 + CV5).
   // Both engines must write the same 4 provenance columns (source_kind,
   // source_uri, ingested_via, ingested_at) on putPage AND surface them
-  // on getPage. A drift here would mean `gbrain migrate --to supabase`
+  // on getPage. A drift here would mean `modusbrain migrate --to supabase`
   // silently loses half a user's provenance audit trail.
   test('provenance columns: putPage writes + getPage returns identical shape on both engines', async () => {
     const slug = 'wiki/provenance-parity';
@@ -620,7 +620,7 @@ describeBoth('Engine parity — relationalFanout', () => {
 
 // #2200 — federated sourceIds[] on the secondary-fetch reads must behave
 // identically on both engines (a drift would mean a federated MCP client sees
-// different tags/links/timeline after `gbrain migrate --to supabase`).
+// different tags/links/timeline after `modusbrain migrate --to supabase`).
 async function seedFederated(eng: BrainEngine) {
   await eng.executeRaw(`INSERT INTO sources (id, name, local_path) VALUES ('beta', 'beta', '/tmp/beta') ON CONFLICT (id) DO NOTHING`);
   await eng.putPage('fed/doc', { type: 'note', title: 'Fed doc', compiled_truth: 'b', timeline: '' }, { sourceId: 'beta' });

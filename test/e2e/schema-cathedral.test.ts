@@ -122,14 +122,14 @@ describe('v0.39 T22c — T18-replacement: schema show --as-filing-rules', () => 
 
 describe('v0.39 T22d — artifact-type routing', () => {
   test('detectArtifactKind dispatches by extension', () => {
-    expect(detectArtifactKind('/tmp/foo.gbrain-schema')).toBe('schemapack');
-    expect(detectArtifactKind('/tmp/foo.gbrain-skillpack')).toBe('skillpack');
+    expect(detectArtifactKind('/tmp/foo.modusbrain-schema')).toBe('schemapack');
+    expect(detectArtifactKind('/tmp/foo.modusbrain-skillpack')).toBe('skillpack');
     expect(detectArtifactKind('/tmp/foo.tar.gz')).toBe(null);
   });
 
   test('validateManifestByKind rejects cross-kind manifests', () => {
     expect(() => validateManifestByKind('schemapack', { api_version: 'gbrain-skillpack-v1' })).toThrow();
-    expect(() => validateManifestByKind('skillpack', { api_version: 'gbrain-schema-pack-v1' })).toThrow();
+    expect(() => validateManifestByKind('skillpack', { api_version: 'modusbrain-schema-pack-v1' })).toThrow();
   });
 });
 

@@ -1,19 +1,19 @@
 # agent-voice — reference bundle
 
-This directory is a **reference**, not a runtime gbrain dependency. The gbrain compiled binary does NOT load anything under `recipes/agent-voice/code/`, `recipes/agent-voice/skills/`, or `recipes/agent-voice/tests/`. Those exist to be COPIED into the operator's host agent repo via `gbrain integrations install agent-voice --target <host-repo>`.
+This directory is a **reference**, not a runtime modusbrain dependency. The modusbrain compiled binary does NOT load anything under `recipes/agent-voice/code/`, `recipes/agent-voice/skills/`, or `recipes/agent-voice/tests/`. Those exist to be COPIED into the operator's host agent repo via `modusbrain integrations install agent-voice --target <host-repo>`.
 
 ## The paradigm
 
 | Aspect                  | Legacy skillpack (`local-managed`)            | Reference skillpack (`copy-into-host-repo`)        |
 | ----------------------- | --------------------------------------------- | -------------------------------------------------- |
-| Where code lives        | `~/.gbrain/skills/<name>/`                    | `<host-repo>/services/voice-agent/`                |
-| Who owns edits          | gbrain (managed block)                        | Operator (host repo)                               |
+| Where code lives        | `~/.modusbrain/skills/<name>/`                    | `<host-repo>/services/voice-agent/`                |
+| Who owns edits          | modusbrain (managed block)                        | Operator (host repo)                               |
 | Update path             | Overwrite or skip                             | Diff-and-propose against manifest hashes           |
-| Resolver registration   | `~/.gbrain/skills/RESOLVER.md`                | `<host-repo>/RESOLVER.md` or `AGENTS.md`           |
-| Identity of updates     | gbrain pushes                                 | Operator pulls per release cadence                 |
-| Bisect / blame / history| gbrain's git history                          | Operator's host repo git history                   |
+| Resolver registration   | `~/.modusbrain/skills/RESOLVER.md`                | `<host-repo>/RESOLVER.md` or `AGENTS.md`           |
+| Identity of updates     | modusbrain pushes                                 | Operator pulls per release cadence                 |
+| Bisect / blame / history| modusbrain's git history                          | Operator's host repo git history                   |
 
-The `install_kind` discriminator in the recipe frontmatter routes between the two paths inside `gbrain integrations install`.
+The `install_kind` discriminator in the recipe frontmatter routes between the two paths inside `modusbrain integrations install`.
 
 ## Sibling-directory convention (for future copy-into-host-repo recipes)
 
@@ -22,7 +22,7 @@ This recipe pioneers the layout future copy-into-host-repo recipes should follow
 ```
 recipes/<name>.md                       # registered entrypoint (loader sees this)
 recipes/<name>/
-├── README.md                           # paradigm doc; gbrain-side only (not copied)
+├── README.md                           # paradigm doc; modusbrain-side only (not copied)
 ├── package.json                        # top-of-bundle; copied to <host>/services/<name>/package.json
 ├── code/                               # copied to <host>/services/<name>/code/
 ├── tests/                              # copied to <host>/services/<name>/tests/
@@ -30,7 +30,7 @@ recipes/<name>/
 │   ├── e2e/
 │   └── evals/
 ├── skills/                             # copied to <host>/skills/<skill-name>/
-├── install/                            # gbrain-side only; install metadata
+├── install/                            # modusbrain-side only; install metadata
 │   ├── manifest.json                   # src → target map + per-file SHA-256
 │   ├── refresh-algorithm.md            # diff-and-propose semantics
 │   └── post-install-hint.md            # next-step prompts for the install agent
@@ -43,9 +43,9 @@ Three rules for new recipes following this shape:
 
 2. **PII guard scope.** Every file under `recipes/<name>/` is scanned by `scripts/check-no-pii-in-agent-voice.sh` (or future equivalent), PLUS the top-level `recipes/<name>.md`. The single source of truth for the blocklist is a JSON file inside the bundle.
 
-3. **`install_kind: copy-into-host-repo`** in frontmatter routes to the copy path. Without it, the recipe defaults to `local-managed` (legacy `~/.gbrain/skills/` install).
+3. **`install_kind: copy-into-host-repo`** in frontmatter routes to the copy path. Without it, the recipe defaults to `local-managed` (legacy `~/.modusbrain/skills/` install).
 
-## Files (gbrain-side only — NOT copied to host)
+## Files (modusbrain-side only — NOT copied to host)
 
 - `README.md` — this doc.
 - `install/manifest.json` — declares src → target paths + permissions; the install command computes SHA-256 at copy time.
@@ -56,7 +56,7 @@ Three rules for new recipes following this shape:
 
 ## Files (in `bundle = code/ + tests/ + skills/ + package.json`) — copied to host repo
 
-The install subcommand reads `install/manifest.json` and copies each listed file to its target path under the host repo. SHA-256s computed at copy time get persisted into `<host>/services/<name>/.gbrain-source.json` so `--refresh` can do three-way classification (unchanged-identical / unchanged-stale / locally-modified) without re-walking the entire bundle.
+The install subcommand reads `install/manifest.json` and copies each listed file to its target path under the host repo. SHA-256s computed at copy time get persisted into `<host>/services/<name>/.modusbrain-source.json` so `--refresh` can do three-way classification (unchanged-identical / unchanged-stale / locally-modified) without re-walking the entire bundle.
 
 ## Reading order
 

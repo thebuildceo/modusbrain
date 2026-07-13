@@ -9,11 +9,11 @@
  *   1. Create scratch dir → /tmp/agent-voice-fullflow-<uuid>/
  *   2. Seed as fake host repo (.git init, AGENTS.md stub)
  *   3. Spawn openclaw with BRIEF.md that says:
- *      "Run `gbrain integrations install agent-voice --target $PWD`.
+ *      "Run `modusbrain integrations install agent-voice --target $PWD`.
  *       Then start the voice server: `bun run start` (or `npm start`).
  *       Wait for /health to respond."
  *   4. Wait ≤5min for openclaw exit OR /health response.
- *   5. Assert filesystem (server.mjs exists, .gbrain-source.json shape, no PII leak)
+ *   5. Assert filesystem (server.mjs exists, .modusbrain-source.json shape, no PII leak)
  *   6. Drive the roundtrip via shared lib/browser-audio.mjs.
  *   7. Three-tier assertions (CONNECTION hard, NON-SILENT hard, SEMANTIC soft).
  *   8. Collect friction artifacts.
@@ -49,11 +49,11 @@ let scratchDir;
 let serverProcess;
 let openclawProcess;
 
-function findGbrainBin() {
-  // Try the local checkout's CLI first; fall back to global gbrain.
+function findModusbrainBin() {
+  // Try the local checkout's CLI first; fall back to global modusbrain.
   const local = resolve(__dirname, '..', '..', '..', '..', 'src', 'cli.ts');
   if (existsSync(local)) return { bin: 'bun', args: ['run', local] };
-  const which = spawnSync('which', ['gbrain'], { encoding: 'utf-8' });
+  const which = spawnSync('which', ['modusbrain'], { encoding: 'utf-8' });
   if (which.status === 0 && which.stdout.trim()) return { bin: which.stdout.trim(), args: [] };
   return null;
 }
@@ -78,8 +78,8 @@ beforeAll(async () => {
   spawnSync('git', ['init', '-q'], { cwd: scratchDir });
   writeFileSync(join(scratchDir, 'AGENTS.md'), '# stub\n');
 
-  const gbrainBin = findGbrainBin();
-  if (!gbrainBin) throw new Error('gbrain CLI not found (checked local checkout + $PATH)');
+  const modusbrainBin = findModusbrainBin();
+  if (!modusbrainBin) throw new Error('modusbrain CLI not found (checked local checkout + $PATH)');
 
   // Write BRIEF.md the openclaw runner will pick up.
   const brief = [
@@ -90,7 +90,7 @@ beforeAll(async () => {
     '',
     '## Steps',
     '',
-    '1. Run: `' + (typeof gbrainBin === 'object' ? `${gbrainBin.bin} ${gbrainBin.args.join(' ')}` : gbrainBin) + ' integrations install agent-voice --target ' + scratchDir + '`',
+    '1. Run: `' + (typeof modusbrainBin === 'object' ? `${modusbrainBin.bin} ${modusbrainBin.args.join(' ')}` : modusbrainBin) + ' integrations install agent-voice --target ' + scratchDir + '`',
     '2. After it completes, run the test command:',
     '   `cd ' + join(scratchDir, 'services/voice-agent') + ' && bun install && bun run test`',
     '3. Start the voice server on port ' + PORT + ':',
@@ -98,7 +98,7 @@ beforeAll(async () => {
     '4. Wait for ' + SERVER_URL + '/health to return {ok: true}.',
     '5. Print "READY" and exit.',
     '',
-    'If anything is confusing, run `gbrain friction log` with severity=error.',
+    'If anything is confusing, run `modusbrain friction log` with severity=error.',
   ].join('\n');
   writeFileSync(join(scratchDir, 'BRIEF.md'), brief);
 
@@ -148,9 +148,9 @@ afterAll(async () => {
 describe.skipIf(!SHOULD_RUN)('voice-full-flow E2E (openclaw + roundtrip)', () => {
   it('openclaw installs agent-voice and starts the server', () => {
     expect(existsSync(join(scratchDir, 'services/voice-agent/code/server.mjs')), 'server.mjs missing post-install').toBe(true);
-    expect(existsSync(join(scratchDir, 'services/voice-agent/.gbrain-source.json')), '.gbrain-source.json missing').toBe(true);
+    expect(existsSync(join(scratchDir, 'services/voice-agent/.modusbrain-source.json')), '.modusbrain-source.json missing').toBe(true);
 
-    const manifest = JSON.parse(readFileSync(join(scratchDir, 'services/voice-agent/.gbrain-source.json'), 'utf8'));
+    const manifest = JSON.parse(readFileSync(join(scratchDir, 'services/voice-agent/.modusbrain-source.json'), 'utf8'));
     expect(manifest.recipe).toBe('agent-voice');
     expect(manifest.install_kind).toBe('copy-into-host-repo');
     expect(manifest.upstream_repo).toBeUndefined(); // D11-A
@@ -167,7 +167,7 @@ describe.skipIf(!SHOULD_RUN)('voice-full-flow E2E (openclaw + roundtrip)', () =>
     expect(existsSync(join(scratchDir, 'services/voice-agent/code/lib/personas/venus.mjs'))).toBe(true);
 
     // No PII leak — re-run the guard against the copied tree.
-    // (We can't easily invoke the gbrain-side guard here; the guard ran during install via gbrain CI.)
+    // (We can't easily invoke the modusbrain-side guard here; the guard ran during install via modusbrain CI.)
     // Spot-check: any term from $AGENT_VOICE_PII_BLOCKLIST should not appear in any copied file.
     // Literal banned names deliberately NOT in this source file per CLAUDE.md.
     if (process.env.AGENT_VOICE_PII_BLOCKLIST) {
@@ -219,7 +219,7 @@ describe.skipIf(!SHOULD_RUN)('voice-full-flow E2E (openclaw + roundtrip)', () =>
     console.log('[full-flow] semantic judgement:', judgement);
 
     // Friction artifacts.
-    const frictionDir = join(process.env.HOME, '.gbrain', 'friction');
+    const frictionDir = join(process.env.HOME, '.modusbrain', 'friction');
     if (existsSync(frictionDir)) {
       const recent = readdirSync(frictionDir)
         .filter((f) => f.endsWith('.jsonl'))

@@ -10,7 +10,7 @@
  *      named-ref second arg is allowed (NOT the bug pattern even if `async`
  *      appears later in the file in a different context).
  *
- * Uses the GBRAIN_LOCK_RENEWAL_SHAPE_TARGET env knob (built into the
+ * Uses the MODUSBRAIN_LOCK_RENEWAL_SHAPE_TARGET env knob (built into the
  * script) to swap the scanned file without git-mucking. Hermetic via
  * per-test tempfiles.
  */
@@ -45,7 +45,7 @@ afterEach(() => {
 function runGuard(targetPath: string): { status: number; stdout: string; stderr: string } {
   const r = spawnSync('bash', [GUARD_SH], {
     encoding: 'utf-8',
-    env: { ...process.env, GBRAIN_LOCK_RENEWAL_SHAPE_TARGET: targetPath },
+    env: { ...process.env, MODUSBRAIN_LOCK_RENEWAL_SHAPE_TARGET: targetPath },
   });
   return { status: r.status ?? -1, stdout: r.stdout, stderr: r.stderr };
 }

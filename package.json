@@ -1,11 +1,10 @@
 {
-  "name": "modusbrain",
-  "description": "ModusBrain — versioned company knowledge + confidence-gated operational skills for AI agents. Built on GBrain (MIT).",
+  "name": "@genthropic/modusbrain",
+  "description": "ModusBrain — versioned company knowledge + confidence-gated operational skills for AI agents. Built on ModusBrain (MIT).",
   "type": "module",
   "main": "src/core/index.ts",
   "bin": {
-    "modusbrain": "src/cli.ts",
-    "gbrain": "src/cli.ts"
+    "modusbrain": "src/cli.ts"
   },
   "exports": {
     ".": "./src/core/index.ts",
@@ -32,7 +31,7 @@
   "scripts": {
     "dev": "bun run src/cli.ts",
     "build": "bun build --compile --outfile bin/modusbrain src/cli.ts",
-    "build:legacy": "bun build --compile --outfile bin/gbrain src/cli.ts",
+    "build:legacy": "bun build --compile --outfile bin/modusbrain src/cli.ts",
     "build:all": "bun build --compile --target=bun-darwin-arm64 --outfile bin/modusbrain-darwin-arm64 src/cli.ts && bun build --compile --target=bun-linux-x64 --outfile bin/modusbrain-linux-x64 src/cli.ts",
     "build:admin": "cd admin && bun run build && cd .. && bun run scripts/build-admin-embedded.ts",
     "build:admin-embedded": "bun run scripts/build-admin-embedded.ts",
@@ -88,7 +87,7 @@
     "check:fixture-privacy": "bash scripts/check-fixture-privacy.sh",
     "check:conversation-parser": "bun src/cli.ts eval conversation-parser test/fixtures/conversation-formats/all.jsonl --no-llm",
     "check:source-scope-onboard": "bash scripts/check-source-scope-onboard.sh",
-    "postinstall": "command -v modusbrain >/dev/null 2>&1 && modusbrain apply-migrations --yes --non-interactive || command -v gbrain >/dev/null 2>&1 && gbrain apply-migrations --yes --non-interactive || echo '[modusbrain] postinstall skipped. If installed via bun install -g: run `modusbrain doctor` and `modusbrain apply-migrations --yes` manually.' 1>&2",
+    "postinstall": "command -v modusbrain >/dev/null 2>&1 && modusbrain apply-migrations --yes --non-interactive || command -v modusbrain >/dev/null 2>&1 && modusbrain apply-migrations --yes --non-interactive || echo '[modusbrain] postinstall skipped. If installed via bun install -g: run `modusbrain doctor` and `modusbrain apply-migrations --yes` manually.' 1>&2",
     "prepublish:clawhub": "bun run build:all",
     "publish:clawhub": "clawhub package publish . --family bundle-plugin"
   },
@@ -146,6 +145,14 @@
   ],
   "engines": {
     "bun": ">=1.3.10"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thebuildceo/modusbrain.git"
+  },
+  "homepage": "https://github.com/thebuildceo/modusbrain#readme",
+  "bugs": {
+    "url": "https://github.com/thebuildceo/modusbrain/issues"
   },
   "license": "MIT",
   "version": "0.42.56.0"

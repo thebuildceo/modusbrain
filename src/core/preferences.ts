@@ -1,11 +1,11 @@
 /**
- * ~/.gbrain/preferences.json — user-facing agent-behavior flags (minion_mode, etc.).
+ * ~/.modusbrain/preferences.json — user-facing agent-behavior flags (minion_mode, etc.).
  *
  * Separate from src/core/config.ts (engine config), written to its own file so
  * engine config and agent preferences can evolve independently. Atomic writes
  * via mktemp + rename; 0o600 perms; forward-compatible (preserves unknown keys).
  *
- * Also houses ~/.gbrain/migrations/completed.jsonl append helper.
+ * Also houses ~/.modusbrain/migrations/completed.jsonl append helper.
  */
 
 import { readFileSync, writeFileSync, renameSync, chmodSync, mkdtempSync, rmSync, existsSync, mkdirSync, appendFileSync } from 'fs';
@@ -19,30 +19,30 @@ function home(): string {
   // Prefer the env var; fall back to the cached OS value. Matches the existing
   // `src/commands/upgrade.ts` pattern.
   //
-  // NOTE: prefsDir() and migrationsDir() route through gbrainPath() (which
-  // honors GBRAIN_HOME), so this fallback is only used by code paths that
+  // NOTE: prefsDir() and migrationsDir() route through modusbrainPath() (which
+  // honors MODUSBRAIN_HOME), so this fallback is only used by code paths that
   // want $HOME directly (none in this file as of v0.30.3).
   return process.env.HOME || homedir();
 }
 
 /**
- * GBRAIN_HOME-aware override for the .gbrain directory. When the env var
- * is set, this returns it directly (so the directory is GBRAIN_HOME itself,
- * matching the convention `src/core/config.ts:gbrainPath` enforces).
- * When unset, falls back to `<home>/.gbrain` so legacy callers and the
+ * MODUSBRAIN_HOME-aware override for the .modusbrain directory. When the env var
+ * is set, this returns it directly (so the directory is MODUSBRAIN_HOME itself,
+ * matching the convention `src/core/config.ts:modusbrainPath` enforces).
+ * When unset, falls back to `<home>/.modusbrain` so legacy callers and the
  * doctor's filesystem-only checks keep working.
  *
- * Without this, `~/.gbrain/migrations/completed.jsonl` is the only path
+ * Without this, `~/.modusbrain/migrations/completed.jsonl` is the only path
  * doctor reads on filesystem checks — the test isolation contract that
- * `gbrainPath()` provides for everywhere else doesn't extend here.
+ * `modusbrainPath()` provides for everywhere else doesn't extend here.
  */
-function gbrainDir(): string {
-  const override = process.env.GBRAIN_HOME;
+function modusbrainDir(): string {
+  const override = process.env.MODUSBRAIN_HOME;
   if (override) {
     const trimmed = override.trim();
     if (trimmed) return trimmed;
   }
-  return join(home(), '.gbrain');
+  return join(home(), '.modusbrain');
 }
 
 export type MinionMode = 'always' | 'pain_triggered' | 'off';
@@ -79,13 +79,13 @@ export interface CompletedMigrationEntry {
 
 const VALID_MODES: ReadonlyArray<MinionMode> = ['always', 'pain_triggered', 'off'];
 
-// Route preferences + migration ledger paths through gbrainDir() so they
-// honor GBRAIN_HOME for hermetic test isolation. Pre-v0.30.3 these used
-// `$HOME/.gbrain` directly, which leaked the developer's local migration
-// ledger into E2E tests and CI runs even when GBRAIN_HOME was set.
-function prefsDir(): string { return gbrainDir(); }
+// Route preferences + migration ledger paths through modusbrainDir() so they
+// honor MODUSBRAIN_HOME for hermetic test isolation. Pre-v0.30.3 these used
+// `$HOME/.modusbrain` directly, which leaked the developer's local migration
+// ledger into E2E tests and CI runs even when MODUSBRAIN_HOME was set.
+function prefsDir(): string { return modusbrainDir(); }
 function prefsPath(): string { return join(prefsDir(), 'preferences.json'); }
-function migrationsDir(): string { return join(gbrainDir(), 'migrations'); }
+function migrationsDir(): string { return join(modusbrainDir(), 'migrations'); }
 function completedJsonlPath(): string { return join(migrationsDir(), 'completed.jsonl'); }
 
 /** Validate that a value is a recognized minion mode. Throws with the allowed list. */
@@ -134,7 +134,7 @@ export function savePreferences(prefs: Preferences): void {
 }
 
 /**
- * Append one line to ~/.gbrain/migrations/completed.jsonl. Creates the
+ * Append one line to ~/.modusbrain/migrations/completed.jsonl. Creates the
  * directory if missing. Does not read existing lines (append is cheap and
  * the reader tolerates malformed lines by skipping them).
  *

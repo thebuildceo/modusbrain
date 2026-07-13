@@ -32,7 +32,7 @@ export const collectUninstalledBundled: AdvisorCollector = {
         severity: 'info',
         title: `${missing.length} recommended skill${missing.length === 1 ? ' is' : 's are'} not installed in this workspace.`,
         detail: missing.map((s) => s.slug).join(', '),
-        fix: { command_argv: ['gbrain', 'skillpack', 'scaffold', ...missing.map((s) => s.slug)] },
+        fix: { command_argv: ['modusbrain', 'skillpack', 'scaffold', ...missing.map((s) => s.slug)] },
         collector: 'uninstalled-bundled',
         ask_user: true,
         workspace_dependent: true,

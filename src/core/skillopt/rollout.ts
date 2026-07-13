@@ -90,10 +90,10 @@ export async function runRollout(opts: RolloutOpts): Promise<Trajectory> {
 
   // Capture tool calls as they fire. The toolLoop's callbacks fire in
   // ordering: onToolCallStart -> handler.execute -> onToolCallComplete|Failed.
-  // We capture outputs in a Map keyed by gbrainToolUseId so we can stitch
+  // We capture outputs in a Map keyed by modusbrainToolUseId so we can stitch
   // them into the trajectory's tool_calls array (preserving call order).
   const toolCalls: Trajectory['tool_calls'] = [];
-  const callsById = new Map<string, number>(); // gbrainToolUseId -> index in toolCalls
+  const callsById = new Map<string, number>(); // modusbrainToolUseId -> index in toolCalls
   let nextOrdinal = 0;
 
   const result = await toolLoopImpl({
@@ -106,20 +106,20 @@ export async function runRollout(opts: RolloutOpts): Promise<Trajectory> {
     cacheSystem: true, // D11: candidate skill is stable for a step's batch.
     abortSignal: opts.abortSignal,
     onToolCallStart: async (_turnIdx, _messageIdx, _ordinal, toolName, input, providerToolCallId) => {
-      const gbrainToolUseId = `skillopt-${nextOrdinal++}-${providerToolCallId}`;
+      const modusbrainToolUseId = `skillopt-${nextOrdinal++}-${providerToolCallId}`;
       const idx = toolCalls.length;
-      callsById.set(gbrainToolUseId, idx);
+      callsById.set(modusbrainToolUseId, idx);
       toolCalls.push({ name: stripBrainPrefix(toolName), input });
-      return { gbrainToolUseId };
+      return { modusbrainToolUseId };
     },
-    onToolCallComplete: async (gbrainToolUseId, output) => {
-      const idx = callsById.get(gbrainToolUseId);
+    onToolCallComplete: async (modusbrainToolUseId, output) => {
+      const idx = callsById.get(modusbrainToolUseId);
       if (idx !== undefined && toolCalls[idx]) {
         toolCalls[idx]!.output = output;
       }
     },
-    onToolCallFailed: async (gbrainToolUseId, error) => {
-      const idx = callsById.get(gbrainToolUseId);
+    onToolCallFailed: async (modusbrainToolUseId, error) => {
+      const idx = callsById.get(modusbrainToolUseId);
       if (idx !== undefined && toolCalls[idx]) {
         toolCalls[idx]!.failed = true;
         toolCalls[idx]!.output = { error };

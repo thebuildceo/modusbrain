@@ -36,7 +36,7 @@ function run(args: string[]): { exitCode: number; stdout: string; stderr: string
 
 describe('skillify-check CLI', () => {
   test('text mode runs against a known-skilled file', () => {
-    // publish is one of the gbrain commands with SKILL.md + tests +
+    // publish is one of the modusbrain commands with SKILL.md + tests +
     // resolver entry. Should get a non-zero score.
     const result = run(['src/commands/publish.ts']);
     expect(result.stdout).toContain('[publish]');
@@ -105,7 +105,7 @@ import { afterEach } from 'bun:test';
 
 function runWithPath(opts: { path: string }): { stdout: string; stderr: string } {
   // Use bun's absolute path so spawnSync doesn't need bun on the scoped PATH.
-  // PATH is what skillify-check's own `spawnSync('gbrain', ...)` will search.
+  // PATH is what skillify-check's own `spawnSync('modusbrain', ...)` will search.
   const bunBin = process.execPath || 'bun';
   const res = spawnSync(bunBin, ['run', SCRIPT, '--json', 'src/commands/publish.ts'], {
     encoding: 'utf-8',
@@ -119,7 +119,7 @@ function runWithPath(opts: { path: string }): { stdout: string; stderr: string }
   };
 }
 
-describe('skillify-check ↔ gbrain check-resolvable wiring', () => {
+describe('skillify-check ↔ modusbrain check-resolvable wiring', () => {
   const created: string[] = [];
   afterEach(() => {
     while (created.length) {
@@ -128,12 +128,12 @@ describe('skillify-check ↔ gbrain check-resolvable wiring', () => {
     }
   });
 
-  test('loud failure when gbrain binary is not on PATH (no silent pass)', () => {
-    const emptyPath = mkdtempSync(join(tmpdir(), 'no-gbrain-'));
+  test('loud failure when modusbrain binary is not on PATH (no silent pass)', () => {
+    const emptyPath = mkdtempSync(join(tmpdir(), 'no-modusbrain-'));
     created.push(emptyPath);
     const r = runWithPath({ path: emptyPath });
     // Loud warning must appear on stderr.
-    expect(r.stderr).toContain('gbrain check-resolvable not runnable');
+    expect(r.stderr).toContain('modusbrain check-resolvable not runnable');
     const parsed = JSON.parse(r.stdout);
     const gate = parsed[0].items.find((i: any) => i.name === 'check-resolvable gate');
     expect(gate).toBeDefined();
@@ -142,10 +142,10 @@ describe('skillify-check ↔ gbrain check-resolvable wiring', () => {
     expect(gate.detail).toContain('unavailable');
   });
 
-  test('happy path: synthetic gbrain on PATH returns ok=true, gate passes', () => {
-    const fakeBinDir = mkdtempSync(join(tmpdir(), 'fake-gbrain-'));
+  test('happy path: synthetic modusbrain on PATH returns ok=true, gate passes', () => {
+    const fakeBinDir = mkdtempSync(join(tmpdir(), 'fake-modusbrain-'));
     created.push(fakeBinDir);
-    const fakeBin = join(fakeBinDir, 'gbrain');
+    const fakeBin = join(fakeBinDir, 'modusbrain');
     writeFileSync(
       fakeBin,
       `#!/bin/sh
@@ -157,7 +157,7 @@ JSON
     chmodSync(fakeBin, 0o755);
     const r = runWithPath({ path: `${fakeBinDir}:${process.env.PATH}` });
     // No silent-pass warning.
-    expect(r.stderr).not.toContain('gbrain check-resolvable not runnable');
+    expect(r.stderr).not.toContain('modusbrain check-resolvable not runnable');
     const parsed = JSON.parse(r.stdout);
     const gate = parsed[0].items.find((i: any) => i.name === 'check-resolvable gate');
     expect(gate).toBeDefined();

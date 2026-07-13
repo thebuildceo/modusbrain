@@ -5,19 +5,19 @@ import { describe, expect, test } from 'bun:test';
 import { dotenvValuesForKey, effectiveEnvDatabaseUrl } from '../src/core/config.ts';
 import { withEnv } from './helpers/with-env.ts';
 
-// #427 — Bun auto-loads `.env` from the process cwd, so running gbrain inside
+// #427 — Bun auto-loads `.env` from the process cwd, so running modusbrain inside
 // any web-app checkout whose `.env` defines DATABASE_URL silently retargets
 // the brain at that app's database. These tests pin the guard:
 // effectiveEnvDatabaseUrl() must treat a DATABASE_URL whose value matches a
 // cwd .env assignment as file-origin (ignored), while still honoring
-// GBRAIN_DATABASE_URL and genuinely exported DATABASE_URLs.
+// MODUSBRAIN_DATABASE_URL and genuinely exported DATABASE_URLs.
 //
 // The dir is injected instead of process.chdir'd so these tests stay safe in
 // the parallel shard runner (cwd is process-global, same reason with-env.ts
 // exists for process.env).
 
 function tmpProject(envFiles: Record<string, string>): string {
-  const dir = mkdtempSync(join(tmpdir(), 'gbrain-env-hijack-'));
+  const dir = mkdtempSync(join(tmpdir(), 'modusbrain-env-hijack-'));
   for (const [name, content] of Object.entries(envFiles)) {
     writeFileSync(join(dir, name), content);
   }
@@ -59,7 +59,7 @@ describe('dotenvValuesForKey', () => {
   });
 
   test('returns empty set when no .env files exist', () => {
-    const dir = mkdtempSync(join(tmpdir(), 'gbrain-env-hijack-none-'));
+    const dir = mkdtempSync(join(tmpdir(), 'modusbrain-env-hijack-none-'));
     try {
       expect(dotenvValuesForKey('DATABASE_URL', dir).size).toBe(0);
     } finally {
@@ -76,7 +76,7 @@ describe('effectiveEnvDatabaseUrl (#427 guard)', () => {
     const dir = tmpProject({ '.env': `DATABASE_URL=${HIJACK_URL}\n` });
     try {
       await withEnv(
-        { GBRAIN_DATABASE_URL: undefined, DATABASE_URL: HIJACK_URL },
+        { MODUSBRAIN_DATABASE_URL: undefined, DATABASE_URL: HIJACK_URL },
         () => {
           expect(effectiveEnvDatabaseUrl(dir)).toBeUndefined();
         },
@@ -90,7 +90,7 @@ describe('effectiveEnvDatabaseUrl (#427 guard)', () => {
     const dir = tmpProject({ '.env': `DATABASE_URL=${HIJACK_URL}\n` });
     try {
       await withEnv(
-        { GBRAIN_DATABASE_URL: undefined, DATABASE_URL: OPERATOR_URL },
+        { MODUSBRAIN_DATABASE_URL: undefined, DATABASE_URL: OPERATOR_URL },
         () => {
           expect(effectiveEnvDatabaseUrl(dir)).toBe(OPERATOR_URL);
         },
@@ -100,11 +100,11 @@ describe('effectiveEnvDatabaseUrl (#427 guard)', () => {
     }
   });
 
-  test('GBRAIN_DATABASE_URL is never ignored, even when it matches the cwd .env', async () => {
-    const dir = tmpProject({ '.env': `GBRAIN_DATABASE_URL=${OPERATOR_URL}\nDATABASE_URL=${HIJACK_URL}\n` });
+  test('MODUSBRAIN_DATABASE_URL is never ignored, even when it matches the cwd .env', async () => {
+    const dir = tmpProject({ '.env': `MODUSBRAIN_DATABASE_URL=${OPERATOR_URL}\nDATABASE_URL=${HIJACK_URL}\n` });
     try {
       await withEnv(
-        { GBRAIN_DATABASE_URL: OPERATOR_URL, DATABASE_URL: HIJACK_URL },
+        { MODUSBRAIN_DATABASE_URL: OPERATOR_URL, DATABASE_URL: HIJACK_URL },
         () => {
           expect(effectiveEnvDatabaseUrl(dir)).toBe(OPERATOR_URL);
         },
@@ -115,10 +115,10 @@ describe('effectiveEnvDatabaseUrl (#427 guard)', () => {
   });
 
   test('honors DATABASE_URL when no .env files exist in cwd', async () => {
-    const dir = mkdtempSync(join(tmpdir(), 'gbrain-env-hijack-clean-'));
+    const dir = mkdtempSync(join(tmpdir(), 'modusbrain-env-hijack-clean-'));
     try {
       await withEnv(
-        { GBRAIN_DATABASE_URL: undefined, DATABASE_URL: OPERATOR_URL },
+        { MODUSBRAIN_DATABASE_URL: undefined, DATABASE_URL: OPERATOR_URL },
         () => {
           expect(effectiveEnvDatabaseUrl(dir)).toBe(OPERATOR_URL);
         },
@@ -129,10 +129,10 @@ describe('effectiveEnvDatabaseUrl (#427 guard)', () => {
   });
 
   test('returns undefined when neither env var is set', async () => {
-    const dir = mkdtempSync(join(tmpdir(), 'gbrain-env-hijack-unset-'));
+    const dir = mkdtempSync(join(tmpdir(), 'modusbrain-env-hijack-unset-'));
     try {
       await withEnv(
-        { GBRAIN_DATABASE_URL: undefined, DATABASE_URL: undefined },
+        { MODUSBRAIN_DATABASE_URL: undefined, DATABASE_URL: undefined },
         () => {
           expect(effectiveEnvDatabaseUrl(dir)).toBeUndefined();
         },

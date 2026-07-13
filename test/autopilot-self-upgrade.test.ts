@@ -6,7 +6,7 @@ import { generateSystemdUnit } from '../src/commands/autopilot.ts';
 const AUTOPILOT_SRC = readFileSync(join(import.meta.dir, '../src/commands/autopilot.ts'), 'utf8');
 
 describe('generateSystemdUnit', () => {
-  const unit = generateSystemdUnit('/home/u/.gbrain/autopilot-run.sh');
+  const unit = generateSystemdUnit('/home/u/.modusbrain/autopilot-run.sh');
 
   test('uses Restart=always (NOT on-failure) so a clean exit-for-relaunch respawns', () => {
     expect(unit).toContain('Restart=always');
@@ -17,7 +17,7 @@ describe('generateSystemdUnit', () => {
     expect(unit).toContain('StartLimitBurst=');
   });
   test('runs the given wrapper path', () => {
-    expect(unit).toContain('ExecStart=/home/u/.gbrain/autopilot-run.sh');
+    expect(unit).toContain('ExecStart=/home/u/.modusbrain/autopilot-run.sh');
   });
 });
 
@@ -28,9 +28,9 @@ describe('autopilot self-upgrade static-shape regressions', () => {
     expect(AUTOPILOT_SRC).not.toMatch(/execvp\s*\(/);
   });
   test('the silent channel does swap-only, never a blocking full post-upgrade in the tick', () => {
-    expect(AUTOPILOT_SRC).toContain("execSync('gbrain upgrade --swap-only'");
+    expect(AUTOPILOT_SRC).toContain("execSync('modusbrain upgrade --swap-only'");
     // The tick must not invoke the (up-to-30-min) post-upgrade inline.
-    expect(AUTOPILOT_SRC).not.toContain("execSync('gbrain post-upgrade'");
+    expect(AUTOPILOT_SRC).not.toContain("execSync('modusbrain post-upgrade'");
   });
   test('boot reconciles the breadcrumb and the tick attempts the channel', () => {
     expect(AUTOPILOT_SRC).toContain('reconcileSelfUpgradeAtBoot()');

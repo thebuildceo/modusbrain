@@ -2,7 +2,7 @@
 //
 // Problem: after unify-types runs, pages with type='article' become
 // type='media' with frontmatter.subtype='article'. Existing scripts that
-// run `gbrain extract --type article` would return zero pages.
+// run `modusbrain extract --type article` would return zero pages.
 //
 // Fix: expand the user-supplied type at query construction time. If the
 // type is declared as an ALIAS of a canonical type (per the active

@@ -1,5 +1,5 @@
 /**
- * v0.41.16.0 — `gbrain conversation-parser` debug CLI tests.
+ * v0.41.16.0 — `modusbrain conversation-parser` debug CLI tests.
  *
  * Pins:
  *   - list-builtins prints all 12 patterns + accepts --json

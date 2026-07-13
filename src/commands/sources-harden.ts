@@ -1,10 +1,10 @@
 /**
- * gbrain sources harden / pull / unharden — brain-repo git durability (v0.42.44).
+ * modusbrain sources harden / pull / unharden — brain-repo git durability (v0.42.44).
  *
- *   gbrain sources harden   <id|--all> [--pat-file <p>] [--branch <b>]
+ *   modusbrain sources harden   <id|--all> [--pat-file <p>] [--branch <b>]
  *                                      [--no-cron] [--no-verify] [--dry-run] [--json]
- *   gbrain sources pull     <id> | --path <dir> [--branch <b>]
- *   gbrain sources unharden <id>
+ *   modusbrain sources pull     <id> | --path <dir> [--branch <b>]
+ *   modusbrain sources unharden <id>
  *
  * `harden`/`unharden` write executables, an OS cron, and a credential helper on
  * the host → CLI-only (never MCP). `pull --path` is DB-free (the cron's entry):
@@ -44,7 +44,7 @@ async function loadSourceRows(engine: BrainEngine, id: string | undefined, all: 
   if (all) {
     return engine.executeRaw<SourceRow>(`SELECT id, local_path, config FROM sources WHERE local_path IS NOT NULL ORDER BY id`);
   }
-  if (!id) throw new Error('Usage: gbrain sources harden <id|--all> [--pat-file <p>] [--branch <b>] [--no-cron] [--no-verify] [--dry-run] [--json]');
+  if (!id) throw new Error('Usage: modusbrain sources harden <id|--all> [--pat-file <p>] [--branch <b>] [--no-cron] [--no-verify] [--dry-run] [--json]');
   return engine.executeRaw<SourceRow>(`SELECT id, local_path, config FROM sources WHERE id = $1`, [id]);
 }
 
@@ -62,7 +62,7 @@ export async function runHarden(engine: BrainEngine, args: string[]): Promise<vo
   const patFile = flagVal(args, '--pat-file');
 
   const pat = acceptPat({ patFile });
-  for (const w of pat?.warnings ?? []) console.error(`[gbrain] ${w}`);
+  for (const w of pat?.warnings ?? []) console.error(`[modusbrain] ${w}`);
 
   const rows = await loadSourceRows(engine, id, all);
   if (rows.length === 0) {
@@ -74,7 +74,7 @@ export async function runHarden(engine: BrainEngine, args: string[]): Promise<vo
   if (all && pat) {
     const hosts = new Set(rows.map(r => configHost(r.config)).filter(Boolean));
     if (hosts.size > 1) {
-      console.error(`[gbrain] Refusing --all with one PAT across multiple hosts (${[...hosts].join(', ')}). Harden each source with its own --pat-file.`);
+      console.error(`[modusbrain] Refusing --all with one PAT across multiple hosts (${[...hosts].join(', ')}). Harden each source with its own --pat-file.`);
       process.exit(2);
     }
   }
@@ -127,7 +127,7 @@ export async function runPull(engine: BrainEngine | null, args: string[]): Promi
   } else {
     const id = args.find(a => !a.startsWith('--') && a !== branchFlag);
     if (!engine || !id) {
-      console.error('Usage: gbrain sources pull <id> | --path <dir> [--branch <b>]');
+      console.error('Usage: modusbrain sources pull <id> | --path <dir> [--branch <b>]');
       process.exit(2);
     }
     const rows = await engine.executeRaw<SourceRow>(`SELECT id, local_path, config FROM sources WHERE id = $1`, [id]);
@@ -139,7 +139,7 @@ export async function runPull(engine: BrainEngine | null, args: string[]): Promi
   }
 
   if (!existsSync(join(repoPath, '.git'))) {
-    console.error(`[gbrain] not a git repo: ${repoPath}`);
+    console.error(`[modusbrain] not a git repo: ${repoPath}`);
     process.exit(1);
   }
   const branch = branchFlag || detectDefaultBranch(repoPath);
@@ -149,7 +149,7 @@ export async function runPull(engine: BrainEngine | null, args: string[]): Promi
     case 'advanced': console.log(`advanced ${outcome.from.slice(0, 7)}→${outcome.to.slice(0, 7)} (${branch})`); break;
     case 'skipped_dirty': console.log(`skipped — working tree dirty (${branch})`); break;
     case 'conflict_aborted':
-      console.error(`[gbrain] ${outcome.detail}`);
+      console.error(`[modusbrain] ${outcome.detail}`);
       process.exit(3);
   }
 }
@@ -159,7 +159,7 @@ export async function runPull(engine: BrainEngine | null, args: string[]): Promi
 export async function runUnharden(engine: BrainEngine, args: string[]): Promise<void> {
   const id = args.find(a => !a.startsWith('--'));
   if (!id) {
-    console.error('Usage: gbrain sources unharden <id>');
+    console.error('Usage: modusbrain sources unharden <id>');
     process.exit(2);
   }
   const rows = await engine.executeRaw<SourceRow>(`SELECT id, local_path, config FROM sources WHERE id = $1`, [id]);

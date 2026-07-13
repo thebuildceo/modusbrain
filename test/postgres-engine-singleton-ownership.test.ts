@@ -81,7 +81,7 @@ describe('postgres-engine / module-singleton ownership (#1471)', () => {
     const disconnect = stripComments(extractFn(DB_SRC, 'disconnect'));
     const snapshotIdx = disconnect.search(/const\s+s\s*=\s*sql/);
     const nullIdx = disconnect.search(/\bsql\s*=\s*null/);
-    // #1972: the pool end is now wrapped in the gbrain-owned hard bound
+    // #1972: the pool end is now wrapped in the modusbrain-owned hard bound
     // `endPoolBounded(s)` instead of a bare `s.end()`. The ordering contract is
     // unchanged: snapshot + null the singleton BEFORE awaiting the end.
     const endIdx = disconnect.search(/\bawait\s+(?:s\.end\s*\(|endPoolBounded\s*\(\s*s\b)/);

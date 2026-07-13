@@ -11,7 +11,7 @@
  *  - ZE setup hint fires at init when key missing (Lane B.1)
  *  - Init merges existing config across re-init (Lane B.4)
  *  - config set refuses schema-sizing fields with the recipe (Lane C.2)
- *  - ZEROENTROPY_API_KEY env merge into GBrainConfig (Lane C.3)
+ *  - ZEROENTROPY_API_KEY env merge into ModusBrainConfig (Lane C.3)
  *  - Embed pre-flight catches dim mismatch end-to-end (Lane D.2)
  *  - Sync hint fires at both catch sites (Lane D.3, CDX2-8)
  *  - reinit-pglite end-to-end behavior (deferred-TODO sugar)
@@ -102,31 +102,31 @@ describe('Lane B — init precedence chain (CLI > env > existing file > default)
   let origHome: string | undefined;
 
   beforeEach(() => {
-    tmpHome = mkdtempSync(join(tmpdir(), 'gbrain-v37-b-'));
-    origHome = process.env.GBRAIN_HOME;
-    process.env.GBRAIN_HOME = tmpHome;
+    tmpHome = mkdtempSync(join(tmpdir(), 'modusbrain-v37-b-'));
+    origHome = process.env.MODUSBRAIN_HOME;
+    process.env.MODUSBRAIN_HOME = tmpHome;
   });
 
   afterEach(() => {
     rmSync(tmpHome, { recursive: true, force: true });
-    if (origHome === undefined) delete process.env.GBRAIN_HOME;
-    else process.env.GBRAIN_HOME = origHome;
+    if (origHome === undefined) delete process.env.MODUSBRAIN_HOME;
+    else process.env.MODUSBRAIN_HOME = origHome;
   });
 
   test('configureGatewayWithMergedPrecedence honors CLI > env > file > gateway-default', async () => {
     // Write an existing config.json to simulate prior install.
-    const dotgbrain = join(tmpHome, '.gbrain');
-    require('fs').mkdirSync(dotgbrain, { recursive: true });
-    writeFileSync(join(dotgbrain, 'config.json'), JSON.stringify({
+    const dotmodusbrain = join(tmpHome, '.modusbrain');
+    require('fs').mkdirSync(dotmodusbrain, { recursive: true });
+    writeFileSync(join(dotmodusbrain, 'config.json'), JSON.stringify({
       engine: 'pglite',
-      database_path: join(dotgbrain, 'brain.pglite'),
+      database_path: join(dotmodusbrain, 'brain.pglite'),
       embedding_model: 'voyage:voyage-3-large',
       embedding_dimensions: 1024,
     }));
 
     // Set an env override that should beat the file value but lose to CLI.
     await withEnv(
-      { GBRAIN_EMBEDDING_MODEL: 'openai:text-embedding-3-small', GBRAIN_EMBEDDING_DIMENSIONS: '768' },
+      { MODUSBRAIN_EMBEDDING_MODEL: 'openai:text-embedding-3-small', MODUSBRAIN_EMBEDDING_DIMENSIONS: '768' },
       async () => {
         // The helper is non-exported; we exercise the merged-precedence
         // resolution that configureGatewayWithMergedPrecedence builds by
@@ -137,8 +137,8 @@ describe('Lane B — init precedence chain (CLI > env > existing file > default)
         const { configureGateway: cg1, getEmbeddingModel: gm1, getEmbeddingDimensions: gd1, resetGateway: rg1 } = await import('../src/core/ai/gateway.ts');
         rg1();
         cg1({
-          embedding_model: process.env.GBRAIN_EMBEDDING_MODEL ?? 'voyage:voyage-3-large',
-          embedding_dimensions: parseInt(process.env.GBRAIN_EMBEDDING_DIMENSIONS!, 10),
+          embedding_model: process.env.MODUSBRAIN_EMBEDDING_MODEL ?? 'voyage:voyage-3-large',
+          embedding_dimensions: parseInt(process.env.MODUSBRAIN_EMBEDDING_DIMENSIONS!, 10),
           env: { ...process.env },
         });
         expect(gm1()).toBe('openai:text-embedding-3-small');
@@ -166,29 +166,29 @@ describe('Lane B — init precedence chain (CLI > env > existing file > default)
 });
 
 // ─────────────────────────────────────────────────────────────────────
-// Lane C.3 — ZEROENTROPY_API_KEY env merge into GBrainConfig
+// Lane C.3 — ZEROENTROPY_API_KEY env merge into ModusBrainConfig
 // ─────────────────────────────────────────────────────────────────────
 describe('Lane C.3 — env ZEROENTROPY_API_KEY merges into loadConfig', () => {
   let tmpHome: string;
   let origHome: string | undefined;
 
   beforeEach(() => {
-    tmpHome = mkdtempSync(join(tmpdir(), 'gbrain-v37-c-'));
-    origHome = process.env.GBRAIN_HOME;
-    process.env.GBRAIN_HOME = tmpHome;
+    tmpHome = mkdtempSync(join(tmpdir(), 'modusbrain-v37-c-'));
+    origHome = process.env.MODUSBRAIN_HOME;
+    process.env.MODUSBRAIN_HOME = tmpHome;
     // Write a minimal pglite config so loadConfig returns non-null.
-    const dotgbrain = join(tmpHome, '.gbrain');
-    require('fs').mkdirSync(dotgbrain, { recursive: true });
-    writeFileSync(join(dotgbrain, 'config.json'), JSON.stringify({
+    const dotmodusbrain = join(tmpHome, '.modusbrain');
+    require('fs').mkdirSync(dotmodusbrain, { recursive: true });
+    writeFileSync(join(dotmodusbrain, 'config.json'), JSON.stringify({
       engine: 'pglite',
-      database_path: join(dotgbrain, 'brain.pglite'),
+      database_path: join(dotmodusbrain, 'brain.pglite'),
     }));
   });
 
   afterEach(() => {
     rmSync(tmpHome, { recursive: true, force: true });
-    if (origHome === undefined) delete process.env.GBRAIN_HOME;
-    else process.env.GBRAIN_HOME = origHome;
+    if (origHome === undefined) delete process.env.MODUSBRAIN_HOME;
+    else process.env.MODUSBRAIN_HOME = origHome;
   });
 
   test('process.env.ZEROENTROPY_API_KEY → cfg.zeroentropy_api_key', async () => {
@@ -364,33 +364,33 @@ describe('reinit-pglite — backup + reinit', () => {
   });
 
   beforeEach(() => {
-    tmpHome = mkdtempSync(join(tmpdir(), 'gbrain-v37-reinit-'));
-    origHome = process.env.GBRAIN_HOME;
-    process.env.GBRAIN_HOME = tmpHome;
+    tmpHome = mkdtempSync(join(tmpdir(), 'modusbrain-v37-reinit-'));
+    origHome = process.env.MODUSBRAIN_HOME;
+    process.env.MODUSBRAIN_HOME = tmpHome;
     // Pre-seed a config + a dummy brain file so reinit-pglite sees them.
-    const dotgbrain = join(tmpHome, '.gbrain');
-    require('fs').mkdirSync(dotgbrain, { recursive: true });
-    writeFileSync(join(dotgbrain, 'config.json'), JSON.stringify({
+    const dotmodusbrain = join(tmpHome, '.modusbrain');
+    require('fs').mkdirSync(dotmodusbrain, { recursive: true });
+    writeFileSync(join(dotmodusbrain, 'config.json'), JSON.stringify({
       engine: 'pglite',
-      database_path: join(dotgbrain, 'brain.pglite'),
+      database_path: join(dotmodusbrain, 'brain.pglite'),
       embedding_model: 'openai:text-embedding-3-large',
       embedding_dimensions: 1536,
     }));
     // PGLite uses a directory, not a single file. Create a placeholder
     // directory so existsSync() passes.
-    require('fs').mkdirSync(join(dotgbrain, 'brain.pglite'), { recursive: true });
-    writeFileSync(join(dotgbrain, 'brain.pglite', 'placeholder'), 'stub');
+    require('fs').mkdirSync(join(dotmodusbrain, 'brain.pglite'), { recursive: true });
+    writeFileSync(join(dotmodusbrain, 'brain.pglite', 'placeholder'), 'stub');
   });
 
   afterEach(() => {
     rmSync(tmpHome, { recursive: true, force: true });
-    if (origHome === undefined) delete process.env.GBRAIN_HOME;
-    else process.env.GBRAIN_HOME = origHome;
+    if (origHome === undefined) delete process.env.MODUSBRAIN_HOME;
+    else process.env.MODUSBRAIN_HOME = origHome;
   });
 
   test('refuses on non-PGLite engine', async () => {
     // Overwrite config to claim postgres.
-    const cfgPath = join(tmpHome, '.gbrain', 'config.json');
+    const cfgPath = join(tmpHome, '.modusbrain', 'config.json');
     writeFileSync(cfgPath, JSON.stringify({
       engine: 'postgres',
       database_url: 'postgres://example/db',

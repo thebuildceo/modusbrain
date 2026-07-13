@@ -1,6 +1,6 @@
 // Page types
 // v0.38: `PageType` opens from a closed 23-element union to `string`. The
-// closed union was always a fiction — every gbrain user accumulated organic
+// closed union was always a fiction — every modusbrain user accumulated organic
 // types (`apple-note`, `therapy-session`, `tweet-bundle`, etc.) via
 // `as PageType` casts the engine never enforced. v0.38 schema packs make
 // the runtime authoritative: validation moves from compile-time
@@ -15,7 +15,7 @@
 //
 // Historical type docs (kept for `gbrain-base` codegen reference):
 // - email | slack | calendar-event: native Page types for inbox/chat/calendar
-//   ingest (and the amara-life-v1 eval corpus in the sibling gbrain-evals repo).
+//   ingest (and the amara-life-v1 eval corpus in the sibling modusbrain-evals repo).
 //   Previously these collapsed into `source`, which lost workflow semantics
 //   (e.g. "attended meetings" vs "received emails").
 // - `code` (v0.19.0): tree-sitter-chunked source files; consumed by code-def /
@@ -144,7 +144,7 @@ export interface Page {
   source_id: string;
 
   // v0.39.3.0 provenance read-path (WARN-8 + CV5). Migration v81 columns
-  // surfaced through getPage / list_pages so `gbrain call get_page | jq
+  // surfaced through getPage / list_pages so `modusbrain call get_page | jq
   // .source_kind` actually returns the value the put_page op wrote. NULL
   // on historical pages that pre-date v0.38. Three-state read pattern
   // (undefined: not in projection, null: column NULL, populated: real
@@ -235,7 +235,7 @@ export interface PageInput {
   import_filename?: string | null;
   /**
    * v0.32.7 CJK wave: bumped to MARKDOWN_CHUNKER_VERSION (2) on import so the
-   * post-upgrade `gbrain reindex --markdown` sweep can find pre-bump pages
+   * post-upgrade `modusbrain reindex --markdown` sweep can find pre-bump pages
    * via `WHERE chunker_version < 2`. Defaults to 1 at the schema level when
    * omitted (existing rows pre-migration inherit 1; new imports overwrite
    * with the current version).
@@ -252,7 +252,7 @@ export interface PageInput {
   // v0.39.3.0 provenance write-through (WARN-8 + A1 + CV6).
   // Migration v81 added these 4 nullable columns to `pages`. Until v0.39.3.0,
   // put_page wrote them into the file's frontmatter (via the write-through
-  // path) but never to the DB columns — `gbrain call get_page | jq .source_kind`
+  // path) but never to the DB columns — `modusbrain call get_page | jq .source_kind`
   // returned null even though the JSON receipt claimed `capture-cli`. These
   // params close the loop. Trust gate lives at the put_page op layer
   // (operations.ts): ONLY ctx.remote === false (trusted local callers like
@@ -297,7 +297,7 @@ export interface PageFilters {
    * Prefix-match filter on slug. Implemented as `WHERE slug LIKE prefix || '%'`
    * in both engines so it uses the (source_id, slug) UNIQUE constraint's btree
    * index for efficient range scans on large brains. Used by storage-tiering
-   * commands (gbrain storage status, gbrain export --restore-only) to scope
+   * commands (modusbrain storage status, modusbrain export --restore-only) to scope
    * queries to a tier directory without loading every page into memory.
    */
   slugPrefix?: string;
@@ -360,7 +360,7 @@ export const PAGE_SORT_SQL: Record<NonNullable<PageFilters['sort']>, string> = {
  * `engine.getRecentSalience` for the SQL.
  */
 /**
- * v0.37.0 — domain-bank sampling for `gbrain brainstorm` / `gbrain lsd`.
+ * v0.37.0 — domain-bank sampling for `modusbrain brainstorm` / `modusbrain lsd`.
  * Pulls one page per prefix from a caller-supplied prefix list.
  * Tiebreaker via JOIN to page_links (inbound link count = "structural centrality").
  * Stale-bias optional (LSD mode prefers forgotten pages via `last_retrieved_at`).
@@ -381,7 +381,7 @@ export interface DomainBankSampleOpts {
   sourceIds?: string[];
 }
 
-/** v0.37.0 — corpus-sampling fallback for `gbrain brainstorm` when prefix-stratified can't fill M. */
+/** v0.37.0 — corpus-sampling fallback for `modusbrain brainstorm` when prefix-stratified can't fill M. */
 export interface CorpusSampleOpts {
   /** Number of pages to sample. */
   n: number;
@@ -444,7 +444,7 @@ export interface SalienceResult {
 }
 
 /**
- * v0.41.39 (issue #1700) — `gbrain enrich --thin` candidate selection.
+ * v0.41.39 (issue #1700) — `modusbrain enrich --thin` candidate selection.
  *
  * One source-aware SQL query enumerates thin (stub) pages of the given
  * types, computes a source-correct inbound-link count per page, applies an
@@ -605,7 +605,7 @@ export interface StaleChunkRow {
 /**
  * v0.42.7 (#1696) — a page that needs link/timeline extraction, returned by
  * `listStalePagesForExtraction`. Carries the page CONTENT (compiled_truth +
- * timeline + frontmatter) so `gbrain extract --stale` extracts in ~1 query per
+ * timeline + frontmatter) so `modusbrain extract --stale` extracts in ~1 query per
  * batch instead of an N+1 `getPage` per page (mirrors how StaleChunkRow carries
  * chunk_text). `id` is the keyset cursor; `updated_at` lets callers reason about
  * the edited-since-extract staleness arm.
@@ -719,7 +719,7 @@ export interface SearchResult {
   /**
    * v0.40.4 graph signals — populated by applyGraphSignals when the
    * graph_signals mode-bundle knob is on. Surfaced in JSON envelope
-   * for agent introspection + the `gbrain search --explain` formatter.
+   * for agent introspection + the `modusbrain search --explain` formatter.
    */
   /** Number of OTHER top-K pages linking to this page (>= ADJACENCY_MIN_HITS). */
   graph_adjacency_hits?: number;
@@ -733,7 +733,7 @@ export interface SearchResult {
   graph_session_prefix?: string;
   /**
    * v0.43 relational recall arm — set when this result was surfaced by
-   * typed-edge traversal (not lexical/vector). Drives `gbrain search
+   * typed-edge traversal (not lexical/vector). Drives `modusbrain search
    * --explain` attribution ("surfaced via invested_in edge from widget-co").
    * Absent for organic keyword/vector results.
    */
@@ -747,7 +747,7 @@ export interface SearchResult {
   relational_path?: string[];
   /**
    * v0.40.4 full attribution (D12=A) — per-stage score deltas for the
-   * `gbrain search --explain` formatter. Every boost stage stamps its
+   * `modusbrain search --explain` formatter. Every boost stage stamps its
    * contribution so the formatter can reconstruct the score derivation.
    *
    * base_score is captured once at runPostFusionStages entry BEFORE any
@@ -844,7 +844,7 @@ export interface AdjacencyRow {
 
 /**
  * v0.36 (D12) — declared shape of one entry in the `embedding_columns`
- * config registry. Users declare entries via `gbrain config set
+ * config registry. Users declare entries via `modusbrain config set
  * embedding_columns '...JSON...'` (DB plane); resolver merges with
  * built-ins. Field validation lives in src/core/search/embedding-column.ts
  * and runs at load time:
@@ -913,14 +913,14 @@ export interface SearchOpts {
    * pages whose `type` is in this list, pushed to SQL via
    * `AND p.type = ANY($N::text[])` in both engines. Stacks with the
    * single-value `type` filter (both are AND-applied). Primary consumer
-   * is `gbrain whoknows` (filters to ['person','company']); future
+   * is `modusbrain whoknows` (filters to ['person','company']); future
    * entity-only search reuses the parameter.
    */
   types?: PageType[];
   exclude_slugs?: string[];
   /**
    * Slug-prefix excludes — additive over DEFAULT_HARD_EXCLUDES (test/,
-   * attachments/, .raw/) and the GBRAIN_SEARCH_EXCLUDE env var. Stacks with
+   * attachments/, .raw/) and the MODUSBRAIN_SEARCH_EXCLUDE env var. Stacks with
    * `exclude_slugs` (exact match) — a row is filtered if it matches either set.
    * NOTE (issue #1777): `archive/` is NOT hard-excluded; it is demoted (0.5x)
    * via DEFAULT_SOURCE_BOOSTS so archived content stays findable by default.
@@ -935,18 +935,18 @@ export interface SearchOpts {
   detail?: 'low' | 'medium' | 'high';
   /**
    * v0.20.0 Cathedral II: filter by content_chunks.language (e.g., 'typescript',
-   * 'python', 'ruby'). Used by `gbrain query --lang <lang>`. NULL/undefined
+   * 'python', 'ruby'). Used by `modusbrain query --lang <lang>`. NULL/undefined
    * returns all languages.
    */
   language?: string;
   /**
    * v0.20.0 Cathedral II: filter by content_chunks.symbol_type (e.g., 'function',
-   * 'class', 'method', 'type', 'interface'). Used by `gbrain query --symbol-kind`.
+   * 'class', 'method', 'type', 'interface'). Used by `modusbrain query --symbol-kind`.
    */
   symbolKind?: string;
   /**
    * v0.20.0 Cathedral II: anchor the two-pass retrieval at a specific qualified
-   * symbol name. Pairs with walkDepth. Used by `gbrain query --near-symbol`.
+   * symbol name. Pairs with walkDepth. Used by `modusbrain query --near-symbol`.
    */
   nearSymbol?: string;
   /**
@@ -981,7 +981,7 @@ export interface SearchOpts {
    *    to ResolvedColumn at the boundary via `resolveEmbeddingColumn()`.
    *    Built-in names: 'embedding' (default, text), 'embedding_image'
    *    (multimodal). v0.36 cross-modal wave adds 'embedding_multimodal'
-   *    (unified column populated by `gbrain reindex --multimodal`). Custom
+   *    (unified column populated by `modusbrain reindex --multimodal`). Custom
    *    user-declared names also accepted when registered in
    *    `embedding_columns` config.
    *
@@ -991,7 +991,7 @@ export interface SearchOpts {
    *    is a pure SQL composer).
    *
    * The two-shape union is the transition seam. External callers
-   * (operations.ts image branch, tests, gbrain-evals) pass strings;
+   * (operations.ts image branch, tests, modusbrain-evals) pass strings;
    * hybridSearch resolves; engine sees descriptor.
    *
    * searchKeyword is unaffected — modality filtering on the keyword path
@@ -1434,7 +1434,7 @@ export interface BrainHealth {
   most_connected: Array<{ slug: string; link_count: number }>;
   /**
    * Per-component contribution to brain_score. Sum equals brain_score by
-   * construction. Displayed by `gbrain doctor` when brain_score < 100.
+   * construction. Displayed by `modusbrain doctor` when brain_score < 100.
    * Field names are distinct from the entity-scoped link_coverage /
    * timeline_coverage above to avoid semantic collision (these reflect
    * whole-brain measures used in the score formula).
@@ -1447,7 +1447,7 @@ export interface BrainHealth {
   /**
    * v0.30.1 (Cherry D7 + Codex C3): explicit migrations diagnostic surface
    * exposed to MCP get_health callers so remote agents can detect a wedged
-   * brain WITHOUT shelling SSH + gbrain doctor. Two ledgers (schema +
+   * brain WITHOUT shelling SSH + modusbrain doctor. Two ledgers (schema +
    * orchestrator) per Codex T5 namespacing.
    *
    * `schema_version` ("1") on the parent BrainHealth pins the additive
@@ -1498,8 +1498,8 @@ export interface IngestLogInput {
 
 // Eval capture (v0.25.0)
 // Real MCP/CLI/subagent query+search calls are captured into eval_candidates
-// so gbrain-evals can replay them as BrainBench-Real. The companion
-// eval_capture_failures table records insert failures so gbrain doctor can
+// so modusbrain-evals can replay them as BrainBench-Real. The companion
+// eval_capture_failures table records insert failures so modusbrain doctor can
 // surface silent capture drops cross-process.
 export interface EvalCandidateInput {
   tool_name: 'query' | 'search';
@@ -1529,7 +1529,7 @@ export interface EvalCandidateInput {
    * Engines coalesce undefined to NULL at insert time so the column is
    * always either a known column name or DB NULL — never JS undefined.
    *
-   * Replay (`gbrain eval replay`) re-runs the captured query against the
+   * Replay (`modusbrain eval replay`) re-runs the captured query against the
    * brain. Without this field, a replay after the user flipped
    * `search_embedding_column` produces "regressions" that are just
    * column changes. Replay reads this and uses it as a per-row override
@@ -1559,7 +1559,7 @@ export interface EvalCaptureFailure {
 /**
  * Side-channel metadata that hybridSearch reports about what actually ran.
  * Surfaced via the optional `onMeta` callback in HybridSearchOpts so
- * existing SearchResult[] consumers (Cathedral II, gbrain-evals, etc.)
+ * existing SearchResult[] consumers (Cathedral II, modusbrain-evals, etc.)
  * stay unchanged. Used by op-layer eval capture to distinguish
  * "keyword-only fallback" from "full hybrid with expansion."
  */
@@ -1572,20 +1572,20 @@ export interface HybridSearchMeta {
   expansion_applied: boolean;
   /**
    * v0.32.x (search-lite): the intent the zero-LLM classifier inferred for
-   * this query. Surfaced for debugging — agents and the `gbrain query`
+   * this query. Surfaced for debugging — agents and the `modusbrain query`
    * command can show "intent: temporal" alongside results to make the
    * weighting decision auditable.
    */
   intent?: 'entity' | 'temporal' | 'event' | 'general';
   /**
    * v0.42 — adaptive return-sizing decision (intent, cap, kept, total).
-   * Omitted when the gate is off. Surfaced for `gbrain search --explain`.
+   * Omitted when the gate is off. Surfaced for `modusbrain search --explain`.
    */
   adaptive_return?: import('./search/return-policy.ts').AdaptiveReturnDecision;
   /**
    * v0.42.3.0 — autocut decision (signal, cut point, kept/total, gapRatio).
    * Omitted when autocut didn't run (no reranker). Surfaced for
-   * `gbrain search --explain`.
+   * `modusbrain search --explain`.
    */
   autocut?: import('./search/autocut.ts').AutocutDecision;
   /**
@@ -1638,7 +1638,7 @@ export interface EngineConfig {
 }
 
 // Errors
-export class GBrainError extends Error {
+export class ModusBrainError extends Error {
   constructor(
     public problem: string,
     public cause_description: string,
@@ -1646,6 +1646,6 @@ export class GBrainError extends Error {
     public docs_url?: string,
   ) {
     super(`${problem}: ${cause_description}. Fix: ${fix}`);
-    this.name = 'GBrainError';
+    this.name = 'ModusBrainError';
   }
 }

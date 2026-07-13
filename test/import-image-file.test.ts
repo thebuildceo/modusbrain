@@ -20,7 +20,7 @@ beforeAll(async () => {
   engine = new PGLiteEngine();
   await engine.connect({});
   await engine.initSchema();
-  tmpDir = mkdtempSync(join(tmpdir(), 'gbrain-img-test-'));
+  tmpDir = mkdtempSync(join(tmpdir(), 'modusbrain-img-test-'));
 });
 
 afterAll(async () => {

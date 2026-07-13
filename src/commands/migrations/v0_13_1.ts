@@ -9,16 +9,16 @@
  * This migration walks every page and adds `validate: false` to frontmatter
  * where the field isn't already present. Pages with that flag bypass the
  * validators entirely, so strict-mode rollout doesn't break existing
- * content. `gbrain integrity --auto` clears the flag per-page as it writes
+ * content. `modusbrain integrity --auto` clears the flag per-page as it writes
  * proper citations.
  *
  * Idempotency: pages that already have `validate: false` or `validate: true`
  * are skipped. Running twice is a no-op on the second pass.
  *
  * Reversibility: every page touched is logged to
- * ~/.gbrain/migrations/v0_13_1-rollback.jsonl with its pre-migration
+ * ~/.modusbrain/migrations/v0_13_1-rollback.jsonl with its pre-migration
  * frontmatter snapshot. Roll back by re-applying those snapshots via
- * `gbrain apply-migrations --rollback v0.13.0` (future CLI; not in scope).
+ * `modusbrain apply-migrations --rollback v0.13.0` (future CLI; not in scope).
  *
  * Scale (v0.41.37.0 #1581): chunked bulk SQL — one id-snapshot SELECT + N
  * (SELECT-for-rollback + UPDATE) statements of CHUNK_SIZE rows each. Completes
@@ -29,8 +29,8 @@
  * invalidated by our writes because each UPDATE flips its rows out of the
  * GRANDFATHER_WHERE predicate (idempotent + resumable).
  *
- * Safety: does NOT call saveConfig. Prior learning [gbrain-init-default-pglite-flip]:
- * bare `gbrain init` defaults to PGLite and overwrites Postgres config.
+ * Safety: does NOT call saveConfig. Prior learning [modusbrain-init-default-pglite-flip]:
+ * bare `modusbrain init` defaults to PGLite and overwrites Postgres config.
  * This migration uses the standalone engine-factory flow with the existing
  * config; it never writes config.
  */
@@ -39,13 +39,13 @@ import { existsSync, mkdirSync, appendFileSync } from 'fs';
 import { join } from 'path';
 
 import type { Migration, OrchestratorOpts, OrchestratorResult, OrchestratorPhaseResult } from './types.ts';
-import { loadConfig, toEngineConfig, gbrainPath } from '../../core/config.ts';
+import { loadConfig, toEngineConfig, modusbrainPath } from '../../core/config.ts';
 import { createEngine } from '../../core/engine-factory.ts';
 import type { BrainEngine } from '../../core/engine.ts';
 // Bug 3 — ledger writes moved to the runner (apply-migrations.ts).
 
-// Lazy: GBRAIN_HOME may be set after module load.
-const getRollbackDir = () => gbrainPath('migrations');
+// Lazy: MODUSBRAIN_HOME may be set after module load.
+const getRollbackDir = () => modusbrainPath('migrations');
 const getRollbackFile = () => join(getRollbackDir(), 'v0_13_1-rollback.jsonl');
 
 // ---------------------------------------------------------------------------
@@ -60,7 +60,7 @@ async function phaseAConnect(opts: OrchestratorOpts): Promise<{ result: Orchestr
     const config = loadConfig();
     if (!config) {
       return {
-        result: { name: 'connect', status: 'skipped', detail: 'no brain configured (run gbrain init first)' },
+        result: { name: 'connect', status: 'skipped', detail: 'no brain configured (run modusbrain init first)' },
         engine: null,
       };
     }
@@ -296,9 +296,9 @@ export const v0_13_1: Migration = {
     description:
       'Adds `validate: false` to existing pages so the new Knowledge Runtime ' +
       'validators (citation / link / back-link / triple-HR) don’t reject legacy ' +
-      'content. Pages keep passing writes through unchanged; `gbrain integrity ' +
+      'content. Pages keep passing writes through unchanged; `modusbrain integrity ' +
       '--auto` clears the flag per-page once citations are repaired. Rollback ' +
-      'log at ~/.gbrain/migrations/v0_13_1-rollback.jsonl.',
+      'log at ~/.modusbrain/migrations/v0_13_1-rollback.jsonl.',
   },
   orchestrator,
 };

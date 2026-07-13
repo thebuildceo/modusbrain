@@ -1,5 +1,5 @@
 /**
- * `gbrain eval retrieval-quality <fixture.jsonl> [--json] [--source <id>]`
+ * `modusbrain eval retrieval-quality <fixture.jsonl> [--json] [--source <id>]`
  * (T6 — NamedThingBench). Runs the gold query set against the brain's hybrid
  * retrieval and gates on the families that ARE the retrieval-maxpool incident.
  *
@@ -26,7 +26,7 @@ export async function runEvalRetrievalQuality(engine: BrainEngine, args: string[
   const fixture = args.find(a => !a.startsWith('--') && a !== sourceId);
 
   if (!fixture) {
-    console.error('Usage: gbrain eval retrieval-quality <fixture.jsonl> [--json] [--source <id>] [--ab-relational]');
+    console.error('Usage: modusbrain eval retrieval-quality <fixture.jsonl> [--json] [--source <id>] [--ab-relational]');
     process.exit(2);
   }
 

@@ -23,9 +23,9 @@ import {
 } from '../src/core/audit/db-disconnect-audit.ts';
 
 async function withFreshAuditDir(body: (tmpDir: string) => void | Promise<void>): Promise<void> {
-  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gbrain-db-disconnect-audit-'));
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'modusbrain-db-disconnect-audit-'));
   try {
-    await withEnv({ GBRAIN_AUDIT_DIR: tmpDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: tmpDir }, async () => {
       await body(tmpDir);
     });
   } finally {
@@ -90,15 +90,15 @@ describe('db-disconnect-audit (v0.41.25.0)', () => {
   test('feature name is stable (drives audit filename on disk)', () => {
     // Pin the filename prefix so a future rename can't silently strand
     // old audit files. Operators with v0.41.25 deployments have
-    // ~/.gbrain/audit/db-disconnect-YYYY-Www.jsonl files.
+    // ~/.modusbrain/audit/db-disconnect-YYYY-Www.jsonl files.
     expect(_dbDisconnectAuditFeatureName()).toBe('db-disconnect');
   });
 
   test('audit write is best-effort — unreadable dir does NOT throw', async () => {
-    // Point GBRAIN_AUDIT_DIR at a path the writer cannot create (a non-
+    // Point MODUSBRAIN_AUDIT_DIR at a path the writer cannot create (a non-
     // existent root we don't have perms for). The writer should stderr-
     // warn but not throw to the caller's disconnect flow.
-    await withEnv({ GBRAIN_AUDIT_DIR: '/proc/1/cannot-create-here-1570' }, () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: '/proc/1/cannot-create-here-1570' }, () => {
       expect(() => logDbDisconnect('postgres', 'module')).not.toThrow();
     });
   });

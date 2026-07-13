@@ -1,35 +1,35 @@
 # CLAUDE.md
 
-GBrain is a personal knowledge brain and GStack mod for agent platforms. Pluggable
+ModusBrain is a personal knowledge brain and GStack mod for agent platforms. Pluggable
 engines: PGLite (embedded Postgres via WASM, zero-config default) or Postgres + pgvector
-+ hybrid search in a managed Supabase instance. `gbrain init` defaults to PGLite;
-suggests Supabase for 1000+ files. GStack teaches agents how to code. GBrain teaches
++ hybrid search in a managed Supabase instance. `modusbrain init` defaults to PGLite;
+suggests Supabase for 1000+ files. GStack teaches agents how to code. ModusBrain teaches
 agents everything else: brain ops, signal detection, content ingestion, enrichment,
 cron scheduling, reports, identity, and access control.
 
 ## North Star
 
-gbrain aims to be the **next Postgres for memory**: the most well-tested, widest-coverage,
+modusbrain aims to be the **next Postgres for memory**: the most well-tested, widest-coverage,
 best-for-the-most-at-the-least retrieval + agent memory system for company brains and
 personal AI, built to serve a billion people. Every feature and every eval is judged
-against this bar. "gbrain is best" is a WHOLE-SYSTEM claim — proven across the full
+against this bar. "modusbrain is best" is a WHOLE-SYSTEM claim — proven across the full
 BrainBench suite (retrieval, longmemeval, calibration, …) — not by any single feature.
-When scoping an eval, prove the FEATURE delivers value to gbrain users; do not waste it
-proving that gbrain's particular algorithm beats some other algorithm (a research
+When scoping an eval, prove the FEATURE delivers value to modusbrain users; do not waste it
+proving that modusbrain's particular algorithm beats some other algorithm (a research
 bake-off, off-mission).
 
 ## Two organizational axes (read this first)
 
-GBrain knowledge is organized along two orthogonal axes. Users AND agents must
+ModusBrain knowledge is organized along two orthogonal axes. Users AND agents must
 understand both, or queries misroute silently.
 
 - **Brain** — WHICH DATABASE. Your personal brain is `host`. You can mount
   additional brains (team-published, each with their own DB and access policy)
-  via `gbrain mounts add` (v0.19+). Routing: `--brain`, `GBRAIN_BRAIN_ID`,
-  `.gbrain-mount` dotfile.
+  via `modusbrain mounts add` (v0.19+). Routing: `--brain`, `MODUSBRAIN_BRAIN_ID`,
+  `.modusbrain-mount` dotfile.
 - **Source** — WHICH REPO INSIDE THE DATABASE. A brain can hold many sources
   (wiki, gstack, openclaw, essays). Slugs scope per source. Routing:
-  `--source`, `GBRAIN_SOURCE`, `.gbrain-source` dotfile.
+  `--source`, `MODUSBRAIN_SOURCE`, `.modusbrain-source` dotfile.
 
 Both axes follow the same 6-tier resolution pattern. Read
 `docs/architecture/brains-and-sources.md` for topology diagrams (personal, team
@@ -94,7 +94,7 @@ Per-file detail is in `docs/architecture/KEY_FILES.md`.
 
 CLAUDE.md is the always-loaded orientation + dispatcher. Detailed reference loads
 on demand — read the linked doc before working in that area. (Same two-layer
-pattern gbrain ships for its own skills: thin router in `skills/RESOLVER.md`, fat
+pattern modusbrain ships for its own skills: thin router in `skills/RESOLVER.md`, fat
 detail on demand.)
 
 | When you're working on... | Read first |
@@ -106,7 +106,7 @@ detail on demand.)
 | push-based context (volunteer/watch/reflex window) | `docs/guides/push-context.md` |
 | schema packs / page types / extraction | `docs/architecture/schema-packs.md`, `type-taxonomy.md`, `lens-packs.md` |
 | thin-client / remote MCP / cross-modal | `docs/architecture/thin-client.md` |
-| the CLI surface (commands + flags) | `gbrain --help` / `gbrain --tools-json`, plus the relevant `KEY_FILES.md` entry |
+| the CLI surface (commands + flags) | `modusbrain --help` / `modusbrain --tools-json`, plus the relevant `KEY_FILES.md` entry |
 | running or writing tests | `docs/TESTING.md` |
 | bulk-command progress wiring | `docs/progress-events.md` |
 | eval methodology / metrics | `docs/eval/` |
@@ -124,7 +124,7 @@ current-state).
 
 CLAUDE.md grew to ~592KB / ~147k tokens once the per-file index became append-only
 (one `**vX.Y.Z:**` clause per release per file). That is the exact anti-pattern
-gbrain exists to fix. The rules that keep it from recurring:
+modusbrain exists to fix. The rules that keep it from recurring:
 
 - **CLAUDE.md is orientation, not the implementation spec.** It carries the North
   Star, the two axes, architecture + cross-cutting invariants, the resolver, and
@@ -144,7 +144,7 @@ gbrain exists to fix. The rules that keep it from recurring:
 
 ## Search Mode (v0.32.3)
 
-GBrain ships three named search modes that bundle the search-lite knobs from
+ModusBrain ships three named search modes that bundle the search-lite knobs from
 PR #897 into a single config key. Pick one at install time; the rest of the
 project resolves through `src/core/search/mode.ts`.
 
@@ -159,7 +159,7 @@ project resolves through `src/core/search/mode.ts`.
 | `relationalRetrieval`         | false          | **true**   | **true**       |
 | `searchLimit` default         | 10             | 25         | 50             |
 
-**Cost anchors (downstream agent input cost — gbrain itself is rounding error).**
+**Cost anchors (downstream agent input cost — modusbrain itself is rounding error).**
 The corner-to-corner spread is 25x once you pair mode with downstream model.
 Chunks ~400 tokens avg. Per-query cost @ 10K queries/month (typical
 single-user volume), full search payload, no cache savings:
@@ -178,7 +178,7 @@ expensive one.
 
 tokenmax adds ~\$1.50 per 1K queries in Haiku expansion calls on top of
 the matrix (\$15/mo @ 10K). Cache hits cut all numbers ~50%. **The cost
-picker copy in `gbrain init` carries the same matrix verbatim** — update
+picker copy in `modusbrain init` carries the same matrix verbatim** — update
 both when refreshing.
 
 **Per-query math vs real-world spend.** The matrix above is what an
@@ -199,7 +199,7 @@ matrix dominate — mode + model choice matters more there.
 
 Mode resolution lives in **bare `hybridSearch`** (NOT just the cached wrapper)
 per `[CDX-5+6]` in `~/.claude/plans/lets-take-a-look-validated-parrot.md` — so
-`gbrain eval replay` and `gbrain eval longmemeval` test the same mode-affected
+`modusbrain eval replay` and `modusbrain eval longmemeval` test the same mode-affected
 behavior as the production `query` op.
 
 **Cache-key contamination hotfix `[CDX-4]`:** migration v56 added a
@@ -230,18 +230,18 @@ The `query` op's `relational` flag forces it on/off per call.
 
 **Three CLI surfaces:**
 
-    gbrain search modes              # what is running, with per-knob attribution
-    gbrain search modes --reset      # clear search.* overrides (mode bundle wins)
-    gbrain search stats [--days N]   # cache hit rate, intent mix, budget drops
-    gbrain search tune [--apply]     # data-driven recommendations
+    modusbrain search modes              # what is running, with per-knob attribution
+    modusbrain search modes --reset      # clear search.* overrides (mode bundle wins)
+    modusbrain search stats [--days N]   # cache hit rate, intent mix, budget drops
+    modusbrain search tune [--apply]     # data-driven recommendations
 
-The install picker fires inside `gbrain init` AFTER `engine.initSchema()`
+The install picker fires inside `modusbrain init` AFTER `engine.initSchema()`
 (non-TTY auto-selects). The upgrade banner fires once via `runPostUpgrade`
 in `src/commands/upgrade.ts`, gated by `search.mode_upgrade_notice_shown`.
 
 ## Eval discipline (v0.32.3)
 
-Every metric printed by any `gbrain eval *` or `gbrain search stats` command
+Every metric printed by any `modusbrain eval *` or `modusbrain search stats` command
 resolves through `src/core/eval/metric-glossary.ts` so industry terms
 (`P@k`, `nDCG@k`, `MRR`, `Jaccard@k`) carry a plain-English line in human
 output and a `_meta.metric_glossary` block in JSON output (one block per
@@ -253,13 +253,13 @@ discipline `[CDX-14]` — lives in `docs/eval/SEARCH_MODE_METHODOLOGY.md`.
 Auto-regenerated `docs/eval/METRIC_GLOSSARY.md` is CI-guarded against
 drift (`scripts/check-eval-glossary-fresh.sh`).
 
-Per-run records land at `<repo>/.gbrain-evals/eval-results.jsonl` per
-`[CDX-23]`. The user's personal `~/.gbrain` brain is NEVER touched —
+Per-run records land at `<repo>/.modusbrain-evals/eval-results.jsonl` per
+`[CDX-23]`. The user's personal `~/.modusbrain` brain is NEVER touched —
 audit trail lives in the source repo's git history.
 
 ## Skills
 
-Read the skill files in `skills/` before doing brain operations. GBrain ships 30 skills
+Read the skill files in `skills/` before doing brain operations. ModusBrain ships 30 skills
 organized by `skills/RESOLVER.md` (`AGENTS.md` is also accepted as of v0.19):
 
 **Original 8 (conformance-migrated):** ingest (thin router), query, maintain, enrich,
@@ -271,8 +271,8 @@ meeting-ingestion, citation-fixer, repo-architecture, skill-creator, daily-task-
 **Operational + identity:** daily-task-prep, cross-modal-review, cron-scheduler, reports,
 testing, soul-audit, webhook-transforms, data-research, minion-orchestrator. As of
 v0.20.4, `minion-orchestrator` is the single unified skill for both lanes of background
-work (shell jobs via `gbrain jobs submit shell`, LLM subagents via `gbrain agent run`) ...
-the prior `gbrain-jobs` skill was merged in, Preconditions are shared, and trigger
+work (shell jobs via `modusbrain jobs submit shell`, LLM subagents via `modusbrain agent run`) ...
+the prior `modusbrain-jobs` skill was merged in, Preconditions are shared, and trigger
 routing is narrowed to what the skill actually covers.
 
 **Skillify loop (v0.19):** skillify (the markdown orchestration), skillpack-check
@@ -280,11 +280,11 @@ routing is narrowed to what the skill actually covers.
 
 **Brain-resident skillpacks + advisor (v0.42.47.0, #2180):** A brain repo can carry its
 own publishable skillpack (`brain_resident: true` in `skillpack.json` + `schema_pack`);
-`gbrain skillpack init-brain-pack` scaffolds one with a 5-section machine-parseable README.
-Connecting harnesses discover it on `gbrain sources add` (Topology A advisory, bounded nag
+`modusbrain skillpack init-brain-pack` scaffolds one with a 5-section machine-parseable README.
+Connecting harnesses discover it on `modusbrain sources add` (Topology A advisory, bounded nag
 via `nag-state.ts`) and over MCP via the source-scoped `list_brain_skillpack` op +
-`get_skill --source_id` (gated by `mcp.publish_skills`). The bundled `gbrain-advisor` skill
-+ `gbrain advisor` op compute a ranked, read-only list of high-leverage actions from brain
+`get_skill --source_id` (gated by `mcp.publish_skills`). The bundled `modusbrain-advisor` skill
++ `modusbrain advisor` op compute a ranked, read-only list of high-leverage actions from brain
 state (8 collectors in `src/core/advisor/`); `--json`+exit codes for CI/cron, local-only
 `--apply <id>` behind confirm, exposed over MCP behind `mcp.publish_advisor` (default off,
 read-only on remote). Thin-client binary install stays deferred to PR2 `build_skillpack`.
@@ -316,7 +316,7 @@ prompt-design ablation methodology.
 
 **Operational health (v0.19.1):** smoke-test (8 post-restart health checks with auto-fix
 for Bun, CLI, DB, worker, Zod CJS, gateway, API key, brain repo; user-extensible via
-`~/.gbrain/smoke-tests.d/*.sh`).
+`~/.modusbrain/smoke-tests.d/*.sh`).
 
 **Conventions:** `skills/conventions/` has cross-cutting rules (quality, brain-first,
 model-routing, test-before-bulk, cross-modal). `skills/_brain-filing-rules.md` and
@@ -390,7 +390,7 @@ output.
 
 ## Sync resumability + lock tuning (v0.42.x, #1794)
 
-`gbrain sync` is resumable and converges under pool exhaustion + repeated kills.
+`modusbrain sync` is resumable and converges under pool exhaustion + repeated kills.
 Progress banks into the append-only `op_checkpoint_paths` table (one row per drained
 path, written via the direct session pool so it survives `EMAXCONNSESSION`); a killed
 run resumes from the checkpoint and `last_commit` only advances on true completion. The
@@ -400,16 +400,16 @@ hatches — no config-dashboard surface by design):
 
 | Env var | Default | What it does |
 |---|---|---|
-| `GBRAIN_SYNC_CHECKPOINT_EVERY` | 1000 | Flush the checkpoint every N drained files. |
-| `GBRAIN_SYNC_CHECKPOINT_SECONDS` | 10 | Also flush every N seconds (whichever comes first) — bounds worst-case loss regardless of throughput. Flush also fires after the first file. |
-| `GBRAIN_SYNC_MAX_CHECKPOINT_FAILURES` | 3 | Consecutive failed flushes (each already retried ~12s) before the run aborts with `reason: 'checkpoint_unavailable'` instead of importing work it can never bank. |
-| `GBRAIN_SYNC_YIELD_EVERY` | 64 | Yield the event loop (`setTimeout(0)`, NOT `setImmediate` — Bun starves the timers phase under a tight setImmediate loop) every N files so the lock-refresh `setInterval` heartbeat fires mid-import. |
-| `GBRAIN_LOCK_STEAL_GRACE_SECONDS` | derived (~600 at 30min TTL) | A holder that refreshed within this window is NOT stolen even if its TTL lapsed (starved-but-alive). Dead holders stop refreshing, age past the grace, and become stealable; TTL stays the backstop. |
-| `GBRAIN_SYNC_STALL_ABORT_SECONDS` | 900 | Progress-aware stall watchdog (#1950): if the import drain makes no forward progress (keyed on file-import progress, NOT the lock heartbeat) for N seconds, abort the run and release the per-source lock so the next `gbrain sync` resumes from the checkpoint. Reports `reason: 'stall_timeout'`. Observed BETWEEN files; a hang inside one file's import isn't interrupted until it returns (the wall-clock hard deadline is that backstop). 0 disables. |
+| `MODUSBRAIN_SYNC_CHECKPOINT_EVERY` | 1000 | Flush the checkpoint every N drained files. |
+| `MODUSBRAIN_SYNC_CHECKPOINT_SECONDS` | 10 | Also flush every N seconds (whichever comes first) — bounds worst-case loss regardless of throughput. Flush also fires after the first file. |
+| `MODUSBRAIN_SYNC_MAX_CHECKPOINT_FAILURES` | 3 | Consecutive failed flushes (each already retried ~12s) before the run aborts with `reason: 'checkpoint_unavailable'` instead of importing work it can never bank. |
+| `MODUSBRAIN_SYNC_YIELD_EVERY` | 64 | Yield the event loop (`setTimeout(0)`, NOT `setImmediate` — Bun starves the timers phase under a tight setImmediate loop) every N files so the lock-refresh `setInterval` heartbeat fires mid-import. |
+| `MODUSBRAIN_LOCK_STEAL_GRACE_SECONDS` | derived (~600 at 30min TTL) | A holder that refreshed within this window is NOT stolen even if its TTL lapsed (starved-but-alive). Dead holders stop refreshing, age past the grace, and become stealable; TTL stays the backstop. |
+| `MODUSBRAIN_SYNC_STALL_ABORT_SECONDS` | 900 | Progress-aware stall watchdog (#1950): if the import drain makes no forward progress (keyed on file-import progress, NOT the lock heartbeat) for N seconds, abort the run and release the per-source lock so the next `modusbrain sync` resumes from the checkpoint. Reports `reason: 'stall_timeout'`. Observed BETWEEN files; a hang inside one file's import isn't interrupted until it returns (the wall-clock hard deadline is that backstop). 0 disables. |
 
 ## Pace Mode (DB-contention-aware backfill pacing)
 
-A naive `gbrain embed --stale` / large `sync` can saturate a PgBouncer
+A naive `modusbrain embed --stale` / large `sync` can saturate a PgBouncer
 transaction-mode pooler and starve the minion supervisor's lock renewals
 (`lock-renewal-failed` → dead jobs). Pacing is the native, composable fix — it
 replaces external SIGSTOP/SIGCONT wrapper scripts. **Opt-in: default mode `off`.**
@@ -430,7 +430,7 @@ The composable primitive is `src/core/db-pacer.ts` (`createDbPacer`):
 Named bundles resolve through `src/core/pace-mode.ts` (`resolvePaceMode`), mirror
 of the search-mode pattern but with **env ABOVE config** (incident escape hatch):
 
-    per-call flag → GBRAIN_PACE_* env → config (pace.*) → PACE_BUNDLES[mode] → off
+    per-call flag → MODUSBRAIN_PACE_* env → config (pace.*) → PACE_BUNDLES[mode] → off
 
 | Knob | off | gentle | balanced | aggressive |
 |---|---|---|---|---|
@@ -438,10 +438,10 @@ of the search-mode pattern but with **env ABOVE config** (incident escape hatch)
 | `paceAtMs` (EWMA → sleep) | — | 250 | 500 | 1000 |
 | `maxSleepMs` (jittered cap) | — | 2000 | 1500 | 1000 |
 
-**Surfaces.** `gbrain embed --stale --pace[=mode]` (bare `--pace` = balanced),
+**Surfaces.** `modusbrain embed --stale --pace[=mode]` (bare `--pace` = balanced),
 `--pace-max-concurrency=N`. `--background` carries explicit pace OVERRIDES (not
 the resolved bundle) into the `embed` job payload; the handler re-resolves
-env>config>bundle at execution so `GBRAIN_PACE_*` still wins (CX5). Config-level
+env>config>bundle at execution so `MODUSBRAIN_PACE_*` still wins (CX5). Config-level
 `pace.mode` paces EVERY `runEmbedCore` caller (cycle embed, embed-catch-up,
 sync-auto-embed) and the prod `embed-backfill` job automatically. `sync` reads
 env/config. PGLite / mode `off` → no-op pacer.
@@ -460,7 +460,7 @@ ms, max waiters) for `--json`; a one-line summary prints to stderr.
 
 ## Build
 
-`bun build --compile --outfile bin/gbrain src/cli.ts`
+`bun build --compile --outfile bin/modusbrain src/cli.ts`
 
 ## Version locations (single source of truth: `VERSION` file)
 
@@ -485,7 +485,7 @@ four numeric segments are required first. Historical 3-segment versions
 | File | What lives there | Format |
 |---|---|---|
 | `VERSION` | The single source of truth. Read first by `/ship`, the binary, and CI version-gate. | Bare 4-segment string `MAJOR.MINOR.PATCH.MICRO` (e.g. `0.31.4.1`), no leading `v`. |
-| `package.json` | Bun/npm package version. `gbrain --version` reads it via the compiled binary's bundled package metadata. CI version-gate cross-checks this against `VERSION` and fails if they drift. | `"version": "0.31.4.1"` |
+| `package.json` | Bun/npm package version. `modusbrain --version` reads it via the compiled binary's bundled package metadata. CI version-gate cross-checks this against `VERSION` and fails if they drift. | `"version": "0.31.4.1"` |
 | `CHANGELOG.md` | Top entry header `## [0.31.4.1] - YYYY-MM-DD` plus the "To take advantage of v0.31.4.1" block. | Standard Keep-a-Changelog header. |
 | `TODOS.md` | Any TODO entries that mention "follow-up from vX.Y.Z.W" use the version of the release that filed them. Update only when filing NEW follow-up TODOs. | Inline `vX.Y.Z.W` references in TODO bodies. |
 | `CLAUDE.md` | The Key Files section's per-file annotations carry `vX.Y.Z.W (#NNN)` tags noting which release introduced a behavior. Update whenever a wave's annotations get folded in. | Inline `vX.Y.Z.W (#NNN, contributed by @user)` references. |
@@ -690,9 +690,9 @@ public-facing artifact.** Public artifacts include: `CHANGELOG.md`, `README.md`,
 code. Query examples, benchmark stories, and migration guides MUST use generic
 placeholders.
 
-Why: gbrain runs a personal knowledge brain containing notes on real people and
+Why: modusbrain runs a personal knowledge brain containing notes on real people and
 real companies (YC founders, portfolio companies, funds, investors, meeting
-attendees). When a doc copies a query like `gbrain graph diana-hu --depth 2` or
+attendees). When a doc copies a query like `modusbrain graph diana-hu --depth 2` or
 names a specific agent fork like `Wintermute`, that real name gets indexed by
 search engines, surfaced in cross-references, and distributed with every release.
 
@@ -747,7 +747,7 @@ tweets, blog posts.
 **Do write:**
 - "Security hardening pass. Fresh installs secure by default. Existing brains
   brought to the same bar automatically on upgrade."
-- "If `gbrain doctor` still flags anything after upgrade, the message names each
+- "If `modusbrain doctor` still flags anything after upgrade, the message names each
   table and gives the exact fix."
 
 Why: anyone reading the release page before they've upgraded now has a directed
@@ -757,7 +757,7 @@ get them. But the release page is a broadcast channel. Don't hand attackers a
 curated list with a banner.
 
 **The test:** if a reader with no prior context could read the release note and
-walk away knowing "gbrain at version X has table Y readable by anon key until
+walk away knowing "modusbrain at version X has table Y readable by anon key until
 they patch," the note is too specific. Rewrite until that's no longer possible.
 
 **What IS fine in public artifacts:**

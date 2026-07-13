@@ -1,7 +1,7 @@
 /**
  * skillpack/brain-pack-lint.ts — E6 version-skew lint for brain-resident packs.
  *
- * A brain ships skills that call gbrain operations. If the connecting gbrain is
+ * A brain ships skills that call modusbrain operations. If the connecting modusbrain is
  * older/newer than the pack assumed, a skill's declared `tools:` may reference
  * ops that don't exist on this binary — silent breakage when the harness tries
  * to call them. This lint reads every pack skill's SKILL.md frontmatter `tools:`
@@ -9,8 +9,8 @@
  * drift instead of mysteriously half-working.
  *
  * Pure-ish: filesystem reads only, no mutation. Used by
- * `gbrain skillpack init-brain-pack` (lint the freshly-generated pack) and
- * `gbrain skillpack check` (lint an existing brain repo's pack).
+ * `modusbrain skillpack init-brain-pack` (lint the freshly-generated pack) and
+ * `modusbrain skillpack check` (lint an existing brain repo's pack).
  */
 
 import { existsSync, readFileSync } from 'fs';
@@ -35,7 +35,7 @@ export interface BrainPackLintResult {
 
 /**
  * Lint a brain-resident pack's declared `tools:` against the set of op names the
- * serving gbrain actually exposes. `knownOps` is the authoritative op-name set
+ * serving modusbrain actually exposes. `knownOps` is the authoritative op-name set
  * (callers pass `new Set(operations.map(o => o.name))`).
  *
  * A skill with no `tools:` frontmatter contributes nothing (the common case for

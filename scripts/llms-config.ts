@@ -9,7 +9,7 @@
  *
  * Fork-friendliness: `rawBaseUrl` reads from `LLMS_REPO_BASE` so forks can
  * regenerate without manual URL rewrites:
- *   LLMS_REPO_BASE=https://raw.githubusercontent.com/fork-org/gbrain/main bun run build:llms
+ *   LLMS_REPO_BASE=https://raw.githubusercontent.com/fork-org/modusbrain/main bun run build:llms
  */
 
 export type DocEntry = {
@@ -26,13 +26,13 @@ export type DocSection = {
 };
 
 export const PROJECT = {
-  name: "GBrain",
+  name: "ModusBrain",
   summary:
-    "GBrain is a personal knowledge brain and GStack mod for agent platforms. Pluggable engines (PGLite default, Postgres+pgvector for scale), contract-first operations, 26 fat-markdown skills. Teaches agents brain ops, ingestion, enrichment, scheduling, identity, and access control.",
+    "ModusBrain is a personal knowledge brain and GStack mod for agent platforms. Pluggable engines (PGLite default, Postgres+pgvector for scale), contract-first operations, 26 fat-markdown skills. Teaches agents brain ops, ingestion, enrichment, scheduling, identity, and access control.",
   repoUrl: "https://github.com/garrytan/gbrain",
   rawBaseUrl:
     process.env.LLMS_REPO_BASE ??
-    "https://raw.githubusercontent.com/garrytan/gbrain/master",
+    "https://raw.githubusercontent.com/garrytan/modusbrain/master",
 };
 
 export const SECTIONS: DocSection[] = [
@@ -54,7 +54,7 @@ export const SECTIONS: DocSection[] = [
       {
         title: "docs/architecture/KEY_FILES.md",
         description:
-          "Per-file index for the gbrain repo: what each src/ file does + its load-bearing invariants. The on-demand detail CLAUDE.md's reference map routes to.",
+          "Per-file index for the modusbrain repo: what each src/ file does + its load-bearing invariants. The on-demand detail CLAUDE.md's reference map routes to.",
         path: "docs/architecture/KEY_FILES.md",
         // Link-only until compressed to current-state (still large pre-compression).
         // Flip to inlined once the doc-history compression lands and the bundle
@@ -94,10 +94,10 @@ export const SECTIONS: DocSection[] = [
         path: "docs/ENGINES.md",
       },
       {
-        title: "docs/GBRAIN_RECOMMENDED_SCHEMA.md",
+        title: "docs/MODUSBRAIN_RECOMMENDED_SCHEMA.md",
         description:
           "MECE directory structure (people/, companies/, concepts/).",
-        path: "docs/GBRAIN_RECOMMENDED_SCHEMA.md",
+        path: "docs/MODUSBRAIN_RECOMMENDED_SCHEMA.md",
         // v0.40.6.0: 64KB reference doc. Web index entry stays; the single-fetch
         // bundle gets the README + setup guides instead. Keeps llms-full.txt
         // under the 600KB budget as CLAUDE.md grows with each release.
@@ -115,7 +115,7 @@ export const SECTIONS: DocSection[] = [
       {
         title: "docs/schema-author-tutorial.md",
         description:
-          "5-minute walkthrough: fork the bundled pack, add a custom `researcher` type, backfill existing pages via `gbrain schema sync --apply`, prove the T1.5 wiring via `gbrain whoknows` (v0.40.7.0).",
+          "5-minute walkthrough: fork the bundled pack, add a custom `researcher` type, backfill existing pages via `modusbrain schema sync --apply`, prove the T1.5 wiring via `modusbrain whoknows` (v0.40.7.0).",
         path: "docs/schema-author-tutorial.md",
       },
       {
@@ -131,7 +131,7 @@ export const SECTIONS: DocSection[] = [
       {
         title: "docs/guides/minions-deployment.md",
         description:
-          "Deploying the gbrain jobs worker: crontab + watchdog, inline --follow, systemd/Procfile/fly.toml, upgrade checklist.",
+          "Deploying the modusbrain jobs worker: crontab + watchdog, inline --follow, systemd/Procfile/fly.toml, upgrade checklist.",
         path: "docs/guides/minions-deployment.md",
         // v0.41.8.0: 13KB deployment runbook. Web index entry stays;
         // single-fetch bundle drops it to keep under FULL_SIZE_BUDGET
@@ -148,13 +148,13 @@ export const SECTIONS: DocSection[] = [
       {
         title: "docs/guides/scaling-skills.md",
         description:
-          "Three-tier architecture for agents with 300+ skills: always-loaded, resolver-routed, and dormant. Per-turn token math, the v0.41.7.0 compact list-format resolver, and the `gbrain doctor` safety net. 306 skills, ~21K tokens freed per turn, zero capability loss.",
+          "Three-tier architecture for agents with 300+ skills: always-loaded, resolver-routed, and dormant. Per-turn token math, the v0.41.7.0 compact list-format resolver, and the `modusbrain doctor` safety net. 306 skills, ~21K tokens freed per turn, zero capability loss.",
         path: "docs/guides/scaling-skills.md",
       },
       {
         title: "docs/guides/push-context.md",
         description:
-          "Push-based context: the brain volunteers confidence-gated pages from the rolling conversation window. Three channels (ambient reflex, volunteer_context op, gbrain watch), config knobs, and the volunteered-vs-used feedback loop.",
+          "Push-based context: the brain volunteers confidence-gated pages from the rolling conversation window. Three channels (ambient reflex, volunteer_context op, modusbrain watch), config knobs, and the volunteered-vs-used feedback loop.",
         path: "docs/guides/push-context.md",
       },
       {
@@ -179,7 +179,7 @@ export const SECTIONS: DocSection[] = [
       {
         title: "docs/ai-providers/llama-server-reranker.md",
         description:
-          "Local reranker via llama.cpp --reranking: Qwen3-Reranker or self-hosted ZE weights, --alias setup, gbrain config keys, cold-start timeout, budget-cap interaction.",
+          "Local reranker via llama.cpp --reranking: Qwen3-Reranker or self-hosted ZE weights, --alias setup, modusbrain config keys, cold-start timeout, budget-cap interaction.",
         path: "docs/ai-providers/llama-server-reranker.md",
         includeInFull: false,
       },
@@ -189,10 +189,10 @@ export const SECTIONS: DocSection[] = [
     heading: "Debugging",
     entries: [
       {
-        title: "docs/GBRAIN_VERIFY.md",
+        title: "docs/MODUSBRAIN_VERIFY.md",
         description:
           "7-check post-setup verification. Start here when something feels off.",
-        path: "docs/GBRAIN_VERIFY.md",
+        path: "docs/MODUSBRAIN_VERIFY.md",
       },
       {
         title: "docs/guides/minions-fix.md",
@@ -295,10 +295,10 @@ export const SECTIONS: DocSection[] = [
 ];
 
 export const INLINE_TIPS = [
-  "`gbrain doctor [--json] [--fast] [--fix]` - built-in health checks.",
-  "`gbrain orphans [--json]` - pages with zero inbound wikilinks.",
-  "`gbrain repair-jsonb [--dry-run]` - repair v0.12.0 double-encoded JSONB rows.",
-  "`gbrain upgrade` runs post-upgrade + apply-migrations.",
+  "`modusbrain doctor [--json] [--fast] [--fix]` - built-in health checks.",
+  "`modusbrain orphans [--json]` - pages with zero inbound wikilinks.",
+  "`modusbrain repair-jsonb [--dry-run]` - repair v0.12.0 double-encoded JSONB rows.",
+  "`modusbrain upgrade` runs post-upgrade + apply-migrations.",
 ];
 
 // Target ~800KB so llms-full.txt fits in ~200k-token contexts with room to spare.

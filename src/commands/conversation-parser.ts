@@ -1,5 +1,5 @@
 /**
- * v0.41.16.0 — `gbrain conversation-parser` debug CLI.
+ * v0.41.16.0 — `modusbrain conversation-parser` debug CLI.
  *
  * Three subcommands for operators:
  *   - scan <slug>       Dry-run the parser on a page; report which
@@ -21,7 +21,7 @@ import type { BrainEngine } from '../core/engine.ts';
 import { brandHelp } from '../core/branding.ts';
 
 function printHelp(): void {
-  process.stdout.write(brandHelp(`Usage: gbrain conversation-parser <subcommand> [options]
+  process.stdout.write(brandHelp(`Usage: modusbrain conversation-parser <subcommand> [options]
 
 Subcommands:
   scan <slug>          Dry-run the parser on a page; report pattern hit.
@@ -31,9 +31,9 @@ Subcommands:
                         emits "TODO v0.42+" notice.)
 
 Examples:
-  gbrain conversation-parser scan conversations/imessage/alice-example
-  gbrain conversation-parser list-builtins --json
-  gbrain conversation-parser validate ./my-pattern.json
+  modusbrain conversation-parser scan conversations/imessage/alice-example
+  modusbrain conversation-parser list-builtins --json
+  modusbrain conversation-parser validate ./my-pattern.json
 
 Global flags:
   --json               Emit JSON envelope on stdout (where applicable).

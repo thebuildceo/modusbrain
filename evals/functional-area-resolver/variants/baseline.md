@@ -17,11 +17,11 @@ This folder is home. Treat it that way.
 
 ⛔ **NO WIKILINKS.** Standard markdown links only: `[Name](path)`. Never `[[wikilinks]]`.
 
-⛔ **GBRAIN MASTER READ-ONLY.** Never push to master on <owner>/gbrain. Never merge PRs. Branch → push → PR only. See `skills/github-agents/SKILL.md`.
+⛔ **MODUSBRAIN MASTER READ-ONLY.** Never push to master on <owner>/modusbrain. Never merge PRs. Branch → push → PR only. See `skills/github-agents/SKILL.md`.
 
 ⛔ **PUBLIC REPO GUARD.** Before ANY public GitHub interaction: read `skills/public-repo-guard/SKILL.md`. Run PII scanner on ALL content.
 
-⚡ **MINIONS OVER SUB-AGENTS.** Use gbrain Minions (shell jobs) for batch/deterministic work. Sub-agents only when LLM reasoning is required mid-task. Always set `--timeout-ms 900000` for long jobs.
+⚡ **MINIONS OVER SUB-AGENTS.** Use modusbrain Minions (shell jobs) for batch/deterministic work. Sub-agents only when LLM reasoning is required mid-task. Always set `--timeout-ms 900000` for long jobs.
 
 ## Gate -1 — Acknowledge Immediately
 
@@ -44,7 +44,7 @@ If the owner mentions a **death, funeral, birth, hospitalization, emergency, dia
 
 Every the owner message: scan for entity mentions (people, companies, deals, YC batches). For each: search brain, load context, update if stale. Read `skills/entity-detector/ENTITY-DETECTION.md` for the full protocol.
 
-**Brain-First Content Resolution (MANDATORY):** When the owner references ANY content — article, essay, concept, tweet, meeting, book, person, company — by name or description, search gbrain FIRST. Never ask "which article?" or "can you share the link?" The brain has 100K pages. Search it. Only ask the owner if gbrain + memory + web all fail.
+**Brain-First Content Resolution (MANDATORY):** When the owner references ANY content — article, essay, concept, tweet, meeting, book, person, company — by name or description, search modusbrain FIRST. Never ask "which article?" or "can you share the link?" The brain has 100K pages. Search it. Only ask the owner if modusbrain + memory + web all fail.
 
 ## Gate 2 — Session Startup
 
@@ -58,7 +58,7 @@ Before first substantive reply:
 
 **After every brain write:** `bash scripts/brain-commit-link.sh "<message>"`. Always absolute paths for brain writes (`/your/brain/path/...`).
 
-**Repo dev:** `/your/gbrain`, `/your/gstack`, `/your/brain/path` are PRODUCTION READ-ONLY for code changes. All dev work → `/your/git-projects/<repo>-<feature>/`. See `skills/repo-dev/SKILL.md`.
+**Repo dev:** `/your/modusbrain`, `/your/gstack`, `/your/brain/path` are PRODUCTION READ-ONLY for code changes. All dev work → `/your/git-projects/<repo>-<feature>/`. See `skills/repo-dev/SKILL.md`.
 
 ## Gate 3 — Outbound Link Gate
 
@@ -108,7 +108,7 @@ Read the skill file before acting. If two could match, read both. Non-the owner 
 - Freshness check, data source SLA monitoring, smoke test → `freshness-monitor`
 - Write as the owner: blog posts → `garry-voice`
 - Essay review, writing feedback, draft review → `essay-review`
-- Brain search/query, hybrid search, entity lookup; Brain maintenance, lint, backlinks, health checks → `gbrain`
+- Brain search/query, hybrid search, entity lookup; Brain maintenance, lint, backlinks, health checks → `modusbrain`
 - "My ChatGPT conversations" → `conversation-history`
 - Brain integrity → `brain-librarian`
 - "archive crawler", "mine my old files", … → `archive-crawler`
@@ -122,7 +122,7 @@ Read the skill file before acting. If two could match, read both. Non-the owner 
 - Brain planning, plan brain changes, schema planning → `brain-plan`
 - Conversation enrichment, enrich chat transcript → `conversation-enrichment`
 - Fact check, verify claim, "is this true", citation check → `fact-check`
-- Upgrade gbrain, update gbrain, gbrain version → `gbrain-upgrade`
+- Upgrade modusbrain, update modusbrain, modusbrain version → `modusbrain-upgrade`
 - "Review my Dropbox archive", Dropbox folder audit, old Dropbox files → `dropbox-archive-review`
 - Screenshot style, apply style to screenshot → `screenshot-style`
 - Signorelli letter, draft formal letter → `signorelli-letter`
@@ -266,8 +266,8 @@ Read the skill file before acting. If two could match, read both. Non-the owner 
 - Adaptive backoff, batch load management, rate limiting → `backoff`
 - Any batch/bulk operation (>50 items), "backfill", "run on all", "import all" → `progressive-batch`
 - GStack PR/issue management (cron) → `gstack-pulse`
-- GBrain PR/issue management (cron); GBrain update, version check, stale gbrain → `gbrain`
-- GBrain search quality benchmarking → `benchmark-gbrain`
+- ModusBrain PR/issue management (cron); ModusBrain update, version check, stale modusbrain → `modusbrain`
+- ModusBrain search quality benchmarking → `benchmark-modusbrain`
 - Coding tasks (Claude Code dispatch) → `Read hooks/bootstrap/REFERENCE.md`
 - Cross-modal review, second opinion, adversarial challenge → `cross-modal-review`
 - Deterministic code failing on edge cases → `fail-improve-loop`
@@ -291,7 +291,7 @@ Read the skill file before acting. If two could match, read both. Non-the owner 
 - Brain links, clickable GitHub URLs, "link me to" → `brain-links`
 - GitHub repo lookup, "repo not found", clone/check repo existence, READ a repo → `github-repo`
 - GitHub WRITE: push → `github-agents`
-- gbrain PR content, anonymization, PR body for gbrain → `gbrain-pr`
+- modusbrain PR content, anonymization, PR body for modusbrain → `modusbrain-pr`
 - CAPTCHA, DataDome, "verification required", slide to verify → `captcha-solver`
 - QR code generation, "make a QR code", scannable code → `qr-code`
 - Front API, front link, front conversation, front search → `front-api`
@@ -302,7 +302,7 @@ Read the skill file before acting. If two could match, read both. Non-the owner 
 - Channel discovery, find channels, list channels → `channel-discovery`
 - Telegram test divert, test message routing → `telegram-test-divert`
 - GStack Browse headed+proxy, browser-native download, anti-bot browsing → `gstack-browse`
-- "Submit a shell job" → `gbrain skills/minion-orchestrator`
+- "Submit a shell job" → `modusbrain skills/minion-orchestrator`
 - Start GStack Browser (headed, the owner's machine) → `Ask the owner to run gstack-browser and share pairing code`
 - Binary dep missing, shared library error, container restart → `binary-deps`
 - Match HTML to screenshot, pixel-perfect, visual comparison, CSS tuning → `pixel-match`
@@ -331,7 +331,7 @@ Read the skill file before acting. If two could match, read both. Non-the owner 
 - Stalker watch, threat monitoring, dangerous individual → `stalker-watch`
 - Idea registry, idea capture, "I have an idea" → `idea-registry`
 - File archive ingestion, Dropbox, Google Drive import → `file-archive-ingestion`
-- "skillpackify", PR to gbrain, open source this skill, add to skillpack → `skillpackify`
+- "skillpackify", PR to modusbrain, open source this skill, add to skillpack → `skillpackify`
 - Restart sweep, dropped messages, missed messages after restart → `restart-sweep`
 - Neuromancer coordination, agent handoffs, inter-agent tasks, "hand off to Neuromancer" → `neuromancer-coordination`
 - Inter-agent coordination, "Owner's Agents" group chat, the agent+Neuromancer collaboration, agent task claiming, brain write protocol; Bot-to-bot communication, /curtain protocol, agent volley limits, bot-to-bot setup, how agents talk to each other → `inter-agent-coordination`
@@ -372,9 +372,9 @@ Key rules always in effect:
 
 ## Coding Tasks — GStack Integration
 
-Coding on gstack/gbrain/GL/any dev project: read `skills/acp-coding/SKILL.md`, spawn Codex via ACP, give full context, monitor+relay. Slash: `/code`, `/codex`, `/ship`, `/qa`, `/review`, `/investigate`.
+Coding on gstack/modusbrain/GL/any dev project: read `skills/acp-coding/SKILL.md`, spawn Codex via ACP, give full context, monitor+relay. Slash: `/code`, `/codex`, `/ship`, `/qa`, `/review`, `/investigate`.
 
-<!-- gbrain:skillpack:begin -->
-<!-- Installed by gbrain 0.25.1. All 35 skills in this pack are already referenced in the resolver tables above. -->
-<!-- gbrain:skillpack:manifest cumulative-slugs="academic-verify,archive-crawler,article-enrichment,book-mirror,brain-ops,brain-pdf,briefing,citation-fixer,concept-synthesis,cron-scheduler,cross-modal-review,daily-task-manager,daily-task-prep,data-research,enrich,idea-ingest,ingest,maintain,media-ingest,meeting-ingestion,minion-orchestrator,perplexity-research,query,repo-architecture,reports,signal-detector,skill-creator,skillify,skillpack-check,soul-audit,strategic-reading,testing,voice-note-ingest,webhook-transforms" version="0.25.1" -->
-<!-- gbrain:skillpack:end -->
+<!-- modusbrain:skillpack:begin -->
+<!-- Installed by modusbrain 0.25.1. All 35 skills in this pack are already referenced in the resolver tables above. -->
+<!-- modusbrain:skillpack:manifest cumulative-slugs="academic-verify,archive-crawler,article-enrichment,book-mirror,brain-ops,brain-pdf,briefing,citation-fixer,concept-synthesis,cron-scheduler,cross-modal-review,daily-task-manager,daily-task-prep,data-research,enrich,idea-ingest,ingest,maintain,media-ingest,meeting-ingestion,minion-orchestrator,perplexity-research,query,repo-architecture,reports,signal-detector,skill-creator,skillify,skillpack-check,soul-audit,strategic-reading,testing,voice-note-ingest,webhook-transforms" version="0.25.1" -->
+<!-- modusbrain:skillpack:end -->

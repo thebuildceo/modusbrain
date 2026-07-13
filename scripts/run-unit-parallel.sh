@@ -13,8 +13,8 @@
 #
 # Env overrides:
 #   SHARDS=N                     same as --shards
-#   GBRAIN_TEST_SHARD_TIMEOUT    per-shard wallclock cap, seconds (default 600)
-#   GBRAIN_TEST_MAX_CONCURRENCY  passed through to bun test (default 4)
+#   MODUSBRAIN_TEST_SHARD_TIMEOUT    per-shard wallclock cap, seconds (default 600)
+#   MODUSBRAIN_TEST_MAX_CONCURRENCY  passed through to bun test (default 4)
 #
 # Output files (workspace-local; falls back to /tmp if .context/ unwritable):
 #   .context/test-failures.log   failure blocks (cleared at start)
@@ -70,14 +70,14 @@ if [ -z "${SHARDS_OVERRIDE:-}" ] && [ -z "${SHARDS:-}" ] && [ "$N" -gt 4 ]; then
   N=4
 fi
 
-INTRA_CONC="${MAX_CONCURRENCY_OVERRIDE:-${GBRAIN_TEST_MAX_CONCURRENCY:-4}}"
+INTRA_CONC="${MAX_CONCURRENCY_OVERRIDE:-${MODUSBRAIN_TEST_MAX_CONCURRENCY:-4}}"
 # v0.40.10 flake-hardening: bump per-shard cap 600 → 1500 (was 900). At
 # 4-shard default each shard runs 159 files / ~2420 tests with internal
 # wallclock 960-1020s. The 900s value (sized for 8-shard's ~80 files /
 # 1100 tests at 620-770s) false-killed shard 1 at 900s even though it
 # had completed in 968s. 1500s cap gives ~55% headroom over observed
 # 4-shard wallclock; real hangs still hit it. Override via
-# GBRAIN_TEST_SHARD_TIMEOUT=N.
+# MODUSBRAIN_TEST_SHARD_TIMEOUT=N.
 DEFAULT_SHARD_TIMEOUT=1500
 case "$(uname -s 2>/dev/null || echo unknown)" in
   MINGW*|MSYS*|CYGWIN*)
@@ -88,12 +88,12 @@ case "$(uname -s 2>/dev/null || echo unknown)" in
       N=1
     fi
     # Lower intra-shard concurrency to reduce memory pressure on Windows.
-    if [ -z "${MAX_CONCURRENCY_OVERRIDE:-}" ] && [ -z "${GBRAIN_TEST_MAX_CONCURRENCY:-}" ]; then
+    if [ -z "${MAX_CONCURRENCY_OVERRIDE:-}" ] && [ -z "${MODUSBRAIN_TEST_MAX_CONCURRENCY:-}" ]; then
       INTRA_CONC=2
     fi
     ;;
 esac
-SHARD_TIMEOUT="${GBRAIN_TEST_SHARD_TIMEOUT:-$DEFAULT_SHARD_TIMEOUT}"
+SHARD_TIMEOUT="${MODUSBRAIN_TEST_SHARD_TIMEOUT:-$DEFAULT_SHARD_TIMEOUT}"
 
 # ──────────────────────────────────────────────────────────────────────────
 # Output directories. Prefer workspace-local .context/, fall back to /tmp.
@@ -104,9 +104,9 @@ if mkdir -p .context/test-shards 2>/dev/null; then
   FAILURES_LOG=".context/test-failures.log"
   SUMMARY_FILE=".context/test-summary.txt"
 else
-  LOG_DIR="/tmp/gbrain-test-shards-$$"
-  FAILURES_LOG="/tmp/gbrain-test-failures.log"
-  SUMMARY_FILE="/tmp/gbrain-test-summary.txt"
+  LOG_DIR="/tmp/modusbrain-test-shards-$$"
+  FAILURES_LOG="/tmp/modusbrain-test-failures.log"
+  SUMMARY_FILE="/tmp/modusbrain-test-summary.txt"
   mkdir -p "$LOG_DIR" || { echo "ERROR: cannot create log dir" >&2; exit 2; }
 fi
 # Clear from prior run.

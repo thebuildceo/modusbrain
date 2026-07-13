@@ -16,20 +16,20 @@ const GRACE_MS = HARD_DEADLINE_GRACE_SEC * 1000;
 describe('resolveStallAbortSeconds (#1950)', () => {
   test('defaults to 900s when the env var is unset or empty', () => {
     expect(resolveStallAbortSeconds({})).toBe(DEFAULT_SYNC_STALL_ABORT_SEC);
-    expect(resolveStallAbortSeconds({ GBRAIN_SYNC_STALL_ABORT_SECONDS: '' })).toBe(900);
+    expect(resolveStallAbortSeconds({ MODUSBRAIN_SYNC_STALL_ABORT_SECONDS: '' })).toBe(900);
   });
 
   test('honors a positive override', () => {
-    expect(resolveStallAbortSeconds({ GBRAIN_SYNC_STALL_ABORT_SECONDS: '120' })).toBe(120);
+    expect(resolveStallAbortSeconds({ MODUSBRAIN_SYNC_STALL_ABORT_SECONDS: '120' })).toBe(120);
   });
 
   test('<=0 disables the watchdog (returned verbatim)', () => {
-    expect(resolveStallAbortSeconds({ GBRAIN_SYNC_STALL_ABORT_SECONDS: '0' })).toBe(0);
-    expect(resolveStallAbortSeconds({ GBRAIN_SYNC_STALL_ABORT_SECONDS: '-1' })).toBe(-1);
+    expect(resolveStallAbortSeconds({ MODUSBRAIN_SYNC_STALL_ABORT_SECONDS: '0' })).toBe(0);
+    expect(resolveStallAbortSeconds({ MODUSBRAIN_SYNC_STALL_ABORT_SECONDS: '-1' })).toBe(-1);
   });
 
   test('falls back to the default on a non-numeric value', () => {
-    expect(resolveStallAbortSeconds({ GBRAIN_SYNC_STALL_ABORT_SECONDS: 'nope' })).toBe(900);
+    expect(resolveStallAbortSeconds({ MODUSBRAIN_SYNC_STALL_ABORT_SECONDS: 'nope' })).toBe(900);
   });
 });
 
@@ -66,13 +66,13 @@ describe('resolveSyncHardDeadline', () => {
     expect(tty).toBeNull();
   });
 
-  test('env GBRAIN_SYNC_MAX_RUNTIME_SECONDS sets the deadline', () => {
-    const r = resolveSyncHardDeadline([], { isTty: true, env: { GBRAIN_SYNC_MAX_RUNTIME_SECONDS: '900' } });
-    expect(r).toEqual({ deadlineMs: 900_000, graceMs: GRACE_MS, reason: 'env:GBRAIN_SYNC_MAX_RUNTIME_SECONDS' });
+  test('env MODUSBRAIN_SYNC_MAX_RUNTIME_SECONDS sets the deadline', () => {
+    const r = resolveSyncHardDeadline([], { isTty: true, env: { MODUSBRAIN_SYNC_MAX_RUNTIME_SECONDS: '900' } });
+    expect(r).toEqual({ deadlineMs: 900_000, graceMs: GRACE_MS, reason: 'env:MODUSBRAIN_SYNC_MAX_RUNTIME_SECONDS' });
   });
 
   test('env 0 disables (overrides the non-TTY default)', () => {
-    const r = resolveSyncHardDeadline([], { isTty: false, env: { GBRAIN_SYNC_MAX_RUNTIME_SECONDS: '0' } });
+    const r = resolveSyncHardDeadline([], { isTty: false, env: { MODUSBRAIN_SYNC_MAX_RUNTIME_SECONDS: '0' } });
     expect(r).toBeNull();
   });
 

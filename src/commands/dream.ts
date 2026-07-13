@@ -1,25 +1,25 @@
 /**
- * gbrain dream — run one brain maintenance cycle.
+ * modusbrain dream — run one brain maintenance cycle.
  *
  * The README brand promise: "the agent runs while I sleep, the dream
  * cycle ... I wake up and the brain is smarter." Cron-friendly, JSON
  * report, phase-selectable.
  *
  * Thin alias over runCycle (src/core/cycle.ts). Both this command and
- * `gbrain autopilot` converge on the same primitive so there's one
+ * `modusbrain autopilot` converge on the same primitive so there's one
  * source of truth for what "overnight maintenance" means.
  *
  * Usage:
- *   gbrain dream                       # full 6-phase cycle
- *   gbrain dream --dry-run             # preview, no writes
- *   gbrain dream --json                # CycleReport JSON (for agents)
- *   gbrain dream --phase lint          # run a single phase
- *   gbrain dream --pull                # also git pull the brain repo
- *   gbrain dream --dir /path/to/brain  # explicit brain location
+ *   modusbrain dream                       # full 6-phase cycle
+ *   modusbrain dream --dry-run             # preview, no writes
+ *   modusbrain dream --json                # CycleReport JSON (for agents)
+ *   modusbrain dream --phase lint          # run a single phase
+ *   modusbrain dream --pull                # also git pull the brain repo
+ *   modusbrain dream --dir /path/to/brain  # explicit brain location
  *
- * Cron: 0 2 * * * gbrain dream --json >> /var/log/gbrain-dream.log
+ * Cron: 0 2 * * * modusbrain dream --json >> /var/log/modusbrain-dream.log
  *
- * Related: `gbrain autopilot --install` for continuous daemonized
+ * Related: `modusbrain autopilot --install` for continuous daemonized
  * maintenance. dream is the one-shot, autopilot is the scheduler.
  */
 
@@ -59,7 +59,7 @@ interface DreamArgs {
   /**
    * v0.41.13: per-source cycle scoping. Threaded into runCycle as
    * `sourceId` so `cycle.ts:1947-1967` writes `last_full_cycle_at`
-   * to `sources.config` on success — without it, `gbrain doctor`'s
+   * to `sources.config` on success — without it, `modusbrain doctor`'s
    * `cycle_freshness` check stays stale forever. Accepts `--source
    * <id>` and the alias `--source-id <id>` (the v0.37.7.0 #1167
    * canonical name across import/extract/graph-query); both work
@@ -166,11 +166,11 @@ function parseArgs(args: string[]): DreamArgs {
   const sourceValues = collectFlagValues(args, '--source');
   const sourceIdValues = collectFlagValues(args, '--source-id');
   if (sourceValues === null) {
-    console.error('--source <id>: missing value. Usage: gbrain dream --source <source-id>');
+    console.error('--source <id>: missing value. Usage: modusbrain dream --source <source-id>');
     process.exit(2);
   }
   if (sourceIdValues === null) {
-    console.error('--source-id <id>: missing value. Usage: gbrain dream --source-id <source-id>');
+    console.error('--source-id <id>: missing value. Usage: modusbrain dream --source-id <source-id>');
     process.exit(2);
   }
   const uniqSource = Array.from(new Set(sourceValues));
@@ -238,12 +238,12 @@ function parseArgs(args: string[]): DreamArgs {
  * Resolution order (v0.41.30 — postgres support):
  *   1. An explicit --dir argument (exits 1 if it doesn't exist — a real mistake).
  *   2. T1: when --source resolved to a source that has an on-disk `local_path`,
- *      use it (matches `gbrain sync`, lets that source's filesystem phases run).
+ *      use it (matches `modusbrain sync`, lets that source's filesystem phases run).
  *   3. The legacy `sync.repo_path` config key (pre-v0.18 default-source brains).
  *   4. `null` — no local checkout. The cycle then SKIPS filesystem phases
  *      (lint/backlinks/sync/synthesize/extract/patterns) with reason
  *      `no_brain_dir` and runs the DB-only phases (resolve_symbol_edges, embed,
- *      orphans, ...). This is what makes `gbrain dream` work on a postgres /
+ *      orphans, ...). This is what makes `modusbrain dream` work on a postgres /
  *      Supabase brain with no checkout. `runDream` owns the only hard error:
  *      no checkout AND no engine = truly nothing to run.
  *
@@ -294,7 +294,7 @@ async function resolveBrainDir(
 }
 
 function printHelp() {
-  console.log(`Usage: gbrain dream [options]
+  console.log(`Usage: modusbrain dream [options]
 
 Run one brain maintenance cycle. Eight phases:
   lint -> backlinks -> sync -> synthesize -> extract -> patterns -> embed -> orphans
@@ -319,7 +319,7 @@ Options:
 
   --source <id>       Scope the cycle to one source so doctor's
                       cycle_freshness check sees a fresh stamp on
-                      completion. Without this, gbrain dream's
+                      completion. Without this, modusbrain dream's
                       timestamp never lands and federated brains
                       see "stale cycle" forever.
   --source-id <id>    Alias for --source. Matches the v0.37.7.0+
@@ -350,20 +350,20 @@ Options:
   --help, -h          Show this help
 
 Examples:
-  gbrain dream
-  gbrain dream --dry-run --json
-  gbrain dream --phase lint
-  gbrain dream --phase synthesize --input ~/transcripts/2026-04-25.txt
-  gbrain dream --phase synthesize --from 2026-04-01 --to 2026-04-25
-  0 2 * * * gbrain dream --json         # nightly via cron
+  modusbrain dream
+  modusbrain dream --dry-run --json
+  modusbrain dream --phase lint
+  modusbrain dream --phase synthesize --input ~/transcripts/2026-04-25.txt
+  modusbrain dream --phase synthesize --from 2026-04-01 --to 2026-04-25
+  0 2 * * * modusbrain dream --json         # nightly via cron
 
 Configure synthesize:
-  gbrain config set dream.synthesize.session_corpus_dir /path/to/transcripts
-  gbrain config set dream.synthesize.session_corpus_dir /path/to/transcripts
+  modusbrain config set dream.synthesize.session_corpus_dir /path/to/transcripts
+  modusbrain config set dream.synthesize.session_corpus_dir /path/to/transcripts
 
 Related:
-  gbrain autopilot --install            # continuous maintenance as a daemon
-  gbrain autopilot                      # same maintenance cycle, scheduled
+  modusbrain autopilot --install            # continuous maintenance as a daemon
+  modusbrain autopilot                      # same maintenance cycle, scheduled
 `);
 }
 
@@ -436,7 +436,7 @@ function isResolverUserError(e: unknown): boolean {
   const m = e.message;
   return (m.startsWith('Source "') && m.includes(' not found.'))
       || m.startsWith('Invalid --source value')
-      || m.startsWith('Invalid GBRAIN_SOURCE value');
+      || m.startsWith('Invalid MODUSBRAIN_SOURCE value');
 }
 
 /**
@@ -509,7 +509,7 @@ export async function runDream(engine: BrainEngine | null, args: string[]): Prom
   const opts = parseArgs(args);
 
   // ─── IRON RULE: --help short-circuits BEFORE any engine-bearing work ─
-  // Tests pin this ordering so `gbrain dream --help --source whatever`
+  // Tests pin this ordering so `modusbrain dream --help --source whatever`
   // ALWAYS prints help and exits 0, never reaching the engine-null gate
   // below. If you reorder this, dream-cli-flags.test.ts will fail.
   if (opts.help) {
@@ -530,8 +530,8 @@ export async function runDream(engine: BrainEngine | null, args: string[]): Prom
   if (opts.source !== null) {
     if (engine === null) {
       console.error(
-        'gbrain dream --source <id> requires a connected brain ' +
-        '(no engine available); omit --source or run `gbrain init` first',
+        'modusbrain dream --source <id> requires a connected brain ' +
+        '(no engine available); omit --source or run `modusbrain init` first',
       );
       process.exit(1);
     }
@@ -554,7 +554,7 @@ export async function runDream(engine: BrainEngine | null, args: string[]): Prom
     if (src?.archived === true) {
       console.error(
         `source ${resolvedSourceId} is archived; restore with ` +
-        `\`gbrain sources restore ${resolvedSourceId}\` before cycling`,
+        `\`modusbrain sources restore ${resolvedSourceId}\` before cycling`,
       );
       process.exit(1);
     }
@@ -568,14 +568,14 @@ export async function runDream(engine: BrainEngine | null, args: string[]): Prom
   if (brainDir === null && engine === null) {
     console.error(
       'No brain directory found and no database connection. ' +
-      'Pass --dir <path> or configure a brain via `gbrain init`.',
+      'Pass --dir <path> or configure a brain via `modusbrain init`.',
     );
     process.exit(1);
   }
   // ─── issue #1678: bounded single-hold extract_atoms drain ──────────
   if (opts.drain) {
     if (engine === null) {
-      console.error('gbrain dream --drain requires a connected brain (no engine available)');
+      console.error('modusbrain dream --drain requires a connected brain (no engine available)');
       process.exit(1);
     }
     return runDrain(engine, opts, resolvedSourceId, brainDir);

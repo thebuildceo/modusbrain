@@ -19,7 +19,7 @@ import { resolveEffectiveFanoutMax } from '../src/commands/autopilot-fanout.ts';
 
 let engine: PGLiteEngine;
 let auditDir: string;
-const prevAuditDir = process.env.GBRAIN_AUDIT_DIR;
+const prevAuditDir = process.env.MODUSBRAIN_AUDIT_DIR;
 
 beforeAll(async () => {
   engine = new PGLiteEngine();
@@ -32,9 +32,9 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-  auditDir = mkdtempSync(join(tmpdir(), 'gbrain-clamp-'));
-  process.env.GBRAIN_AUDIT_DIR = auditDir;
-  await engine.executeRaw(`DELETE FROM gbrain_cycle_locks WHERE id LIKE 'gbrain-supervisor:%'`);
+  auditDir = mkdtempSync(join(tmpdir(), 'modusbrain-clamp-'));
+  process.env.MODUSBRAIN_AUDIT_DIR = auditDir;
+  await engine.executeRaw(`DELETE FROM modusbrain_cycle_locks WHERE id LIKE 'modusbrain-supervisor:%'`);
   // base fan-out: override to 8 so the clamp's effect is visible on PGLite
   // (whose natural default is 1). The clamp logic is engine-agnostic.
   await engine.setConfig('autopilot.fanout_max_per_tick', '8');
@@ -42,8 +42,8 @@ beforeEach(async () => {
 });
 
 afterEach(() => {
-  if (prevAuditDir === undefined) delete process.env.GBRAIN_AUDIT_DIR;
-  else process.env.GBRAIN_AUDIT_DIR = prevAuditDir;
+  if (prevAuditDir === undefined) delete process.env.MODUSBRAIN_AUDIT_DIR;
+  else process.env.MODUSBRAIN_AUDIT_DIR = prevAuditDir;
   try { rmSync(auditDir, { recursive: true, force: true }); } catch { /* noop */ }
 });
 

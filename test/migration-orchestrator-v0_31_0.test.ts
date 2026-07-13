@@ -2,11 +2,11 @@
  * v0.31.2 (B3 ship-blocker fix) — orchestrator gate test.
  *
  * The v0_31_0 orchestrator's phaseASchema is the precondition check
- * `gbrain post-upgrade` runs. It must:
+ * `modusbrain post-upgrade` runs. It must:
  *   - Reject brains at schema_version < 45 (facts table not yet created).
  *   - Pass brains at schema_version >= 45 with the facts table present.
  *   - Surface a useful operator-facing message that names the version
- *     and the recovery command (`gbrain apply-migrations --yes`).
+ *     and the recovery command (`modusbrain apply-migrations --yes`).
  *
  * Pre-fix, the gate had been demoted to `v < 40` with a misleading
  * "+ notability" claim. v40 brains passed the precondition without
@@ -27,19 +27,19 @@ import type { BrainEngine } from '../src/core/engine.ts';
 
 describe('v0.31.0 orchestrator — phaseASchema gate', () => {
   let tmp: string;
-  let oldGbrainHome: string | undefined;
+  let oldModusbrainHome: string | undefined;
   let engine: BrainEngine;
 
   beforeEach(async () => {
-    oldGbrainHome = process.env.GBRAIN_HOME;
-    tmp = mkdtempSync(join(tmpdir(), 'gbrain-v0310-gate-'));
-    process.env.GBRAIN_HOME = tmp;
+    oldModusbrainHome = process.env.MODUSBRAIN_HOME;
+    tmp = mkdtempSync(join(tmpdir(), 'modusbrain-v0310-gate-'));
+    process.env.MODUSBRAIN_HOME = tmp;
 
-    const gbrainHome = join(tmp, '.gbrain');
+    const modusbrainHome = join(tmp, '.modusbrain');
     const dbPath = join(tmp, 'brain-db');
-    mkdirSync(gbrainHome, { recursive: true });
+    mkdirSync(modusbrainHome, { recursive: true });
     writeFileSync(
-      join(gbrainHome, 'config.json'),
+      join(modusbrainHome, 'config.json'),
       JSON.stringify({ engine: 'pglite', database_path: dbPath }, null, 2) + '\n',
     );
 
@@ -52,8 +52,8 @@ describe('v0.31.0 orchestrator — phaseASchema gate', () => {
   afterEach(async () => {
     __setTestEngineOverride(null);
     await engine.disconnect();
-    if (oldGbrainHome === undefined) delete process.env.GBRAIN_HOME;
-    else process.env.GBRAIN_HOME = oldGbrainHome;
+    if (oldModusbrainHome === undefined) delete process.env.MODUSBRAIN_HOME;
+    else process.env.MODUSBRAIN_HOME = oldModusbrainHome;
     rmSync(tmp, { recursive: true, force: true });
   });
 

@@ -1,6 +1,6 @@
 # Content Guardrail Seams
 
-GBrain exposes **vendor-neutral guardrail seams** at the boundaries where
+ModusBrain exposes **vendor-neutral guardrail seams** at the boundaries where
 external content enters the retrieval layer and where queries/tool-inputs enter
 the LLM gateway. A guardrail is any external classifier — a content firewall, a
 prompt-injection detector, a PII scrubber — that wants to *observe* content at
@@ -15,7 +15,7 @@ These hold for every seam and are enforced by `test/guardrails.test.ts`:
 
 - **Observe-only.** `runGuardrails()` returns `void`. Callers never branch on a
   provider verdict. A guardrail registered through this interface *cannot*
-  block, rewrite, drop, retry, or reorder GBrain behavior. Enforcement, if ever
+  block, rewrite, drop, retry, or reorder ModusBrain behavior. Enforcement, if ever
   added, will get its own explicitly-named seam and its own RFC — it will not
   silently reuse this one.
 - **Fail open.** Missing config, provider throw/reject, timeout, and network
@@ -23,7 +23,7 @@ These hold for every seam and are enforced by `test/guardrails.test.ts`:
   or a tool call.
 - **Inline await.** Hooks await the provider before proceeding, so the
   classifier sees content at the exact pre-persist / pre-inference moment.
-- **No verdict persistence.** GBrain writes no guardrail rows. Providers own
+- **No verdict persistence.** ModusBrain writes no guardrail rows. Providers own
   their own audit trail.
 - **Content boundaries.** Hooks pass only the ingest/user-facing payload — the
   markdown/code body, the last user message, the expansion query, the tool
@@ -44,7 +44,7 @@ All seams call `runGuardrails({ hook, content, metadata })` from
 | `ai_gateway.tool_input` | `ai/gateway.ts` → `toolLoop` | On `{toolName, input}`, before pending-persist and before tool execution |
 
 The two `file_storage.*` hooks cover every natural ingest caller that routes
-through `importFromContent` / `importCodeFile`: `gbrain import`, sync, capture,
+through `importFromContent` / `importCodeFile`: `modusbrain import`, sync, capture,
 `put_page`, subagent `brain_put_page`, trusted-workspace writes,
 `ingest_capture`, inbox daemon dispatch, reindex, code reindex, and the public
 import APIs.
@@ -52,7 +52,7 @@ import APIs.
 ## Writing a guardrail provider
 
 ```ts
-import { registerGuardrailProvider, type GuardrailInput } from 'gbrain/core/guardrails';
+import { registerGuardrailProvider, type GuardrailInput } from 'modusbrain/core/guardrails';
 
 registerGuardrailProvider({
   id: 'my-firewall',
@@ -62,7 +62,7 @@ registerGuardrailProvider({
     // input.metadata  — provider-opaque context (slug, source_kind, tool_name, model, ...)
     //
     // Do your own timeout/retry/logging here. The return value is IGNORED by
-    // GBrain — return a typed verdict only if your own audit code consumes it.
+    // ModusBrain — return a typed verdict only if your own audit code consumes it.
     await fetch(MY_API, { method: 'POST', body: JSON.stringify({ text: input.content }) });
   },
 });
@@ -73,9 +73,9 @@ hook). Registration is idempotent by `id`, so a re-init won't double-fire.
 
 ### Provider responsibilities
 
-GBrain deliberately keeps the seam minimal. The provider owns:
+ModusBrain deliberately keeps the seam minimal. The provider owns:
 
-- **Timeout discipline.** GBrain does not impose a timeout in `runGuardrails`
+- **Timeout discipline.** ModusBrain does not impose a timeout in `runGuardrails`
   so you can tune per-deployment latency. Use an `AbortController`.
 - **Secret handling.** Read API keys from env at call time. Never log the key.
 - **Redacted logging.** Don't log raw classified content (it may itself be the
@@ -97,6 +97,6 @@ the reference provider doc shipped to integration partners for a complete
 4. emits one redacted stderr line (`status=… prediction=… content_sha256=…`),
 5. fails open on every error path.
 
-Because the verdict is ignored by GBrain, "shadow mode" requires *no* special
-GBrain flag — it is the only mode this interface supports. Enforcement would be
+Because the verdict is ignored by ModusBrain, "shadow mode" requires *no* special
+ModusBrain flag — it is the only mode this interface supports. Enforcement would be
 a separate, future, RFC-gated seam.

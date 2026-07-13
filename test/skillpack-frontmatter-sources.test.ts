@@ -28,8 +28,8 @@ afterEach(() => {
   }
 });
 
-function scratchGbrain(): string {
-  const root = mkdtempSync(join(tmpdir(), 'fms-gbrain-'));
+function scratchModusbrain(): string {
+  const root = mkdtempSync(join(tmpdir(), 'fms-modusbrain-'));
   created.push(root);
   mkdirSync(join(root, 'src', 'commands'), { recursive: true });
   mkdirSync(join(root, 'skills', 'sample'), { recursive: true });
@@ -44,7 +44,7 @@ function writeSkill(root: string, name: string, frontmatter: string): void {
 
 describe('loadSkillSources', () => {
   it('returns empty array when frontmatter has no `sources:` field', () => {
-    const root = scratchGbrain();
+    const root = scratchModusbrain();
     writeSkill(root, 'plain', 'name: plain\nversion: 0.1.0');
 
     const out = loadSkillSources(root, 'skills/plain');
@@ -53,7 +53,7 @@ describe('loadSkillSources', () => {
   });
 
   it('returns empty array when SKILL.md is missing (shared-conventions dirs)', () => {
-    const root = scratchGbrain();
+    const root = scratchModusbrain();
     mkdirSync(join(root, 'skills', 'no-md-dir'));
     writeFileSync(join(root, 'skills', 'no-md-dir', 'README.md'), 'no skill here');
 
@@ -62,7 +62,7 @@ describe('loadSkillSources', () => {
   });
 
   it('reads a valid `sources:` array and returns repo-relative paths', () => {
-    const root = scratchGbrain();
+    const root = scratchModusbrain();
     writeFileSync(join(root, 'src', 'commands', 'demo.ts'), '// stub');
     writeSkill(
       root,
@@ -75,7 +75,7 @@ describe('loadSkillSources', () => {
   });
 
   it('returns empty array when `sources: []` is explicitly empty', () => {
-    const root = scratchGbrain();
+    const root = scratchModusbrain();
     writeSkill(root, 'empty-sources', 'name: empty-sources\nsources: []');
 
     const out = loadSkillSources(root, 'skills/empty-sources');
@@ -83,35 +83,35 @@ describe('loadSkillSources', () => {
   });
 
   it('throws BundleError when `sources:` is not an array', () => {
-    const root = scratchGbrain();
+    const root = scratchModusbrain();
     writeSkill(root, 'bad', 'name: bad\nsources: not-an-array');
 
     expect(() => loadSkillSources(root, 'skills/bad')).toThrow(BundleError);
   });
 
   it('throws when an entry is not a string', () => {
-    const root = scratchGbrain();
+    const root = scratchModusbrain();
     writeSkill(root, 'bad', 'name: bad\nsources:\n  - 42');
 
     expect(() => loadSkillSources(root, 'skills/bad')).toThrow(BundleError);
   });
 
   it('throws on absolute paths', () => {
-    const root = scratchGbrain();
+    const root = scratchModusbrain();
     writeSkill(root, 'bad', 'name: bad\nsources:\n  - /etc/passwd');
 
     expect(() => loadSkillSources(root, 'skills/bad')).toThrow(/absolute/);
   });
 
   it('throws on `..` traversal', () => {
-    const root = scratchGbrain();
+    const root = scratchModusbrain();
     writeSkill(root, 'bad', 'name: bad\nsources:\n  - ../other-repo/src/leak.ts');
 
     expect(() => loadSkillSources(root, 'skills/bad')).toThrow(/traversal/);
   });
 
   it('throws when a declared source file is missing on disk', () => {
-    const root = scratchGbrain();
+    const root = scratchModusbrain();
     writeSkill(
       root,
       'gone',
@@ -122,7 +122,7 @@ describe('loadSkillSources', () => {
   });
 
   it('throws on empty string entries', () => {
-    const root = scratchGbrain();
+    const root = scratchModusbrain();
     writeSkill(root, 'bad', 'name: bad\nsources:\n  - ""');
 
     expect(() => loadSkillSources(root, 'skills/bad')).toThrow(BundleError);

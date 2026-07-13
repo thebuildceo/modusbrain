@@ -9,7 +9,7 @@ import {
 } from '../core/semver.ts';
 import { writeUpdateCache, type UpdateMarker } from '../core/self-upgrade.ts';
 
-/** Best-effort cache write — a read-only ~/.gbrain must never make the check throw. */
+/** Best-effort cache write — a read-only ~/.modusbrain must never make the check throw. */
 function safeWriteCache(marker: UpdateMarker): void {
   try {
     writeUpdateCache(marker);
@@ -37,10 +37,10 @@ interface CheckUpdateResult {
 
 function upgradeCommandForMethod(method: string): string {
   switch (method) {
-    case 'bun': return 'bun update gbrain';
-    case 'clawhub': return 'clawhub update gbrain';
-    case 'binary': return 'gbrain self-upgrade';
-    default: return 'gbrain upgrade';
+    case 'bun': return 'bun update modusbrain';
+    case 'clawhub': return 'clawhub update modusbrain';
+    case 'binary': return 'modusbrain self-upgrade';
+    default: return 'modusbrain upgrade';
   }
 }
 
@@ -51,8 +51,8 @@ function upgradeCommandForMethod(method: string): string {
  */
 export async function fetchLatestRelease(): Promise<{ tag: string; published_at: string; url: string } | null> {
   try {
-    const res = await fetch('https://api.github.com/repos/garrytan/gbrain/releases/latest', {
-      headers: { 'User-Agent': `gbrain/${VERSION}` },
+    const res = await fetch('https://api.github.com/repos/garrytan/modusbrain/releases/latest', {
+      headers: { 'User-Agent': `modusbrain/${VERSION}` },
       signal: AbortSignal.timeout(5_000),
     });
     if (!res.ok) return null;
@@ -69,7 +69,7 @@ export async function fetchLatestRelease(): Promise<{ tag: string; published_at:
 
 export async function fetchChangelog(currentVersion: string, latestVersion: string): Promise<string> {
   try {
-    const res = await fetch('https://raw.githubusercontent.com/garrytan/gbrain/master/CHANGELOG.md', {
+    const res = await fetch('https://raw.githubusercontent.com/garrytan/modusbrain/master/CHANGELOG.md', {
       signal: AbortSignal.timeout(5_000),
     });
     if (!res.ok) return '';
@@ -121,7 +121,7 @@ export function extractChangelogBetween(changelog: string, from: string, to: str
  * read by the CLI startup hook). Fail-open: on any network failure we cache
  * `UP_TO_DATE <current>` so the TTL prevents hammering GitHub on every
  * invocation. Returns the resolved marker for callers that want it. This is the
- * function the detached single-flight refresh (`gbrain check-update
+ * function the detached single-flight refresh (`modusbrain check-update
  * --refresh-cache`) invokes.
  */
 export async function refreshUpdateCache(): Promise<void> {
@@ -140,7 +140,7 @@ export async function refreshUpdateCache(): Promise<void> {
 
 export async function runCheckUpdate(args: string[]) {
   if (args.includes('--help') || args.includes('-h')) {
-    console.log('Usage: gbrain check-update [--json] [--refresh-cache]\n\nCheck for new GBrain versions.\n\nOnly reports minor/major version bumps (v0.X.0), not patches.\nFails silently on network errors.\n\n--refresh-cache  Fetch + update the self-upgrade cache, print nothing (used by\n                 the CLI startup hook\'s detached refresh).');
+    console.log('Usage: modusbrain check-update [--json] [--refresh-cache]\n\nCheck for new ModusBrain versions.\n\nOnly reports minor/major version bumps (v0.X.0), not patches.\nFails silently on network errors.\n\n--refresh-cache  Fetch + update the self-upgrade cache, print nothing (used by\n                 the CLI startup hook\'s detached refresh).');
     return;
   }
 
@@ -181,7 +181,7 @@ export async function runCheckUpdate(args: string[]) {
         error: 'no_releases',
       }, null, 2));
     } else {
-      console.log(`GBrain ${VERSION} — could not check for updates (no releases found or network unavailable).`);
+      console.log(`ModusBrain ${VERSION} — could not check for updates (no releases found or network unavailable).`);
     }
     return;
   }
@@ -189,7 +189,7 @@ export async function runCheckUpdate(args: string[]) {
   const latestVersion = release.tag.replace(/^v/, '');
   const updateAvailable = isValidVersionString(latestVersion) && isMinorOrMajorBump(VERSION, latestVersion);
 
-  // Warm the self-upgrade cache so the next `gbrain <cmd>` startup hook can emit
+  // Warm the self-upgrade cache so the next `modusbrain <cmd>` startup hook can emit
   // the marker without a network call.
   safeWriteCache(
     updateAvailable
@@ -216,10 +216,10 @@ export async function runCheckUpdate(args: string[]) {
   if (json) {
     console.log(JSON.stringify(result, null, 2));
   } else if (updateAvailable) {
-    console.log(`GBrain update available: ${VERSION} → ${latestVersion}`);
+    console.log(`ModusBrain update available: ${VERSION} → ${latestVersion}`);
     console.log(`Run: ${upgradeCmd}`);
     console.log(`Release: ${release.url}`);
   } else {
-    console.log(`GBrain ${VERSION} is up to date.`);
+    console.log(`ModusBrain ${VERSION} is up to date.`);
   }
 }

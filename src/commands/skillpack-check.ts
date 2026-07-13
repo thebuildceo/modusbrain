@@ -1,14 +1,14 @@
 /**
- * `gbrain skillpack-check` — agent-readable health report.
+ * `modusbrain skillpack-check` — agent-readable health report.
  *
- * Wraps `gbrain doctor --json` + `gbrain apply-migrations --list` into a
+ * Wraps `modusbrain doctor --json` + `modusbrain apply-migrations --list` into a
  * single JSON blob a host agent (your OpenClaw's morning-briefing, any
  * OpenClaw cron) can consume without parsing two subcommands.
  *
  * Usage:
- *   gbrain skillpack-check              # pretty-printed JSON + exit code
- *   gbrain skillpack-check --quiet      # only exits with status; no output
- *   gbrain skillpack-check --help
+ *   modusbrain skillpack-check              # pretty-printed JSON + exit code
+ *   modusbrain skillpack-check --quiet      # only exits with status; no output
+ *   modusbrain skillpack-check --help
  *
  * Exit codes:
  *   0 — Healthy. Nothing needs action.
@@ -21,25 +21,25 @@ import { VERSION } from '../version.ts';
 import { getCliOptions } from '../core/cli-options.ts';
 
 /**
- * Resolve the gbrain binary + args for spawning subcommands from
+ * Resolve the modusbrain binary + args for spawning subcommands from
  * within skillpack-check. Handles three install cases:
- *   - Running the compiled binary (argv[1] ends in /gbrain): re-exec it.
+ *   - Running the compiled binary (argv[1] ends in /modusbrain): re-exec it.
  *   - Running via `bun run src/cli.ts` (argv[1] is a .ts file): prefix with `bun run`.
- *   - Anything else: fall back to `which gbrain` on $PATH.
+ *   - Anything else: fall back to `which modusbrain` on $PATH.
  */
-function gbrainSpawn(): { cmd: string; prefix: string[] } {
+function modusbrainSpawn(): { cmd: string; prefix: string[] } {
   const arg1 = process.argv[1] ?? '';
-  if (arg1.endsWith('/gbrain') || arg1.endsWith('\\gbrain.exe')) {
+  if (arg1.endsWith('/modusbrain') || arg1.endsWith('\\modusbrain.exe')) {
     return { cmd: arg1, prefix: [] };
   }
   if (arg1.endsWith('.ts') || arg1.endsWith('.mjs') || arg1.endsWith('.js')) {
     return { cmd: 'bun', prefix: ['run', arg1] };
   }
   const execPath = process.execPath ?? '';
-  if (execPath.endsWith('/gbrain') || execPath.endsWith('\\gbrain.exe')) {
+  if (execPath.endsWith('/modusbrain') || execPath.endsWith('\\modusbrain.exe')) {
     return { cmd: execPath, prefix: [] };
   }
-  return { cmd: 'gbrain', prefix: [] };
+  return { cmd: 'modusbrain', prefix: [] };
 }
 
 interface DoctorCheck {
@@ -72,7 +72,7 @@ interface SkillpackReport {
 }
 
 function runDoctor(): SkillpackReport['doctor'] {
-  const { cmd, prefix } = gbrainSpawn();
+  const { cmd, prefix } = modusbrainSpawn();
   try {
     // --fast avoids DB dependency; the filesystem half-migration checks
     // we care about most run in the fast path.
@@ -98,7 +98,7 @@ function runDoctor(): SkillpackReport['doctor'] {
 }
 
 function runMigrationsList(): SkillpackReport['migrations'] {
-  const { cmd, prefix } = gbrainSpawn();
+  const { cmd, prefix } = modusbrainSpawn();
   try {
     const stdout = execFileSync(cmd, [...prefix, 'apply-migrations', '--list'], {
       encoding: 'utf-8',
@@ -107,7 +107,7 @@ function runMigrationsList(): SkillpackReport['migrations'] {
     });
 
     // Count rows by status word. Output shape from apply-migrations:
-    //   Installed gbrain version: 0.11.1
+    //   Installed modusbrain version: 0.11.1
     //
     //     Status   Version   Headline
     //     -------  --------  ...
@@ -166,7 +166,7 @@ function buildReport(): SkillpackReport {
   if ('applied_count' in migrations) {
     if (migrations.partial_count > 0 || migrations.pending_count > 0) {
       healthy = false;
-      const action = 'gbrain apply-migrations --yes';
+      const action = 'modusbrain apply-migrations --yes';
       if (!actions.includes(action)) actions.unshift(action);
     }
   } else {
@@ -175,8 +175,8 @@ function buildReport(): SkillpackReport {
   }
 
   const summary = healthy
-    ? 'gbrain skillpack healthy'
-    : `gbrain skillpack needs attention: ${actions.length} action(s) — ${actions[0]}`;
+    ? 'modusbrain skillpack healthy'
+    : `modusbrain skillpack needs attention: ${actions.length} action(s) — ${actions[0]}`;
 
   return {
     version: VERSION,
@@ -191,16 +191,16 @@ function buildReport(): SkillpackReport {
 
 export async function runSkillpackCheck(args: string[]): Promise<void> {
   if (args.includes('--help') || args.includes('-h')) {
-    console.log(`gbrain skillpack-check — agent-readable health report.
+    console.log(`modusbrain skillpack-check — agent-readable health report.
 
 Wraps doctor + apply-migrations --list into one JSON blob.
 
 Usage:
-  gbrain skillpack-check            Pretty JSON to stdout, exit 0/1/2 (legacy).
-  gbrain skillpack check            v0.33 subcommand. Default: informational
+  modusbrain skillpack-check            Pretty JSON to stdout, exit 0/1/2 (legacy).
+  modusbrain skillpack check            v0.33 subcommand. Default: informational
                                      (exit 0 even with drift). Pass --strict
                                      to exit non-zero on action-needed.
-  gbrain skillpack-check --quiet    Exit code only, no output.
+  modusbrain skillpack-check --quiet    Exit code only, no output.
 
 Exit codes:
   0  healthy (no action needed) — or informational mode with drift detected
@@ -226,12 +226,12 @@ Exit codes:
     process.exit(2);
   }
 
-  // v0.33: When invoked as the new `gbrain skillpack check` subcommand,
+  // v0.33: When invoked as the new `modusbrain skillpack check` subcommand,
   // the dispatcher detects this via process.argv and treats the default
   // as informational (exit 0 even with drift). Pass --strict to opt
   // back into action-needed exit-1 semantics for CI gates.
   //
-  // Top-level `gbrain skillpack-check` (cron compat) keeps exit-1 on
+  // Top-level `modusbrain skillpack-check` (cron compat) keeps exit-1 on
   // action-needed as the default — see argv detection below.
   const isSubcommandInvocation = isSkillpackCheckSubcommand();
   const informational = isSubcommandInvocation && !strict;
@@ -243,13 +243,13 @@ Exit codes:
 }
 
 /**
- * Detect whether this invocation came via `gbrain skillpack check`
- * (subcommand) vs the top-level `gbrain skillpack-check` (cron compat).
+ * Detect whether this invocation came via `modusbrain skillpack check`
+ * (subcommand) vs the top-level `modusbrain skillpack-check` (cron compat).
  * Subcommand → informational default. Top-level → strict default.
  */
 function isSkillpackCheckSubcommand(): boolean {
   const argv = process.argv;
-  // argv shape for `gbrain skillpack check` after the binary name and
+  // argv shape for `modusbrain skillpack check` after the binary name and
   // any --quiet / --json globals stripped: ['skillpack', 'check', ...].
   // Walk to find the first non-flag arg.
   for (let i = 2; i < argv.length; i++) {

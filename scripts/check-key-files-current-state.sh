@@ -23,8 +23,8 @@
 #   bash scripts/check-key-files-current-state.sh
 #
 # Env overrides (for the guard's own test):
-#   GBRAIN_DOC_GUARD_ROOT        repo root to scan (default: script's ../)
-#   GBRAIN_CLAUDE_MD_MAX_BYTES   CLAUDE.md hard cap (default: 60000; post-restructure
+#   MODUSBRAIN_DOC_GUARD_ROOT        repo root to scan (default: script's ../)
+#   MODUSBRAIN_CLAUDE_MD_MAX_BYTES   CLAUDE.md hard cap (default: 60000; post-restructure
 #                                CLAUDE.md is ~39KB, so this leaves headroom while
 #                                staying far below the ~592KB disease state)
 #
@@ -34,8 +34,8 @@
 
 set -uo pipefail
 
-ROOT="${GBRAIN_DOC_GUARD_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
-MAX_BYTES="${GBRAIN_CLAUDE_MD_MAX_BYTES:-60000}"
+ROOT="${MODUSBRAIN_DOC_GUARD_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
+MAX_BYTES="${MODUSBRAIN_CLAUDE_MD_MAX_BYTES:-60000}"
 
 # Reference docs that MUST stay current-state (history-free).
 REFERENCE_DOCS=(

@@ -18,7 +18,7 @@
  *   3. LOCK LEAK GUARD: if `db.close()` throws, the file lock STILL
  *      releases. Codex outside-voice finding #7 in the eng review:
  *      without try/finally, a close-throw would wedge every next
- *      gbrain invocation on the stale lock.
+ *      modusbrain invocation on the stale lock.
  *
  *   4. IDEMPOTENCY: calling disconnect() twice is a clean no-op on
  *      the second call (no throw, no double-close attempt).
@@ -38,7 +38,7 @@ import { join } from 'path';
 import { PGLiteEngine } from '../src/core/pglite-engine.ts';
 
 function newTempDataDir(): string {
-  return mkdtempSync(join(tmpdir(), 'gbrain-disconnect-test-'));
+  return mkdtempSync(join(tmpdir(), 'modusbrain-disconnect-test-'));
 }
 
 describe('PGLiteEngine.disconnect() — v0.41.8.0 lifecycle invariants', () => {
@@ -242,7 +242,7 @@ describe('PGLiteEngine: Emscripten process.exitCode containment (#2084)', () => 
   test('a pre-call verdict survives the create-throw path (finally restores)', async () => {
     const prev = process.exitCode;
     const eng = new PGLiteEngine();
-    const blockingFile = join(tmpdir(), `gbrain-pglite-blocking-${process.pid}-${Date.now()}`);
+    const blockingFile = join(tmpdir(), `modusbrain-pglite-blocking-${process.pid}-${Date.now()}`);
     try {
       process.exitCode = 3;
       writeFileSync(blockingFile, 'not a directory');

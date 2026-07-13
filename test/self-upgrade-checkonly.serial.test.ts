@@ -1,5 +1,5 @@
 /**
- * Serial (stubs globalThis.fetch): `gbrain self-upgrade --check-only --json`
+ * Serial (stubs globalThis.fetch): `modusbrain self-upgrade --check-only --json`
  * surfaces the changelog so the notify prompt can tell the operator WHAT they'll
  * get, not just a version number. Network stubbed; the JSON shape + changelog
  * extraction are real.
@@ -36,9 +36,9 @@ function stub(tag: string | null, changelog: string): void {
 }
 
 beforeEach(() => {
-  priorHome = process.env.GBRAIN_HOME;
-  home = mkdtempSync(join(tmpdir(), 'gbrain-checkonly-'));
-  process.env.GBRAIN_HOME = home;
+  priorHome = process.env.MODUSBRAIN_HOME;
+  home = mkdtempSync(join(tmpdir(), 'modusbrain-checkonly-'));
+  process.env.MODUSBRAIN_HOME = home;
   captured = [];
   console.log = (...a: unknown[]) => { captured.push(a.join(' ')); };
 });
@@ -46,8 +46,8 @@ beforeEach(() => {
 afterEach(() => {
   globalThis.fetch = realFetch;
   console.log = realLog;
-  if (priorHome === undefined) delete process.env.GBRAIN_HOME;
-  else process.env.GBRAIN_HOME = priorHome;
+  if (priorHome === undefined) delete process.env.MODUSBRAIN_HOME;
+  else process.env.MODUSBRAIN_HOME = priorHome;
   rmSync(home, { recursive: true, force: true });
 });
 

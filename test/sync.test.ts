@@ -128,11 +128,11 @@ describe('pruneDir', () => {
     expect(pruneDir('.vscode')).toBe(false);
   });
 
-  test('blocks ops (gbrain operational dir)', () => {
+  test('blocks ops (modusbrain operational dir)', () => {
     expect(pruneDir('ops')).toBe(false);
   });
 
-  test('blocks *.raw sidecar dirs (gbrain convention)', () => {
+  test('blocks *.raw sidecar dirs (modusbrain convention)', () => {
     expect(pruneDir('.raw')).toBe(false);
     expect(pruneDir('pedro.raw')).toBe(false);
     expect(pruneDir('article.raw')).toBe(false);
@@ -198,7 +198,7 @@ describe('pathToSlug', () => {
   });
 
   test('handles nested paths', () => {
-    expect(pathToSlug('projects/gbrain/spec.md')).toBe('projects/gbrain/spec');
+    expect(pathToSlug('projects/modusbrain/spec.md')).toBe('projects/modusbrain/spec');
   });
 
   test('adds repo prefix when provided', () => {
@@ -295,7 +295,7 @@ describe('performSync dry-run never writes', () => {
 
   beforeEach(async () => {
     await resetPgliteState(engine);
-    repoPath = mkdtempSync(join(tmpdir(), 'gbrain-sync-dryrun-'));
+    repoPath = mkdtempSync(join(tmpdir(), 'modusbrain-sync-dryrun-'));
     execSync('git init', { cwd: repoPath, stdio: 'pipe' });
     execSync('git config user.email "test@test.com"', { cwd: repoPath, stdio: 'pipe' });
     execSync('git config user.name "Test"', { cwd: repoPath, stdio: 'pipe' });
@@ -710,7 +710,7 @@ describe('#1970: unreachable last_commit bookmark recovery', () => {
 
   /** Create a temp git repo seeded with the given files + an initial commit. */
   function mkRepo(files: Record<string, string>): string {
-    const dir = mkdtempSync(join(tmpdir(), 'gbrain-1970-'));
+    const dir = mkdtempSync(join(tmpdir(), 'modusbrain-1970-'));
     repos.push(dir);
     execSync('git init', { cwd: dir, stdio: 'pipe' });
     execSync('git config user.email "test@test.com"', { cwd: dir, stdio: 'pipe' });

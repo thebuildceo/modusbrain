@@ -134,10 +134,10 @@ describe('gateway.toolLoop (v0.38 D11 — provider-agnostic loop control)', () =
       },
       onToolCallStart: async (turnIdx, _msgIdx, ordinal, toolName, _input, providerToolCallId) => {
         events.push(`onToolCallStart(turn=${turnIdx}, ordinal=${ordinal}, name=${toolName}, providerCallId=${providerToolCallId})`);
-        return { gbrainToolUseId: `gb-${turnIdx}-${ordinal}` };
+        return { modusbrainToolUseId: `gb-${turnIdx}-${ordinal}` };
       },
-      onToolCallComplete: async (gbrainToolUseId, _output) => {
-        events.push(`onToolCallComplete(${gbrainToolUseId})`);
+      onToolCallComplete: async (modusbrainToolUseId, _output) => {
+        events.push(`onToolCallComplete(${modusbrainToolUseId})`);
       },
     });
 
@@ -185,7 +185,7 @@ describe('gateway.toolLoop (v0.38 D11 — provider-agnostic loop control)', () =
         idempotent: false,
         async execute() { executed = true; return 'fresh'; },
       }]]),
-      onToolCallStart: async () => ({ gbrainToolUseId: 'gb-replay-key' }),
+      onToolCallStart: async () => ({ modusbrainToolUseId: 'gb-replay-key' }),
       replayState: {
         priorMessages: [],
         priorTools: new Map([['gb-replay-key', {
@@ -219,7 +219,7 @@ describe('gateway.toolLoop (v0.38 D11 — provider-agnostic loop control)', () =
         initialMessages: [{ role: 'user', content: 'go' }],
         tools: [{ name: 'mutate', description: 'm', inputSchema: { type: 'object' } }],
         toolHandlers: new Map([['mutate', { idempotent: false, async execute() { return null; } }]]),
-        onToolCallStart: async () => ({ gbrainToolUseId: 'gb-pending-key' }),
+        onToolCallStart: async () => ({ modusbrainToolUseId: 'gb-pending-key' }),
         replayState: {
           priorMessages: [],
           priorTools: new Map([['gb-pending-key', { status: 'pending' as const }]]),

@@ -1,9 +1,9 @@
 /**
- * skillpack/init-scaffold.ts — `gbrain skillpack init <name>` scaffold.
+ * skillpack/init-scaffold.ts — `modusbrain skillpack init <name>` scaffold.
  *
  * Cathedral default per codex T4 + DX-Round-2: lands a complete 10/10
  * pack tree out of the box. Publisher edits or deletes what they don't
- * need; `gbrain skillpack doctor --quick` on a freshly-init'd pack
+ * need; `modusbrain skillpack doctor --quick` on a freshly-init'd pack
  * passes 10/10 immediately.
  *
  * `--minimal` flag drops test/, e2e/, evals/ for power users who
@@ -111,7 +111,7 @@ export function runInitScaffold(opts: InitScaffoldOptions): InitScaffoldResult {
     author: opts.author ?? 'Your Name <you@example.com>',
     license: opts.license ?? 'MIT',
     homepage: opts.homepage ?? `https://github.com/your-user/skillpack-${opts.name}`,
-    gbrain_min_version: '0.36.0',
+    modusbrain_min_version: '0.36.0',
     skills: [`skills/${firstSlug}`],
     runbooks: { bootstrap: 'runbooks/bootstrap.md' },
     changelog: 'CHANGELOG.md',
@@ -174,11 +174,11 @@ export function runInitScaffold(opts: InitScaffoldOptions): InitScaffoldResult {
     content: [
       '# Bootstrap',
       '',
-      'Post-scaffold steps. gbrain displays this but does NOT auto-execute.',
+      'Post-scaffold steps. modusbrain displays this but does NOT auto-execute.',
       'The agent reads it and walks per-step at its own discretion.',
       '',
       `1. show user: "${opts.name} is installed. Try one of the trigger phrases from skills/${firstSlug}/SKILL.md."`,
-      `2. (edit me) agent: gbrain put_page wiki/_${opts.name}-config --frontmatter type=config`,
+      `2. (edit me) agent: modusbrain put_page wiki/_${opts.name}-config --frontmatter type=config`,
       '',
     ].join('\n'),
   });
@@ -207,7 +207,7 @@ export function runInitScaffold(opts: InitScaffoldOptions): InitScaffoldResult {
       '## Install',
       '',
       '```bash',
-      `gbrain skillpack scaffold your-user/skillpack-${opts.name}`,
+      `modusbrain skillpack scaffold your-user/skillpack-${opts.name}`,
       '```',
       '',
       '## What it does',

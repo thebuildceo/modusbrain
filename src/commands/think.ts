@@ -1,5 +1,5 @@
 /**
- * v0.28: `gbrain think <question>` CLI.
+ * v0.28: `modusbrain think <question>` CLI.
  *
  * Thin wrapper around runThink + persistSynthesis. Local CLI = remote=false,
  * so --save and --take are honored. Reads ANTHROPIC_API_KEY from the env;
@@ -22,7 +22,7 @@ function flagPresent(args: string[], name: string): boolean {
 
 export async function runThinkCli(engine: BrainEngine, args: string[]): Promise<void> {
   if (args.length === 0 || args.includes('--help') || args.includes('-h')) {
-    console.log(`Usage: gbrain think "<question>" [options]
+    console.log(`Usage: modusbrain think "<question>" [options]
 
 Options:
   --anchor <slug>          Pull the entity subgraph around this slug
@@ -43,7 +43,7 @@ the synthesis page is persisted AND printed. If --save is given but no synthesis
 was produced (no LLM available, or empty result), nothing is saved and the command
 exits non-zero.
 
-Set ANTHROPIC_API_KEY (or run: gbrain config set anthropic_api_key ...) to run
+Set ANTHROPIC_API_KEY (or run: modusbrain config set anthropic_api_key ...) to run
 real synthesis. Without it AND without --save, the gather phase still runs and
 prints what would have been the input (exit 0).
 `);
@@ -61,7 +61,7 @@ prints what would have been the input (exit 0).
   }
   const question = positional.join(' ').trim();
   if (!question) {
-    console.error('Missing question. Try: gbrain think "What do we know about acme-example?"');
+    console.error('Missing question. Try: modusbrain think "What do we know about acme-example?"');
     process.exit(1);
   }
 

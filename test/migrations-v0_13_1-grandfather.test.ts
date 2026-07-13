@@ -43,11 +43,11 @@ const fmOf = async (slug: string, sourceId = 'default') => {
   return p?.frontmatter ?? null;
 };
 
-// Run the phase with an isolated GBRAIN_HOME so the rollback log lands in a
+// Run the phase with an isolated MODUSBRAIN_HOME so the rollback log lands in a
 // tempdir (withEnv keeps R1 test-isolation compliance — no raw process.env writes).
 async function gf(home: string, opts: Partial<OrchestratorOpts> = {}) {
   const full: OrchestratorOpts = { yes: true, dryRun: false, noAutopilotInstall: true, ...opts };
-  return withEnv({ GBRAIN_HOME: home }, () => phaseCGrandfather(engine, full));
+  return withEnv({ MODUSBRAIN_HOME: home }, () => phaseCGrandfather(engine, full));
 }
 
 describe('#1581 phaseCGrandfather (chunked, source-safe)', () => {
@@ -105,8 +105,8 @@ describe('#1581 phaseCGrandfather (chunked, source-safe)', () => {
     await seed('people/dup', { src: 'b' }, 'src2');
     await gf(home);
 
-    // configDir() appends '.gbrain' to GBRAIN_HOME.
-    const logPath = join(home, '.gbrain', 'migrations', 'v0_13_1-rollback.jsonl');
+    // configDir() appends '.modusbrain' to MODUSBRAIN_HOME.
+    const logPath = join(home, '.modusbrain', 'migrations', 'v0_13_1-rollback.jsonl');
     expect(existsSync(logPath)).toBe(true);
     const lines = readFileSync(logPath, 'utf-8').trim().split('\n').map(l => JSON.parse(l));
     expect(lines.map(l => l.source_id).sort()).toEqual(['default', 'src2']);

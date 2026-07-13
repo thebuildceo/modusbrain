@@ -51,12 +51,12 @@ export interface LockRenewalKnobs {
   /**
    * Failure counter cap used ONLY for audit-event labeling.
    * Abort triggering uses the time-based deadline (NOT this count).
-   * Env: `GBRAIN_LOCK_RENEWAL_MAX_FAILURES`. Default: 3.
+   * Env: `MODUSBRAIN_LOCK_RENEWAL_MAX_FAILURES`. Default: 3.
    */
   maxFailuresForAudit: number;
   /**
    * Per-renewLock-call timeout enforced via `Promise.race`.
-   * Env: `GBRAIN_LOCK_RENEWAL_CALL_TIMEOUT_MS`. Default: `lockDuration / 3`.
+   * Env: `MODUSBRAIN_LOCK_RENEWAL_CALL_TIMEOUT_MS`. Default: `lockDuration / 3`.
    * Bounds the "hung renewLock wedges the re-entrancy guard forever" vector.
    */
   callTimeoutMs: number;
@@ -64,7 +64,7 @@ export interface LockRenewalKnobs {
    * Time-based abort fires when `now - lastSuccessfulRenewalAt >=
    * lockDuration - safetyMarginMs`. Default safety margin gives ~5s
    * of headroom before another worker could reclaim the lock.
-   * Env: `GBRAIN_LOCK_RENEWAL_SAFETY_MARGIN_MS`. Default: `lockDuration / 6`.
+   * Env: `MODUSBRAIN_LOCK_RENEWAL_SAFETY_MARGIN_MS`. Default: `lockDuration / 6`.
    */
   safetyMarginMs: number;
 }
@@ -87,7 +87,7 @@ export function _resetKnobWarningsForTests(): void {
  * Validation: each env var parsed as a positive integer; on bad input
  * (NaN, zero, negative, non-integer), emit a single stderr warning per
  * process per env-name and fall through to the default. This means an
- * operator who sets `GBRAIN_LOCK_RENEWAL_CALL_TIMEOUT_MS=abc` gets a
+ * operator who sets `MODUSBRAIN_LOCK_RENEWAL_CALL_TIMEOUT_MS=abc` gets a
  * loud-but-not-fatal nudge AND a working worker.
  */
 export function resolveLockRenewalKnobs(
@@ -100,19 +100,19 @@ export function resolveLockRenewalKnobs(
 
   return {
     maxFailuresForAudit: parsePositiveInt(
-      env.GBRAIN_LOCK_RENEWAL_MAX_FAILURES,
+      env.MODUSBRAIN_LOCK_RENEWAL_MAX_FAILURES,
       defaultMaxFailures,
-      'GBRAIN_LOCK_RENEWAL_MAX_FAILURES',
+      'MODUSBRAIN_LOCK_RENEWAL_MAX_FAILURES',
     ),
     callTimeoutMs: parsePositiveInt(
-      env.GBRAIN_LOCK_RENEWAL_CALL_TIMEOUT_MS,
+      env.MODUSBRAIN_LOCK_RENEWAL_CALL_TIMEOUT_MS,
       defaultCallTimeout,
-      'GBRAIN_LOCK_RENEWAL_CALL_TIMEOUT_MS',
+      'MODUSBRAIN_LOCK_RENEWAL_CALL_TIMEOUT_MS',
     ),
     safetyMarginMs: parsePositiveInt(
-      env.GBRAIN_LOCK_RENEWAL_SAFETY_MARGIN_MS,
+      env.MODUSBRAIN_LOCK_RENEWAL_SAFETY_MARGIN_MS,
       defaultSafetyMargin,
-      'GBRAIN_LOCK_RENEWAL_SAFETY_MARGIN_MS',
+      'MODUSBRAIN_LOCK_RENEWAL_SAFETY_MARGIN_MS',
     ),
   };
 }

@@ -9,7 +9,7 @@ requires: []
 secrets: []
 health_checks:
   - type: command
-    argv: [gbrain, doctor, --json]
+    argv: [modusbrain, doctor, --json]
     label: Retrieval reflex wiring (see retrieval_reflex_health)
 setup_time: 2 min
 cost_estimate: "$0 — zero-LLM deterministic layer + a prose policy skill"
@@ -17,7 +17,7 @@ cost_estimate: "$0 — zero-LLM deterministic layer + a prose policy skill"
 
 # Retrieval Reflex: teach the agent *when* and *what* to retrieve
 
-gbrain is great at **storing** knowledge and at **injecting deterministic
+modusbrain is great at **storing** knowledge and at **injecting deterministic
 context** every turn. It does not, by itself, teach the host agent the *policy*
 of retrieval: **when** to look something up and **what** to pull. Without it,
 the agent can discuss a person who has a rich brain page for several messages
@@ -27,11 +27,11 @@ knew.
 This reflex has two halves:
 
 1. **Deterministic pointer layer (automatic, on by default).** The
-   `gbrain-context` engine scans each turn's user message for salient,
+   `modusbrain-context` engine scans each turn's user message for salient,
    resolvable entities and injects a compact pointer (name → slug → one-line
    summary) so the agent *knows the page exists*. Zero-LLM, fail-open. Nothing
    to install — it's on unless `retrieval_reflex` is disabled in
-   `~/.gbrain/config.json` or `GBRAIN_RETRIEVAL_REFLEX=false`.
+   `~/.modusbrain/config.json` or `MODUSBRAIN_RETRIEVAL_REFLEX=false`.
 
 2. **Policy skill (this recipe installs it).** A SKILL fragment in the host
    resolver that encodes the trigger policy and retrieval spec the agent
@@ -42,13 +42,13 @@ This reflex has two halves:
 **You are the installer.** Run these steps on behalf of the user.
 
 1. Confirm the deterministic layer isn't disabled:
-   `gbrain doctor --json | jq '.checks[] | select(.name=="retrieval_reflex_health")'`
+   `modusbrain doctor --json | jq '.checks[] | select(.name=="retrieval_reflex_health")'`
 2. Install the policy skill into the host repo (the OpenClaw/agent repo that
    holds `skills/RESOLVER.md` or `AGENTS.md`):
-   `gbrain integrations install retrieval-reflex --target <host-repo>`
-3. Verify: re-run `gbrain doctor` and confirm `retrieval_reflex_health` is `ok`.
+   `modusbrain integrations install retrieval-reflex --target <host-repo>`
+3. Verify: re-run `modusbrain doctor` and confirm `retrieval_reflex_health` is `ok`.
 
 The deterministic layer needs no install. On a PGLite brain it resolves through
-the running `gbrain serve` (or a host-provided capability); if neither is
+the running `modusbrain serve` (or a host-provided capability); if neither is
 available it stays disabled and this policy skill carries the behavior — the
 doctor check reports which.

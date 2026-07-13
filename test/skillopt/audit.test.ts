@@ -1,7 +1,7 @@
 /**
  * SkillOpt audit JSONL writer tests.
  *
- * Uses withEnv (R1 compliant) to point GBRAIN_AUDIT_DIR at a tempdir per
+ * Uses withEnv (R1 compliant) to point MODUSBRAIN_AUDIT_DIR at a tempdir per
  * test. Resets the cached writer between tests so each invocation re-reads
  * the env.
  */
@@ -34,7 +34,7 @@ afterEach(() => {
 
 describe('logEvent + readRecentEvents', () => {
   test('writes a JSONL row to the current ISO-week file', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: tmpDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: tmpDir }, async () => {
       logEvent({
         kind: 'run_start',
         run_id: 'r1',
@@ -62,7 +62,7 @@ describe('logEvent + readRecentEvents', () => {
   });
 
   test('readRecentEvents returns the row we just wrote', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: tmpDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: tmpDir }, async () => {
       logEvent({ kind: 'abort', run_id: 'r2', skill: 'foo', reason: 'budget_exhausted' } as never);
       const events = readRecentEvents(7);
       expect(events.length).toBeGreaterThanOrEqual(1);
@@ -71,8 +71,8 @@ describe('logEvent + readRecentEvents', () => {
     });
   });
 
-  test('resolveAuditDir honors GBRAIN_AUDIT_DIR override', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: tmpDir }, async () => {
+  test('resolveAuditDir honors MODUSBRAIN_AUDIT_DIR override', async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: tmpDir }, async () => {
       expect(resolveAuditDir()).toBe(tmpDir);
     });
   });

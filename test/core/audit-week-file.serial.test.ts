@@ -55,14 +55,14 @@ describe('isoWeekFilename', () => {
 });
 
 describe('resolveAuditDir', () => {
-  test('honors GBRAIN_AUDIT_DIR override', () => {
-    const prev = process.env.GBRAIN_AUDIT_DIR;
-    process.env.GBRAIN_AUDIT_DIR = '/tmp/test-audit-override';
+  test('honors MODUSBRAIN_AUDIT_DIR override', () => {
+    const prev = process.env.MODUSBRAIN_AUDIT_DIR;
+    process.env.MODUSBRAIN_AUDIT_DIR = '/tmp/test-audit-override';
     try {
       expect(resolveAuditDir()).toBe('/tmp/test-audit-override');
     } finally {
-      if (prev === undefined) delete process.env.GBRAIN_AUDIT_DIR;
-      else process.env.GBRAIN_AUDIT_DIR = prev;
+      if (prev === undefined) delete process.env.MODUSBRAIN_AUDIT_DIR;
+      else process.env.MODUSBRAIN_AUDIT_DIR = prev;
     }
   });
 });

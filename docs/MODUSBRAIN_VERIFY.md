@@ -1,6 +1,6 @@
-# GBrain Installation Verification Runbook
+# ModusBrain Installation Verification Runbook
 
-Run these checks after install to confirm every part of GBrain is working.
+Run these checks after install to confirm every part of ModusBrain is working.
 Each check includes the command, expected output, and what to do if it fails.
 
 The most important check is #4 (live sync). "Sync ran" is not the same as
@@ -14,7 +14,7 @@ worse than no sync at all, because you think it's working.
 **Command:**
 
 ```bash
-gbrain doctor --json
+modusbrain doctor --json
 ```
 
 **Expected:** All checks return `"ok"`:
@@ -33,12 +33,12 @@ check. See `skills/setup/SKILL.md` Error Recovery table.
 
 **Check:** Ask the agent: "What is the brain-agent loop?"
 
-**Expected:** The agent references GBRAIN_SKILLPACK.md Section 2 and describes
+**Expected:** The agent references MODUSBRAIN_SKILLPACK.md Section 2 and describes
 the read-write cycle: detect entities, read brain, respond with context, write
 brain, sync.
 
 **If it fails:** The agent hasn't loaded the skillpack. Run step 6 from the
-install paste (read `docs/GBRAIN_SKILLPACK.md`).
+install paste (read `docs/MODUSBRAIN_SKILLPACK.md`).
 
 ---
 
@@ -47,13 +47,13 @@ install paste (read `docs/GBRAIN_SKILLPACK.md`).
 **Command:**
 
 ```bash
-gbrain check-update --json
+modusbrain check-update --json
 ```
 
 **Expected:** Returns JSON with `current_version`, `latest_version`,
-`update_available` (boolean). The cron `gbrain-update-check` is registered.
+`update_available` (boolean). The cron `modusbrain-update-check` is registered.
 
-**If it fails:** Run step 7 from the install paste. See GBRAIN_SKILLPACK.md
+**If it fails:** Run step 7 from the install paste. See MODUSBRAIN_SKILLPACK.md
 Section 17.
 
 ---
@@ -67,7 +67,7 @@ This is the most important check. Three parts.
 Compare page count in the DB against syncable file count in the repo:
 
 ```bash
-gbrain stats
+modusbrain stats
 ```
 
 Then count syncable files:
@@ -84,24 +84,24 @@ find /data/brain -name '*.md' \
   | wc -l
 ```
 
-**Expected:** Page count in `gbrain stats` should be close to the file count.
+**Expected:** Page count in `modusbrain stats` should be close to the file count.
 Some difference is normal (files added since last sync), but if page count is
 less than half the file count, sync is silently skipping pages.
 
 **If page count is way too low:** The #1 cause is an unreachable direct
-connection on an IPv4-only host. GBrain uses the Transaction pooler (port 6543)
+connection on an IPv4-only host. ModusBrain uses the Transaction pooler (port 6543)
 for reads, but routes migrations, DDL, and sync transactions to a derived direct
 connection (`db.<ref>.supabase.co:5432`), which is IPv6-only.
 - On an IPv4-only host, reads work but sync transactions fail and silently skip
   pages.
-- Fix: set `GBRAIN_DIRECT_DATABASE_URL` to the **Session pooler** string (port
+- Fix: set `MODUSBRAIN_DIRECT_DATABASE_URL` to the **Session pooler** string (port
   5432 on the `pooler.supabase.com` host, IPv4), or enable Supabase's IPv4
-  add-on. Then run `gbrain sync --full` to reimport everything.
+  add-on. Then run `modusbrain sync --full` to reimport everything.
 
 ### 4b. Embed Check
 
 ```bash
-gbrain stats
+modusbrain stats
 ```
 
 **Expected:** Embedded chunk count should be close to total chunk count.
@@ -109,7 +109,7 @@ gbrain stats
 **If embedded is much lower than total:**
 
 ```bash
-gbrain embed --stale
+modusbrain embed --stale
 ```
 
 If `OPENAI_API_KEY` is not set, embeddings can't be generated. Keyword search
@@ -133,16 +133,16 @@ git add -A && git commit -m "test: verify live sync" && git push
 3. Search for the corrected text:
 
 ```bash
-gbrain search "<text from the correction>"
+modusbrain search "<text from the correction>"
 ```
 
 **Expected:** The search returns the **corrected** text, not the old version.
 
 **If it returns old text:** Sync failed silently. Check:
 - Is the sync cron registered and running?
-- Is `gbrain sync --watch` still alive (if using watch mode)?
-- Run `gbrain config get sync.last_run` to see when sync last ran.
-- Run `gbrain sync --repo /data/brain` manually and check for errors.
+- Is `modusbrain sync --watch` still alive (if using watch mode)?
+- Run `modusbrain config get sync.last_run` to see when sync last ran.
+- Run `modusbrain sync --repo /data/brain` manually and check for errors.
 - If sync errors mention an unreachable host or connection timeout, the direct
   connection isn't reachable on IPv4 (see 4a above).
 
@@ -153,7 +153,7 @@ gbrain search "<text from the correction>"
 **Command:**
 
 ```bash
-gbrain stats
+modusbrain stats
 ```
 
 **Expected:** Embedded chunk count matches (or is close to) total chunk count.
@@ -167,7 +167,7 @@ echo $OPENAI_API_KEY | head -c 10
 If blank, set the key. Then:
 
 ```bash
-gbrain embed --stale
+modusbrain embed --stale
 ```
 
 ---
@@ -176,7 +176,7 @@ gbrain embed --stale
 
 **Check:** Ask the agent about a person or concept that exists in the brain.
 
-**Expected:** The agent uses `gbrain search` or `gbrain query` FIRST, not grep
+**Expected:** The agent uses `modusbrain search` or `modusbrain query` FIRST, not grep
 or external APIs. The response includes brain-sourced context with source
 attribution.
 
@@ -193,7 +193,7 @@ auto-linked, but historical pages need a one-time backfill.
 **Command:**
 
 ```bash
-gbrain stats | grep -E 'links|timeline'
+modusbrain stats | grep -E 'links|timeline'
 ```
 
 **Expected:** Both `links` and `timeline_entries` are non-zero (assuming the brain
@@ -202,17 +202,17 @@ has content with entity references and dated markdown).
 **If it's zero on a brain with imported content:** Run the backfill.
 
 ```bash
-gbrain extract links --source db --dry-run | head -5    # preview
-gbrain extract links --source db                         # commit
-gbrain extract timeline --source db
-gbrain stats                                             # confirm > 0
+modusbrain extract links --source db --dry-run | head -5    # preview
+modusbrain extract links --source db                         # commit
+modusbrain extract timeline --source db
+modusbrain stats                                             # confirm > 0
 ```
 
 **Bonus check** — graph traversal works:
 
 ```bash
 # Pick any well-connected slug from your brain
-gbrain graph-query people/<some-person-slug> --depth 2
+modusbrain graph-query people/<some-person-slug> --depth 2
 ```
 
 **Expected:** Indented tree of typed edges (`--attended-->`, `--works_at-->`, etc.).
@@ -229,14 +229,14 @@ heuristics won't find them — file an issue with a sample page.
 ## 8. JSONB Frontmatter Integrity (v0.12.2)
 
 Postgres-backed brains created before v0.12.2 had double-encoded JSONB columns
-(`frontmatter->>'key'` returned NULL, GIN indexes were inert). `gbrain upgrade`
-runs `gbrain repair-jsonb` automatically via the `v0_12_2` orchestrator.
+(`frontmatter->>'key'` returned NULL, GIN indexes were inert). `modusbrain upgrade`
+runs `modusbrain repair-jsonb` automatically via the `v0_12_2` orchestrator.
 Verify the repair succeeded.
 
 **Command:**
 
 ```bash
-gbrain repair-jsonb --dry-run --json
+modusbrain repair-jsonb --dry-run --json
 ```
 
 **Expected:** `totalRepaired: 0` across all 5 columns (`pages.frontmatter`,
@@ -248,7 +248,7 @@ JSON objects, not string-encoded JSON.
 without `--dry-run`:
 
 ```bash
-gbrain repair-jsonb
+modusbrain repair-jsonb
 ```
 
 Idempotent. PGLite brains always report 0 (unaffected by the original bug).
@@ -256,7 +256,7 @@ Idempotent. PGLite brains always report 0 (unaffected by the original bug).
 **Bonus check** — frontmatter-keyed queries actually resolve:
 
 ```bash
-gbrain call list_pages '{"frontmatterKey": "type", "frontmatterValue": "person"}'
+modusbrain call list_pages '{"frontmatterKey": "type", "frontmatterValue": "person"}'
 ```
 
 If this returns rows on a brain with person pages, the JSONB path is healthy.
@@ -267,28 +267,28 @@ If this returns rows on a brain with person pages, the JSONB path is healthy.
 
 ```bash
 # 1. Schema
-gbrain doctor --json
+modusbrain doctor --json
 
 # 2. Sync recency
-gbrain config get sync.last_run
+modusbrain config get sync.last_run
 
 # 3. Page count + embed coverage
-gbrain stats
+modusbrain stats
 
 # 4. Search works
-gbrain search "test query from your brain content"
+modusbrain search "test query from your brain content"
 
 # 5. Catch any unembedded chunks
-gbrain embed --stale
+modusbrain embed --stale
 
 # 6. Auto-update
-gbrain check-update --json
+modusbrain check-update --json
 
 # 7. Knowledge graph populated (links + timeline > 0)
-gbrain stats | grep -E 'links|timeline'
+modusbrain stats | grep -E 'links|timeline'
 
 # 8. JSONB integrity (v0.12.2 — Postgres only, PGLite always 0)
-gbrain repair-jsonb --dry-run --json
+modusbrain repair-jsonb --dry-run --json
 ```
 
 If all eight return successfully, the installation is healthy. For the full

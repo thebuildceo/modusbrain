@@ -1,7 +1,7 @@
 // v0.38 candidate-audit gap-fill (T1 from gap audit).
 //
 // Pins the privacy contract + file I/O behavior for the schema-candidate
-// audit trail used by `gbrain schema review-candidates` (v0.39).
+// audit trail used by `modusbrain schema review-candidates` (v0.39).
 //
 // Why this matters: candidate-audit is the only on-disk surface for
 // lenient-mode put_page events. The privacy contract (sha8-by-default,
@@ -25,7 +25,7 @@ import {
 let auditDir: string;
 
 beforeEach(() => {
-  auditDir = mkdtempSync(join(tmpdir(), 'gbrain-candidate-audit-'));
+  auditDir = mkdtempSync(join(tmpdir(), 'modusbrain-candidate-audit-'));
 });
 
 afterEach(() => {
@@ -34,20 +34,20 @@ afterEach(() => {
 
 describe('isAuditVerbose', () => {
   test('false when env unset', async () => {
-    await withEnv({ GBRAIN_SCHEMA_AUDIT_VERBOSE: undefined }, () => {
+    await withEnv({ MODUSBRAIN_SCHEMA_AUDIT_VERBOSE: undefined }, () => {
       expect(isAuditVerbose()).toBe(false);
     });
   });
   test('true when env=1', async () => {
-    await withEnv({ GBRAIN_SCHEMA_AUDIT_VERBOSE: '1' }, () => {
+    await withEnv({ MODUSBRAIN_SCHEMA_AUDIT_VERBOSE: '1' }, () => {
       expect(isAuditVerbose()).toBe(true);
     });
   });
   test('false for any other value', async () => {
-    await withEnv({ GBRAIN_SCHEMA_AUDIT_VERBOSE: 'true' }, () => {
+    await withEnv({ MODUSBRAIN_SCHEMA_AUDIT_VERBOSE: 'true' }, () => {
       expect(isAuditVerbose()).toBe(false);
     });
-    await withEnv({ GBRAIN_SCHEMA_AUDIT_VERBOSE: 'yes' }, () => {
+    await withEnv({ MODUSBRAIN_SCHEMA_AUDIT_VERBOSE: 'yes' }, () => {
       expect(isAuditVerbose()).toBe(false);
     });
   });
@@ -65,8 +65,8 @@ describe('computeIsoWeekName', () => {
 });
 
 describe('computeCandidateAuditPath', () => {
-  test('honors GBRAIN_AUDIT_DIR override', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: auditDir }, () => {
+  test('honors MODUSBRAIN_AUDIT_DIR override', async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: auditDir }, () => {
       const path = computeCandidateAuditPath(new Date('2026-03-15T12:00:00Z'));
       expect(path).toStartWith(auditDir);
       expect(path).toEndWith('schema-candidates-2026-W11.jsonl');
@@ -76,7 +76,7 @@ describe('computeCandidateAuditPath', () => {
 
 describe('logCandidate (redacted by default)', () => {
   test('writes sha8 hash, not raw type, when verbose is unset', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: auditDir, GBRAIN_SCHEMA_AUDIT_VERBOSE: undefined }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: auditDir, MODUSBRAIN_SCHEMA_AUDIT_VERBOSE: undefined }, async () => {
       await logCandidate({
         type: 'therapy-session',
         slug: 'personal/therapy/2025-03-15-session-12.md',
@@ -101,8 +101,8 @@ describe('logCandidate (redacted by default)', () => {
     });
   });
 
-  test('writes raw type when GBRAIN_SCHEMA_AUDIT_VERBOSE=1', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: auditDir, GBRAIN_SCHEMA_AUDIT_VERBOSE: '1' }, async () => {
+  test('writes raw type when MODUSBRAIN_SCHEMA_AUDIT_VERBOSE=1', async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: auditDir, MODUSBRAIN_SCHEMA_AUDIT_VERBOSE: '1' }, async () => {
       await logCandidate({
         type: 'therapy-session',
         slug: 'personal/therapy/foo.md',
@@ -116,7 +116,7 @@ describe('logCandidate (redacted by default)', () => {
   });
 
   test('honors custom count', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       await logCandidate({
         type: 'foo',
         slug: 'bar/baz.md',
@@ -130,7 +130,7 @@ describe('logCandidate (redacted by default)', () => {
   });
 
   test('appends multiple entries as JSONL', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       await logCandidate({ type: 'a', slug: 'x/1.md', frontmatterKeys: [], packIdentity: 'p' });
       await logCandidate({ type: 'b', slug: 'y/2.md', frontmatterKeys: [], packIdentity: 'p' });
       const lines = readFileSync(computeCandidateAuditPath(), 'utf-8').trim().split('\n');
@@ -141,18 +141,18 @@ describe('logCandidate (redacted by default)', () => {
   });
 
   test('best-effort: unwritable audit dir warns but does not throw', async () => {
-    // Point GBRAIN_AUDIT_DIR at a path that mkdirSync(recursive:true) can't create.
+    // Point MODUSBRAIN_AUDIT_DIR at a path that mkdirSync(recursive:true) can't create.
     // Using a non-existent file as a parent (file, not dir) triggers ENOTDIR.
     const blockerFile = join(auditDir, 'blocker');
     writeFileSync(blockerFile, 'this is a file, not a dir');
-    await withEnv({ GBRAIN_AUDIT_DIR: join(blockerFile, 'subdir') }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: join(blockerFile, 'subdir') }, async () => {
       // Should not throw.
       await logCandidate({ type: 'x', slug: 'y/z.md', frontmatterKeys: [], packIdentity: 'p' });
     });
   });
 
   test('slug with no slashes falls back to whole slug as prefix', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       await logCandidate({ type: 'x', slug: 'rootonly', frontmatterKeys: [], packIdentity: 'p' });
       const record = JSON.parse(readFileSync(computeCandidateAuditPath(), 'utf-8').trim());
       expect(record.slug_prefix).toBe('rootonly');
@@ -162,13 +162,13 @@ describe('logCandidate (redacted by default)', () => {
 
 describe('readRecentCandidates', () => {
   test('returns [] when audit dir does not exist', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: join(auditDir, 'nope') }, () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: join(auditDir, 'nope') }, () => {
       expect(readRecentCandidates(30)).toEqual([]);
     });
   });
 
   test('reads recently-written entries', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       await logCandidate({ type: 'a', slug: 'x/1.md', frontmatterKeys: [], packIdentity: 'p' });
       await logCandidate({ type: 'b', slug: 'y/2.md', frontmatterKeys: [], packIdentity: 'p' });
       const records = readRecentCandidates(30);
@@ -179,7 +179,7 @@ describe('readRecentCandidates', () => {
   });
 
   test('skips malformed lines silently', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       // Pre-create a valid entry, then append junk.
       await logCandidate({ type: 'a', slug: 'x/1.md', frontmatterKeys: [], packIdentity: 'p' });
       const path = computeCandidateAuditPath();
@@ -196,7 +196,7 @@ describe('readRecentCandidates', () => {
   });
 
   test('filters by daysBack cutoff', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       // Write a record by hand with an ancient ts, plus one fresh via the API.
       const ancientPath = join(auditDir, 'schema-candidates-2020-W01.jsonl');
       mkdirSync(auditDir, { recursive: true });
@@ -224,7 +224,7 @@ describe('readRecentCandidates', () => {
   });
 
   test('ignores files that do not match the audit prefix', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       mkdirSync(auditDir, { recursive: true });
       // Sibling audit file from a different surface — must be ignored.
       writeFileSync(

@@ -15,8 +15,8 @@ writes_pages:
 # capture — the single ingestion entrypoint
 
 When the user wants to save a thought, an article snippet, a transcript
-fragment, or any text into their brain, run `gbrain capture`. Don't reach
-for `gbrain put` or commit-then-sync — `capture` is the front door and it
+fragment, or any text into their brain, run `modusbrain capture`. Don't reach
+for `modusbrain put` or commit-then-sync — `capture` is the front door and it
 handles both local and thin-client installs the same way.
 
 ## Contract
@@ -24,8 +24,8 @@ handles both local and thin-client installs the same way.
 - **Input:** the content to save (inline arg, `--file PATH`, or `--stdin`).
 - **Output:** a page in the brain DB AND a markdown file on disk under
   `<sync.repo_path>/<slug>.md`. Receipt printed to stdout.
-- **Side effect:** the page becomes immediately queryable via `gbrain query`,
-  `gbrain search`, or any MCP-bound agent.
+- **Side effect:** the page becomes immediately queryable via `modusbrain query`,
+  `modusbrain search`, or any MCP-bound agent.
 - **Idempotency:** same content → same `inbox/YYYY-MM-DD-<hash8>` slug. The
   daemon's 24h content-hash dedup catches re-captures.
 - **Trust:** all captures via this skill are local-CLI trust (`remote: false`).
@@ -39,7 +39,7 @@ handles both local and thin-client installs the same way.
 
 ## What it does
 
-`gbrain capture` resolves to a `put_page` call (local) or a remote MCP call
+`modusbrain capture` resolves to a `put_page` call (local) or a remote MCP call
 (thin-client). Either way the page lands in the DB AND on disk in one move
 via the v0.38 write-through plumbing. The default slug is
 `inbox/YYYY-MM-DD-<hash8>` so captures cluster in a predictable triage
@@ -48,13 +48,13 @@ location.
 ## How to use
 
 ```bash
-gbrain capture "the thought I want to remember"
-gbrain capture --file ./notes/today.md
-echo "from a pipe" | gbrain capture --stdin
-gbrain capture "..." --slug daily/2026-05-21
-gbrain capture "..." --type idea --source voice-whisper
-gbrain capture "..." --quiet          # script-friendly: prints just the slug
-gbrain capture "..." --json           # structured output for agents
+modusbrain capture "the thought I want to remember"
+modusbrain capture --file ./notes/today.md
+echo "from a pipe" | modusbrain capture --stdin
+modusbrain capture "..." --slug daily/2026-05-21
+modusbrain capture "..." --type idea --source voice-whisper
+modusbrain capture "..." --quiet          # script-friendly: prints just the slug
+modusbrain capture "..." --json           # structured output for agents
 ```
 
 ## Defaults
@@ -77,16 +77,16 @@ captured:
   captured_at:   2026-05-21T04:15:00.000Z
 ```
 
-`--quiet` prints only the slug (use for `SLUG=$(gbrain capture "..." --quiet)`).
+`--quiet` prints only the slug (use for `SLUG=$(modusbrain capture "..." --quiet)`).
 `--json` prints structured output for downstream tools.
 
 ## Anti-Patterns
 
-- **Don't reach for `gbrain put`.** That's the old per-page primitive that
+- **Don't reach for `modusbrain put`.** That's the old per-page primitive that
   doesn't know about default slug generation, content-type heuristics, or
   the receipt block. `capture` is the human-facing wrapper.
-- **Don't try to bulk-import dozens of files by looping over `gbrain capture`.**
-  That's what `gbrain sync` (or `gbrain import`) is for. Capture is for
+- **Don't try to bulk-import dozens of files by looping over `modusbrain capture`.**
+  That's what `modusbrain sync` (or `modusbrain import`) is for. Capture is for
   single thoughts, single notes, single transcripts.
 - **Don't pre-format the content yourself with frontmatter if you don't need to.**
   Capture wraps plain prose in sensible frontmatter (type + title +
@@ -97,7 +97,7 @@ captured:
 
 ## When NOT to use this skill
 
-- Bulk ingestion of many files → `skills/media-ingest/SKILL.md` or `gbrain sync` instead
+- Bulk ingestion of many files → `skills/media-ingest/SKILL.md` or `modusbrain sync` instead
 - Article/link with author + publication metadata → `skills/idea-ingest/SKILL.md` (it knows to build the people page)
 - Meeting transcripts → `skills/meeting-ingestion/SKILL.md` (attendee enrichment)
 

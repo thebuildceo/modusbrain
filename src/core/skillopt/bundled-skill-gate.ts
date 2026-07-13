@@ -1,14 +1,14 @@
 /**
  * SkillOpt bundled-skill mutation gate (D16).
  *
- * A "bundled" skill is one that lives in the gbrain repo's `skills/` tree
+ * A "bundled" skill is one that lives in the modusbrain repo's `skills/` tree
  * (shipped alongside the binary). These are load-bearing for production
  * workflows; mutating them via SkillOpt without explicit operator opt-in
  * is too risky. By default, bundled-skill optimization runs in `--no-mutate`
  * mode automatically — the proposed best is written to `proposed.md` for
  * human review.
  *
- * User-owned skills (under a user's `~/.gbrain/skills/` or their own
+ * User-owned skills (under a user's `~/.modusbrain/skills/` or their own
  * project's `skills/`) are NOT bundled — they can be mutated freely.
  */
 
@@ -25,15 +25,15 @@ import type { BundledSkillContext } from './types.ts';
  * The resolution chain:
  *  1. Resolve the absolute skill path: `skillsDir/<name>/SKILL.md`.
  *  2. Check whether the skillsDir came from the install-path fallback
- *     (i.e. it's `<gbrain-install>/skills`). If so, this is a bundled skill.
+ *     (i.e. it's `<modusbrain-install>/skills`). If so, this is a bundled skill.
  *  3. Otherwise, the skill is user-owned and freely mutable.
  */
 export function getBundledSkillContext(skillsDir: string, skillName: string): BundledSkillContext {
   const skillPath = path.join(skillsDir, skillName, 'SKILL.md');
   // Detect bundled by checking whether autoDetectSkillsDirReadOnly would
   // have routed here via the install-path fallback. The simpler heuristic:
-  // if the resolved skillsDir is under the gbrain install tree (somewhere
-  // up the chain has node_modules/gbrain or VERSION matching this binary),
+  // if the resolved skillsDir is under the modusbrain install tree (somewhere
+  // up the chain has node_modules/modusbrain or VERSION matching this binary),
   // it's bundled. Use the read-only detector to find the canonical install
   // skillsDir and compare.
   const detected = autoDetectSkillsDirReadOnly(process.cwd());

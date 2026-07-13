@@ -1,5 +1,5 @@
 #!/bin/bash
-# CI guard against silent singleton reuse in connected-gbrains code paths.
+# CI guard against silent singleton reuse in connected-modusbrains code paths.
 #
 # Codex finding #7 (plan review 2026-04-22): the module singleton in
 # src/core/db.ts is shared across the process. With multi-brain routing,

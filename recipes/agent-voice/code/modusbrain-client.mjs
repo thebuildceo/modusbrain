@@ -1,7 +1,7 @@
 /**
- * gbrain-client.mjs — minimal stdio MCP client for gbrain.
+ * modusbrain-client.mjs — minimal stdio MCP client for modusbrain.
  *
- * Spawns `gbrain serve` as a long-lived child process and communicates via
+ * Spawns `modusbrain serve` as a long-lived child process and communicates via
  * JSON-RPC over stdio. The client is intentionally minimal: open the
  * connection once, send `initialize`, then forward tool calls. No retries,
  * no batching, no streaming results (most voice tools return small
@@ -17,14 +17,14 @@
  * can replace it with a richer implementation (e.g., the
  * @modelcontextprotocol/sdk Client) without changing tools.mjs.
  *
- * Configuration: `$GBRAIN_BIN` (default: `gbrain` on PATH) is the binary to
- * spawn. `$GBRAIN_BRAIN_ID` and `$GBRAIN_SOURCE` route to a specific brain
- * + source if set (see the gbrain docs/architecture/brains-and-sources.md).
+ * Configuration: `$MODUSBRAIN_BIN` (default: `modusbrain` on PATH) is the binary to
+ * spawn. `$MODUSBRAIN_BRAIN_ID` and `$MODUSBRAIN_SOURCE` route to a specific brain
+ * + source if set (see the modusbrain docs/architecture/brains-and-sources.md).
  */
 
 import { spawn } from 'node:child_process';
 
-const GBRAIN_BIN = process.env.GBRAIN_BIN || 'gbrain';
+const MODUSBRAIN_BIN = process.env.MODUSBRAIN_BIN || 'modusbrain';
 
 let _child;
 let _nextId = 1;
@@ -36,10 +36,10 @@ function ensureChild() {
   if (_child && !_child.killed) return _child;
 
   const args = ['serve'];
-  if (process.env.GBRAIN_BRAIN_ID) args.push('--brain', process.env.GBRAIN_BRAIN_ID);
-  if (process.env.GBRAIN_SOURCE) args.push('--source', process.env.GBRAIN_SOURCE);
+  if (process.env.MODUSBRAIN_BRAIN_ID) args.push('--brain', process.env.MODUSBRAIN_BRAIN_ID);
+  if (process.env.MODUSBRAIN_SOURCE) args.push('--source', process.env.MODUSBRAIN_SOURCE);
 
-  _child = spawn(GBRAIN_BIN, args, {
+  _child = spawn(MODUSBRAIN_BIN, args, {
     stdio: ['pipe', 'pipe', 'pipe'],
     env: { ...process.env, MCP_STDIO: '1' },
   });
@@ -59,14 +59,14 @@ function ensureChild() {
           const { resolve, reject } = _pending.get(msg.id);
           _pending.delete(msg.id);
           if (msg.error) {
-            reject(new Error(msg.error.message || 'gbrain MCP error'));
+            reject(new Error(msg.error.message || 'modusbrain MCP error'));
           } else {
             resolve(msg.result);
           }
         }
         // notifications/log etc. — ignore for the v0 voice use case.
       } catch (err) {
-        // Malformed line; ignore. gbrain prints structured JSON-RPC only,
+        // Malformed line; ignore. modusbrain prints structured JSON-RPC only,
         // but a renegade stderr-bleed could surface here.
       }
     }
@@ -74,14 +74,14 @@ function ensureChild() {
 
   _child.stderr.setEncoding('utf8');
   _child.stderr.on('data', (chunk) => {
-    // Surface gbrain stderr to our stderr for debugging. Don't crash on it.
-    process.stderr.write(`[gbrain] ${chunk}`);
+    // Surface modusbrain stderr to our stderr for debugging. Don't crash on it.
+    process.stderr.write(`[modusbrain] ${chunk}`);
   });
 
   _child.on('exit', (code, signal) => {
     const reason = signal ? `signal ${signal}` : `code ${code}`;
     for (const [, p] of _pending) {
-      p.reject(new Error(`gbrain child exited (${reason}) with ${_pending.size} pending`));
+      p.reject(new Error(`modusbrain child exited (${reason}) with ${_pending.size} pending`));
     }
     _pending.clear();
     _initialized = false;
@@ -117,17 +117,17 @@ async function initIfNeeded() {
 }
 
 /**
- * Call a single gbrain operation by name with params. Returns the operation
- * result (whatever shape gbrain returns; usually a JSON-serializable object).
+ * Call a single modusbrain operation by name with params. Returns the operation
+ * result (whatever shape modusbrain returns; usually a JSON-serializable object).
  *
  * @throws {Error} on transport failure or operation error.
  */
-export async function callGbrainOp(opName, params) {
+export async function callModusbrainOp(opName, params) {
   await initIfNeeded();
-  // gbrain exposes operations as MCP "tools." The standard call is
+  // modusbrain exposes operations as MCP "tools." The standard call is
   // tools/call with {name, arguments}.
   const result = await rpc('tools/call', { name: opName, arguments: params || {} });
-  // gbrain returns {content: [{type:'text', text:'...JSON...'}]}; parse if needed.
+  // modusbrain returns {content: [{type:'text', text:'...JSON...'}]}; parse if needed.
   if (result?.content?.[0]?.type === 'text') {
     const text = result.content[0].text;
     try {
@@ -141,7 +141,7 @@ export async function callGbrainOp(opName, params) {
 
 /**
  * Test hook: stub the underlying RPC. Tests use this instead of spawning a
- * real gbrain child. Pass `null` to restore the real spawn-and-rpc path.
+ * real modusbrain child. Pass `null` to restore the real spawn-and-rpc path.
  */
 export function __setRpcForTests(fn) {
   if (fn === null) {
@@ -153,19 +153,19 @@ export function __setRpcForTests(fn) {
 
 let _testRpc = null;
 
-// Re-export rpc through the test hook for callGbrainOp.
+// Re-export rpc through the test hook for callModusbrainOp.
 const _origRpc = rpc;
 async function dispatchRpc(method, params) {
   if (_testRpc) return _testRpc(method, params);
   return _origRpc(method, params);
 }
 
-// Override the helper used by callGbrainOp.
-export async function _testableCallGbrainOp(opName, params) {
+// Override the helper used by callModusbrainOp.
+export async function _testableCallModusbrainOp(opName, params) {
   if (_testRpc) {
     return _testRpc('tools/call', { name: opName, arguments: params || {} });
   }
-  return callGbrainOp(opName, params);
+  return callModusbrainOp(opName, params);
 }
 
 /**

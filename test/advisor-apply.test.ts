@@ -16,16 +16,16 @@ function f(over: Partial<AdvisorFinding>): AdvisorFinding {
 describe('resolveApplyTarget', () => {
   test('resolves an allowlisted finding to its argv', () => {
     const r = report([
-      f({ id: 'mig', fix: { command_argv: ['gbrain', 'apply-migrations', '--yes'], dispatch_id: 'apply_migrations' } }),
+      f({ id: 'mig', fix: { command_argv: ['modusbrain', 'apply-migrations', '--yes'], dispatch_id: 'apply_migrations' } }),
     ]);
     const res = resolveApplyTarget(r, 'apply_migrations');
     expect(res.ok).toBe(true);
-    if (res.ok) expect(res.argv).toEqual(['gbrain', 'apply-migrations', '--yes']);
+    if (res.ok) expect(res.argv).toEqual(['modusbrain', 'apply-migrations', '--yes']);
   });
 
   test('rejects unknown id and lists runnable ids', () => {
     const r = report([
-      f({ id: 'mig', fix: { command_argv: ['gbrain', 'apply-migrations', '--yes'], dispatch_id: 'apply_migrations' } }),
+      f({ id: 'mig', fix: { command_argv: ['modusbrain', 'apply-migrations', '--yes'], dispatch_id: 'apply_migrations' } }),
     ]);
     const res = resolveApplyTarget(r, 'nope');
     expect(res.ok).toBe(false);
@@ -33,18 +33,18 @@ describe('resolveApplyTarget', () => {
   });
 
   test('a finding without dispatch_id is NOT runnable', () => {
-    const r = report([f({ id: 'v', fix: { command_argv: ['gbrain', 'upgrade'] } })]); // no dispatch_id
+    const r = report([f({ id: 'v', fix: { command_argv: ['modusbrain', 'upgrade'] } })]); // no dispatch_id
     expect(resolveApplyTarget(r, 'v').ok).toBe(false);
   });
 
   test('rejects shell metacharacters in the argv (injection guard)', () => {
     const r = report([
-      f({ id: 'evil', fix: { command_argv: ['gbrain', 'scaffold', 'foo; rm -rf /'], dispatch_id: 'evil' } }),
+      f({ id: 'evil', fix: { command_argv: ['modusbrain', 'scaffold', 'foo; rm -rf /'], dispatch_id: 'evil' } }),
     ]);
     expect(resolveApplyTarget(r, 'evil').ok).toBe(false);
   });
 
-  test('rejects a fix that does not invoke gbrain', () => {
+  test('rejects a fix that does not invoke modusbrain', () => {
     const r = report([f({ id: 'x', fix: { command_argv: ['rm', '-rf', '/'], dispatch_id: 'x' } })]);
     expect(resolveApplyTarget(r, 'x').ok).toBe(false);
   });

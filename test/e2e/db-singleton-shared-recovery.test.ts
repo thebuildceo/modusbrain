@@ -5,7 +5,7 @@
  * regression test, not architectural refactor).
  *
  * Skipped when DATABASE_URL is unset — mirrors every other test/e2e/
- * file's posture. Caller is expected to bring up gbrain-test-pg via
+ * file's posture. Caller is expected to bring up modusbrain-test-pg via
  * the canonical lifecycle described in CLAUDE.md.
  */
 
@@ -46,7 +46,7 @@ describe.skipIf(skip)('v0.41.25.0 db-singleton shared-recovery regressions (#157
   });
 
   beforeEach(() => {
-    tmpAuditDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gbrain-1570-e2e-'));
+    tmpAuditDir = fs.mkdtempSync(path.join(os.tmpdir(), 'modusbrain-1570-e2e-'));
   });
 
   test('CASE 1: a borrower disconnect leaves the shared singleton ALIVE — no reconnect needed (#1471 ownership fix)', async () => {
@@ -92,7 +92,7 @@ describe.skipIf(skip)('v0.41.25.0 db-singleton shared-recovery regressions (#157
     // which caller is firing the mid-process disconnect. This case pins
     // that the instrumentation is wired correctly: a disconnect call
     // emits an audit JSONL line containing connection_style + caller_stack.
-    await withEnv({ GBRAIN_AUDIT_DIR: tmpAuditDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: tmpAuditDir }, async () => {
       await db.connect({ database_url: DATABASE_URL! });
       const engine = new PostgresEngine();
       await engine.connect({ database_url: DATABASE_URL! });

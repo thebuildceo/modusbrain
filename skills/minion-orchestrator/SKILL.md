@@ -3,13 +3,13 @@ name: minion-orchestrator
 version: 1.0.0
 description: |
   Unified Minions skill for both deterministic shell jobs and LLM subagent
-  orchestration. Replaces the older `gbrain-jobs` routing intent. Use when:
-  submitting gbrain jobs, shell/background tasks, spawning subagents,
+  orchestration. Replaces the older `modusbrain-jobs` routing intent. Use when:
+  submitting modusbrain jobs, shell/background tasks, spawning subagents,
   checking progress, steering running work, pausing/resuming, parallel
   fan-out. One durable, observable, steerable queue interface.
 triggers:
-  - "gbrain jobs submit"
-  - "submit a gbrain job"
+  - "modusbrain jobs submit"
+  - "submit a modusbrain job"
   - "submit a shell job"
   - "shell job"
   - "run shell command in background"
@@ -48,8 +48,8 @@ mutating: true
 
 Minions is a Postgres-native job queue for durable, observable background work.
 This single skill handles two lanes:
-- Deterministic shell jobs (`gbrain jobs submit shell ...`)
-- LLM subagent jobs (`gbrain agent run ...`)
+- Deterministic shell jobs (`modusbrain jobs submit shell ...`)
+- LLM subagent jobs (`modusbrain agent run ...`)
 
 When to route to Minions: durable, observable work that must survive restarts,
 fan out across many parallel tasks, or persist across sessions. Routing policy
@@ -68,13 +68,13 @@ Guarantees:
 
 | Condition | Action |
 |---|---|
-| User asks for deterministic command/script run | Shell job (CLI: `gbrain jobs submit shell ...`) |
+| User asks for deterministic command/script run | Shell job (CLI: `modusbrain jobs submit shell ...`) |
 | User asks to "run in minions" + explicit command/argv | Shell job (CLI, `--params` with `cmd` or `argv`) |
-| User asks for research/reasoning/iterative agent | Subagent job (CLI: `gbrain agent run`) |
+| User asks for research/reasoning/iterative agent | Subagent job (CLI: `modusbrain agent run`) |
 | User asks to steer/pause/resume an agent | Subagent job lifecycle tools (MCP-callable) |
 | Single simple operation under ~30s | Consider inline execution first |
 | Needs restart durability/observability | Submit as Minion job |
-| Parallel work (2+ streams) | `gbrain agent run --fanout-manifest` or parent + child subagents |
+| Parallel work (2+ streams) | `modusbrain agent run --fanout-manifest` or parent + child subagents |
 
 If intent is ambiguous, ask one clarification:
 "Do you want a deterministic shell command job, or an LLM agent job?"
@@ -86,16 +86,16 @@ tasks where no LLM reasoning loop is needed.
 
 ### Preconditions (read before submitting your first shell job)
 
-- **`GBRAIN_ALLOW_SHELL_JOBS=1` must be set on the worker environment.**
+- **`MODUSBRAIN_ALLOW_SHELL_JOBS=1` must be set on the worker environment.**
   Without it, the shell handler refuses to register and submissions sit in
   `waiting` silently. Gate lives in `src/core/minions/handlers/shell.ts`.
-- **Security:** flipping `GBRAIN_ALLOW_SHELL_JOBS=1` authorizes arbitrary
+- **Security:** flipping `MODUSBRAIN_ALLOW_SHELL_JOBS=1` authorizes arbitrary
   command execution on the worker. On a shared queue, this is a remote code
   execution surface. Treat as privileged infrastructure authorization.
 - **Execution mode — pick one:**
-  - **Postgres + daemon:** `gbrain jobs work` runs a persistent worker that
+  - **Postgres + daemon:** `modusbrain jobs work` runs a persistent worker that
     claims and executes jobs from the queue.
-  - **PGLite + --follow:** `gbrain jobs submit ... --follow` runs inline.
+  - **PGLite + --follow:** `modusbrain jobs submit ... --follow` runs inline.
     The daemon mode is not available on PGLite (exclusive file lock). See
     `docs/guides/minions-shell-jobs.md`.
 - **MCP boundary:** shell-job submission is CLI-only. `submit_job name="shell"`
@@ -104,7 +104,7 @@ tasks where no LLM reasoning loop is needed.
   Agents CAN observe shell jobs via `get_job` / `list_jobs` / `get_job_progress`
   (not protected), but cannot submit them. Operator or autopilot submits;
   agent observes.
-- **Verify setup:** after configuration, run `gbrain jobs stats` (CLI) to
+- **Verify setup:** after configuration, run `modusbrain jobs stats` (CLI) to
   confirm the worker is registered and consuming the queue.
 
 ### Submit (CLI, operator or autopilot)
@@ -114,20 +114,20 @@ or `argv` (array), plus `cwd` and optional `env`.
 
 Command string form:
 ```
-gbrain jobs submit shell --params '{"cmd":"echo hello","cwd":"/abs/path"}'
+modusbrain jobs submit shell --params '{"cmd":"echo hello","cwd":"/abs/path"}'
 ```
 
 Argv form (no shell expansion):
 ```
-gbrain jobs submit shell --params '{"argv":["bash","-lc","echo hello"],"cwd":"/abs/path"}'
+modusbrain jobs submit shell --params '{"argv":["bash","-lc","echo hello"],"cwd":"/abs/path"}'
 ```
 
 Inline execution on PGLite or any one-shot deployment:
 ```
-gbrain jobs submit shell --params '{"cmd":"echo hello","cwd":"/tmp"}' --follow
+modusbrain jobs submit shell --params '{"cmd":"echo hello","cwd":"/tmp"}' --follow
 ```
 
-Queue/lifecycle flags exposed by `gbrain jobs submit --help`: `--queue`,
+Queue/lifecycle flags exposed by `modusbrain jobs submit --help`: `--queue`,
 `--priority`, `--delay`, `--max-attempts`, `--max-stalled`, `--backoff-type`,
 `--backoff-delay`, `--backoff-jitter`, `--timeout-ms`, `--idempotency-key`,
 `--dry-run`.
@@ -143,7 +143,7 @@ get_job_progress ID
 ```
 
 Check structured result fields (exit code, stdout/stderr tails, attempts,
-timings) from `get_job`. Use `gbrain jobs stats` (CLI) for worker/queue
+timings) from `get_job`. Use `modusbrain jobs stats` (CLI) for worker/queue
 health dashboard.
 
 ### Control (MCP-callable)
@@ -162,16 +162,16 @@ Use idempotency keys for recurring shell workloads to avoid duplicate runs.
 
 Use for open-ended reasoning, tool-using research, and fan-out synthesis.
 
-**User-facing entrypoint:** `gbrain agent run <prompt>` is the canonical way
+**User-facing entrypoint:** `modusbrain agent run <prompt>` is the canonical way
 to submit subagent work. It handles the elevated-trust plumbing — `subagent`
 and `subagent_aggregator` are both in `PROTECTED_JOB_NAMES`, so direct MCP
-submission requires `{allowProtectedSubmit: true}`, which `gbrain agent run`
+submission requires `{allowProtectedSubmit: true}`, which `modusbrain agent run`
 supplies.
 
 ## Phase 1: Submit
 
 ```
-gbrain agent run "Research Acme Corp revenue" --tools "search,query"
+modusbrain agent run "Research Acme Corp revenue" --tools "search,query"
 ```
 
 `--tools` accepts a comma-separated subset of `BRAIN_TOOL_ALLOWLIST` (see
@@ -182,7 +182,7 @@ is rejected at submit time with `allowed_tools references unknown tool`.
 
 For parallel work with a fan-out manifest:
 ```
-gbrain agent run --fanout-manifest companies.json
+modusbrain agent run --fanout-manifest companies.json
 ```
 
 The manifest describes N children + 1 aggregator. Each child runs
@@ -201,8 +201,8 @@ Flags (from `src/commands/agent.ts`):
 - `--follow` / `--no-follow` — stream logs + wait (default on TTY)
 - `--detach` — submit and return immediately
 
-Queue/priority/retry tuning is not exposed by `gbrain agent run`; submit the
-raw `subagent` handler via `gbrain jobs submit` (requires CLI trust) if you
+Queue/priority/retry tuning is not exposed by `modusbrain agent run`; submit the
+raw `subagent` handler via `modusbrain jobs submit` (requires CLI trust) if you
 need those knobs.
 
 ## Phase 2: Monitor
@@ -211,8 +211,8 @@ need those knobs.
 list_jobs --status active          # MCP — what's running?
 get_job ID                         # MCP — full details + logs + tokens
 get_job_progress ID                # MCP — structured progress snapshot
-gbrain jobs stats                  # CLI — queue health dashboard
-gbrain agent logs ID --follow      # CLI — streaming transcript + heartbeat
+modusbrain jobs stats                  # CLI — queue health dashboard
+modusbrain agent logs ID --follow      # CLI — streaming transcript + heartbeat
 ```
 
 Progress includes: step count, total steps, message, token usage, last tool called.
@@ -284,13 +284,13 @@ Total tokens so far: 4.3k
 
 - Don't spawn a Minion for a single search query (use search tool directly)
 - Don't fire-and-forget without checking results
-- Don't spawn > 5 concurrent agents without checking `gbrain jobs stats` first
-- For subagent work, don't use `sessions_spawn` with `runtime: "subagent"` when Minions is available (use `gbrain agent run` instead)
+- Don't spawn > 5 concurrent agents without checking `modusbrain jobs stats` first
+- For subagent work, don't use `sessions_spawn` with `runtime: "subagent"` when Minions is available (use `modusbrain agent run` instead)
 - Don't poll `get_job` in a tight loop (use `get_job_progress` for lightweight checks)
 
 ## Tools Used
 
-- Submit a background job — `submit_job` (MCP, non-protected names only; shell jobs are CLI-only, subagent jobs via `gbrain agent run`)
+- Submit a background job — `submit_job` (MCP, non-protected names only; shell jobs are CLI-only, subagent jobs via `modusbrain agent run`)
 - Get job details — `get_job` (MCP)
 - List jobs with filters — `list_jobs` (MCP)
 - Cancel a job — `cancel_job` (MCP)
@@ -299,4 +299,4 @@ Total tokens so far: 4.3k
 - Replay a completed/failed job — `replay_job` (MCP)
 - Send sidechannel message — `send_job_message` (MCP)
 - Get structured progress — `get_job_progress` (MCP)
-- Queue stats — `gbrain jobs stats` (CLI; no MCP equivalent)
+- Queue stats — `modusbrain jobs stats` (CLI; no MCP equivalent)

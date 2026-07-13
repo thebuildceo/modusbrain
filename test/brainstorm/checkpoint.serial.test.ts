@@ -34,16 +34,16 @@ let tmp: string;
 const configDir = '.modusbrain';
 
 beforeEach(() => {
-  tmp = mkdtempSync(join(tmpdir(), 'gbrain-bs-cp-'));
-  homeBackup = process.env.GBRAIN_HOME;
+  tmp = mkdtempSync(join(tmpdir(), 'modusbrain-bs-cp-'));
+  homeBackup = process.env.MODUSBRAIN_HOME;
   modusHomeBackup = process.env.MODUSBRAIN_HOME;
-  process.env.GBRAIN_HOME = tmp;
+  process.env.MODUSBRAIN_HOME = tmp;
   process.env.MODUSBRAIN_HOME = tmp;
 });
 
 afterEach(() => {
-  if (homeBackup === undefined) delete process.env.GBRAIN_HOME;
-  else process.env.GBRAIN_HOME = homeBackup;
+  if (homeBackup === undefined) delete process.env.MODUSBRAIN_HOME;
+  else process.env.MODUSBRAIN_HOME = homeBackup;
   if (modusHomeBackup === undefined) delete process.env.MODUSBRAIN_HOME;
   else process.env.MODUSBRAIN_HOME = modusHomeBackup;
   rmSync(tmp, { recursive: true, force: true });

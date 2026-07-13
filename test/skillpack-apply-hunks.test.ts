@@ -180,19 +180,19 @@ describe('round-trip: unifiedDiff produces output parseUnifiedDiff + applyHunks 
   });
 
   it('user-edited file: identical diff applies clean to unrelated section', () => {
-    // gbrain bundle and user file both have lines 1-20. Bundle changed
+    // modusbrain bundle and user file both have lines 1-20. Bundle changed
     // line 5; user changed line 15. Distance is > 2*context, so the
     // hunk's post-context never reaches the user's edit. Apply succeeds.
-    const gbrainOld =
+    const modusbrainOld =
       Array.from({ length: 20 }, (_, i) => `line${i + 1}`).join('\n') + '\n';
-    const gbrainNew = gbrainOld.replace('line5\n', 'line5 GBRAIN\n');
-    const userFile = gbrainOld.replace('line15\n', 'line15 USER\n');
+    const modusbrainNew = modusbrainOld.replace('line5\n', 'line5 MODUSBRAIN\n');
+    const userFile = modusbrainOld.replace('line15\n', 'line15 USER\n');
 
-    const diff = unifiedDiff(gbrainOld, gbrainNew);
+    const diff = unifiedDiff(modusbrainOld, modusbrainNew);
     const result = applyHunks(userFile, parseUnifiedDiff(diff));
 
     expect(result.applied).toBe(1);
-    expect(result.text).toContain('line5 GBRAIN');
+    expect(result.text).toContain('line5 MODUSBRAIN');
     expect(result.text).toContain('line15 USER');
   });
 });

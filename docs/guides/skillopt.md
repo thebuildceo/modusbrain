@@ -1,4 +1,4 @@
-# `gbrain skillopt` — Self-evolving skills
+# `modusbrain skillopt` — Self-evolving skills
 
 Treat your `SKILL.md` files as the trainable parameters of an agent that
 itself never changes. Write a benchmark of realistic tasks; SkillOpt watches
@@ -9,7 +9,7 @@ Based on [SkillOpt](https://arxiv.org/abs/2605.23904) (Microsoft Research,
 May 2026).
 
 > **New to this?** Start with the hands-on tutorial:
-> [Auto-improve a skill with `gbrain skillopt`](../tutorials/improving-skills-with-skillopt.md).
+> [Auto-improve a skill with `modusbrain skillopt`](../tutorials/improving-skills-with-skillopt.md).
 > It walks you from "I have a skill" to "I accepted a measurably better version"
 > in ~20 minutes, including how to write your first benchmark. This page is the
 > reference — flags, exit codes, cost model, safety guards.
@@ -18,13 +18,13 @@ May 2026).
 
 ```bash
 # 1. Generate a starter benchmark from the skill itself (no routing-eval needed)
-gbrain skillopt my-skill --bootstrap-from-skill
+modusbrain skillopt my-skill --bootstrap-from-skill
 
 # 2. Review the benchmark — STRENGTHEN the generated judges (they're weak drafts),
 #    then delete the trailing `# BOOTSTRAP_PENDING_REVIEW` line
 
 # 3. Run the optimizer (--split 1:1:1 is required for a ~15-task starter)
-gbrain skillopt my-skill --bootstrap-reviewed --split 1:1:1
+modusbrain skillopt my-skill --bootstrap-reviewed --split 1:1:1
 ```
 
 That's the entire workflow. (Already have a `routing-eval.jsonl`? Swap step 1 for
@@ -46,8 +46,8 @@ skills/my-skill/
     rejected.json                   ← bounded LRU of rejected edits
 ```
 
-The audit trail lives at `~/.gbrain/audit/skillopt-YYYY-Www.jsonl`
-(ISO-week rotated; honors `GBRAIN_AUDIT_DIR`).
+The audit trail lives at `~/.modusbrain/audit/skillopt-YYYY-Www.jsonl`
+(ISO-week rotated; honors `MODUSBRAIN_AUDIT_DIR`).
 
 ## How the loop works
 
@@ -88,7 +88,7 @@ proposal (this lives in v0.42 follow-up; v1 emits the audit event).
 | `--patch \| --rewrite` | patch | Edit ops only vs. full rewrites |
 | `--dry-run` | off | Cost preview, no LLM calls |
 | `--no-mutate` | off | Write proposed.md, don't replace SKILL.md (no held-out needed) |
-| `--allow-mutate-bundled` | off | Required to mutate gbrain-bundled skills in place — ALSO requires `--held-out` (>=5 rows) or the run hard-refuses |
+| `--allow-mutate-bundled` | off | Required to mutate modusbrain-bundled skills in place — ALSO requires `--held-out` (>=5 rows) or the run hard-refuses |
 | `--held-out <path>` | — | Independent test set (same JSONL shape as the benchmark, task IDs disjoint from it). A candidate that beats the benchmark but regresses on the held-out set is refused. Required for in-place bundled mutation. |
 | `--max-cost-usd N` | 5.00 | Hard cap; preflight refuses if exceeded |
 | `--max-runtime-min N` | 30 | Wall-clock cap |
@@ -124,7 +124,7 @@ refuses to start when the estimate exceeds `--max-cost-usd`.
 | Validation gate is mandatory | D12 (paper) | Accepting LLM judge noise as improvement |
 | Frontmatter mutation forbidden | D5 | Routing surface drift (`check-resolvable` regression) |
 | Per-skill DB lock | D14 | Two concurrent runs corrupting history/versions |
-| Bundled-skill gate | D16 | Auto-mutating skills shipped with gbrain (in-place mutation requires `--allow-mutate-bundled` + a `--held-out` set of >=5 benchmark-disjoint tasks; else hard-refuse + proposed.md) |
+| Bundled-skill gate | D16 | Auto-mutating skills shipped with modusbrain (in-place mutation requires `--allow-mutate-bundled` + a `--held-out` set of >=5 benchmark-disjoint tasks; else hard-refuse + proposed.md) |
 | Held-out gate | F11 | Accepting a candidate that overfits its own benchmark — `--held-out` refuses a candidate whose held-out score regresses below baseline |
 | Bootstrap review sentinel | D15 | Self-referential benchmark gaming |
 | Read-only tool sandbox in rollouts | D13 | Optimization runs writing junk pages to your brain |
@@ -142,6 +142,6 @@ refuses to start when the estimate exceeds `--max-cost-usd`.
 
 ## Related skills
 
-- `gbrain skillify scaffold <name>` — create a new skill (use BEFORE skillopt)
-- `gbrain skillpack-check <name>` — audit conformance + skillopt status
-- `gbrain check-resolvable` — routing MECE validation (NOT mutated by skillopt)
+- `modusbrain skillify scaffold <name>` — create a new skill (use BEFORE skillopt)
+- `modusbrain skillpack-check <name>` — audit conformance + skillopt status
+- `modusbrain check-resolvable` — routing MECE validation (NOT mutated by skillopt)

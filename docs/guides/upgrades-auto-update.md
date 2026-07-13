@@ -2,13 +2,13 @@
 
 ## Goal
 
-Users get notified of new GBrain features conversationally, and the agent walks them through upgrading with post-upgrade migrations that make the new version actually work.
+Users get notified of new ModusBrain features conversationally, and the agent walks them through upgrading with post-upgrade migrations that make the new version actually work.
 
 ## What the User Gets
 
-Without this: GBrain ships updates but nobody knows. The user stays on an old
+Without this: ModusBrain ships updates but nobody knows. The user stays on an old
 version with stale skills and missing features. Or worse, someone runs
-`gbrain upgrade` but skips the post-upgrade steps, leaving new code with old
+`modusbrain upgrade` but skips the post-upgrade steps, leaving new code with old
 agent behavior.
 
 With this: the agent checks for updates daily, sells the upgrade with punchy
@@ -18,31 +18,31 @@ schema. The user gets new capabilities automatically.
 
 ## Self-upgrade modes (v0.42)
 
-gbrain now stays current the way gstack does: it rides invocation frequency. A
-throttled, cache-read-only check runs at the start of every `gbrain` invocation
+modusbrain now stays current the way gstack does: it rides invocation frequency. A
+throttled, cache-read-only check runs at the start of every `modusbrain` invocation
 (CLI and MCP) and emits an `UPGRADE_AVAILABLE <old> <new>` marker on stderr. No
 host cron required — every agent kind (Claude Code, Codex, OpenClaw, Hermes, the
-`gbrain serve` host behind a Perplexity thin client) converges to current by
+`modusbrain serve` host behind a Perplexity thin client) converges to current by
 construction. The behavior is governed by one file-plane config key,
 `self_upgrade.mode`:
 
 | Mode | Behavior | Who it's for |
 |------|----------|--------------|
 | `notify` (default) | Emit the marker + a 4-option prompt; never apply without confirmation. | Interactive installs / anyone with a human in the loop. |
-| `auto` (opt-in) | Apply silently, but ONLY during quiet hours, ONLY when the brain is idle, doctor-gated, and never re-trying a known-bad version. | Headless / always-on installs (autopilot daemon, the `gbrain serve` host). |
+| `auto` (opt-in) | Apply silently, but ONLY during quiet hours, ONLY when the brain is idle, doctor-gated, and never re-trying a known-bad version. | Headless / always-on installs (autopilot daemon, the `modusbrain serve` host). |
 | `off` | Never check. | Air-gapped / pinned installs. |
 
 Enable hands-off upgrades on an always-on install with one line:
 
 ```bash
-gbrain config set self_upgrade.mode auto
+modusbrain config set self_upgrade.mode auto
 ```
 
 `auto` is deliberately NOT a default anywhere — it's an explicit autonomy grant,
 because applying code from GitHub unattended is, by design, remote code
-execution. The trust model is TLS + GitHub (same as `gbrain upgrade`);
+execution. The trust model is TLS + GitHub (same as `modusbrain upgrade`);
 signature verification is a tracked follow-up. Apply manually any time with
-`gbrain self-upgrade`.
+`modusbrain self-upgrade`.
 
 ## Implementation
 
@@ -50,7 +50,7 @@ signature verification is a tracked follow-up. Apply manually any time with
 
 ```
 check_for_update():
-  result = run("gbrain check-update --json")
+  result = run("modusbrain check-update --json")
 
   if not result.update_available:
     exit_silently()  // do NOT message the user
@@ -70,7 +70,7 @@ Sell the upgrade. The user should feel "hell yeah, I want that." Lead with
 what they can DO now that they couldn't before, not what files changed.
 
 ```
-> **GBrain v0.5.0 is available** (you're on v0.4.0)
+> **ModusBrain v0.5.0 is available** (you're on v0.4.0)
 >
 > What's new:
 > - Your brain never falls behind. Live sync keeps the vector DB current
@@ -105,15 +105,15 @@ experience.
 ```
 full_upgrade():
   // Step 1: Update the binary/package
-  run("gbrain upgrade")
+  run("modusbrain upgrade")
 
   // Step 2: Re-read all updated skills
   for skill in find("skills/*/SKILL.md"):
     read_and_internalize(skill)  // updated skills = better agent behavior
 
   // Step 3: Re-read production reference docs
-  read("docs/GBRAIN_SKILLPACK.md")
-  read("docs/GBRAIN_RECOMMENDED_SCHEMA.md")
+  read("docs/MODUSBRAIN_SKILLPACK.md")
+  read("docs/MODUSBRAIN_RECOMMENDED_SCHEMA.md")
 
   // Step 4: Check for version-specific migration directives
   for version in range(old_version, new_version):
@@ -122,7 +122,7 @@ full_upgrade():
       read_and_execute(migration)  // in order, don't skip
 
   // Step 5: Schema sync — suggest new, respect declined
-  state = read("~/.gbrain/update-state.json")
+  state = read("~/.modusbrain/update-state.json")
   for recommendation in new_schema_recommendations:
     if recommendation not in state.declined:
       suggest_to_user(recommendation)
@@ -146,27 +146,27 @@ hasn't changed.
 ### Cron Registration
 
 ```
-Name: gbrain-update-check
+Name: modusbrain-update-check
 Default schedule: 0 9 * * * (daily 9 AM)
 Weekly schedule: 0 9 * * 1 (Monday 9 AM)
-Prompt: "Run gbrain check-update --json. If update_available is true,
+Prompt: "Run modusbrain check-update --json. If update_available is true,
   summarize the changelog and message me asking if I'd like to upgrade.
   If false, stay silent."
 ```
 
 ### Frequency Preferences
 
-Default: daily. Store in agent memory as `gbrain_update_frequency: daily|weekly|off`.
-Also persist in `~/.gbrain/update-state.json` so it survives agent context resets.
+Default: daily. Store in agent memory as `modusbrain_update_frequency: daily|weekly|off`.
+Also persist in `~/.modusbrain/update-state.json` so it survives agent context resets.
 
 ### Standalone Skillpack Users
 
 If you loaded this SKILLPACK directly (copied or read from GitHub) without
-installing gbrain, you can still stay current. Both GBRAIN_SKILLPACK.md and
-GBRAIN_RECOMMENDED_SCHEMA.md have version markers:
+installing modusbrain, you can still stay current. Both MODUSBRAIN_SKILLPACK.md and
+MODUSBRAIN_RECOMMENDED_SCHEMA.md have version markers:
 
 ```bash
-curl -s https://raw.githubusercontent.com/garrytan/gbrain/master/docs/GBRAIN_SKILLPACK.md | head -1
+curl -s https://raw.githubusercontent.com/garrytan/modusbrain/master/docs/MODUSBRAIN_SKILLPACK.md | head -1
 # Returns: <!-- skillpack-version: X.Y.Z -->
 ```
 
@@ -190,7 +190,7 @@ copy. Set up a weekly cron to check automatically.
    has live sync configured).
 
 3. **check-update should run on a daily cron.** Don't rely on the user
-   remembering to check for updates. The cron runs `gbrain check-update --json`
+   remembering to check for updates. The cron runs `modusbrain check-update --json`
    daily at 9 AM (respecting quiet hours). If there's nothing new, it stays
    completely silent. The user only hears about updates when there IS something
    worth upgrading to.
@@ -198,7 +198,7 @@ copy. Set up a weekly cron to check automatically.
 ## How to Verify
 
 1. **Run check-update and verify detection.** Execute
-   `gbrain check-update --json`. Verify it returns the current version and
+   `modusbrain check-update --json`. Verify it returns the current version and
    correctly reports whether an update is available. If `update_available`
    is false, verify the version matches the latest release on GitHub.
 
@@ -214,4 +214,4 @@ copy. Set up a weekly cron to check automatically.
 
 ---
 
-*Part of the [GBrain Skillpack](../GBRAIN_SKILLPACK.md).*
+*Part of the [ModusBrain Skillpack](../MODUSBRAIN_SKILLPACK.md).*

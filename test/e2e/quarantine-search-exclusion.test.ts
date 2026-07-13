@@ -43,7 +43,7 @@ async function withHome<T>(fn: () => Promise<T>): Promise<T> {
   const home = mkdtempSync(join(tmpdir(), 'q-search-home-'));
   const audit = mkdtempSync(join(tmpdir(), 'q-search-audit-'));
   try {
-    return await withEnv({ GBRAIN_HOME: home, GBRAIN_AUDIT_DIR: audit }, fn);
+    return await withEnv({ MODUSBRAIN_HOME: home, MODUSBRAIN_AUDIT_DIR: audit }, fn);
   } finally {
     rmSync(home, { recursive: true, force: true });
     rmSync(audit, { recursive: true, force: true });

@@ -1,11 +1,11 @@
 /**
- * gbrain code-callees <symbol>
+ * modusbrain code-callees <symbol>
  *
  * v0.20.0 Cathedral II Layer 10 (C5) — "what does this symbol call?"
  * Forward view of the A1 call graph. Matches `from_symbol_qualified`
  * in both code_edges_chunk + code_edges_symbol.
  *
- * Source resolution: honors the full chain (incl. the `.gbrain-source` pin)
+ * Source resolution: honors the full chain (incl. the `.modusbrain-source` pin)
  * via `resolveScopedSourceOrThrow` when --source/--all-sources are omitted.
  * See code-callers.ts for the full rationale. Same behavior here. JSON
  * envelope carries `source_id` + `scope`.
@@ -20,7 +20,7 @@ import { resolveScopedSourceOrThrow, SourceResolutionError } from '../core/sourc
 import { formatSoleNonDefaultNudge } from '../core/source-resolver.ts';
 import { resolveCodeReadiness, readinessHint } from '../core/code-graph-readiness.ts';
 
-/** A bad/invalid `.gbrain-source` pin or GBRAIN_SOURCE value surfaces from
+/** A bad/invalid `.modusbrain-source` pin or MODUSBRAIN_SOURCE value surfaces from
  * `resolveSourceWithTier`'s `assertSourceExists` as a plain Error with one of
  * these message prefixes. Mirrors dream.ts:isResolverUserError. */
 function isResolverUserError(e: unknown): boolean {
@@ -28,7 +28,7 @@ function isResolverUserError(e: unknown): boolean {
   const m = e.message;
   return (m.startsWith('Source "') && m.includes(' not found.'))
     || m.startsWith('Invalid --source value')
-    || m.startsWith('Invalid GBRAIN_SOURCE value');
+    || m.startsWith('Invalid MODUSBRAIN_SOURCE value');
 }
 
 function parseFlag(args: string[], name: string): string | undefined {
@@ -50,7 +50,7 @@ export async function runCodeCallees(engine: BrainEngine, args: string[]): Promi
       class: 'UsageError',
       code: 'code_callees_requires_symbol',
       message: 'code-callees requires a symbol name',
-      hint: 'gbrain code-callees <symbol> [--source S | --all-sources] [--limit N] [--json]',
+      hint: 'modusbrain code-callees <symbol> [--source S | --all-sources] [--limit N] [--json]',
     });
     if (shouldEmitJson(args)) {
       console.log(JSON.stringify({ error: err.envelope }));
@@ -63,7 +63,7 @@ export async function runCodeCallees(engine: BrainEngine, args: string[]): Promi
   const allSources = args.includes('--all-sources');
   let sourceId = parseFlag(args, '--source');
 
-  // Full source-resolution chain (honors .gbrain-source pin, env, local_path,
+  // Full source-resolution chain (honors .modusbrain-source pin, env, local_path,
   // brain_default, sole_non_default). Matches code-callers behavior.
   if (!allSources && !sourceId) {
     try {
@@ -93,7 +93,7 @@ export async function runCodeCallees(engine: BrainEngine, args: string[]): Promi
           class: 'UsageError',
           code: 'invalid_source_pin',
           message: (e as Error).message,
-          hint: 'fix the .gbrain-source pin / GBRAIN_SOURCE value, or pass --source <id> / --all-sources',
+          hint: 'fix the .modusbrain-source pin / MODUSBRAIN_SOURCE value, or pass --source <id> / --all-sources',
         }).envelope;
         if (shouldEmitJson(args)) {
           console.log(JSON.stringify({ error: env }));

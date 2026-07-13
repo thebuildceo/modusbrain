@@ -1,11 +1,11 @@
 // v0.42 Type Unification (T10) — unify-types PROTECTED Minion handler.
 //
 // Lifecycle (non-interactive per Codex F14; the CLI orchestrator
-// `gbrain onboard` owns the prompt):
+// `modusbrain onboard` owns the prompt):
 //   1. Preflight: load target pack; refuse if no mapping_rules; pack-load
 //      validation already rejected cyclic aliases + invalid subtype_field.
 //   2. Stats snapshot (pre-state for celebration summary).
-//   3. Acquire `gbrain-unify` db-lock (mirrors gbrain-sync pattern).
+//   3. Acquire `modusbrain-unify` db-lock (mirrors modusbrain-sync pattern).
 //   4. Apply in dependency order:
 //        a. Explicit retype rules
 //        b. Catch-all retype (D12: from_type='*unknown*' expanded per-type)
@@ -118,14 +118,14 @@ export async function runUnifyTypes(
   // 3. Acquire db-lock
   let lockHandle: DbLockHandle | null = null;
   if (apply) {
-    lockHandle = await tryAcquireDbLock(ctx.engine, 'gbrain-unify', 60);
+    lockHandle = await tryAcquireDbLock(ctx.engine, 'modusbrain-unify', 60);
     if (lockHandle === null) {
       throw new Error(
-        `[unify-types] could not acquire gbrain-unify db-lock (held by another process). ` +
+        `[unify-types] could not acquire modusbrain-unify db-lock (held by another process). ` +
         `Wait for the other unify run to complete (lock TTL: 60min).`,
       );
     }
-    onProgress(`[unify-types] gbrain-unify lock acquired`);
+    onProgress(`[unify-types] modusbrain-unify lock acquired`);
   }
 
   try {
@@ -256,7 +256,7 @@ export async function runUnifyTypes(
       //   - DB config (engine.setConfig) — covers federated/multi-source brains
       //     where future loadActivePack calls thread dbConfig from `config` table.
       //   - File-plane config (saveConfig) — covers loadActivePack({ cfg, ... })
-      //     callers that read from ~/.gbrain/config.json (homeConfig tier).
+      //     callers that read from ~/.modusbrain/config.json (homeConfig tier).
       // Without the file-plane write the local CLI loadActivePack callers
       // wouldn't see the flip and pack_upgrade_available would keep firing.
       await ctx.engine.setConfig('schema_pack', input.target_pack);
@@ -267,7 +267,7 @@ export async function runUnifyTypes(
       } catch (e) {
         warnings.push(
           `Active-pack flip wrote to DB but file-plane saveConfig failed: ` +
-          `${(e as Error).message}. Run \`gbrain schema use ${input.target_pack}\` ` +
+          `${(e as Error).message}. Run \`modusbrain schema use ${input.target_pack}\` ` +
           `manually to ensure local CLI sees the flip.`,
         );
       }
@@ -292,7 +292,7 @@ export async function runUnifyTypes(
         `Post-unify distinct types (${stats_after.distinct_types}) exceeds pack declared ` +
         `(${targetPack.manifest.page_types.length}) + safety margin (5). ` +
         `Some types may not be covered by the catch-all rule; review with ` +
-        `\`gbrain schema stats\`.`,
+        `\`modusbrain schema stats\`.`,
       );
     }
 
@@ -359,7 +359,7 @@ export async function runUnifyTypes(
     if (lockHandle !== null) {
       try {
         await lockHandle.release();
-        onProgress(`[unify-types] gbrain-unify lock released`);
+        onProgress(`[unify-types] modusbrain-unify lock released`);
       } catch (e) {
         onProgress(
           `[unify-types] WARNING: lock release failed (${(e as Error).message}); ` +

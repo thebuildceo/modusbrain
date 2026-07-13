@@ -148,8 +148,8 @@ describe('inside-code-fence guard', () => {
 Some prose.
 
 \`\`\`bash
-gbrain skillopt foo
-gbrain skillopt bar
+modusbrain skillopt foo
+modusbrain skillopt bar
 \`\`\`
 
 After fence.
@@ -158,8 +158,8 @@ After fence.
   test('rejects replace inside fence', () => {
     const r = applyEdit(FENCED, {
       op: 'replace',
-      target: 'gbrain skillopt foo',
-      replacement: 'gbrain skillopt zzz',
+      target: 'modusbrain skillopt foo',
+      replacement: 'modusbrain skillopt zzz',
     });
     expect(r.outcome).toBe('rejected');
     if (r.outcome === 'rejected') expect(r.reason).toBe('inside_code_fence');

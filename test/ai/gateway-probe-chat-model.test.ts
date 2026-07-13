@@ -3,12 +3,12 @@
  *
  * validateModelId reads the recipe REGISTRY (not gateway _config), so it works without
  * configureGateway — that's the property makeJudgeClient + tryBuildGatewayClient rely on
- * (C1 #6). probeChatModel adds the key layer via hasAnthropicKey (env OR gbrain config
+ * (C1 #6). probeChatModel adds the key layer via hasAnthropicKey (env OR modusbrain config
  * file — also gateway-config-independent). Non-Anthropic providers pass the probe (lazy
  * key check deferred to gateway.chat).
  *
- * Hermetic: key-sensitive cases isolate env + GBRAIN_HOME via withEnv (R1) so the dev
- * machine's real ~/.gbrain/config.json never leaks in.
+ * Hermetic: key-sensitive cases isolate env + MODUSBRAIN_HOME via withEnv (R1) so the dev
+ * machine's real ~/.modusbrain/config.json never leaks in.
  */
 
 import { describe, test, expect, afterEach } from 'bun:test';
@@ -23,7 +23,7 @@ const REAL = 'anthropic:claude-sonnet-4-6';
 
 const tmpDirs: string[] = [];
 function emptyHome(): string {
-  const d = mkdtempSync(join(tmpdir(), 'gbrain-probe-'));
+  const d = mkdtempSync(join(tmpdir(), 'modusbrain-probe-'));
   tmpDirs.push(d);
   return d;
 }
@@ -33,10 +33,10 @@ afterEach(() => {
   }
 });
 
-// No-key env: ANTHROPIC_API_KEY unset + GBRAIN_HOME pointed at an empty dir so the
+// No-key env: ANTHROPIC_API_KEY unset + MODUSBRAIN_HOME pointed at an empty dir so the
 // config-file branch of hasAnthropicKey finds nothing.
-const noKeyEnv = () => ({ ANTHROPIC_API_KEY: undefined, GBRAIN_HOME: emptyHome() });
-const withKeyEnv = () => ({ ANTHROPIC_API_KEY: 'sk-test', GBRAIN_HOME: emptyHome() });
+const noKeyEnv = () => ({ ANTHROPIC_API_KEY: undefined, MODUSBRAIN_HOME: emptyHome() });
+const withKeyEnv = () => ({ ANTHROPIC_API_KEY: 'sk-test', MODUSBRAIN_HOME: emptyHome() });
 
 describe('validateModelId (#1698 C1 core)', () => {
   test('ok for a real model id, returns parsed + recipe', () => {

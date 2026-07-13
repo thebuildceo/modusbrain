@@ -4,7 +4,7 @@
 //   1. Resolution chain (registry.resolveActivePackName) — 7 tiers per D13
 //   2. Pack manifest loading from disk:
 //      - Built-in 'gbrain-base' lives at src/core/schema-pack/base/gbrain-base.yaml
-//      - User packs live at ~/.gbrain/schema-packs/<name>/pack.yaml
+//      - User packs live at ~/.modusbrain/schema-packs/<name>/pack.yaml
 //      - Custom paths supported via `__setPackLocatorForTests` (test seam)
 //   3. `extends` chain resolution (registry.resolvePack)
 //
@@ -19,13 +19,13 @@
 //
 // Test seam: `__setPackLocatorForTests` replaces the disk-loader so unit
 // tests can drive the boundary helper with synthetic packs without
-// writing to `~/.gbrain/schema-packs/`.
+// writing to `~/.modusbrain/schema-packs/`.
 
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { GBrainConfig } from '../config.ts';
-import { gbrainPath } from '../config.ts';
+import type { ModusBrainConfig } from '../config.ts';
+import { modusbrainPath } from '../config.ts';
 import type { SchemaPackManifest } from './manifest-v1.ts';
 import { loadPackFromFile } from './loader.ts';
 import {
@@ -44,25 +44,25 @@ import {
  * ops pass additional fields.
  */
 export interface LoadActivePackInput {
-  /** Loaded GBrain config (file + env merged). Pass null for default-only resolution. */
-  cfg: GBrainConfig | null;
+  /** Loaded ModusBrain config (file + env merged). Pass null for default-only resolution. */
+  cfg: ModusBrainConfig | null;
   /** Tier-1 trust gate: false for CLI, true for MCP/OAuth callers. */
   remote: boolean;
   /** Tier-1 per-call opt. Honored only when remote=false. */
   perCall?: string;
   /** Tier-3 per-source query target. */
   sourceId?: string;
-  /** Tier-3 per-source DB config map (from `gbrain config get` keyspace). */
+  /** Tier-3 per-source DB config map (from `modusbrain config get` keyspace). */
   perSourceDb?: ReadonlyMap<string, string>;
-  /** Tier-5 gbrain.yml schema.pack field (already parsed by storage-config). */
-  gbrainYml?: string;
+  /** Tier-5 modusbrain.yml schema.pack field (already parsed by storage-config). */
+  modusbrainYml?: string;
   /** Tier-4 brain-wide DB config (overrides tier 6 file-plane). */
   dbConfig?: string;
 }
 
 /**
  * Test seam — a function that maps a pack name to the file path on disk.
- * Production wires this to the built-in + ~/.gbrain/schema-packs lookup.
+ * Production wires this to the built-in + ~/.modusbrain/schema-packs lookup.
  * Tests inject a Map-backed locator.
  */
 export type PackLocator = (name: string) => string | null;
@@ -71,7 +71,7 @@ let _packLocator: PackLocator = defaultPackLocator;
 
 /**
  * Replace the pack locator. Tests use this to inject synthetic packs
- * without writing to ~/.gbrain. Always pair with `_resetPackLocatorForTests`
+ * without writing to ~/.modusbrain. Always pair with `_resetPackLocatorForTests`
  * in afterAll to avoid leaking across files.
  */
 export function __setPackLocatorForTests(locator: PackLocator): void {
@@ -86,13 +86,13 @@ export function _resetPackLocatorForTests(): void {
 /**
  * Default pack locator: maps a pack name to its filesystem path.
  *   'gbrain-base' → bundled src/core/schema-pack/base/gbrain-base.yaml
- *   other         → ~/.gbrain/schema-packs/<name>/pack.yaml or pack.json
+ *   other         → ~/.modusbrain/schema-packs/<name>/pack.yaml or pack.json
  *
  * Returns null when the pack is not found. Callers handle null by
  * throwing UnknownPackError with a paste-ready install hint.
  */
 function defaultPackLocator(name: string): string | null {
-  // v0.39 T8 — bundled packs registry. gbrain-base + gbrain-recommended
+  // v0.39 T8 — bundled packs registry. gbrain-base + modusbrain-recommended
   // ship in src/core/schema-pack/base/. Add a new entry here to bundle
   // additional canonical packs.
   //
@@ -103,13 +103,13 @@ function defaultPackLocator(name: string): string | null {
   // via extends + borrow_from). Each ships as a real YAML at base/<name>.yaml.
   const BUNDLED: ReadonlyArray<string> = [
     'gbrain-base',
-    'gbrain-recommended',
-    'gbrain-creator',
-    'gbrain-investor',
-    'gbrain-engineer',
-    'gbrain-everything',
+    'modusbrain-recommended',
+    'modusbrain-creator',
+    'modusbrain-investor',
+    'modusbrain-engineer',
+    'modusbrain-everything',
     // v0.42 type-unification: 15-type canonical successor to gbrain-base.
-    // Ships as install default (Lane E T17) + via gbrain onboard pack
+    // Ships as install default (Lane E T17) + via modusbrain onboard pack
     // upgrade flow (the unify-types Minion handler).
     'gbrain-base-v2',
   ];
@@ -125,8 +125,8 @@ function defaultPackLocator(name: string): string | null {
     if (existsSync(repoRootFallback)) return repoRootFallback;
     return null;
   }
-  // User-installed pack at ~/.gbrain/schema-packs/<name>/pack.{yaml,json}
-  const baseDir = gbrainPath('schema-packs', name);
+  // User-installed pack at ~/.modusbrain/schema-packs/<name>/pack.{yaml,json}
+  const baseDir = modusbrainPath('schema-packs', name);
   const candidates = ['pack.yaml', 'pack.yml', 'pack.json'];
   for (const c of candidates) {
     const candidate = join(baseDir, c);
@@ -176,8 +176,8 @@ export async function loadActivePack(input: LoadActivePackInput): Promise<Resolv
 
 /**
  * Return the resolved pack NAME and source tier WITHOUT loading the
- * manifest from disk. Used by `gbrain schema active` to surface
- * provenance ("active pack: garry — source: gbrain.yml") without
+ * manifest from disk. Used by `modusbrain schema active` to surface
+ * provenance ("active pack: garry — source: modusbrain.yml") without
  * paying the load cost.
  */
 export function resolveActivePackNameOnly(input: LoadActivePackInput): ResolutionResult {
@@ -191,7 +191,7 @@ export function resolveActivePackNameOnly(input: LoadActivePackInput): Resolutio
  * gbrain-base@1.x; gbrain-base-v2@1.0.0 is available." Results sorted by
  * successor version descending so the highest-available successor wins.
  *
- * Walks BUNDLED_PACK_NAMES + any installed pack under `~/.gbrain/schema-packs/`
+ * Walks BUNDLED_PACK_NAMES + any installed pack under `~/.modusbrain/schema-packs/`
  * discoverable via the locator. Each candidate is loaded + parsed; load
  * failures are logged-and-skipped per the D4 EMPTY FILTER contract — a
  * corrupt pack on disk doesn't break the upgrade-available check for
@@ -214,7 +214,7 @@ export async function findPackSuccessors(
   for (const name of BUNDLED_PACK_NAMES) {
     if (name !== packName) candidates.push(name);
   }
-  // Walk ~/.gbrain/schema-packs/* via the locator. We can't enumerate
+  // Walk ~/.modusbrain/schema-packs/* via the locator. We can't enumerate
   // directly without filesystem scan; defer to v0.43+ for installed-pack
   // enumeration. Bundled packs alone cover v0.42's gbrain-base→v2 path.
 
@@ -279,8 +279,8 @@ export function _versionDescCompare(a: string, b: string): number {
 }
 
 function buildResolutionInput(input: LoadActivePackInput): ResolutionInput {
-  const envVar = process.env.GBRAIN_SCHEMA_PACK?.trim() || undefined;
-  // tier-6: ~/.gbrain/config.json schema_pack field
+  const envVar = process.env.MODUSBRAIN_SCHEMA_PACK?.trim() || undefined;
+  // tier-6: ~/.modusbrain/config.json schema_pack field
   const homeConfig = input.cfg?.schema_pack?.trim() || undefined;
   return {
     perCall: input.perCall,
@@ -289,7 +289,7 @@ function buildResolutionInput(input: LoadActivePackInput): ResolutionInput {
     sourceId: input.sourceId,
     envVar,
     dbConfig: input.dbConfig,
-    gbrainYml: input.gbrainYml,
+    modusbrainYml: input.modusbrainYml,
     homeConfig,
   };
 }

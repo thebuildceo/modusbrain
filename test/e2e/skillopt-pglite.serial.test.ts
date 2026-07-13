@@ -88,7 +88,7 @@ describe('skillopt E2E (PGLite + DI LLM)', () => {
   test('dry-run mode: cost preview, no LLM calls, exits with aborted outcome', async () => {
     const fixture = setupSkillFixture();
     try {
-      await withEnv({ GBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
+      await withEnv({ MODUSBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
         const { runSkillOpt } = await import('../../src/core/skillopt/orchestrator.ts');
         const result = await runSkillOpt({
           engine,
@@ -128,7 +128,7 @@ describe('skillopt E2E (PGLite + DI LLM)', () => {
   test('all-reject path: validation gate refuses every candidate, exits no_improvement', async () => {
     const fixture = setupSkillFixture();
     try {
-      await withEnv({ GBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
+      await withEnv({ MODUSBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
         // Stub the runValidationGate by stubbing the gateway.chat that
         // underlies score.scoreLlm. For rule-only benchmarks, no chat is
         // called — runRollout's toolLoop IS called. Stub gateway.toolLoop
@@ -195,7 +195,7 @@ describe('skillopt E2E (PGLite + DI LLM)', () => {
   test('resume after revertAllPending: prior baseline restored, fresh run completes', async () => {
     const fixture = setupSkillFixture();
     try {
-      await withEnv({ GBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
+      await withEnv({ MODUSBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
         // Pre-stage a pending row + a corrupted best.md.
         const { acceptCandidate, bestPath: bp, historyPath, versionsDir, revertAllPending, loadHistory: lh } = await import('../../src/core/skillopt/version-store.ts');
         // First: a clean v1 accept.

@@ -22,7 +22,7 @@ let tmpDir: string;
 beforeEach(() => {
   _resetPackCacheForTests();
   _resetPackLocatorForTests();
-  tmpDir = mkdtempSync(join(tmpdir(), 'gbrain-best-effort-test-'));
+  tmpDir = mkdtempSync(join(tmpdir(), 'modusbrain-best-effort-test-'));
 });
 
 afterEach(() => {
@@ -45,7 +45,7 @@ function fakeCtx(remote = false): OperationContext {
 describe('loadActivePackBestEffort', () => {
   it('returns ResolvedPack when load succeeds (default bundled gbrain-base)', async () => {
     // No locator override → defaults to bundled gbrain-base resolution.
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_SCHEMA_PACK: undefined }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_SCHEMA_PACK: undefined }, async () => {
       const result = await loadActivePackBestEffort(fakeCtx());
       expect(result).not.toBeNull();
       expect(result?.manifest.name).toBe('gbrain-base');
@@ -54,7 +54,7 @@ describe('loadActivePackBestEffort', () => {
 
   it('returns null when the resolved pack is not on disk', async () => {
     __setPackLocatorForTests(() => null);
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_SCHEMA_PACK: 'never-installed' }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_SCHEMA_PACK: 'never-installed' }, async () => {
       const result = await loadActivePackBestEffort(fakeCtx());
       expect(result).toBeNull();
     });
@@ -66,7 +66,7 @@ describe('loadActivePackBestEffort', () => {
     const packPath = join(packDir, 'pack.yaml');
     writeFileSync(packPath, 'this: is: not: valid: yaml: at all: \n}}{', 'utf-8');
     __setPackLocatorForTests((name) => (name === 'corrupt-pack' ? packPath : null));
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_SCHEMA_PACK: 'corrupt-pack' }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_SCHEMA_PACK: 'corrupt-pack' }, async () => {
       const result = await loadActivePackBestEffort(fakeCtx());
       expect(result).toBeNull();
     });
@@ -75,7 +75,7 @@ describe('loadActivePackBestEffort', () => {
   it('NEVER throws on any failure path (the load-bearing best-effort contract)', async () => {
     // Force load to throw via a locator that returns garbage.
     __setPackLocatorForTests(() => { throw new Error('synthetic disk failure'); });
-    await withEnv({ GBRAIN_HOME: tmpDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir }, async () => {
       // resolves, doesn't throw.
       await expect(loadActivePackBestEffort(fakeCtx())).resolves.toBeNull();
     });

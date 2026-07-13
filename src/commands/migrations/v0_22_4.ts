@@ -2,14 +2,14 @@
  * v0.22.4 migration orchestrator — frontmatter-guard adoption.
  *
  * v0.22.4 ships a shared frontmatter validator (parseMarkdown(..., {validate:true})),
- * a doctor subcheck (frontmatter_integrity), a top-level `gbrain frontmatter`
+ * a doctor subcheck (frontmatter_integrity), a top-level `modusbrain frontmatter`
  * CLI (validate / audit / install-hook), and a new `frontmatter-guard` skill.
  *
  * This migration is AUDIT-ONLY (per D5): it reads the user's brain pages,
- * writes a JSON report to ~/.gbrain/migrations/v0.22.4-audit.json, and emits
- * one entry per source-with-issues to ~/.gbrain/migrations/pending-host-work.jsonl.
+ * writes a JSON report to ~/.modusbrain/migrations/v0.22.4-audit.json, and emits
+ * one entry per source-with-issues to ~/.modusbrain/migrations/pending-host-work.jsonl.
  * It NEVER mutates brain content. The agent reads skills/migrations/v0.22.4.md
- * after upgrade and runs `gbrain frontmatter validate <source-path> --fix` with
+ * after upgrade and runs `modusbrain frontmatter validate <source-path> --fix` with
  * explicit user consent. Missing frontmatter is not queued by default; plain
  * Markdown imports are valid, and generated frontmatter should add real signal
  * rather than blanket `type: note`.
@@ -37,10 +37,10 @@ export function __setTestEngineOverride(engine: BrainEngine | null): void {
   testEngineOverride = engine;
 }
 
-function gbrainDir(): string {
-  return join(process.env.HOME || '', '.gbrain');
+function modusbrainDir(): string {
+  return join(process.env.HOME || '', '.modusbrain');
 }
-function migrationsDir(): string { return join(gbrainDir(), 'migrations'); }
+function migrationsDir(): string { return join(modusbrainDir(), 'migrations'); }
 function auditReportPath(): string { return join(migrationsDir(), 'v0.22.4-audit.json'); }
 function pendingHostWorkPath(): string { return join(migrationsDir(), 'pending-host-work.jsonl'); }
 
@@ -158,7 +158,7 @@ function phaseCEmitTodo(opts: OrchestratorOpts, report: AuditReport | null): Orc
         reason: `${src.total} frontmatter issue(s) in source ${src.source_id}`,
         source_id: src.source_id,
         source_path: src.source_path,
-        command: `gbrain frontmatter validate ${src.source_path} --fix`,
+        command: `modusbrain frontmatter validate ${src.source_path} --fix`,
       };
       appendFileSync(pendingHostWorkPath(), JSON.stringify(entry) + '\n');
       added++;
@@ -209,14 +209,14 @@ export const v0_22_4: Migration = {
   featurePitch: {
     headline: 'Frontmatter-guard ships — broken brain pages can\'t hide',
     description:
-      'gbrain v0.22.4 adds end-to-end frontmatter validation: a `gbrain frontmatter` CLI ' +
+      'modusbrain v0.22.4 adds end-to-end frontmatter validation: a `modusbrain frontmatter` CLI ' +
       '(validate / audit / install-hook), a `frontmatter_integrity` doctor subcheck, a ' +
       'pre-commit hook helper, and a new frontmatter-guard skill. The migration is audit-only ' +
       '(it never mutates your brain) — it scans every registered source, writes a per-source ' +
-      'report to ~/.gbrain/migrations/v0.22.4-audit.json, and queues a TODO with the exact fix ' +
+      'report to ~/.modusbrain/migrations/v0.22.4-audit.json, and queues a TODO with the exact fix ' +
       'command for malformed frontmatter only. Missing frontmatter is treated as optional metadata ' +
-      'coverage for broad document sources. Run `gbrain frontmatter validate <source-path> --fix` ' +
-      'to repair (creates centralized backups under ~/.gbrain/backups/frontmatter). Ships frontmatter-guard.',
+      'coverage for broad document sources. Run `modusbrain frontmatter validate <source-path> --fix` ' +
+      'to repair (creates centralized backups under ~/.modusbrain/backups/frontmatter). Ships frontmatter-guard.',
   },
   orchestrator,
 };

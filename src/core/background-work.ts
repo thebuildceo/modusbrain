@@ -93,7 +93,7 @@ export function __listDrainerNamesForTest(): string[] {
 /**
  * CLI-EXIT-ONLY. `abort()` is a permanent process-level state change on a sink
  * (the facts queue's `shutdown()` sets `shuttingDown=true` for the process
- * lifetime). NEVER call this in a long-lived process (`gbrain serve`). Drains
+ * lifetime). NEVER call this in a long-lived process (`modusbrain serve`). Drains
  * every registered sink before `engine.disconnect()` so a PGLite `db.close()`
  * can't race in-flight work into the re-pump busy-loop (#1762).
  *

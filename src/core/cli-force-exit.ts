@@ -21,7 +21,7 @@
  *           │  + 2 × pool-end bound + slack, floor 10s). The backstop fires
  *           │  ONLY if a component violated its own bound; on fire it prints
  *           │  a truthful banner and *flushThenExit(currentExitCode()).
- *           │  GBRAIN_TEARDOWN_DEADLINE_MS overrides (incident escape hatch).
+ *           │  MODUSBRAIN_TEARDOWN_DEADLINE_MS overrides (incident escape hatch).
  *           ▼
  *     drain background sinks (bounded per-sink; CLI-exit-only contract)
  *           ▼
@@ -64,7 +64,7 @@ export function shouldForceExitAfterMain(
   // Resolve the command the same way main() does — parseGlobalFlags strips
   // global flags INCLUDING space-separated values (`--timeout 30s`), so the
   // command here always matches the dispatched one. The old first-non-dash
-  // heuristic saw `30s` as the command for `gbrain --timeout 30s serve` and
+  // heuristic saw `30s` as the command for `modusbrain --timeout 30s serve` and
   // (post-#2084, where this gates an unconditional process.exit) would have
   // killed the daemon ~250ms after boot. Cross-model adversarial finding.
   let command: string | undefined;
@@ -99,15 +99,15 @@ const FLUSH_GUARD_MS = 2_000;
 const FLUSH_GRACE_PIPE_MS = 250;
 
 /**
- * Resolve the non-TTY aliveness grace: `GBRAIN_FLUSH_GRACE_MS` env override
+ * Resolve the non-TTY aliveness grace: `MODUSBRAIN_FLUSH_GRACE_MS` env override
  * (incident/batch escape hatch, same env-only pattern as
- * GBRAIN_TEARDOWN_DEADLINE_MS) over the 250ms default. Consumers piping LARGE
+ * MODUSBRAIN_TEARDOWN_DEADLINE_MS) over the 250ms default. Consumers piping LARGE
  * payloads into slow readers (a reader that attaches later than the grace
  * loses the tail — Bun gives no delivery signal to wait on) can raise it;
  * high-frequency agent loops capturing to files can lower it.
  */
 function resolveFlushGraceMs(): number {
-  const env = Number(process.env.GBRAIN_FLUSH_GRACE_MS);
+  const env = Number(process.env.MODUSBRAIN_FLUSH_GRACE_MS);
   if (Number.isFinite(env) && env >= 0) return env;
   return FLUSH_GRACE_PIPE_MS;
 }
@@ -119,14 +119,14 @@ const DEFAULT_DRAIN_TIMEOUT_MS = 2_000;
  * it guards so it fires only when a component violated its own bound (#2084
  * eng-review D9 — a static 10s fired on healthy-but-slow bounded teardown:
  * 4 sinks × 2s + facts grace + 2 × ~2.5s pool ends ≈ 13s).
- * `GBRAIN_TEARDOWN_DEADLINE_MS` overrides the formula (incident escape hatch,
- * same env-only pattern as the GBRAIN_SYNC_* knobs).
+ * `MODUSBRAIN_TEARDOWN_DEADLINE_MS` overrides the formula (incident escape hatch,
+ * same env-only pattern as the MODUSBRAIN_SYNC_* knobs).
  */
 export function computeTeardownDeadlineMs(opts: {
   sinkCount: number;
   drainTimeoutMs: number;
 }): number {
-  const env = Number(process.env.GBRAIN_TEARDOWN_DEADLINE_MS);
+  const env = Number(process.env.MODUSBRAIN_TEARDOWN_DEADLINE_MS);
   if (Number.isFinite(env) && env > 0) return env;
   // +500 mirrors endPoolBounded's slack over the postgres.js hint (db.ts);
   // ×2 budgets the worst case of two sequential pool ends (direct + read).
@@ -149,7 +149,7 @@ export interface MinimalWritable {
 }
 
 /**
- * #2084 — the CLI's exit verdict lives in a gbrain-OWNED variable, never read
+ * #2084 — the CLI's exit verdict lives in a modusbrain-OWNED variable, never read
  * back from `process.exitCode`. PGLite's Emscripten runtime writes its own
  * status into `process.exitCode` at arbitrary points DURING a run (99 at
  * create; in-memory brains run initdb whose exit status, e.g. 100, lands on a
@@ -295,7 +295,7 @@ export async function finishCliTeardown(opts: FinishCliTeardownOpts): Promise<vo
     warn(
       `[cli] teardown (background-work drain + engine.disconnect()) did not return within ${deadlineMs}ms — force-exiting`,
     );
-    // currentExitCode() reads the gbrain-owned verdict channel — an errored
+    // currentExitCode() reads the modusbrain-owned verdict channel — an errored
     // op's setCliExitVerdict(1) is honored even when PGLite has scribbled over
     // process.exitCode; a bare exit(0) would mask the failure.
     flushThenExit(currentExitCode(), opts);

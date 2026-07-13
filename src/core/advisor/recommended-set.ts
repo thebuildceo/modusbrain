@@ -44,7 +44,7 @@ export const RECOMMENDED: RecommendedSkill[] = [
   {
     slug: 'archive-crawler',
     description:
-      'Universal archivist for personal file archives. REFUSES to run without a gbrain.yml allow-list — safe-by-default.',
+      'Universal archivist for personal file archives. REFUSES to run without a modusbrain.yml allow-list — safe-by-default.',
   },
   {
     slug: 'academic-verify',

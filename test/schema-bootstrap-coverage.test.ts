@@ -2,7 +2,7 @@
  * CI guard: PGLITE_SCHEMA_SQL must not forward-reference state that
  * `applyForwardReferenceBootstrap` doesn't know how to create.
  *
- * Background: gbrain ships an "embedded latest schema" blob
+ * Background: modusbrain ships an "embedded latest schema" blob
  * (`pglite-schema.ts`) for fast bootstraps, alongside a numbered migration
  * chain (`migrate.ts`) for incremental upgrades. Across 2 years and 6 schema
  * versions, every release that added a column-with-index in the schema blob
@@ -36,7 +36,7 @@ import { PGLiteEngine } from '../src/core/pglite-engine.ts';
 // Tier 3 opt-out: this file tests the bootstrap coverage contract explicitly,
 // running applyForwardReferenceBootstrap against fresh PGlite instances. A
 // snapshot-loaded engine would skip the bootstrap entirely.
-delete process.env.GBRAIN_PGLITE_SNAPSHOT;
+delete process.env.MODUSBRAIN_PGLITE_SNAPSHOT;
 
 // Forward-reference targets that PGLITE_SCHEMA_SQL requires.
 // When you add a new one, extend this list AND the bootstrap.
@@ -165,7 +165,7 @@ const REQUIRED_BOOTSTRAP_COVERAGE: ForwardReference[] = [
   // v0.42.7 (v112) — forward-referenced by `CREATE INDEX
   // pages_links_extracted_at_idx ON pages (source_id, links_extracted_at)`.
   // Pre-v112 brains have pages without this column; bootstrap adds it before
-  // SCHEMA_SQL replay creates the index. Powers `gbrain extract --stale` + the
+  // SCHEMA_SQL replay creates the index. Powers `modusbrain extract --stale` + the
   // `links_extraction_lag` doctor check.
   { kind: 'column', table: 'pages', column: 'links_extracted_at' },
 ];
@@ -725,7 +725,7 @@ const COLUMN_EXEMPTIONS = new Set<string>([
   // facts.claim_metric et al: no forward-reference index in
   // PGLITE_SCHEMA_SQL, no downstream filter breaks on old brains
   // (existing callers — founder-scorecard, eval-trajectory,
-  // gbrain think trajectory injection — all defensively skip
+  // modusbrain think trajectory injection — all defensively skip
   // NULL-metric rows in per-metric math, so event_type=NULL on old
   // brains is invisible to them). Migration is column-only, no FK,
   // no index — bootstrap probe would be pure overhead.

@@ -5,7 +5,7 @@
  *
  * Threat model: a multi-user POSIX host where an attacker can write into a
  * shared ancestor directory of the victim's CWD. The hardening must refuse a
- * routing dotfile (`.gbrain-source` / `.gbrain-mount`) the victim doesn't own,
+ * routing dotfile (`.modusbrain-source` / `.modusbrain-mount`) the victim doesn't own,
  * and refuse a `skills/` directory that escapes its declared workspace via
  * symlink. (#418 / #419, codex #9)
  */
@@ -226,47 +226,47 @@ describe('isWriteTargetContained', () => {
 
 // ── source-resolver integration (#418) ─────────────────────
 
-describe('resolveSourceId — .gbrain-source dotfile trust', () => {
+describe('resolveSourceId — .modusbrain-source dotfile trust', () => {
   test('trusted dotfile resolves to its id (control)', async () => {
     const dir = scratch();
-    writeFileSync(join(dir, '.gbrain-source'), 'evil\n');
+    writeFileSync(join(dir, '.modusbrain-source'), 'evil\n');
     expect(await resolveSourceId(stubEngine(['evil', 'default']), null, dir)).toBe('evil');
   });
   test('symlinked dotfile is REFUSED → falls through to default', async () => {
     if (typeof process.getuid !== 'function') return;
     const dir = scratch();
     const target = join(dir, 'target'); writeFileSync(target, 'evil\n');
-    symlinkSync(target, join(dir, '.gbrain-source'));
+    symlinkSync(target, join(dir, '.modusbrain-source'));
     expect(await resolveSourceId(stubEngine(['evil', 'default']), null, dir)).toBe('default');
   });
   test('world-writable dotfile is REFUSED → falls through to default', async () => {
     if (typeof process.getuid !== 'function') return;
     const dir = scratch();
-    const df = join(dir, '.gbrain-source'); writeFileSync(df, 'evil\n'); chmodSync(df, 0o666);
+    const df = join(dir, '.modusbrain-source'); writeFileSync(df, 'evil\n'); chmodSync(df, 0o666);
     expect(await resolveSourceId(stubEngine(['evil', 'default']), null, dir)).toBe('default');
   });
 });
 
 // ── brain-resolver integration (#418, brain axis) ──────────
 
-describe('resolveBrainId — .gbrain-mount dotfile trust', () => {
+describe('resolveBrainId — .modusbrain-mount dotfile trust', () => {
   const noMounts = () => [];
   test('trusted dotfile resolves to its id (control)', () => {
     const dir = scratch();
-    writeFileSync(join(dir, '.gbrain-mount'), 'evil-brain\n');
+    writeFileSync(join(dir, '.modusbrain-mount'), 'evil-brain\n');
     expect(resolveBrainId(null, dir, noMounts)).toBe('evil-brain');
   });
-  test('symlinked .gbrain-mount is REFUSED → falls through to host', () => {
+  test('symlinked .modusbrain-mount is REFUSED → falls through to host', () => {
     if (typeof process.getuid !== 'function') return;
     const dir = scratch();
     const target = join(dir, 'm'); writeFileSync(target, 'evil-brain\n');
-    symlinkSync(target, join(dir, '.gbrain-mount'));
+    symlinkSync(target, join(dir, '.modusbrain-mount'));
     expect(resolveBrainId(null, dir, noMounts)).toBe(HOST_BRAIN_ID);
   });
-  test('world-writable .gbrain-mount is REFUSED → falls through to host', () => {
+  test('world-writable .modusbrain-mount is REFUSED → falls through to host', () => {
     if (typeof process.getuid !== 'function') return;
     const dir = scratch();
-    const df = join(dir, '.gbrain-mount'); writeFileSync(df, 'evil-brain\n'); chmodSync(df, 0o666);
+    const df = join(dir, '.modusbrain-mount'); writeFileSync(df, 'evil-brain\n'); chmodSync(df, 0o666);
     expect(resolveBrainId(null, dir, noMounts)).toBe(HOST_BRAIN_ID);
   });
 });

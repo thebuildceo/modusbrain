@@ -24,7 +24,7 @@ describe('cli pipe completeness — deliberate exit never truncates piped stdout
         stdio: ['ignore', 'pipe', 'pipe'],
         encoding: 'utf-8',
         timeout: 60_000,
-        env: { ...process.env, GBRAIN_SKIP_STARTUP_HOOKS: '1' },
+        env: { ...process.env, MODUSBRAIN_SKIP_STARTUP_HOOKS: '1' },
         maxBuffer: 64 * 1024 * 1024,
       });
       return { stdout: res.stdout ?? '', stderr: res.stderr ?? '', status: res.status, ms: Date.now() - t0 };

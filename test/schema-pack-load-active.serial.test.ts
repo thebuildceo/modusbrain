@@ -53,8 +53,8 @@ describe('loadActivePack boundary helper', () => {
     expect(result.source).toBe('home-config');
   });
 
-  test('tier-2 env var GBRAIN_SCHEMA_PACK wins over tier-6 home config', async () => {
-    await withEnv({ GBRAIN_SCHEMA_PACK: 'env-pack' }, async () => {
+  test('tier-2 env var MODUSBRAIN_SCHEMA_PACK wins over tier-6 home config', async () => {
+    await withEnv({ MODUSBRAIN_SCHEMA_PACK: 'env-pack' }, async () => {
       const result = resolveActivePackNameOnly({
         cfg: { engine: 'pglite', schema_pack: 'home-pack' } as never,
         remote: false,
@@ -103,9 +103,9 @@ describe('loadActivePack boundary helper', () => {
     const { mkdtempSync, writeFileSync } = await import('node:fs');
     const { tmpdir } = await import('node:os');
     const { join } = await import('node:path');
-    const dir = mkdtempSync(join(tmpdir(), 'gbrain-test-pack-'));
+    const dir = mkdtempSync(join(tmpdir(), 'modusbrain-test-pack-'));
     const yamlPath = join(dir, 'pack.yaml');
-    writeFileSync(yamlPath, `api_version: gbrain-schema-pack-v1
+    writeFileSync(yamlPath, `api_version: modusbrain-schema-pack-v1
 name: injected-pack
 version: 0.1.0
 description: test

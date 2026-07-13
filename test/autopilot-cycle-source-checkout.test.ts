@@ -50,7 +50,7 @@ async function captureHandlers(): Promise<Map<string, (job: any) => Promise<any>
 
 describe('autopilot-cycle handler — per-source checkout binding (#2227/#2194)', () => {
   test('source_id with local_path → brainDir is the SOURCE checkout, not the global repo', async () => {
-    const sourceDir = mkdtempSync(join(tmpdir(), 'gbrain-src-'));
+    const sourceDir = mkdtempSync(join(tmpdir(), 'modusbrain-src-'));
     // A DIFFERENT global checkout must NOT win for a per-source job.
     await engine.setConfig('sync.repo_path', '/some/global/brain/checkout');
     await engine.executeRaw(
@@ -93,7 +93,7 @@ describe('autopilot-cycle handler — per-source checkout binding (#2227/#2194)'
   });
 
   test('legacy (no source_id) keeps the global repoPath — back-compat', async () => {
-    const globalDir = mkdtempSync(join(tmpdir(), 'gbrain-global-'));
+    const globalDir = mkdtempSync(join(tmpdir(), 'modusbrain-global-'));
     await engine.setConfig('sync.repo_path', globalDir);
 
     const handlers = await captureHandlers();

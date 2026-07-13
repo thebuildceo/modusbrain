@@ -27,8 +27,8 @@ describe('non-TTY output contract: jobs watch (#1784)', () => {
   let env: NodeJS.ProcessEnv;
 
   beforeAll(() => {
-    home = mkdtempSync(join(tmpdir(), 'gbrain-nontty-e2e-'));
-    env = { ...process.env, GBRAIN_HOME: home };
+    home = mkdtempSync(join(tmpdir(), 'modusbrain-nontty-e2e-'));
+    env = { ...process.env, MODUSBRAIN_HOME: home };
     // Fresh local PGLite brain so `jobs watch` has an engine to read.
     bunExecFileSync( ['run', 'src/cli.ts', 'init', '--pglite', '--no-embedding', '--non-interactive'], {
       cwd: process.cwd(), env, stdio: 'ignore',
@@ -45,7 +45,7 @@ describe('non-TTY output contract: jobs watch (#1784)', () => {
       cwd: process.cwd(), env, stdio: ['ignore', 'pipe', 'ignore'], encoding: 'utf-8', timeout: 30_000,
     });
     expect(out.length).toBeGreaterThan(0);                 // the bug was (no output)
-    expect(out).toContain('gbrain jobs watch');            // human renderer header
+    expect(out).toContain('modusbrain jobs watch');            // human renderer header
     expect(out).toContain('Queue');                        // human panel
     expect(out.trimStart().startsWith('{')).toBe(false);   // NOT JSON by default
   }, 35_000);

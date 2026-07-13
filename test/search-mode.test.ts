@@ -491,7 +491,7 @@ describe('loadOverridesFromConfig flat-map parser', () => {
 });
 
 describe('SEARCH_MODE_CONFIG_KEYS is the full reset surface', () => {
-  test('every key starts with search. prefix (gbrain config unset --pattern search.* compatibility)', () => {
+  test('every key starts with search. prefix (modusbrain config unset --pattern search.* compatibility)', () => {
     for (const k of SEARCH_MODE_CONFIG_KEYS) {
       expect(k.startsWith('search.')).toBe(true);
     }
@@ -500,7 +500,7 @@ describe('SEARCH_MODE_CONFIG_KEYS is the full reset surface', () => {
   test('every ModeBundle field has a config key (consistency check)', () => {
     // If a new knob is added to ModeBundle, this test fails until the operator
     // adds the corresponding config key to SEARCH_MODE_CONFIG_KEYS. That's the
-    // intentional regression guard: `gbrain search modes --reset` must clear
+    // intentional regression guard: `modusbrain search modes --reset` must clear
     // every knob.
     const knobs = Object.keys(MODE_BUNDLES.balanced);
     expect(SEARCH_MODE_CONFIG_KEYS.length).toBeGreaterThanOrEqual(knobs.length);

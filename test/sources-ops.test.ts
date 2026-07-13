@@ -36,12 +36,12 @@ import { withEnv } from './helpers/with-env.ts';
 // Tier 3: every PGLite spinup path needs the snapshot env unset (test
 // infrastructure detail; matches bootstrap.test.ts pattern).
 let engine: PGLiteEngine;
-const FAKE_GIT_DIR = join(tmpdir(), `gbrain-sources-ops-test-${process.pid}`);
-const GBRAIN_HOME = join(FAKE_GIT_DIR, 'gbrain-home');
-// gbrainPath() appends `.gbrain` to GBRAIN_HOME, so the actual clone root the
-// production code resolves to is $GBRAIN_HOME/.gbrain/clones/. Tests that
-// hand-craft path fixtures must use this, NOT $GBRAIN_HOME/clones/.
-const CLONE_ROOT = join(GBRAIN_HOME, '.gbrain', 'clones');
+const FAKE_GIT_DIR = join(tmpdir(), `modusbrain-sources-ops-test-${process.pid}`);
+const MODUSBRAIN_HOME = join(FAKE_GIT_DIR, 'modusbrain-home');
+// modusbrainPath() appends `.modusbrain` to MODUSBRAIN_HOME, so the actual clone root the
+// production code resolves to is $MODUSBRAIN_HOME/.modusbrain/clones/. Tests that
+// hand-craft path fixtures must use this, NOT $MODUSBRAIN_HOME/clones/.
+const CLONE_ROOT = join(MODUSBRAIN_HOME, '.modusbrain', 'clones');
 
 // ---------------------------------------------------------------------------
 // Fake-git harness — controllable success/failure so addSource's clone
@@ -116,18 +116,18 @@ beforeEach(async () => {
   await engine.executeRaw(
     `INSERT INTO sources (id, name, local_path, config) VALUES ('default', 'default', NULL, '{}'::jsonb) ON CONFLICT (id) DO NOTHING`,
   );
-  // Reset GBRAIN_HOME fixtures between tests
-  rmSync(GBRAIN_HOME, { recursive: true, force: true });
-  mkdirSync(GBRAIN_HOME, { recursive: true });
+  // Reset MODUSBRAIN_HOME fixtures between tests
+  rmSync(MODUSBRAIN_HOME, { recursive: true, force: true });
+  mkdirSync(MODUSBRAIN_HOME, { recursive: true });
   setMode('ok');
 });
 
-// Run every test with GBRAIN_HOME pointing at our fixture dir AND fake git
+// Run every test with MODUSBRAIN_HOME pointing at our fixture dir AND fake git
 // in PATH. Passed via withEnv so other test files in the shard don't see
 // it leak.
 async function withEnv2<T>(fn: () => Promise<T>): Promise<T> {
   return withEnv(
-    { GBRAIN_HOME, PATH: fakePath() },
+    { MODUSBRAIN_HOME, PATH: fakePath() },
     fn,
   );
 }
@@ -301,7 +301,7 @@ describe('listSources', () => {
 // ---------------------------------------------------------------------------
 
 describe('removeSource — clone-cleanup', () => {
-  test('removes clone IFF managed (local_path under $GBRAIN_HOME/clones/ + remote_url set)', async () => {
+  test('removes clone IFF managed (local_path under $MODUSBRAIN_HOME/clones/ + remote_url set)', async () => {
     await withEnv2(async () => {
       const row = await addSource(engine, {
         id: 'cleanup-yes',
@@ -320,7 +320,7 @@ describe('removeSource — clone-cleanup', () => {
 
   test('does NOT remove clone for user-supplied --path (no remote_url)', async () => {
     await withEnv2(async () => {
-      const userPath = join(GBRAIN_HOME, 'user-managed-fixture');
+      const userPath = join(MODUSBRAIN_HOME, 'user-managed-fixture');
       mkdirSync(userPath, { recursive: true });
       writeFileSync(join(userPath, 'file'), 'hi');
       await addSource(engine, { id: 'cleanup-no', localPath: userPath });
@@ -341,7 +341,7 @@ describe('removeSource — clone-cleanup', () => {
       // the link and rejects because the target isn't under the clones/
       // confine. removeSource skips cleanup and just deletes the DB row.
       // Sentinel stays intact.
-      const target = join(GBRAIN_HOME, 'sensitive-fixture');
+      const target = join(MODUSBRAIN_HOME, 'sensitive-fixture');
       mkdirSync(target, { recursive: true });
       writeFileSync(join(target, 'sentinel'), 'do-not-touch');
       const linkPath = join(CLONE_ROOT, 'evil');
@@ -445,7 +445,7 @@ describe('getSourceStatus', () => {
 
   test('clone_state = "not-applicable" for path-only source (no remote)', async () => {
     await withEnv2(async () => {
-      const userPath = join(GBRAIN_HOME, 'na-fixture');
+      const userPath = join(MODUSBRAIN_HOME, 'na-fixture');
       mkdirSync(userPath, { recursive: true });
       // path-only source still gets validateRepoState — but with no expected
       // URL, it just probes existence + .git. Path exists with no .git → 'no-git'.
@@ -633,7 +633,7 @@ describe('recloneIfMissing — refuses to delete an unowned working tree (#1881)
                    '{"remote_url":"https://github.com/example/repo"}'::jsonb)`,
         [ghost],
       );
-      await expect(recloneIfMissing(engine, 'ghost')).rejects.toThrow(/unmanaged_path|not a clone gbrain created/);
+      await expect(recloneIfMissing(engine, 'ghost')).rejects.toThrow(/unmanaged_path|not a clone modusbrain created/);
     });
   });
 });
@@ -673,7 +673,7 @@ describe('recloneIfMissing — symlink TOCTOU + EXDEV-safe swap', () => {
     });
   });
 
-  test('owned no-git clone reclones; no .gbrain-reclone-* / .old-* residue left', async () => {
+  test('owned no-git clone reclones; no .modusbrain-reclone-* / .old-* residue left', async () => {
     await withEnv2(async () => {
       const row = await addSource(engine, {
         id: 'swap-clean',
@@ -688,7 +688,7 @@ describe('recloneIfMissing — symlink TOCTOU + EXDEV-safe swap', () => {
 
       // Parent (CLONE_ROOT) must hold no swap residue.
       const residue = readdirSync(CLONE_ROOT).filter(
-        (e) => e.startsWith('.gbrain-reclone-') || e.includes('.old-'),
+        (e) => e.startsWith('.modusbrain-reclone-') || e.includes('.old-'),
       );
       expect(residue).toEqual([]);
     });
@@ -784,8 +784,8 @@ describe('addSource --url — writes ownership marker', () => {
 // ---------------------------------------------------------------------------
 
 describe('isPathContained', () => {
-  // Use a sandbox dir, not GBRAIN_HOME (which has the .gbrain quirk).
-  const SANDBOX = join(tmpdir(), `gbrain-isPathContained-${process.pid}`);
+  // Use a sandbox dir, not MODUSBRAIN_HOME (which has the .modusbrain quirk).
+  const SANDBOX = join(tmpdir(), `modusbrain-isPathContained-${process.pid}`);
   beforeEach(() => {
     rmSync(SANDBOX, { recursive: true, force: true });
     mkdirSync(SANDBOX, { recursive: true });

@@ -20,7 +20,7 @@ let packDir: string;
 let plainDir: string;
 
 beforeEach(() => {
-  root = mkdtempSync(join(tmpdir(), 'gbrain-brl-'));
+  root = mkdtempSync(join(tmpdir(), 'modusbrain-brl-'));
   packDir = join(root, 'pack-source');
   plainDir = join(root, 'plain-source');
   runInitBrainPack({ targetDir: packDir, name: 'deal-brain', firstSkillSlug: 'diligence', schemaPack: 'gbrain-base' });
@@ -80,10 +80,10 @@ describe('loadResidentPacksForServer', () => {
   test('computes schema_pack_match server-side against per-source config (#7)', async () => {
     const engine = fakeEngine(
       [{ id: 'default', local_path: packDir }],
-      { 'schema_pack.source.default': 'gbrain-other' },
+      { 'schema_pack.source.default': 'modusbrain-other' },
     );
     const result = await loadResidentPacksForServer(ctxFor(engine, { remote: false }));
-    expect(result.packs[0]!.active_schema_pack).toBe('gbrain-other');
+    expect(result.packs[0]!.active_schema_pack).toBe('modusbrain-other');
     expect(result.packs[0]!.schema_pack_match).toBe(false);
   });
 

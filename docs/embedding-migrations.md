@@ -1,12 +1,12 @@
 # Switching embedding models or dimensions on an existing brain
 
-GBrain stores embeddings in a fixed-dimension `vector(N)` column on
+ModusBrain stores embeddings in a fixed-dimension `vector(N)` column on
 `content_chunks`. If you switch to a model with a different dimension
 (e.g. `openai:text-embedding-3-large` 1536 → `zeroentropyai:zembed-1`
 1280, or `voyage:voyage-4-large` 2048), the on-disk column type doesn't
 change automatically.
 
-`gbrain init`, `gbrain doctor`, and `gbrain embed --stale` all detect
+`modusbrain init`, `modusbrain doctor`, and `modusbrain embed --stale` all detect
 this mismatch and refuse to silently proceed. This doc is the recipe
 they point at.
 
@@ -15,20 +15,20 @@ they point at.
 If you switch to a different model at the **same** dimension count
 (e.g. one 1536-dim provider to another, or a re-tuned model that keeps
 its width), the column type doesn't change, so no `ALTER`/wipe recipe
-is needed. As of v0.41.31.0, gbrain stamps an embedding-provenance
+is needed. As of v0.41.31.0, modusbrain stamps an embedding-provenance
 signature (`<provider:model>:<dims>`) onto each page when its chunks are
 embedded. After you point the config at the new model, the stored
-signatures differ from the current one, and `gbrain embed --stale`
+signatures differ from the current one, and `modusbrain embed --stale`
 re-embeds exactly those pages:
 
 ```bash
 # After switching to the new same-dim model in your config:
-gbrain embed --stale          # re-embeds signature-drifted pages
-gbrain embed --stale --dry-run # preview the count without re-embedding
+modusbrain embed --stale          # re-embeds signature-drifted pages
+modusbrain embed --stale --dry-run # preview the count without re-embedding
 ```
 
 Under federated_v2, the same drift is picked up by the per-source
-`embed-backfill` jobs that `gbrain sync --all` enqueues (capped
+`embed-backfill` jobs that `modusbrain sync --all` enqueues (capped
 `$X/source/24h`). **Grandfather:** pages embedded before v0.41.31.0
 carry a NULL signature and are NEVER flagged stale, so upgrading to
 v0.41.31.0 does NOT trigger a whole-corpus re-embed. Signatures only
@@ -62,14 +62,14 @@ The path that works on PGLite is **wipe-and-reinit**. v0.37 ships a
 single-command wrapper:
 
 ```bash
-gbrain reinit-pglite \
+modusbrain reinit-pglite \
   --embedding-model zeroentropyai:zembed-1 \
   --embedding-dimensions 1280
 ```
 
-This backs up the existing brain to `<path>.bak`, runs `gbrain init`
+This backs up the existing brain to `<path>.bak`, runs `modusbrain init`
 with the new flags (preserving every other field in
-`~/.gbrain/config.json`), and re-syncs the brain repo. Add `--no-sync`
+`~/.modusbrain/config.json`), and re-syncs the brain repo. Add `--no-sync`
 to skip the resync, `--yes` to skip the TTY confirmation, `--json` for
 structured output.
 
@@ -77,23 +77,23 @@ Equivalent by hand:
 
 ```bash
 # 1. Back up the existing brain (in case you want to roll back).
-mv ~/.gbrain/brain.pglite ~/.gbrain/brain.pglite.bak
+mv ~/.modusbrain/brain.pglite ~/.modusbrain/brain.pglite.bak
 
-# 2. Re-init with the new model + dimensions. `gbrain init` writes
+# 2. Re-init with the new model + dimensions. `modusbrain init` writes
 #    the schema sized to the new dim, and (as of v0.37) preserves
-#    every other field in ~/.gbrain/config.json (chat model,
+#    every other field in ~/.modusbrain/config.json (chat model,
 #    expansion model, API keys).
-gbrain init --pglite \
+modusbrain init --pglite \
   --embedding-model zeroentropyai:zembed-1 \
   --embedding-dimensions 1280
 
-# 3. Re-import your brain repo. `gbrain sync` reads the brain repo
+# 3. Re-import your brain repo. `modusbrain sync` reads the brain repo
 #    from disk and re-creates the page rows.
-gbrain sync
+modusbrain sync
 
 # 4. Re-embed. The embed pipeline now uses the new model and the
 #    column accepts the new dim.
-gbrain embed --stale
+modusbrain embed --stale
 ```
 
 If your brain repo is large enough that re-syncing from disk is
@@ -101,8 +101,8 @@ expensive (>50K pages), see the Postgres section below — migrating to
 Postgres temporarily lets you run the SQL recipe, then migrate back to
 PGLite.
 
-`GBRAIN_HOME` users: substitute the active database path (or use
-`gbrain config get database_path` to find it).
+`MODUSBRAIN_HOME` users: substitute the active database path (or use
+`modusbrain config get database_path` to find it).
 
 ## Postgres (Supabase / self-hosted)
 
@@ -127,7 +127,7 @@ UPDATE content_chunks SET embedding = NULL, embedded_at = NULL;
 ALTER TABLE content_chunks ALTER COLUMN embedding TYPE vector(<NEW_DIMS>);
 
 -- 4. Recreate the HNSW index ONLY IF dims <= 2000. Above that, leave it
---    indexless and rely on exact scans (gbrain searchVector handles this
+--    indexless and rely on exact scans (modusbrain searchVector handles this
 --    automatically — search just gets slower, not broken).
 -- For dims <= 2000 (e.g. 1024, 1280, 1536, 768):
 CREATE INDEX IF NOT EXISTS idx_chunks_embedding
@@ -140,7 +140,7 @@ COMMIT;
 Then re-init config with the new model:
 
 ```bash
-gbrain init --supabase \
+modusbrain init --supabase \
   --embedding-model <provider:model> \
   --embedding-dimensions <NEW_DIMS>
 ```
@@ -148,27 +148,27 @@ gbrain init --supabase \
 And re-embed:
 
 ```bash
-gbrain embed --stale
+modusbrain embed --stale
 ```
 
-## A note on `gbrain config set`
+## A note on `modusbrain config set`
 
-Pre-v0.37 docs recommended `gbrain config set embedding_model X` to
+Pre-v0.37 docs recommended `modusbrain config set embedding_model X` to
 switch models. **This is a no-op for the embed pipeline.** `config set`
 writes the DB plane; the embed gateway reads the file plane
-(`~/.gbrain/config.json`). The pre-v0.37 recipe shipped the lie because
+(`~/.modusbrain/config.json`). The pre-v0.37 recipe shipped the lie because
 the contract wasn't surfaced.
 
-As of v0.37, `gbrain config set embedding_model` and `gbrain config set
+As of v0.37, `modusbrain config set embedding_model` and `modusbrain config set
 embedding_dimensions` REFUSE and print the wipe-and-reinit recipe.
 
-To change schema-sizing fields, use `gbrain init` (PGLite) or the SQL
+To change schema-sizing fields, use `modusbrain init` (PGLite) or the SQL
 recipe (Postgres). Both update the file plane AND the schema together.
 
 ## Verify
 
-After the recipe lands, `gbrain doctor --fast` should report green and
-`gbrain doctor` should pass the `embedding_width_consistency` check:
+After the recipe lands, `modusbrain doctor --fast` should report green and
+`modusbrain doctor` should pass the `embedding_width_consistency` check:
 
 ```
 ✓ embedding_width_consistency   dim parity: config 1280 / column vector(1280)

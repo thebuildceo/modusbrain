@@ -3,7 +3,7 @@
  * link-extraction watermark.
  *
  * `performSync`'s INCREMENTAL path runs link/timeline extraction inline for the
- * changed pages (the `gbrain sync` default — see performSyncInner's auto-extract
+ * changed pages (the `modusbrain sync` default — see performSyncInner's auto-extract
  * block). v0.42.7 adds a `stampExtracted` call at that call site (after
  * extractLinksForSlugs/extractTimelineForSlugs) so a normal incremental sync
  * marks the pages it just extracted as fresh — otherwise every synced page
@@ -60,7 +60,7 @@ describe('#1696 — inline sync extract stamps links_extracted_at', () => {
 
   beforeEach(async () => {
     await resetPgliteState(engine);
-    repoPath = mkdtempSync(join(tmpdir(), 'gbrain-stamp-'));
+    repoPath = mkdtempSync(join(tmpdir(), 'modusbrain-stamp-'));
     execSync('git init', { cwd: repoPath, stdio: 'pipe' });
     execSync('git config user.email "t@t.com"', { cwd: repoPath, stdio: 'pipe' });
     execSync('git config user.name "T"', { cwd: repoPath, stdio: 'pipe' });

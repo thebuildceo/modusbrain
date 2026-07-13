@@ -2,7 +2,7 @@
 id: agent-voice
 name: Voice Personas (Mars + Venus)
 version: 0.1.0
-description: WebRTC-first voice agent reference (Mars + Venus personas, optional Twilio adapter). Skillpack-as-reference paradigm — the install-time agent COPIES code into your host agent repo where it becomes user-owned and mutable, NOT a runtime gbrain dependency.
+description: WebRTC-first voice agent reference (Mars + Venus personas, optional Twilio adapter). Skillpack-as-reference paradigm — the install-time agent COPIES code into your host agent repo where it becomes user-owned and mutable, NOT a runtime modusbrain dependency.
 category: voice
 install_kind: copy-into-host-repo
 requires: []
@@ -26,7 +26,7 @@ cost_estimate: "$0.06-0.24/min OpenAI Realtime, optional $1-2/mo Twilio number"
 
 # Voice Personas: Mars + Venus
 
-A reference voice agent (WebRTC-first; OpenAI Realtime) shipped as **copy-into-your-repo** content rather than runtime gbrain skills. The install-time agent reads this recipe, copies the bundle into your host agent repo (e.g. `~/git/your-agent-repo/`), wires the resolver, and starts the voice server. From there, the code lives in YOUR repo, on YOUR cadence, with YOUR edits.
+A reference voice agent (WebRTC-first; OpenAI Realtime) shipped as **copy-into-your-repo** content rather than runtime modusbrain skills. The install-time agent reads this recipe, copies the bundle into your host agent repo (e.g. `~/git/your-agent-repo/`), wires the resolver, and starts the voice server. From there, the code lives in YOUR repo, on YOUR cadence, with YOUR edits.
 
 ## What ships in the bundle
 
@@ -40,11 +40,11 @@ A reference voice agent (WebRTC-first; OpenAI Realtime) shipped as **copy-into-y
 
 ## The skillpack-as-reference paradigm
 
-Earlier gbrain skillpacks installed to `~/.gbrain/skills/<name>/` as managed-block-canonical first-class skills. The user's local edits drifted from the canonical and updates were either "overwrite local" or "skip update" — neither is what an operator wants on code they've extended.
+Earlier modusbrain skillpacks installed to `~/.modusbrain/skills/<name>/` as managed-block-canonical first-class skills. The user's local edits drifted from the canonical and updates were either "overwrite local" or "skip update" — neither is what an operator wants on code they've extended.
 
-This recipe ships a different shape: gbrain holds the up-to-date REFERENCE, and `gbrain integrations install agent-voice --target <host-repo>` COPIES it into the operator's repo. The code now lives in the host repo, on the operator's release cadence, with the operator's edits. Subsequent `--refresh` invocations diff host-side files against gbrain's reference and propose changes; the operator picks per-file (keep mine / take theirs / merge).
+This recipe ships a different shape: modusbrain holds the up-to-date REFERENCE, and `modusbrain integrations install agent-voice --target <host-repo>` COPIES it into the operator's repo. The code now lives in the host repo, on the operator's release cadence, with the operator's edits. Subsequent `--refresh` invocations diff host-side files against modusbrain's reference and propose changes; the operator picks per-file (keep mine / take theirs / merge).
 
-The shipped reference does NOT contain personal names, hardcoded private paths, or upstream-agent codenames. A CI guard (`scripts/check-no-pii-in-agent-voice.sh`) blocks any drift back; a deterministic import script (`scripts/import-from-upstream.sh`) refreshes the gbrain reference from an upstream voice-agent source.
+The shipped reference does NOT contain personal names, hardcoded private paths, or upstream-agent codenames. A CI guard (`scripts/check-no-pii-in-agent-voice.sh`) blocks any drift back; a deterministic import script (`scripts/import-from-upstream.sh`) refreshes the modusbrain reference from an upstream voice-agent source.
 
 ## Install
 
@@ -53,9 +53,9 @@ The shipped reference does NOT contain personal names, hardcoded private paths, 
 export TARGET_REPO=$OPENCLAW_WORKSPACE     # or your agent repo path
 
 # 2. Install
-gbrain integrations install agent-voice --target $TARGET_REPO
+modusbrain integrations install agent-voice --target $TARGET_REPO
 
-# 3. Set env vars in $TARGET_REPO/.env (NOT in gbrain)
+# 3. Set env vars in $TARGET_REPO/.env (NOT in modusbrain)
 echo "OPENAI_API_KEY=sk-..." >> $TARGET_REPO/.env
 echo "DEFAULT_PERSONA=venus" >> $TARGET_REPO/.env
 
@@ -75,25 +75,25 @@ cd $TARGET_REPO/services/voice-agent && bun run start
 
 Open `http://localhost:8765/call` and click Connect. The browser asks for mic permission; once granted, it does an SDP exchange via `POST /session`, the OpenAI Realtime API returns the SDP answer, and audio flows bidirectionally over WebRTC.
 
-For test-mode roundtrip checks, append `?test=1` to the URL — that enables the `window._gbrainTest` instrumentation namespace + MediaRecorder capture of the response audio.
+For test-mode roundtrip checks, append `?test=1` to the URL — that enables the `window._modusbrainTest` instrumentation namespace + MediaRecorder capture of the response audio.
 
-## Update (refresh from gbrain)
+## Update (refresh from modusbrain)
 
 ```bash
-# Pull latest gbrain → re-run the install with --refresh
-git -C $(which gbrain | xargs -I{} dirname {})/.. pull   # or your gbrain update path
-gbrain integrations install agent-voice --target $TARGET_REPO --refresh
+# Pull latest modusbrain → re-run the install with --refresh
+git -C $(which modusbrain | xargs -I{} dirname {})/.. pull   # or your modusbrain update path
+modusbrain integrations install agent-voice --target $TARGET_REPO --refresh
 ```
 
-`--refresh` reads the `.gbrain-source.json` manifest written by the original install, re-computes per-file SHA-256 against gbrain's current reference, and classifies each file:
+`--refresh` reads the `.modusbrain-source.json` manifest written by the original install, re-computes per-file SHA-256 against modusbrain's current reference, and classifies each file:
 
-- **unchanged-identical** — host file matches gbrain reference; skip.
+- **unchanged-identical** — host file matches modusbrain reference; skip.
 - **unchanged-stale** — host file matches the recorded SHA but reference moved; offer to update.
 - **locally-modified** — host file diverges from the recorded SHA; show diff, offer three options (keep mine / take theirs / merge).
-- **source-deleted** — gbrain reference removed a file; offer cleanup.
+- **source-deleted** — modusbrain reference removed a file; offer cleanup.
 - **source-renamed** — detected via path-mapping; offer to follow.
 
-A transaction journal at `<target>/services/voice-agent/.gbrain-source.refresh.log` allows partial-apply recovery if the refresh is interrupted.
+A transaction journal at `<target>/services/voice-agent/.modusbrain-source.refresh.log` allows partial-apply recovery if the refresh is interrupted.
 
 ## Architecture
 
@@ -122,7 +122,7 @@ A transaction journal at `<target>/services/voice-agent/.gbrain-source.refresh.l
                          │
                          ▼  stdio JSON-RPC
               ┌─────────────────────┐
-              │  gbrain serve (MCP)  │
+              │  modusbrain serve (MCP)  │
               └─────────────────────┘
 ```
 
@@ -158,4 +158,4 @@ The full-flow E2E is **friction-discovery**, not a ship-gate. Pre-ship gates on 
 - Smart VAD presets (quiet/normal/noisy/very_noisy) — uses Realtime API's default VAD today.
 - WebRTC `/session` does not yet ship MediaRecorder fallback for environments where the WebAudio-tee fails.
 
-Each of the deferred items is filed as a TODO in the gbrain repo's `TODOS.md`.
+Each of the deferred items is filed as a TODO in the modusbrain repo's `TODOS.md`.

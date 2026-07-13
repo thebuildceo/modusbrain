@@ -1,7 +1,7 @@
 /**
  * Per-source health metrics (v0.40 D12 + D9 + D17 + D19).
  *
- * Single source of truth for `gbrain sources status` AND `gbrain doctor`'s
+ * Single source of truth for `modusbrain sources status` AND `modusbrain doctor`'s
  * `federation_health` check. Sharing the implementation prevents the dashboard
  * and the doctor warning from drifting.
  *
@@ -92,8 +92,8 @@ export function resolvePriorityLabel(
   if (!_warnedSources.has(sourceId)) {
     _warnedSources.add(sourceId);
     process.stderr.write(
-      `[gbrain] source "${sourceId}": invalid config.priority value ${JSON.stringify(raw)}; ` +
-      `falling back to 'normal'. Fix: gbrain sources config set ${sourceId} priority normal\n`,
+      `[modusbrain] source "${sourceId}": invalid config.priority value ${JSON.stringify(raw)}; ` +
+      `falling back to 'normal'. Fix: modusbrain sources config set ${sourceId} priority normal\n`,
     );
   }
   return 'normal';
@@ -216,7 +216,7 @@ export async function computeAllSourceMetrics(
   const chunkCounts = await chunkCountsBySource(engine);
   const jobCounts = await jobCountsBySource(engine);
   const now = Date.now();
-  // v0.41.32.0: LOCAL callers (gbrain sources status/audit) opt into a live
+  // v0.41.32.0: LOCAL callers (modusbrain sources status/audit) opt into a live
   // commit-hash probe; the REMOTE federation_health path leaves it off and
   // reads the stored column (no subprocess on a DB-supplied local_path).
   const probeContent = opts?.probeContent === true;

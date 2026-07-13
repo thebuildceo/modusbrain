@@ -29,7 +29,7 @@ async function waitForOrigin(bare: string, expectSha: string, ms = 8000): Promis
 }
 
 let root: string, work: string, bare: string;
-let oldHome: string | undefined, oldGbrainHome: string | undefined;
+let oldHome: string | undefined, oldModusbrainHome: string | undefined;
 
 function shellPath(path: string): string {
   if (process.platform !== 'win32') return path;
@@ -43,10 +43,10 @@ function nodePath(path: string): string {
 
 beforeEach(async () => {
   root = mkdtempSync(join(tmpdir(), 'bdh-'));
-  oldHome = process.env.HOME; oldGbrainHome = process.env.GBRAIN_HOME;
+  oldHome = process.env.HOME; oldModusbrainHome = process.env.MODUSBRAIN_HOME;
   process.env.HOME = mkdtempSync(join(root, 'home-'));
-  process.env.GBRAIN_HOME = shellPath(join(process.env.HOME, '.gbrain'));
-  process.env.GBRAIN_GIT_ALLOW_FILE_TRANSPORT = '1';
+  process.env.MODUSBRAIN_HOME = shellPath(join(process.env.HOME, '.modusbrain'));
+  process.env.MODUSBRAIN_GIT_ALLOW_FILE_TRANSPORT = '1';
   bare = mkdtempSync(join(root, 'origin-')) + '.git';
   execFileSync('git', ['init', '-q', '--bare', '-b', 'main', bare], { stdio: 'ignore' });
   work = mkdtempSync(join(root, 'work-'));
@@ -59,8 +59,8 @@ beforeEach(async () => {
 });
 afterEach(() => {
   if (oldHome === undefined) delete process.env.HOME; else process.env.HOME = oldHome;
-  if (oldGbrainHome === undefined) delete process.env.GBRAIN_HOME; else process.env.GBRAIN_HOME = oldGbrainHome;
-  delete process.env.GBRAIN_GIT_ALLOW_FILE_TRANSPORT;
+  if (oldModusbrainHome === undefined) delete process.env.MODUSBRAIN_HOME; else process.env.MODUSBRAIN_HOME = oldModusbrainHome;
+  delete process.env.MODUSBRAIN_GIT_ALLOW_FILE_TRANSPORT;
   try { rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 }); } catch { /* Windows git hook cleanup */ }
 });
 
@@ -121,7 +121,7 @@ describe('post-commit hook (D9 local, D7 self-contained)', () => {
     git(work, 'remote', 'set-url', 'origin', join(root, 'gone2.git'));
     writeFileSync(join(work, 'orphan.md'), 'o\n');
     git(work, 'add', 'orphan.md'); git(work, 'commit', '-qm', 'orphan');
-    const log = nodePath(`${process.env.GBRAIN_HOME!}/brain-push.log`);
+    const log = nodePath(`${process.env.MODUSBRAIN_HOME!}/brain-push.log`);
     const deadline = Date.now() + (process.platform === 'win32' ? 30_000 : 8000);
     let found = false;
     while (Date.now() < deadline) {

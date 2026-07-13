@@ -1,6 +1,6 @@
 /**
  * brain-repo-durability core (v0.42.44): hardenBrainRepo / unhardenBrainRepo /
- * acceptPat. Real git against a local bare remote. HOME + GBRAIN_HOME are
+ * acceptPat. Real git against a local bare remote. HOME + MODUSBRAIN_HOME are
  * redirected to a tmp dir; installCron:false so the suite never touches launchd.
  */
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
@@ -31,7 +31,7 @@ let root: string;
 let work: string;
 let bare: string;
 let oldHome: string | undefined;
-let oldGbrainHome: string | undefined;
+let oldModusbrainHome: string | undefined;
 
 function makePair(): void {
   bare = mkdtempSync(join(root, 'origin-')) + '.git';
@@ -51,16 +51,16 @@ async function harden(extra: Record<string, unknown> = {}) {
 
 beforeEach(() => {
   root = mkdtempSync(join(tmpdir(), 'brd-'));
-  oldHome = process.env.HOME; oldGbrainHome = process.env.GBRAIN_HOME;
+  oldHome = process.env.HOME; oldModusbrainHome = process.env.MODUSBRAIN_HOME;
   process.env.HOME = mkdtempSync(join(root, 'home-'));
-  process.env.GBRAIN_HOME = join(process.env.HOME, '.gbrain');
-  process.env.GBRAIN_GIT_ALLOW_FILE_TRANSPORT = '1';
+  process.env.MODUSBRAIN_HOME = join(process.env.HOME, '.modusbrain');
+  process.env.MODUSBRAIN_GIT_ALLOW_FILE_TRANSPORT = '1';
   makePair();
 });
 afterEach(() => {
   if (oldHome === undefined) delete process.env.HOME; else process.env.HOME = oldHome;
-  if (oldGbrainHome === undefined) delete process.env.GBRAIN_HOME; else process.env.GBRAIN_HOME = oldGbrainHome;
-  delete process.env.GBRAIN_GIT_ALLOW_FILE_TRANSPORT;
+  if (oldModusbrainHome === undefined) delete process.env.MODUSBRAIN_HOME; else process.env.MODUSBRAIN_HOME = oldModusbrainHome;
+  delete process.env.MODUSBRAIN_GIT_ALLOW_FILE_TRANSPORT;
   try { rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 }); } catch { /* Windows git hook cleanup */ }
 });
 
@@ -78,7 +78,7 @@ describe('hardenBrainRepo', () => {
     if (process.platform !== 'win32') expect(statSync(helperPath).mode & 0o111).toBeTruthy();
     // AGENTS.md with managed block + taxonomy
     const agents = readFileSync(join(work, 'AGENTS.md'), 'utf-8');
-    expect(agents).toContain('BEGIN gbrain-brain-durability');
+    expect(agents).toContain('BEGIN modusbrain-brain-durability');
     expect(agents).toContain('people/');
     expect(agents).toContain('brain-commit-push.sh');
     // verify pushed scaffolding → clean against origin
@@ -106,7 +106,7 @@ describe('hardenBrainRepo', () => {
     writeFileSync(join(work, 'RESOLVER.md'), '# my resolver\n\nuser content\n');
     git(work, 'add', 'RESOLVER.md'); git(work, 'commit', '-qm', 'resolver');
     await harden();
-    expect(readFileSync(join(work, 'RESOLVER.md'), 'utf-8')).toContain('BEGIN gbrain-brain-durability');
+    expect(readFileSync(join(work, 'RESOLVER.md'), 'utf-8')).toContain('BEGIN modusbrain-brain-durability');
     expect(existsSync(join(work, 'AGENTS.md'))).toBe(false);
   });
 
@@ -117,24 +117,24 @@ describe('hardenBrainRepo', () => {
     const body = readFileSync(join(work, 'AGENTS.md'), 'utf-8');
     expect(body).toContain('keep above');
     expect(body).toContain('keep below');
-    expect(body).toContain('BEGIN gbrain-brain-durability');
+    expect(body).toContain('BEGIN modusbrain-brain-durability');
     // patch-in-place: exactly one managed block
-    expect(body.split('BEGIN gbrain-brain-durability').length - 1).toBe(1);
+    expect(body.split('BEGIN modusbrain-brain-durability').length - 1).toBe(1);
   });
 
   test('D11 — writes a repo-scoped credential (0600 store, local config, ownership key)', async () => {
     await harden();
-    const store = join(process.env.GBRAIN_HOME!, 'git-credentials');
+    const store = join(process.env.MODUSBRAIN_HOME!, 'git-credentials');
     expect(existsSync(store)).toBe(true);
     if (process.platform !== 'win32') expect(statSync(store).mode & 0o077).toBe(0); // not group/other readable
     expect(git(work, 'config', '--local', '--get', 'credential.helper')).toContain('store --file');
-    expect(cfg(work, 'gbrain.durability.managedcredential')).toBe('true');
+    expect(cfg(work, 'modusbrain.durability.managedcredential')).toBe('true');
   });
 
   test('D11 — reuses an existing credential.helper (no plaintext store written)', async () => {
     git(work, 'config', 'credential.helper', 'osxkeychain');
     await harden();
-    const store = join(process.env.GBRAIN_HOME!, 'git-credentials');
+    const store = join(process.env.MODUSBRAIN_HOME!, 'git-credentials');
     expect(existsSync(store)).toBe(false);
     expect(git(work, 'config', '--local', '--get', 'credential.helper')).toBe('osxkeychain');
   });
@@ -176,7 +176,7 @@ describe('unhardenBrainRepo', () => {
     await harden();
     const steps = await unhardenBrainRepo({ repoPath: work, sourceId: 'wiki' });
     expect(existsSync(join(work, '.git', 'hooks', 'post-commit'))).toBe(false);
-    expect(cfg(work, 'gbrain.durability.managedcredential')).toBe('');
+    expect(cfg(work, 'modusbrain.durability.managedcredential')).toBe('');
     // committed helper stays
     expect(existsSync(join(work, 'scripts', 'brain-commit-push.sh'))).toBe(true);
     expect(steps.find(s => s.step === 'hook')?.status).toBe('fixed');
@@ -213,15 +213,15 @@ describe('acceptPat (D8)', () => {
     expect(r?.token).toBe(PAT);
     expect(r?.warnings.length).toBeGreaterThan(0);
   });
-  test('falls back to GBRAIN_GITHUB_PAT env', () => {
-    const old = process.env.GBRAIN_GITHUB_PAT;
-    process.env.GBRAIN_GITHUB_PAT = PAT;
-    try { expect(acceptPat({})?.source).toBe('env:GBRAIN_GITHUB_PAT'); }
-    finally { if (old === undefined) delete process.env.GBRAIN_GITHUB_PAT; else process.env.GBRAIN_GITHUB_PAT = old; }
+  test('falls back to MODUSBRAIN_GITHUB_PAT env', () => {
+    const old = process.env.MODUSBRAIN_GITHUB_PAT;
+    process.env.MODUSBRAIN_GITHUB_PAT = PAT;
+    try { expect(acceptPat({})?.source).toBe('env:MODUSBRAIN_GITHUB_PAT'); }
+    finally { if (old === undefined) delete process.env.MODUSBRAIN_GITHUB_PAT; else process.env.MODUSBRAIN_GITHUB_PAT = old; }
   });
   test('returns null when no PAT is available', () => {
-    const old = process.env.GBRAIN_GITHUB_PAT; delete process.env.GBRAIN_GITHUB_PAT;
+    const old = process.env.MODUSBRAIN_GITHUB_PAT; delete process.env.MODUSBRAIN_GITHUB_PAT;
     try { expect(acceptPat({})).toBeNull(); }
-    finally { if (old !== undefined) process.env.GBRAIN_GITHUB_PAT = old; }
+    finally { if (old !== undefined) process.env.MODUSBRAIN_GITHUB_PAT = old; }
   });
 });

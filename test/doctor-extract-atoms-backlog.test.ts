@@ -7,10 +7,10 @@
  *  - computeExtractAtomsBacklogCheck WARNs with a `--drain` hint when the pack
  *    doesn't run the phase and the backlog is real; OK at 0.
  *
- * Real in-memory PGLite (canonical block, R3+R4). GBRAIN_HOME is pointed at an
+ * Real in-memory PGLite (canonical block, R3+R4). MODUSBRAIN_HOME is pointed at an
  * empty tmpdir for the doctor-check cases so packDeclaresPhase resolves the
  * bundled base pack (which does NOT declare extract_atoms) deterministically,
- * independent of the developer's real ~/.gbrain config.
+ * independent of the developer's real ~/.modusbrain config.
  */
 
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'bun:test';
@@ -24,7 +24,7 @@ import { countExtractAtomsBacklog } from '../src/core/cycle/extract-atoms.ts';
 import { computeExtractAtomsBacklogCheck } from '../src/commands/doctor.ts';
 
 let engine: PGLiteEngine;
-const EMPTY_HOME = mkdtempSync(join(tmpdir(), 'gbrain-xa-backlog-home-'));
+const EMPTY_HOME = mkdtempSync(join(tmpdir(), 'modusbrain-xa-backlog-home-'));
 
 beforeAll(async () => {
   engine = new PGLiteEngine();
@@ -80,7 +80,7 @@ describe('countExtractAtomsBacklog (issue #1678)', () => {
 
 describe('computeExtractAtomsBacklogCheck (issue #1678)', () => {
   it('OK with no backlog', async () => {
-    const check = await withEnv({ GBRAIN_HOME: EMPTY_HOME }, () =>
+    const check = await withEnv({ MODUSBRAIN_HOME: EMPTY_HOME }, () =>
       computeExtractAtomsBacklogCheck(engine));
     expect(check.status).toBe('ok');
     expect((check.details as { backlog: number }).backlog).toBe(0);
@@ -88,7 +88,7 @@ describe('computeExtractAtomsBacklogCheck (issue #1678)', () => {
 
   it('WARNs with a --drain hint when the pack does not run the phase and backlog > 10', async () => {
     for (let i = 0; i < 11; i++) await seedArticle(`article-${i}`);
-    const check = await withEnv({ GBRAIN_HOME: EMPTY_HOME }, () =>
+    const check = await withEnv({ MODUSBRAIN_HOME: EMPTY_HOME }, () =>
       computeExtractAtomsBacklogCheck(engine));
     expect(check.status).toBe('warn');
     expect(check.message).toContain('--drain');

@@ -1,6 +1,6 @@
 # Why the hybrid + graph stack works
 
-Vector search alone underdelivers on real personal-knowledge queries. This doc explains why gbrain layers four strategies together and how they compound.
+Vector search alone underdelivers on real personal-knowledge queries. This doc explains why modusbrain layers four strategies together and how they compound.
 
 ## The four strategies in concert
 
@@ -21,14 +21,14 @@ Vector search alone underdelivers on real personal-knowledge queries. This doc e
 
 ## The benchmark
 
-BrainBench (corpus + harness in the sibling [gbrain-evals](https://github.com/garrytan/gbrain-evals) repo) measures retrieval P@5, R@5, MRR, nDCG@5 on a 240-page Opus-generated rich-prose corpus.
+BrainBench (corpus + harness in the sibling [modusbrain-evals](https://github.com/garrytan/gbrain-evals) repo) measures retrieval P@5, R@5, MRR, nDCG@5 on a 240-page Opus-generated rich-prose corpus.
 
 | Strategy | P@5 | R@5 | Notes |
 |---|---|---|---|
 | ripgrep BM25 only | ~18 | ~75 | Lexical-only baseline |
 | vector-only RAG | ~18 | ~80 | Standard RAG implementation |
-| gbrain graph-disabled (hybrid + RRF, no graph traversal) | ~18 | ~85 | Hybrid alone |
-| **gbrain default (full stack)** | **49.1** | **97.9** | Graph + extract-quality lift |
+| modusbrain graph-disabled (hybrid + RRF, no graph traversal) | ~18 | ~85 | Hybrid alone |
+| **modusbrain default (full stack)** | **49.1** | **97.9** | Graph + extract-quality lift |
 
 **+31 P@5 points** from the graph + extract quality work. The graph isn't a marginal feature; it's the load-bearing wall.
 
@@ -40,7 +40,7 @@ Every `put_page` runs `extractEntityRefs` on the markdown body. It matches:
 - Obsidian wikilinks: `[[wiki/people/garry-tan|Garry Tan]]`
 - Typed-link blockquotes: `> **Convention:** see [path](path).`
 
-Three regexes, zero LLM tokens, single SQL `addLinksBatch` call with `INSERT ... SELECT FROM jsonb_to_recordset(($1::jsonb)->'rows') JOIN pages ON CONFLICT DO NOTHING RETURNING 1` (free-text-safe; the prior `unnest(${arr}::text[])` form crashed on calendar/Zoom context per gbrain#1861). The graph grows on every write at near-zero cost. On a 17K-page brain, full graph extract completes in seconds.
+Three regexes, zero LLM tokens, single SQL `addLinksBatch` call with `INSERT ... SELECT FROM jsonb_to_recordset(($1::jsonb)->'rows') JOIN pages ON CONFLICT DO NOTHING RETURNING 1` (free-text-safe; the prior `unnest(${arr}::text[])` form crashed on calendar/Zoom context per modusbrain#1861). The graph grows on every write at near-zero cost. On a 17K-page brain, full graph extract completes in seconds.
 
 Heuristic link-type inference (`attended`, `works_at`, `invested_in`, `founded`, `advises`) fires from surrounding sentence context — also LLM-free. Power users who want richer types add them via the typed-link blockquote convention.
 
@@ -50,15 +50,15 @@ v0.36.0.0 ships ZeroEntropy's `zerank-2` as the default reranker (on for the `ba
 
 The mechanical reason: hybrid ranking is locally optimal per strategy but globally suboptimal. A cross-encoder reranker reads the query + each candidate document jointly, with full attention. It catches the cases where the vector + keyword + graph signals all agreed on a document that's semantically related but topically wrong.
 
-The cost: +150ms p50 latency, ~$0.025/M tokens. Disabled with `gbrain config set search.reranker.enabled false`. For agent loops that do downstream LLM work after retrieval, the latency is invisible.
+The cost: +150ms p50 latency, ~$0.025/M tokens. Disabled with `modusbrain config set search.reranker.enabled false`. For agent loops that do downstream LLM work after retrieval, the latency is invisible.
 
 ## Source-aware ranking
 
 Hybrid search applies a source-factor CASE expression at the SQL layer (lives in `src/core/search/sql-ranking.ts`). Curated content like `originals/`, `concepts/`, `writing/` outranks bulk content like `your-openclaw/chat/`, `daily/`, `media/x/`. Hard-exclude prefixes (`test/`, `attachments/`, `.raw/`) filter at retrieval, not post-rank.
 
-`archive/` is deliberately NOT hard-excluded (issue #1777): it holds high-signal historical content users expect to find, so it is demoted (`0.5x` in `DEFAULT_SOURCE_BOOSTS`), not hidden. The demote is a prior applied in the outer SQL re-rank; the cross-encoder reranker (balanced/tokenmax modes) can still PROMOTE an archive page that survives the demote into the rerank candidate window — it is not an unconditional suppression. `gbrain doctor`'s `hidden_by_search_policy` check reports how many chunked pages remain hidden by the surviving exclude prefixes.
+`archive/` is deliberately NOT hard-excluded (issue #1777): it holds high-signal historical content users expect to find, so it is demoted (`0.5x` in `DEFAULT_SOURCE_BOOSTS`), not hidden. The demote is a prior applied in the outer SQL re-rank; the cross-encoder reranker (balanced/tokenmax modes) can still PROMOTE an archive page that survives the demote into the rerank candidate window — it is not an unconditional suppression. `modusbrain doctor`'s `hidden_by_search_policy` check reports how many chunked pages remain hidden by the surviving exclude prefixes.
 
-The boost map is configurable via `GBRAIN_SOURCE_BOOST` env var or per-call `SearchOpts.exclude_slug_prefixes`. Temporal queries (`detail: 'high'`) bypass the boost so chat pages re-surface for time-sensitive lookups.
+The boost map is configurable via `MODUSBRAIN_SOURCE_BOOST` env var or per-call `SearchOpts.exclude_slug_prefixes`. Temporal queries (`detail: 'high'`) bypass the boost so chat pages re-surface for time-sensitive lookups.
 
 ## Named-thing retrieval (per-page pool + title + alias + evidence)
 
@@ -80,7 +80,7 @@ embedding proximity. Four layers, added after the incident in
   consulted at query time: a full normalized-query match injects/boosts the
   canonical page (`applyAliasHop`). The only layer that bridges true synonyms
   with zero surface overlap ("Hall of Light" → the Mingtang page). Backfill
-  existing pages with `gbrain reindex --aliases`.
+  existing pages with `modusbrain reindex --aliases`.
 - **Evidence contract** — every result carries `evidence`
   (`alias_hit | exact_title_match | high_vector_match | keyword_exact |
   weak_semantic`) and `create_safety` (`exists | probable | unknown`). An agent
@@ -89,8 +89,8 @@ embedding proximity. Four layers, added after the incident in
 
 The `search` MCP/CLI op is **cheap-hybrid** (vector + keyword + RRF + pool +
 title + alias, expansion off); `query` is the full-control variant. NamedThingBench
-(`gbrain eval retrieval-quality`) gates these families on every PR. Diagnose a
-specific miss with `gbrain search diagnose "<q>" --target <slug>`.
+(`modusbrain eval retrieval-quality`) gates these families on every PR. Diagnose a
+specific miss with `modusbrain search diagnose "<q>" --target <slug>`.
 
 ## Intent-aware query rewriting
 
@@ -149,17 +149,17 @@ Each stage is testable in isolation. Each stage is replaceable. The whole pipeli
 
 ```bash
 # Run the public LongMemEval benchmark
-gbrain eval longmemeval datasets/longmemeval_s.jsonl
+modusbrain eval longmemeval datasets/longmemeval_s.jsonl
 
 # Capture your own queries and replay against retrieval changes
-export GBRAIN_CONTRIBUTOR_MODE=1
-# ... use gbrain normally ...
-gbrain eval export > before.ndjson
+export MODUSBRAIN_CONTRIBUTOR_MODE=1
+# ... use modusbrain normally ...
+modusbrain eval export > before.ndjson
 # ... change something ...
-gbrain eval replay --against before.ndjson
+modusbrain eval replay --against before.ndjson
 
 # A/B retrieval strategies on a labeled fixture
-gbrain eval --qrels labels.tsv --config balanced.json
+modusbrain eval --qrels labels.tsv --config balanced.json
 ```
 
 Methodology + metric glossary in [`docs/eval/SEARCH_MODE_METHODOLOGY.md`](../eval/SEARCH_MODE_METHODOLOGY.md).

@@ -1,9 +1,9 @@
 /**
  * Generic DB-backed lock primitive.
  *
- * Reuses the gbrain_cycle_locks table (id PK + holder_pid + ttl_expires_at)
- * with a parameterized lock id. Both `gbrain-cycle` (the broad cycle lock)
- * and `gbrain-sync` (performSync's writer lock) live here.
+ * Reuses the modusbrain_cycle_locks table (id PK + holder_pid + ttl_expires_at)
+ * with a parameterized lock id. Both `modusbrain-cycle` (the broad cycle lock)
+ * and `modusbrain-sync` (performSync's writer lock) live here.
  *
  * Why not pg_advisory_xact_lock: it is session-scoped, and PgBouncer
  * transaction pooling drops session state between calls. This row-based
@@ -14,9 +14,9 @@
  * the cycle lock is broader (covers every phase). performSync's write-window
  * is narrower. If performSync reused the cycle lock and the cycle handler
  * called performSync, the inner acquire would deadlock against itself. Two
- * lock ids let callers nest cleanly: cycle holds gbrain-cycle for its run;
+ * lock ids let callers nest cleanly: cycle holds modusbrain-cycle for its run;
  * performSync (called from anywhere — cycle, jobs handler, CLI) takes
- * gbrain-sync just for the write window.
+ * modusbrain-sync just for the write window.
  *
  * v0.22.13 — added in PR #490 to fix CODEX-2 (no cross-process lock for
  * direct sync paths). The cycle path was already protected.
@@ -51,12 +51,12 @@ export const HOLDER_TAKEOVER_GRACE_MS = 60_000;
  * live lock). A genuinely dead holder stops refreshing, ages past the grace,
  * and becomes stealable again (TTL stays the ultimate backstop). Derived from
  * the TTL so it scales with the refresh cadence; override with
- * GBRAIN_LOCK_STEAL_GRACE_SECONDS.
+ * MODUSBRAIN_LOCK_STEAL_GRACE_SECONDS.
  */
 export const DEFAULT_STEAL_GRACE_SECONDS = 600;
 
 export function resolveStealGraceSeconds(ttlMinutes: number): number {
-  const raw = process.env.GBRAIN_LOCK_STEAL_GRACE_SECONDS;
+  const raw = process.env.MODUSBRAIN_LOCK_STEAL_GRACE_SECONDS;
   if (raw) {
     const n = Number(raw);
     if (Number.isInteger(n) && n > 0) return n;
@@ -69,7 +69,7 @@ export function resolveStealGraceSeconds(ttlMinutes: number): number {
 /**
  * Liveness classification of a lock holder, from the perspective of the
  * current host. Shared by `isHolderDeadLocally` (auto-takeover in
- * `tryAcquireDbLock`) and `gbrain sync --break-lock`'s safe path so the two
+ * `tryAcquireDbLock`) and `modusbrain sync --break-lock`'s safe path so the two
  * never drift.
  *
  *   - `cross_host`     — holder is on a different host; `process.kill` is
@@ -134,7 +134,7 @@ export function isHolderDeadLocally(
 
 /**
  * issue #2227: is a lock-row holder live enough to count as "running" for an
- * observability surface (`gbrain jobs supervisor status`, `gbrain doctor`)?
+ * observability surface (`modusbrain jobs supervisor status`, `modusbrain doctor`)?
  *
  * PID-reuse-safe by design (`pid-liveness-alone-pid-reuse`): keys on the lock's
  * own freshness, NEVER `process.kill`. A live holder refreshes its TTL on a
@@ -202,11 +202,11 @@ export async function tryAcquireDbLock(
     // v0.41.13.0 (D-V3-4 / migration v98): write last_refreshed_at on INSERT
     // AND on takeover. last_refreshed_at = acquired_at on initial INSERT;
     // every refresh() tick bumps both ttl_expires_at AND last_refreshed_at.
-    // `gbrain sync --break-lock --max-age <s>` uses last_refreshed_at (not
+    // `modusbrain sync --break-lock --max-age <s>` uses last_refreshed_at (not
     // acquired_at) to identify wedged-but-alive holders without stealing
     // healthy long-running holders that are actively refreshing.
     const rows: Array<{ id: string }> = await sql`
-      INSERT INTO gbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at, last_refreshed_at)
+      INSERT INTO modusbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at, last_refreshed_at)
       VALUES (${lockId}, ${pid}, ${host}, NOW(), NOW() + ${ttl}::interval, NOW())
       ON CONFLICT (id) DO UPDATE
         SET holder_pid = ${pid},
@@ -214,15 +214,15 @@ export async function tryAcquireDbLock(
             acquired_at = NOW(),
             ttl_expires_at = NOW() + ${ttl}::interval,
             last_refreshed_at = NOW()
-        WHERE gbrain_cycle_locks.ttl_expires_at < NOW()
-          AND (gbrain_cycle_locks.last_refreshed_at IS NULL
-               OR gbrain_cycle_locks.last_refreshed_at < NOW() - ${stealGraceSeconds} * INTERVAL '1 second')
+        WHERE modusbrain_cycle_locks.ttl_expires_at < NOW()
+          AND (modusbrain_cycle_locks.last_refreshed_at IS NULL
+               OR modusbrain_cycle_locks.last_refreshed_at < NOW() - ${stealGraceSeconds} * INTERVAL '1 second')
       RETURNING id
     `;
     if (rows.length === 0) return null;
     const deregister = registerCleanup(`db-lock:${lockId}`, async () => {
       await sql`
-        DELETE FROM gbrain_cycle_locks
+        DELETE FROM modusbrain_cycle_locks
         WHERE id = ${lockId} AND holder_pid = ${pid}
       `;
     });
@@ -234,7 +234,7 @@ export async function tryAcquireDbLock(
         // transaction pool, so a Supavisor pooler exhaustion (EMAXCONNSESSION)
         // can't kill the heartbeat and let the live lock get stolen.
         await engine.executeRawDirect(
-          `UPDATE gbrain_cycle_locks
+          `UPDATE modusbrain_cycle_locks
               SET ttl_expires_at = NOW() + ($1)::interval,
                   last_refreshed_at = NOW()
             WHERE id = $2 AND holder_pid = $3`,
@@ -244,7 +244,7 @@ export async function tryAcquireDbLock(
       release: async () => {
         deregister();
         await sql`
-          DELETE FROM gbrain_cycle_locks
+          DELETE FROM modusbrain_cycle_locks
           WHERE id = ${lockId} AND holder_pid = ${pid}
         `;
       },
@@ -255,7 +255,7 @@ export async function tryAcquireDbLock(
     const db = maybePGLite.db;
     const ttl = `${ttlMinutes} minutes`;
     const { rows } = await db.query(
-      `INSERT INTO gbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at, last_refreshed_at)
+      `INSERT INTO modusbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at, last_refreshed_at)
        VALUES ($1, $2, $3, NOW(), NOW() + $4::interval, NOW())
        ON CONFLICT (id) DO UPDATE
          SET holder_pid = $2,
@@ -263,16 +263,16 @@ export async function tryAcquireDbLock(
              acquired_at = NOW(),
              ttl_expires_at = NOW() + $4::interval,
              last_refreshed_at = NOW()
-         WHERE gbrain_cycle_locks.ttl_expires_at < NOW()
-           AND (gbrain_cycle_locks.last_refreshed_at IS NULL
-                OR gbrain_cycle_locks.last_refreshed_at < NOW() - $5 * INTERVAL '1 second')
+         WHERE modusbrain_cycle_locks.ttl_expires_at < NOW()
+           AND (modusbrain_cycle_locks.last_refreshed_at IS NULL
+                OR modusbrain_cycle_locks.last_refreshed_at < NOW() - $5 * INTERVAL '1 second')
        RETURNING id`,
       [lockId, pid, host, ttl, stealGraceSeconds],
     );
     if (rows.length === 0) return null;
     const deregister = registerCleanup(`db-lock:${lockId}`, async () => {
       await db.query(
-        `DELETE FROM gbrain_cycle_locks WHERE id = $1 AND holder_pid = $2`,
+        `DELETE FROM modusbrain_cycle_locks WHERE id = $1 AND holder_pid = $2`,
         [lockId, pid],
       );
     });
@@ -280,7 +280,7 @@ export async function tryAcquireDbLock(
       id: lockId,
       refresh: async () => {
         await db.query(
-          `UPDATE gbrain_cycle_locks
+          `UPDATE modusbrain_cycle_locks
               SET ttl_expires_at = NOW() + $1::interval,
                   last_refreshed_at = NOW()
             WHERE id = $2 AND holder_pid = $3`,
@@ -290,7 +290,7 @@ export async function tryAcquireDbLock(
       release: async () => {
         deregister();
         await db.query(
-          `DELETE FROM gbrain_cycle_locks WHERE id = $1 AND holder_pid = $2`,
+          `DELETE FROM modusbrain_cycle_locks WHERE id = $1 AND holder_pid = $2`,
           [lockId, pid],
         );
       },
@@ -333,9 +333,9 @@ export async function tryAcquireDbLock(
  * exists for `lockId`. Used by:
  *   - performSync's lock-busy error path to surface holder PID + hostname
  *     + age in the user-facing "Another sync is in progress" message.
- *   - gbrain doctor's `stale_locks` check (queries all rows where
+ *   - modusbrain doctor's `stale_locks` check (queries all rows where
  *     ttl_expires_at < NOW()).
- *   - gbrain sync --break-lock to verify holder state before clearing.
+ *   - modusbrain sync --break-lock to verify holder state before clearing.
  *
  * Pure read; no side effects, no lock acquire.
  */
@@ -363,7 +363,7 @@ export interface LockSnapshot {
 }
 
 /**
- * Raw row shape returned by every `gbrain_cycle_locks` SELECT. Lives here so
+ * Raw row shape returned by every `modusbrain_cycle_locks` SELECT. Lives here so
  * `selectLockRows` (the single canonical reader) and its mapper share one type.
  */
 interface RawLockRow {
@@ -412,7 +412,7 @@ interface SelectLockRowsOpts {
 }
 
 /**
- * The single canonical reader for `gbrain_cycle_locks`. Engine-branches once
+ * The single canonical reader for `modusbrain_cycle_locks`. Engine-branches once
  * (postgres / pglite) so `inspectLock`, `listStaleLocks`, and the reaper don't
  * each re-roll the SELECT + Date-coercion (previously triplicated). Returns
  * fully-mapped `LockSnapshot[]`; callers filter in JS (the table holds 0-2 rows
@@ -428,19 +428,19 @@ async function selectLockRows(engine: BrainEngine, opts: SelectLockRowsOpts = {}
   if (engine.kind === 'postgres' && maybePG.sql) {
     const sql = maybePG.sql as any;
     if (opts.lockId !== undefined) {
-      rows = await sql`SELECT id, holder_pid, holder_host, acquired_at, ttl_expires_at, last_refreshed_at FROM gbrain_cycle_locks WHERE id = ${opts.lockId}`;
+      rows = await sql`SELECT id, holder_pid, holder_host, acquired_at, ttl_expires_at, last_refreshed_at FROM modusbrain_cycle_locks WHERE id = ${opts.lockId}`;
     } else if (opts.staleOnly) {
-      rows = await sql`SELECT id, holder_pid, holder_host, acquired_at, ttl_expires_at, last_refreshed_at FROM gbrain_cycle_locks WHERE ttl_expires_at < NOW() ORDER BY acquired_at`;
+      rows = await sql`SELECT id, holder_pid, holder_host, acquired_at, ttl_expires_at, last_refreshed_at FROM modusbrain_cycle_locks WHERE ttl_expires_at < NOW() ORDER BY acquired_at`;
     } else {
-      rows = await sql`SELECT id, holder_pid, holder_host, acquired_at, ttl_expires_at, last_refreshed_at FROM gbrain_cycle_locks ORDER BY acquired_at`;
+      rows = await sql`SELECT id, holder_pid, holder_host, acquired_at, ttl_expires_at, last_refreshed_at FROM modusbrain_cycle_locks ORDER BY acquired_at`;
     }
   } else if (engine.kind === 'pglite' && maybePGLite.db) {
     if (opts.lockId !== undefined) {
-      rows = (await maybePGLite.db.query(`SELECT ${LOCK_SELECT_COLS} FROM gbrain_cycle_locks WHERE id = $1`, [opts.lockId])).rows as RawLockRow[];
+      rows = (await maybePGLite.db.query(`SELECT ${LOCK_SELECT_COLS} FROM modusbrain_cycle_locks WHERE id = $1`, [opts.lockId])).rows as RawLockRow[];
     } else if (opts.staleOnly) {
-      rows = (await maybePGLite.db.query(`SELECT ${LOCK_SELECT_COLS} FROM gbrain_cycle_locks WHERE ttl_expires_at < NOW() ORDER BY acquired_at`)).rows as RawLockRow[];
+      rows = (await maybePGLite.db.query(`SELECT ${LOCK_SELECT_COLS} FROM modusbrain_cycle_locks WHERE ttl_expires_at < NOW() ORDER BY acquired_at`)).rows as RawLockRow[];
     } else {
-      rows = (await maybePGLite.db.query(`SELECT ${LOCK_SELECT_COLS} FROM gbrain_cycle_locks ORDER BY acquired_at`)).rows as RawLockRow[];
+      rows = (await maybePGLite.db.query(`SELECT ${LOCK_SELECT_COLS} FROM modusbrain_cycle_locks ORDER BY acquired_at`)).rows as RawLockRow[];
     }
   } else {
     throw new Error(`Unknown engine kind for selectLockRows: ${engine.kind}`);
@@ -458,7 +458,7 @@ export async function inspectLock(engine: BrainEngine, lockId: string): Promise<
 }
 
 /**
- * v0.41.6.0 D3: list every lock whose TTL has expired. Used by gbrain
+ * v0.41.6.0 D3: list every lock whose TTL has expired. Used by modusbrain
  * doctor's `stale_locks` check. The query reuses the same canonical
  * staleness signal (ttl_expires_at < NOW()) that tryAcquireDbLock's
  * UPDATE-on-conflict already trusts — no parallel heuristic.
@@ -468,7 +468,7 @@ export async function listStaleLocks(engine: BrainEngine): Promise<LockSnapshot[
 }
 
 /**
- * v0.41.6.0 D3: atomic verify-and-delete for `gbrain sync --break-lock`.
+ * v0.41.6.0 D3: atomic verify-and-delete for `modusbrain sync --break-lock`.
  *
  * Runs `DELETE ... WHERE id = $1 AND holder_pid = $2 RETURNING id`.
  * RETURNING shape:
@@ -493,7 +493,7 @@ export async function deleteLockRow(
   if (engine.kind === 'postgres' && maybePG.sql) {
     const sql = maybePG.sql as any;
     const rows: Array<{ id: string }> = await sql`
-      DELETE FROM gbrain_cycle_locks
+      DELETE FROM modusbrain_cycle_locks
        WHERE id = ${lockId} AND holder_pid = ${holderPid}
       RETURNING id
     `;
@@ -501,7 +501,7 @@ export async function deleteLockRow(
   }
   if (engine.kind === 'pglite' && maybePGLite.db) {
     const { rows } = await maybePGLite.db.query(
-      `DELETE FROM gbrain_cycle_locks
+      `DELETE FROM modusbrain_cycle_locks
         WHERE id = $1 AND holder_pid = $2
        RETURNING id`,
       [lockId, holderPid],
@@ -513,10 +513,10 @@ export async function deleteLockRow(
 
 /**
  * v0.41.13.0 (D-V3-4 + D-V4-mech-4 + D-V4-mech-5) — atomic age-gated
- * verify-and-delete for `gbrain sync --break-lock --max-age <seconds>`.
+ * verify-and-delete for `modusbrain sync --break-lock --max-age <seconds>`.
  *
  * Runs:
- *   DELETE FROM gbrain_cycle_locks
+ *   DELETE FROM modusbrain_cycle_locks
  *    WHERE id = $1
  *      AND holder_pid = $2
  *      AND last_refreshed_at < NOW() - $3 * INTERVAL '1 second'
@@ -563,7 +563,7 @@ export async function deleteLockRowIfStale(
   if (engine.kind === 'postgres' && maybePG.sql) {
     const sql = maybePG.sql as any;
     const rows: Array<{ id: string; last_refreshed_at: Date | string | null }> = await sql`
-      DELETE FROM gbrain_cycle_locks
+      DELETE FROM modusbrain_cycle_locks
        WHERE id = ${lockId}
          AND holder_pid = ${holderPid}
          AND last_refreshed_at IS NOT NULL
@@ -577,7 +577,7 @@ export async function deleteLockRowIfStale(
   }
   if (engine.kind === 'pglite' && maybePGLite.db) {
     const { rows } = await maybePGLite.db.query(
-      `DELETE FROM gbrain_cycle_locks
+      `DELETE FROM modusbrain_cycle_locks
         WHERE id = $1
           AND holder_pid = $2
           AND last_refreshed_at IS NOT NULL
@@ -627,7 +627,7 @@ export async function deleteLockRowExact(
   if (engine.kind === 'postgres' && maybePG.sql) {
     const sql = maybePG.sql as any;
     const rows: Array<{ id: string }> = await sql`
-      DELETE FROM gbrain_cycle_locks
+      DELETE FROM modusbrain_cycle_locks
        WHERE id = ${lockId}
          AND holder_pid = ${holderPid}
          AND date_trunc('milliseconds', acquired_at) = ${acquiredAt}
@@ -637,7 +637,7 @@ export async function deleteLockRowExact(
   }
   if (engine.kind === 'pglite' && maybePGLite.db) {
     const { rows } = await maybePGLite.db.query(
-      `DELETE FROM gbrain_cycle_locks
+      `DELETE FROM modusbrain_cycle_locks
         WHERE id = $1
           AND holder_pid = $2
           AND date_trunc('milliseconds', acquired_at) = $3
@@ -654,11 +654,11 @@ export async function deleteLockRowExact(
  * (or cycle) that crashed (OOM, recycle, SIGKILL) strands its lock row until
  * something contends for it — a low-traffic source could look "syncing" for
  * hours. `tryAcquireDbLock` only reclaims on contention; this is the background
- * sweep. Intended to run at cycle start (and under `gbrain doctor --fix` for
+ * sweep. Intended to run at cycle start (and under `modusbrain doctor --fix` for
  * no-autopilot brains).
  *
- * Scoped to the `gbrain-sync:*` and `gbrain-cycle`/`gbrain-cycle:*` namespaces
- * ONLY. `gbrain_cycle_locks` is shared by enrich, the minion supervisor,
+ * Scoped to the `modusbrain-sync:*` and `modusbrain-cycle`/`modusbrain-cycle:*` namespaces
+ * ONLY. `modusbrain_cycle_locks` is shared by enrich, the minion supervisor,
  * reindex, schema-pack, and elections (`tryWithDbElection`) — a blanket sweep
  * would change their TTL-failover timing. Those keep their existing
  * on-contention + TTL behavior.
@@ -675,9 +675,9 @@ export async function deleteLockRowExact(
  */
 function isReapableNamespace(lockId: string): boolean {
   return (
-    lockId === 'gbrain-cycle' ||
-    lockId.startsWith('gbrain-cycle:') ||
-    lockId.startsWith('gbrain-sync:')
+    lockId === 'modusbrain-cycle' ||
+    lockId.startsWith('modusbrain-cycle:') ||
+    lockId.startsWith('modusbrain-sync:')
   );
 }
 
@@ -701,18 +701,18 @@ export async function reapDeadHolderLocks(
 /**
  * v0.40 (Federated Sync v2): per-source sync lock helper.
  *
- * Before v0.40: SYNC_LOCK_ID was a bare 'gbrain-sync' constant, taken by
+ * Before v0.40: SYNC_LOCK_ID was a bare 'modusbrain-sync' constant, taken by
  * performSync's writer window. That meant only ONE sync could run at a time
  * across the whole brain — even when two sources are completely independent
  * (different git repos, different last_commit, different DB row anchors).
  *
  * v0.40 namespaces the lock key by sourceId so cross-source sync runs in
- * parallel. The cycle's broader `gbrain-cycle` lock still serializes inside
+ * parallel. The cycle's broader `modusbrain-cycle` lock still serializes inside
  * a single cycle invocation. Two-source layered semantics:
  *
- *   cycle              acquires `gbrain-cycle`
- *     → performSync(A) acquires `gbrain-sync:A`
- *     → performSync(B) acquires `gbrain-sync:B`  (in a different process, fine)
+ *   cycle              acquires `modusbrain-cycle`
+ *     → performSync(A) acquires `modusbrain-sync:A`
+ *     → performSync(B) acquires `modusbrain-sync:B`  (in a different process, fine)
  *
  * Audit: `SYNC_LOCK_ID` (back-compat alias) resolves to `syncLockId('default')`.
  * Every consumer in src/ MUST namespace by source. Tracked consumers:
@@ -720,7 +720,7 @@ export async function reapDeadHolderLocks(
  *   - src/core/cycle/phantom-redirect.ts (per-source, D16)
  */
 export function syncLockId(sourceId: string): string {
-  return `gbrain-sync:${sourceId}`;
+  return `modusbrain-sync:${sourceId}`;
 }
 
 /**
@@ -732,8 +732,8 @@ export const SYNC_LOCK_ID = syncLockId('default');
 /**
  * #1950: is `sourceId` actively holding a live (non-TTL-expired) sync lock?
  *
- * Centralizes the live-sync signal that `gbrain doctor` already computes inline
- * so `gbrain sources status` (and future surfaces) read the SAME truth instead
+ * Centralizes the live-sync signal that `modusbrain doctor` already computes inline
+ * so `modusbrain sources status` (and future surfaces) read the SAME truth instead
  * of each re-deriving it. Returns the holder when a live lock is held, else
  * null (idle, or a stale/expired lock that's structurally available for the
  * next acquire). Inspect failures swallow to null — a status surface should
@@ -744,7 +744,7 @@ export const SYNC_LOCK_ID = syncLockId('default');
  * `last_refreshed_at` on its own timer regardless of import progress. So callers
  * report "running", NOT "healthy"; a wedged-but-alive holder still reads as
  * running here. Forward-progress stall detection lives in the sync drain loop
- * (#1950 stall-abort); stale-lock triage lives in `gbrain doctor`.
+ * (#1950 stall-abort); stale-lock triage lives in `modusbrain doctor`.
  */
 export async function liveSyncStatus(
   engine: BrainEngine,
@@ -775,7 +775,7 @@ export async function liveSyncStatus(
  * lock-holding backend is still responsive — if heartbeat hangs past
  * HEARTBEAT_TIMEOUT_MS, abort the operation and release the lock.
  *
- * Lock-id naming convention: `<scope>:<dbname>` (e.g. `gbrain-migrate:postgres`)
+ * Lock-id naming convention: `<scope>:<dbname>` (e.g. `modusbrain-migrate:postgres`)
  * for multi-tenant safety per cherry D4. Caller composes the dbname.
  *
  * Failure paths:
@@ -873,7 +873,7 @@ export async function withRefreshingLock<T>(
  * re-elects.
  *
  * The codex pass-3 #8 + #9 audit confirmed this should reuse the
- * existing `gbrain_cycle_locks` table (which `tryAcquireDbLock` already
+ * existing `modusbrain_cycle_locks` table (which `tryAcquireDbLock` already
  * wraps for both engines) rather than build a parallel new primitive.
  *
  * Semantics:
@@ -907,7 +907,7 @@ export async function tryWithDbElection<T>(
 
 /**
  * Compose a multi-tenant-safe lock id (cherry D4). Suffixes the lock id
- * with the database name so two gbrain installs sharing a Postgres cluster
+ * with the database name so two modusbrain installs sharing a Postgres cluster
  * (different databases on the same Supabase project) don't contend.
  *
  * Async: queries `current_database()` on the engine. PGLite returns a

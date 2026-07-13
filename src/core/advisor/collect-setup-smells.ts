@@ -32,7 +32,7 @@ export const collectSetupSmells: AdvisorCollector = {
         severity: 'warn',
         title: 'Embeddings are disabled — semantic search and dedup are off.',
         detail: 'Set an embedding model to turn on vector search.',
-        fix: { command_argv: ['gbrain', 'config', 'set', 'embedding_model', '<model-id>'] },
+        fix: { command_argv: ['modusbrain', 'config', 'set', 'embedding_model', '<model-id>'] },
         collector: 'setup-smells',
         ask_user: true,
       });
@@ -43,7 +43,7 @@ export const collectSetupSmells: AdvisorCollector = {
         severity: 'warn',
         title: 'No embedding provider key is set — embedding will fail at write time.',
         detail: 'Set zeroentropy_api_key (or choose another provider via embedding_model).',
-        fix: { command_argv: ['gbrain', 'config', 'set', 'zeroentropy_api_key', '<key>'] },
+        fix: { command_argv: ['modusbrain', 'config', 'set', 'zeroentropy_api_key', '<key>'] },
         collector: 'setup-smells',
         ask_user: true,
       });
@@ -60,7 +60,7 @@ export const collectSetupSmells: AdvisorCollector = {
           severity: 'info',
           title: 'Skill publishing is off while this brain serves agents over MCP.',
           detail: 'Connected agents get an empty list_skills and miss this brain\'s capabilities.',
-          fix: { command_argv: ['gbrain', 'config', 'set', 'mcp.publish_skills', 'true'] },
+          fix: { command_argv: ['modusbrain', 'config', 'set', 'mcp.publish_skills', 'true'] },
           collector: 'setup-smells',
           ask_user: true,
         });

@@ -45,7 +45,7 @@ export const PER_REGEX_TIMEOUT_MS = 50 as const;
 // entering the vm. This is the real runtime safety net (the star-height lint
 // rule is advisory). Env-overridable for power users with huge contexts.
 export const MAX_REGEX_INPUT_CHARS = (() => {
-  const raw = process.env.GBRAIN_MAX_REGEX_INPUT_CHARS;
+  const raw = process.env.MODUSBRAIN_MAX_REGEX_INPUT_CHARS;
   const n = raw ? parseInt(raw, 10) : NaN;
   return Number.isFinite(n) && n > 0 ? n : 64_000;
 })();

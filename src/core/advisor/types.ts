@@ -1,5 +1,5 @@
 /**
- * advisor/types.ts — shared types for `gbrain advisor`.
+ * advisor/types.ts — shared types for `modusbrain advisor`.
  *
  * The advisor is a read-only, brain-state-aware recommender: it computes a
  * ranked list of high-leverage actions for THIS brain right now, each with a
@@ -10,21 +10,21 @@
  */
 
 import type { BrainEngine } from '../engine.ts';
-import type { GBrainConfig } from '../config.ts';
+import type { ModusBrainConfig } from '../config.ts';
 
 export type AdvisorSeverity = 'critical' | 'warn' | 'info';
 
 /** A fix the advisor recommends. */
 export interface AdvisorFix {
   /**
-   * The fix as a structured argv (e.g. ['gbrain','apply-migrations','--yes']).
+   * The fix as a structured argv (e.g. ['modusbrain','apply-migrations','--yes']).
    * Never a shell string — `--apply` executes via an allowlisted dispatcher, not
    * a shell, so source-derived names can't inject (#10/C5). Null when there is
    * no single mechanical fix.
    */
   command_argv: string[] | null;
   /**
-   * Allowlisted dispatch key for `gbrain advisor --apply <id>`. Present only on
+   * Allowlisted dispatch key for `modusbrain advisor --apply <id>`. Present only on
    * findings whose fix is safe to run via the local-only dispatcher.
    */
   dispatch_id?: string;
@@ -53,8 +53,8 @@ export interface AdvisorFinding {
 
 export interface AdvisorContext {
   engine: BrainEngine;
-  config: GBrainConfig;
-  /** Serving gbrain version (src/version.ts VERSION). */
+  config: ModusBrainConfig;
+  /** Serving modusbrain version (src/version.ts VERSION). */
   version: string;
   /** Agent workspace root (CLI only; null over MCP). */
   workspace: string | null;

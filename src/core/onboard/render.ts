@@ -1,6 +1,6 @@
 // src/core/onboard/render.ts
 // v0.41.18.0 (T12). Stable JSON envelope + human renderer for
-// `gbrain onboard`. Library-shaped — no console.* / process.exit; CLI
+// `modusbrain onboard`. Library-shaped — no console.* / process.exit; CLI
 // shell calls these and pipes results to its own output.
 
 import type { RemediationStep } from '../remediation-step.ts';
@@ -22,7 +22,7 @@ import type {
 /**
  * v0.42 (D17): jobs that stay manual_only — autopilot will NOT surface
  * these as auto-apply candidates; user must explicitly run
- * `gbrain onboard --auto-with-prompt` or submit the handler directly.
+ * `modusbrain onboard --auto-with-prompt` or submit the handler directly.
  *
  * Membership criteria: one-time consenting decisions OR LLM-bearing
  * handlers without a mature eval. Adding a new entry here is a load-

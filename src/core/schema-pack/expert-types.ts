@@ -17,7 +17,7 @@
 //   const results = await hybridSearch(engine, query, { types, ... });
 //
 // Until the wiring lands, legacy whoknows.ts callers continue to use
-// the hardcoded DEFAULT_TYPES = ['person', 'company'] — which gbrain-
+// the hardcoded DEFAULT_TYPES = ['person', 'company'] — which modusbrain-
 // base also declares, so behavior is preserved.
 
 import type { SchemaPackManifest } from './manifest-v1.ts';
@@ -53,7 +53,7 @@ export function expertTypesFromPackOrThrow(
   if (types.length === 0) {
     throw new Error(
       `active schema pack "${pack.name}" declares no types with ` +
-      `expert_routing: true. \`gbrain whoknows\` and \`find_experts\` ` +
+      `expert_routing: true. \`modusbrain whoknows\` and \`find_experts\` ` +
       `cannot route queries. Edit the pack manifest to mark at least one ` +
       `page_type as expert_routing: true, or switch packs.`,
     );

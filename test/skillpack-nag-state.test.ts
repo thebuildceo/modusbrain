@@ -20,7 +20,7 @@ import {
 let dir: string;
 let statePath: string;
 beforeEach(() => {
-  dir = mkdtempSync(join(tmpdir(), 'gbrain-nag-'));
+  dir = mkdtempSync(join(tmpdir(), 'modusbrain-nag-'));
   statePath = join(dir, 'skillpack-nag-state.json');
 });
 afterEach(() => {

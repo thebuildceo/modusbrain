@@ -28,7 +28,7 @@ describe('collectChronicle', () => {
     const gap = findings.find((f) => f.id === 'chronicle_coverage_gap');
     expect(gap).toBeTruthy();
     expect(gap!.severity).toBe('info');
-    expect(gap!.fix.command_argv).toEqual(['gbrain', 'chronicle-backfill']);
+    expect(gap!.fix.command_argv).toEqual(['modusbrain', 'chronicle-backfill']);
   });
 
   test('flags unresolved ontology conflicts', async () => {

@@ -3,7 +3,7 @@
  *
  * Reads three variant resolver files + two fixture corpora, runs each
  * (fixture, variant, seed in {1,2,3}) through Anthropic Opus 4.7 via
- * gbrain's gateway, scores the response, writes one JSONL row per call,
+ * modusbrain's gateway, scores the response, writes one JSONL row per call,
  * computes per-variant accuracy mean + 95% CI, prints a summary table.
  *
  * Receipts bind (model, prompt_template_hash, fixtures_hash, ts, seed)
@@ -16,7 +16,7 @@
  * Lives outside `skills/` deliberately — the skillpack bundler walks
  * `skills/<skill>/` recursively, so an eval surface in there would ship
  * to every downstream install. Importing `src/core/ai/gateway.ts` is
- * legitimate from this location because the eval is gbrain-repo-only.
+ * legitimate from this location because the eval is modusbrain-repo-only.
  */
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';

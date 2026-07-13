@@ -1,9 +1,9 @@
 /**
- * gbrain bench publish — turn a captured-run NDJSON into a baseline file (v0.41).
+ * modusbrain bench publish — turn a captured-run NDJSON into a baseline file (v0.41).
  *
  * The LOOP-closing verb. Without `bench publish`, the eval gate has nothing
  * to gate against except hand-curated fixtures. This verb takes the output
- * of `gbrain eval export` and writes a `*.baseline.ndjson` file with:
+ * of `modusbrain eval export` and writes a `*.baseline.ndjson` file with:
  *   - line 1: metadata header (label, thresholds, source_hash, baseline_mean_latency_ms)
  *   - lines 2..N: raw captured rows with `query_hash` stamped on each
  *
@@ -18,7 +18,7 @@
  * + sort + hash all together is impossible). In-memory read + sort + write.
  *
  * Usage:
- *   gbrain bench publish --from <captured.ndjson> --to <X.baseline.ndjson>
+ *   modusbrain bench publish --from <captured.ndjson> --to <X.baseline.ndjson>
  *     [--threshold-jaccard FLOAT] [--threshold-top1 FLOAT]
  *     [--threshold-latency-multiplier FLOAT] [--label STRING]
  *     [--force] [--json]
@@ -116,13 +116,13 @@ function parseArgs(args: string[]): PublishOpts {
 }
 
 function printHelp(): void {
-  console.log(`gbrain bench publish — write a baseline file from captured queries
+  console.log(`modusbrain bench publish — write a baseline file from captured queries
 
 Usage:
-  gbrain bench publish --from <captured.ndjson> --to <X.baseline.ndjson> [flags]
+  modusbrain bench publish --from <captured.ndjson> --to <X.baseline.ndjson> [flags]
 
 Required:
-  --from FILE                    Input NDJSON from \`gbrain eval export\`
+  --from FILE                    Input NDJSON from \`modusbrain eval export\`
   --to FILE                      Output baseline path (recommend .baseline.ndjson extension)
 
 Optional:
@@ -142,11 +142,11 @@ Exit codes:
 
 Examples:
   # Publish your own personal baseline
-  gbrain eval export --limit 200 --tool query > /tmp/captured.ndjson
-  gbrain bench publish --from /tmp/captured.ndjson --to ~/.gbrain/baselines/personal.baseline.ndjson --label "personal-2026-05"
+  modusbrain eval export --limit 200 --tool query > /tmp/captured.ndjson
+  modusbrain bench publish --from /tmp/captured.ndjson --to ~/.modusbrain/baselines/personal.baseline.ndjson --label "personal-2026-05"
 
   # Gate against it later
-  gbrain eval gate --baseline ~/.gbrain/baselines/personal.baseline.ndjson
+  modusbrain eval gate --baseline ~/.modusbrain/baselines/personal.baseline.ndjson
 `);
 }
 

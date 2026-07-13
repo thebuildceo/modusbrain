@@ -10,7 +10,7 @@
 
 /** Per-source embed-backfill lock id, namespaced like sync's. */
 export function embedBackfillLockId(sourceId: string): string {
-  return `gbrain-embed-backfill:${sourceId}`;
+  return `modusbrain-embed-backfill:${sourceId}`;
 }
 
 /** Lock TTL (minutes) for embed backfills. */

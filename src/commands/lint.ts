@@ -1,5 +1,5 @@
 /**
- * gbrain lint — Deterministic brain page quality checker.
+ * modusbrain lint — Deterministic brain page quality checker.
  *
  * Zero LLM calls. Catches common quality issues:
  * - LLM preamble artifacts ("Of course! Here is...")
@@ -10,10 +10,10 @@
  * - Wrapping code fences from LLM output
  *
  * Usage:
- *   gbrain lint <dir>              # report issues
- *   gbrain lint <dir> --fix        # auto-fix what's fixable
- *   gbrain lint <dir> --fix --dry-run  # preview fixes
- *   gbrain lint <file.md>          # lint single file
+ *   modusbrain lint <dir>              # report issues
+ *   modusbrain lint <dir> --fix        # auto-fix what's fixable
+ *   modusbrain lint <dir> --fix --dry-run  # preview fixes
+ *   modusbrain lint <file.md>          # lint single file
  */
 
 import { readFileSync, writeFileSync, readdirSync, statSync, lstatSync, existsSync } from 'fs';
@@ -26,7 +26,7 @@ import {
   DEFAULT_BYTES_WARN,
 } from '../core/content-sanity.ts';
 import { loadOperatorLiterals } from '../core/content-sanity-literals.ts';
-import { loadConfig, loadConfigWithEngine, gbrainPath } from '../core/config.ts';
+import { loadConfig, loadConfigWithEngine, modusbrainPath } from '../core/config.ts';
 import type { BrainEngine } from '../core/engine.ts';
 
 export interface LintIssue {
@@ -50,7 +50,7 @@ const FRONTMATTER_RULE_NAMES: Record<ParseValidationCode, string> = {
   EMPTY_FRONTMATTER: 'frontmatter-empty',
 };
 
-/** Codes whose lint findings are fixable by `gbrain frontmatter validate --fix`. */
+/** Codes whose lint findings are fixable by `modusbrain frontmatter validate --fix`. */
 const FRONTMATTER_FIXABLE: ReadonlySet<ParseValidationCode> = new Set<ParseValidationCode>([
   'MISSING_CLOSE',
   'NULL_BYTES',
@@ -308,10 +308,10 @@ export function fixContent(content: string): string {
  * File/env path is sync via `loadConfig()`; DB-plane lift requires a
  * brief engine open. Best-effort: any engine failure (no brain
  * configured, connection refused, transient error) falls through to
- * the file/env values. CI without `~/.gbrain/` falls through
+ * the file/env values. CI without `~/.modusbrain/` falls through
  * immediately since `loadConfig()` returns minimal config.
  *
- * Also loads the operator literals file (`~/.gbrain/junk-substrings.txt`)
+ * Also loads the operator literals file (`~/.modusbrain/junk-substrings.txt`)
  * once per lint invocation so multi-file lint runs amortize the read.
  */
 async function resolveLintContentSanity(
@@ -336,7 +336,7 @@ async function resolveLintContentSanity(
       // best-effort; fall through to file/env values.
     }
   } else {
-    // Standalone path (CLI `gbrain lint`, which is CLI_ONLY and shares no
+    // Standalone path (CLI `modusbrain lint`, which is CLI_ONLY and shares no
     // engine): only attempt when the file/env config suggests an engine is
     // configured. Avoids spinning up a fresh PGLite just to read 4 config
     // keys in a CI lint run that has no brain at all. Safe to create +
@@ -496,7 +496,7 @@ export async function runLint(args: string[]) {
   const dryRun = args.includes('--dry-run');
 
   if (!target) {
-    console.error('Usage: gbrain lint <dir|file.md> [--fix] [--dry-run]');
+    console.error('Usage: modusbrain lint <dir|file.md> [--fix] [--dry-run]');
     console.error('  --fix      Auto-fix fixable issues (LLM preambles, code fences)');
     console.error('  --dry-run  Preview fixes without writing');
     process.exit(1);

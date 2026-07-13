@@ -5,13 +5,13 @@
  * optimized against its own benchmark may regress on real user workflows.
  * F11 adds an OPTIONAL independent signal:
  *
- *  1. Capture infrastructure: opt-in via `gbrain config set
+ *  1. Capture infrastructure: opt-in via `modusbrain config set
  *     skillopt.capture_enabled true`. Real production rollouts of the
  *     skill get appended as JSONL rows to
- *     `~/.gbrain/skillopt-captures/<skill>/<run>.jsonl`.
+ *     `~/.modusbrain/skillopt-captures/<skill>/<run>.jsonl`.
  *
  *  2. Held-out validation gate: when `--held-out <path>` is passed to
- *     `gbrain skillopt`, the orchestrator runs the candidate skill
+ *     `modusbrain skillopt`, the orchestrator runs the candidate skill
  *     against the held-out set BEFORE committing the mutation. If the
  *     candidate's held-out score is BELOW baseline, the mutation is
  *     refused (returns 'no_improvement' even if D_sel was happy).
@@ -28,7 +28,7 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import type { BrainEngine } from '../engine.ts';
-import { gbrainPath } from '../config.ts';
+import { modusbrainPath } from '../config.ts';
 import { loadBenchmark } from './benchmark.ts';
 import { D_SEL_MIN_SIZE } from './types.ts';
 import type { BenchmarkTask } from './types.ts';
@@ -46,7 +46,7 @@ const CAPTURE_CONFIG_KEY = 'skillopt.capture_enabled';
 export const MIN_HELD_OUT_SIZE = D_SEL_MIN_SIZE;
 
 export function capturesDir(): string {
-  return gbrainPath('skillopt-captures');
+  return modusbrainPath('skillopt-captures');
 }
 
 export function capturePath(skillName: string, runId: string): string {

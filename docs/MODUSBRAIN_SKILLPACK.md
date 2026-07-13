@@ -1,13 +1,13 @@
 <!-- skillpack-version: 0.7.0 -->
-<!-- source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/GBRAIN_SKILLPACK.md -->
-# GBrain Skillpack: Reference Architecture for AI Agents
+<!-- source: https://raw.githubusercontent.com/garrytan/modusbrain/master/docs/MODUSBRAIN_SKILLPACK.md -->
+# ModusBrain Skillpack: Reference Architecture for AI Agents
 
-This is a reference architecture for how a production AI agent uses gbrain as its
+This is a reference architecture for how a production AI agent uses modusbrain as its
 knowledge backbone. Based on patterns from a real deployment with 14,700+ brain
 files, 40+ skills, and 20+ cron jobs running continuously.
 
 **The memex vision, realized.** Vannevar Bush imagined a device where an individual
-stores everything, mechanized so it may be consulted with exceeding speed. GBrain is
+stores everything, mechanized so it may be consulted with exceeding speed. ModusBrain is
 that device, except the memex builds itself. The agent detects entities, enriches
 pages, creates cross-references, and maintains compiled truth automatically.
 
@@ -59,13 +59,13 @@ Running a production brain.
 | [Skill Development Cycle](guides/skill-development.md) | 5-step cycle: concept, prototype, evaluate, codify, cron |
 
 **Subagent routing (v0.11.0+):** agents that dispatch background work should route through
-`skills/conventions/subagent-routing.md` — it reads `~/.gbrain/preferences.json#minion_mode`
+`skills/conventions/subagent-routing.md` — it reads `~/.modusbrain/preferences.json#minion_mode`
 and branches between native subagents and Minion jobs. The v0.11.0 migration auto-injects
 a marker into AGENTS.md pointing at this convention.
 
 **Cron routing (v0.11.0+):** scheduled work goes through Minions, not OpenClaw's `agentTurn`.
 See `skills/conventions/cron-via-minions.md` for the rewrite pattern. The v0.11.0 migration
-auto-rewrites entries whose handler is a gbrain builtin; host-specific handlers (e.g.
+auto-rewrites entries whose handler is a modusbrain builtin; host-specific handlers (e.g.
 `ea-inbox-sweep`) need a code-level registration per `docs/guides/plugin-handlers.md`.
 
 ## Architecture
@@ -77,7 +77,7 @@ How to structure your system.
 | [Two-Repo Architecture](guides/repo-architecture.md) | Agent repo vs brain repo, boundary rules, decision tree |
 | [Sub-Agent Model Routing](guides/sub-agent-routing.md) | Which model for which task, signal detector pattern, cost optimization |
 | [The Three Search Modes](guides/search-modes.md) | Keyword, hybrid, direct. When to use each |
-| [Brain vs Agent Memory](guides/brain-vs-memory.md) | 3 layers: GBrain (world knowledge), agent memory, session |
+| [Brain vs Agent Memory](guides/brain-vs-memory.md) | 3 layers: ModusBrain (world knowledge), agent memory, session |
 
 ## Integrations
 
@@ -114,22 +114,22 @@ data sources to populate it:
 
 ---
 
-## Appendix: GBrain CLI Quick Reference
+## Appendix: ModusBrain CLI Quick Reference
 
 | Command | Purpose |
 |---------|---------|
-| `gbrain search "term"` | Keyword search across all brain pages |
-| `gbrain query "question"` | Hybrid search (vector + keyword + RRF) |
-| `gbrain get <slug>` | Read a specific brain page by slug |
-| `gbrain sync` | Sync local markdown repo to gbrain index |
-| `gbrain import <path>` | Import files into the brain |
-| `gbrain embed --stale` | Re-embed pages with stale or missing embeddings |
-| `gbrain integrations` | Manage integration recipes (senses + reflexes) |
-| `gbrain stats` | Show brain statistics (page count, last sync, etc.) |
-| `gbrain doctor` | Diagnose brain health issues |
-| `gbrain check-update` | Check for new versions and integration recipes |
+| `modusbrain search "term"` | Keyword search across all brain pages |
+| `modusbrain query "question"` | Hybrid search (vector + keyword + RRF) |
+| `modusbrain get <slug>` | Read a specific brain page by slug |
+| `modusbrain sync` | Sync local markdown repo to modusbrain index |
+| `modusbrain import <path>` | Import files into the brain |
+| `modusbrain embed --stale` | Re-embed pages with stale or missing embeddings |
+| `modusbrain integrations` | Manage integration recipes (senses + reflexes) |
+| `modusbrain stats` | Show brain statistics (page count, last sync, etc.) |
+| `modusbrain doctor` | Diagnose brain health issues |
+| `modusbrain check-update` | Check for new versions and integration recipes |
 
-Run `gbrain --help` for the full command reference.
+Run `modusbrain --help` for the full command reference.
 
 ---
 
@@ -139,5 +139,5 @@ Run `gbrain --help` for the full command reference.
 - [Thin Harness, Fat Skills](ethos/THIN_HARNESS_FAT_SKILLS.md) — Architecture philosophy
 - [Markdown Skills as Recipes](ethos/MARKDOWN_SKILLS_AS_RECIPES.md) — Why markdown is code and your agent is a package manager
 - [Homebrew for Personal AI](designs/HOMEBREW_FOR_PERSONAL_AI.md) — The 10-star vision
-- [Recommended Schema](GBRAIN_RECOMMENDED_SCHEMA.md) — Directory structure for your brain repo
-- [Verification Runbook](GBRAIN_VERIFY.md) — End-to-end installation verification
+- [Recommended Schema](MODUSBRAIN_RECOMMENDED_SCHEMA.md) — Directory structure for your brain repo
+- [Verification Runbook](MODUSBRAIN_VERIFY.md) — End-to-end installation verification

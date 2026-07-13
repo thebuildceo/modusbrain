@@ -13,14 +13,14 @@
  *
  * Topology: docker-compose.ci.yml runs `pgbouncer` (transaction mode) in
  * front of postgres-1. The test uses a DEDICATED database
- * (`gbrain_pgbouncer`) created via the direct URL, so it never races the
- * TRUNCATE-based fixtures any shard runs against `gbrain_test`.
+ * (`modusbrain_pgbouncer`) created via the direct URL, so it never races the
+ * TRUNCATE-based fixtures any shard runs against `modusbrain_test`.
  *
- * Gated by GBRAIN_PGBOUNCER_URL + GBRAIN_PGBOUNCER_DIRECT_URL — skips
+ * Gated by MODUSBRAIN_PGBOUNCER_URL + MODUSBRAIN_PGBOUNCER_DIRECT_URL — skips
  * gracefully outside the docker CI gate. Run manually:
  *
- *   GBRAIN_PGBOUNCER_URL=postgresql://postgres:postgres@localhost:6543/gbrain_pgbouncer \
- *   GBRAIN_PGBOUNCER_DIRECT_URL=postgresql://postgres:postgres@localhost:5434/gbrain_test \
+ *   MODUSBRAIN_PGBOUNCER_URL=postgresql://postgres:postgres@localhost:6543/modusbrain_pgbouncer \
+ *   MODUSBRAIN_PGBOUNCER_DIRECT_URL=postgresql://postgres:postgres@localhost:5434/modusbrain_test \
  *   bun test test/e2e/pgbouncer-teardown.test.ts
  */
 
@@ -31,13 +31,13 @@ import { tmpdir } from 'os';
 import postgres from 'postgres';
 import { PostgresEngine } from '../../src/core/postgres-engine.ts';
 
-const POOLED_URL = process.env.GBRAIN_PGBOUNCER_URL;
-const DIRECT_ADMIN_URL = process.env.GBRAIN_PGBOUNCER_DIRECT_URL;
+const POOLED_URL = process.env.MODUSBRAIN_PGBOUNCER_URL;
+const DIRECT_ADMIN_URL = process.env.MODUSBRAIN_PGBOUNCER_DIRECT_URL;
 const SKIP = !POOLED_URL || !DIRECT_ADMIN_URL;
 const describePooled = SKIP ? describe.skip : describe;
 
 const REPO = resolve(import.meta.dir, '..', '..');
-const TEST_DB = 'gbrain_pgbouncer';
+const TEST_DB = 'modusbrain_pgbouncer';
 const SLUG = 'test/pgbouncer-teardown-fixture';
 const MARKER = 'pgbouncer-teardown-marker-content-7c4f';
 
@@ -56,7 +56,7 @@ async function runCli(
   const t0 = Date.now();
   const proc = Bun.spawn([process.execPath, 'run', join(REPO, 'src', 'cli.ts'), ...args], {
     cwd: REPO,
-    env: { ...process.env, ...env, GBRAIN_SKIP_STARTUP_HOOKS: '1' },
+    env: { ...process.env, ...env, MODUSBRAIN_SKIP_STARTUP_HOOKS: '1' },
     stdout: 'pipe',
     stderr: 'pipe',
   });
@@ -103,12 +103,12 @@ describePooled('pgbouncer txn-mode teardown (#2084 / TD1)', () => {
     await eng.disconnect();
 
     // Brain config pointing the CLI at the POOLED url.
-    home = mkdtempSync(join(tmpdir(), 'gbrain-pgbouncer-'));
-    mkdirSync(join(home, '.gbrain'), { recursive: true });
+    home = mkdtempSync(join(tmpdir(), 'modusbrain-pgbouncer-'));
+    mkdirSync(join(home, '.modusbrain'), { recursive: true });
     const pooled = new URL(POOLED_URL!);
     pooled.pathname = `/${TEST_DB}`;
     writeFileSync(
-      join(home, '.gbrain', 'config.json'),
+      join(home, '.modusbrain', 'config.json'),
       JSON.stringify({ engine: 'postgres', database_url: pooled.toString() }) + '\n',
     );
   }, 240_000);
@@ -118,7 +118,7 @@ describePooled('pgbouncer txn-mode teardown (#2084 / TD1)', () => {
   });
 
   test('op against the pooled URL exits clean — output intact, no force-exit banner', async () => {
-    const env = { HOME: home, GBRAIN_HOME: home };
+    const env = { HOME: home, MODUSBRAIN_HOME: home };
     const res = await runCli(['get', SLUG], env, 90_000);
 
     if (res.exitCode !== 0 || /force-exiting/.test(res.stderr)) {
@@ -139,7 +139,7 @@ describePooled('pgbouncer txn-mode teardown (#2084 / TD1)', () => {
   }, 120_000);
 
   test('second run (warm schema probe) also exits clean through the pooler', async () => {
-    const env = { HOME: home, GBRAIN_HOME: home };
+    const env = { HOME: home, MODUSBRAIN_HOME: home };
     const res = await runCli(['get', SLUG], env, 90_000);
     expect(res.exitCode).toBe(0);
     expect(res.stdout).toContain(MARKER);

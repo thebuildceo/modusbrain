@@ -1,35 +1,35 @@
 ---
 title: Environment variables
-description: MODUSBRAIN_* configuration with GBRAIN_* legacy aliases.
+description: MODUSBRAIN_* configuration with MODUSBRAIN_* legacy aliases.
 icon: gear
 ---
 
 # Environment variables
 
-ModusBrain prefers `MODUSBRAIN_*` environment variables. Legacy `GBRAIN_*` names still work.
+ModusBrain prefers `MODUSBRAIN_*` environment variables. Legacy `MODUSBRAIN_*` names still work.
 
 ## Home and config
 
 | Variable | Description |
 | --- | --- |
 | `MODUSBRAIN_HOME` | Parent directory for config (appends `/.modusbrain`) |
-| `GBRAIN_HOME` | Legacy alias for `MODUSBRAIN_HOME` |
+| `MODUSBRAIN_HOME` | Legacy alias for `MODUSBRAIN_HOME` |
 
 ## Database
 
 | Variable | Description |
 | --- | --- |
 | `MODUSBRAIN_DATABASE_URL` | Postgres connection URL |
-| `GBRAIN_DATABASE_URL` | Legacy alias |
+| `MODUSBRAIN_DATABASE_URL` | Legacy alias |
 
 ## Source routing
 
 | Variable | Description |
 | --- | --- |
 | `MODUSBRAIN_SOURCE` | Default source ID for CLI/MCP |
-| `GBRAIN_SOURCE` | Legacy alias |
+| `MODUSBRAIN_SOURCE` | Legacy alias |
 
-Dotfile: `.modusbrain-source` (legacy `.gbrain-source` also read)
+Dotfile: `.modusbrain-source` (legacy `.modusbrain-source` also read)
 
 ## Models and API keys
 

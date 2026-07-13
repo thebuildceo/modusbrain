@@ -8,9 +8,9 @@ import { writeUpdateCache } from '../src/core/self-upgrade.ts';
 import { logSelfUpgrade } from '../src/core/audit/self-upgrade-audit.ts';
 
 async function withHome<T>(fn: (home: string) => T | Promise<T>): Promise<T> {
-  const dir = mkdtempSync(join(tmpdir(), 'gbrain-doctor-su-'));
+  const dir = mkdtempSync(join(tmpdir(), 'modusbrain-doctor-su-'));
   try {
-    return await withEnv({ GBRAIN_HOME: dir, GBRAIN_AUDIT_DIR: join(dir, 'audit'), GBRAIN_SELF_UPGRADE_MODE: undefined }, () => fn(dir));
+    return await withEnv({ MODUSBRAIN_HOME: dir, MODUSBRAIN_AUDIT_DIR: join(dir, 'audit'), MODUSBRAIN_SELF_UPGRADE_MODE: undefined }, () => fn(dir));
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -18,7 +18,7 @@ async function withHome<T>(fn: (home: string) => T | Promise<T>): Promise<T> {
 
 describe('checkSelfUpgradeHealth', () => {
   test('mode=off → ok, names disabled', async () => {
-    await withEnv({ GBRAIN_SELF_UPGRADE_MODE: 'off' }, () => {
+    await withEnv({ MODUSBRAIN_SELF_UPGRADE_MODE: 'off' }, () => {
       const c = checkSelfUpgradeHealth();
       expect(c.name).toBe('self_upgrade_health');
       expect(c.status).toBe('ok');
@@ -50,15 +50,15 @@ describe('checkSelfUpgradeHealth', () => {
       const c = checkSelfUpgradeHealth();
       expect(c.status).toBe('warn');
       expect(c.message).toContain('self-upgrade failure');
-      expect(c.message).toContain('gbrain self-upgrade');
+      expect(c.message).toContain('modusbrain self-upgrade');
     });
   });
 
   test('known-bad versions in config are surfaced', async () => {
     await withHome((home) => {
-      mkdirSync(join(home, '.gbrain'), { recursive: true });
+      mkdirSync(join(home, '.modusbrain'), { recursive: true });
       writeFileSync(
-        join(home, '.gbrain', 'config.json'),
+        join(home, '.modusbrain', 'config.json'),
         JSON.stringify({ engine: 'pglite', self_upgrade: { mode: 'notify', failed_versions: ['0.50.0'] } }),
       );
       const c = checkSelfUpgradeHealth();

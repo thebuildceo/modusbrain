@@ -13,7 +13,7 @@
  *
  * Includes OAuth tables (oauth_clients, oauth_tokens, oauth_codes) and
  * auth infrastructure (access_tokens, mcp_request_log) because
- * `gbrain serve --http` makes PGLite network-accessible.
+ * `modusbrain serve --http` makes PGLite network-accessible.
  *
  * Everything else is identical: same tables, triggers, indexes, pgvector HNSW, tsvector GIN.
  *
@@ -25,7 +25,7 @@ import { applyChunkEmbeddingIndexPolicy } from './vector-index.ts';
 import { DEFAULT_EMBEDDING_MODEL, DEFAULT_EMBEDDING_DIMENSIONS } from './ai/defaults.ts';
 
 const PGLITE_SCHEMA_SQL_TEMPLATE = `
--- GBrain PGLite schema (local embedded Postgres)
+-- ModusBrain PGLite schema (local embedded Postgres)
 
 CREATE EXTENSION IF NOT EXISTS vector;
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
@@ -96,12 +96,12 @@ CREATE TABLE IF NOT EXISTS pages (
   effective_date_source TEXT,
   import_filename       TEXT,
   salience_touched_at   TIMESTAMPTZ,
-  -- v0.37.0 (migration v79): real stale-page signal for gbrain lsd
+  -- v0.37.0 (migration v79): real stale-page signal for modusbrain lsd
   -- (mirrors src/schema.sql). NULL = never retrieved.
   last_retrieved_at     TIMESTAMPTZ,
   -- v0.42.7 (migration v112): link-extraction freshness watermark
   -- (mirrors src/schema.sql). NULL = never extracted. Powers
-  -- gbrain extract --stale + the links_extraction_lag doctor check.
+  -- modusbrain extract --stale + the links_extraction_lag doctor check.
   links_extracted_at    TIMESTAMPTZ,
   -- v0.40.3.0 contextual retrieval (renumbered from v81 to v90 on master
   -- merge; mirrors src/schema.sql).
@@ -255,7 +255,7 @@ CREATE INDEX IF NOT EXISTS idx_chunks_embedding_image
 -- v0.19.0: partial indexes for code chunk lookups.
 CREATE INDEX IF NOT EXISTS idx_chunks_symbol_name ON content_chunks(symbol_name) WHERE symbol_name IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_chunks_language ON content_chunks(language) WHERE language IS NOT NULL;
--- v0.41.18.0 (codex finding #9): partial index for gbrain embed --stale
+-- v0.41.18.0 (codex finding #9): partial index for modusbrain embed --stale
 -- and --priority recent. See src/schema.sql for full rationale.
 CREATE INDEX IF NOT EXISTS content_chunks_stale_idx
   ON content_chunks(page_id, chunk_index) WHERE embedding IS NULL;
@@ -565,12 +565,12 @@ CREATE TABLE IF NOT EXISTS subagent_tool_executions (
   error               TEXT,
   schema_version      INTEGER     NOT NULL DEFAULT 1,
   provider_id         TEXT,
-  -- v0.38 D11: gbrain-owned stable IDs (ordinal assigned at first observation;
-  -- gbrain_tool_use_id is uuid v7). Reconciliation on crash-replay uses
+  -- v0.38 D11: modusbrain-owned stable IDs (ordinal assigned at first observation;
+  -- modusbrain_tool_use_id is uuid v7). Reconciliation on crash-replay uses
   -- (job_id, message_idx, ordinal) as the unique key. Legacy rows (pre-v82)
   -- have ordinal=NULL and resolve via the read-time D5 shim.
   ordinal             INTEGER,
-  gbrain_tool_use_id  UUID,
+  modusbrain_tool_use_id  UUID,
   started_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
   ended_at            TIMESTAMPTZ,
   CONSTRAINT uniq_subagent_tools_use_id UNIQUE (job_id, tool_use_id),
@@ -593,21 +593,21 @@ CREATE INDEX IF NOT EXISTS idx_rate_leases_key_expires ON subagent_rate_leases (
 -- ============================================================
 -- See src/schema.sql for full rationale. One row per active cycle.
 -- PGLite is single-writer, so the lock doubly protects: the DB-level
--- row + the file lock at ~/.gbrain/cycle.lock prevent concurrent
+-- row + the file lock at ~/.modusbrain/cycle.lock prevent concurrent
 -- CLI invocations from racing.
-CREATE TABLE IF NOT EXISTS gbrain_cycle_locks (
+CREATE TABLE IF NOT EXISTS modusbrain_cycle_locks (
   id                 TEXT        PRIMARY KEY,
   holder_pid         INT         NOT NULL,
   holder_host        TEXT,
   acquired_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   ttl_expires_at     TIMESTAMPTZ NOT NULL,
   -- v0.41.13.0 (migration v97 + D-V3-4): bumped on every withRefreshingLock
-  -- refresh tick. Used by gbrain sync --break-lock --max-age <s> to identify
+  -- refresh tick. Used by modusbrain sync --break-lock --max-age <s> to identify
   -- wedged-but-alive holders without stealing healthy long-running holders
   -- that are actively refreshing.
   last_refreshed_at  TIMESTAMPTZ
 );
-CREATE INDEX IF NOT EXISTS idx_cycle_locks_ttl ON gbrain_cycle_locks(ttl_expires_at);
+CREATE INDEX IF NOT EXISTS idx_cycle_locks_ttl ON modusbrain_cycle_locks(ttl_expires_at);
 
 -- Eval capture (v0.25.0). PGLite ignores RLS — see src/schema.sql for the
 -- cross-engine spec.
@@ -696,7 +696,7 @@ CREATE INDEX IF NOT EXISTS eval_contradictions_cache_expires_idx
 
 -- ============================================================
 -- eval_contradictions_runs (v0.32.6): time-series tracking for the probe.
--- One row per 'gbrain eval suspected-contradictions' run; source for the
+-- One row per 'modusbrain eval suspected-contradictions' run; source for the
 -- 'trend' sub-subcommand and the doctor 'contradictions' check.
 -- ============================================================
 CREATE TABLE IF NOT EXISTS eval_contradictions_runs (
@@ -992,7 +992,7 @@ CREATE INDEX IF NOT EXISTS context_volunteer_events_src_slug_idx
   ON context_volunteer_events (source_id, slug);
 
 -- ============================================================
--- migration_impact_log (v0.41.18.0 — gbrain onboard wave)
+-- migration_impact_log (v0.41.18.0 — modusbrain onboard wave)
 -- ============================================================
 -- See src/schema.sql for full rationale.
 CREATE TABLE IF NOT EXISTS migration_impact_log (

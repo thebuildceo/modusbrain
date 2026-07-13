@@ -1,18 +1,18 @@
 /**
- * OpenClaw plugin entry point for gbrain-context engine.
+ * OpenClaw plugin entry point for modusbrain-context engine.
  *
  * Registers a deterministic context engine that injects live temporal/spatial
  * context on every turn. Prevents the "time warp" bug class where compacted
  * sessions lose track of the user's current time, location, and state.
  *
  * Enable in openclaw.json:
- *   plugins.slots.contextEngine: "gbrain-context"
+ *   plugins.slots.contextEngine: "modusbrain-context"
  *
  * @module
  */
 
 /**
- * OpenClaw plugin entry — registers gbrain-context engine.
+ * OpenClaw plugin entry — registers modusbrain-context engine.
  *
  * This file is discovered via the `openclaw.extensions` field in package.json.
  * It requires the OpenClaw plugin SDK at runtime (available when loaded by the
@@ -20,7 +20,7 @@
  * and independently testable.
  */
 
-import { createGBrainContextEngine, ENGINE_ID } from './core/context-engine.ts';
+import { createModusBrainContextEngine, ENGINE_ID } from './core/context-engine.ts';
 import type { ResolveEntitiesFn } from './core/context/reflex.ts';
 
 /**
@@ -49,7 +49,7 @@ interface PluginCtx {
   workspaceDir: string;
   /**
    * Retrieval Reflex (#1981, D1=A): OPTIONAL host-provided resolve capability.
-   * When the OpenClaw host supplies it (backed by the gbrain connection the
+   * When the OpenClaw host supplies it (backed by the modusbrain connection the
    * gateway already holds), the deterministic pointer layer resolves through it
    * — works on every engine, including PGLite where a second connection is
    * impossible. Narrow by contract: candidates in, a pointer block out (no raw
@@ -64,8 +64,8 @@ interface PluginCtx {
 }
 
 const entry: PluginEntry = {
-  id: 'gbrain-context-engine',
-  name: 'GBrain Context Engine',
+  id: 'modusbrain-context-engine',
+  name: 'ModusBrain Context Engine',
   description: 'Deterministic temporal/spatial context injection on every turn',
 
   register(api: PluginApi) {
@@ -76,7 +76,7 @@ const entry: PluginEntry = {
           : typeof ctx.brainQuery === 'function'
             ? ctx.brainQuery
             : undefined;
-      return createGBrainContextEngine({
+      return createModusBrainContextEngine({
         workspaceDir: ctx.workspaceDir,
         resolveEntities: hostResolver,
       });

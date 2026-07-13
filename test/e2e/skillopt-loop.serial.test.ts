@@ -346,7 +346,7 @@ describe('skillopt full-loop E2E (happy path + broken cases)', () => {
         successEdit: null, // success-mode reflect produces no edits
       });
       try {
-        await withEnv({ GBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
+        await withEnv({ MODUSBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
           const result = await runOnce(fixture);
 
           // Outcome contract: accepted + mutated.
@@ -406,7 +406,7 @@ describe('skillopt full-loop E2E (happy path + broken cases)', () => {
         },
       });
       try {
-        await withEnv({ GBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
+        await withEnv({ MODUSBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
           const result = await runOnce(fixture);
 
           // Outcome contract: no acceptance + no mutation.
@@ -454,7 +454,7 @@ describe('skillopt full-loop E2E (happy path + broken cases)', () => {
         optimizerRaw: '{"edits": [BROKEN, no quotes, trailing comma,]',
       });
       try {
-        await withEnv({ GBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
+        await withEnv({ MODUSBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
           const result = await runOnce(fixture);
 
           expect(result.outcome).toBe('no_improvement');
@@ -490,7 +490,7 @@ describe('skillopt full-loop E2E (happy path + broken cases)', () => {
         },
       });
       try {
-        await withEnv({ GBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
+        await withEnv({ MODUSBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
           const result = await runOnce(fixture);
 
           expect(result.outcome).toBe('no_improvement');
@@ -532,7 +532,7 @@ describe('skillopt full-loop E2E (happy path + broken cases)', () => {
         perCallUsage: { input: 50_000, output: 5_000 },
       });
       try {
-        await withEnv({ GBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
+        await withEnv({ MODUSBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
           // The exact cap is calibrated to (a) survive the preflight check
           // (preflight refuses with a CostCapExceeded error if its estimate
           // exceeds the cap), but (b) trip mid-loop when real per-call
@@ -594,7 +594,7 @@ describe('skillopt full-loop E2E (happy path + broken cases)', () => {
         successEdit: null, // success-mode stub returns empty edits
       });
       try {
-        await withEnv({ GBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
+        await withEnv({ MODUSBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
           const result = await runOnce(fixture);
 
           expect(result.outcome).toBe('no_improvement');
@@ -643,7 +643,7 @@ describe('skillopt full-loop E2E (happy path + broken cases)', () => {
       // Run 1: accept.
       installStub(stubConfig);
       try {
-        await withEnv({ GBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
+        await withEnv({ MODUSBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
           const result1 = await runOnce(fixture);
           expect(result1.outcome).toBe('accepted');
           expect(result1.mutatedSkillFile).toBe(true);
@@ -660,7 +660,7 @@ describe('skillopt full-loop E2E (happy path + broken cases)', () => {
       // converge without further mutation.
       installStub(stubConfig);
       try {
-        await withEnv({ GBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
+        await withEnv({ MODUSBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
           const result2 = await runOnce(fixture);
           expect(result2.outcome).toBe('no_improvement');
           expect(result2.mutatedSkillFile).toBe(false);
@@ -703,7 +703,7 @@ describe('skillopt T3 — F11 held-out gate, ablation opts, no-DB-pollution', ()
         successEdit: null,
       });
       try {
-        await withEnv({ GBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
+        await withEnv({ MODUSBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
           const result = await runOnce(fixture, { heldOutPath });
           // Held-out gate blocked the promotion.
           expect(result.outcome).toBe('no_improvement');
@@ -729,7 +729,7 @@ describe('skillopt T3 — F11 held-out gate, ablation opts, no-DB-pollution', ()
         successEdit: null,
       });
       try {
-        await withEnv({ GBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
+        await withEnv({ MODUSBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
           const result = await runOnce(fixture, { heldOutPath });
           expect(result.outcome).toBe('accepted');
           const skill = fs.readFileSync(skillPath(fixture.skillsDir, SKILL), 'utf8');
@@ -749,7 +749,7 @@ describe('skillopt T3 — F11 held-out gate, ablation opts, no-DB-pollution', ()
         successEdit: null,
       });
       try {
-        await withEnv({ GBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
+        await withEnv({ MODUSBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
           const result = await runOnce(fixture, { noMutate: true });
           expect(result.outcome).toBe('accepted');
           expect(result.mutatedSkillFile).toBe(false);
@@ -775,7 +775,7 @@ describe('skillopt T3 — F11 held-out gate, ablation opts, no-DB-pollution', ()
         oneShotBody: '# E2E Loop Test Skill\n\nProduce a structured output.\n\n## People\nList people.\n\n## Citations\nCite the source.\n',
       });
       try {
-        await withEnv({ GBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
+        await withEnv({ MODUSBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
           const result = await runOnce(fixture, { optimizerMode: 'one-shot-rewrite' });
           expect(result.outcome).toBe('accepted');
           expect(result.receipt.optimizer_mode).toBe('one-shot-rewrite');
@@ -803,7 +803,7 @@ describe('skillopt T3 — F11 held-out gate, ablation opts, no-DB-pollution', ()
         successEdit: { op: 'add', anchor: 'People', content: '<!-- success note -->', reason: 'note' },
       });
       try {
-        await withEnv({ GBRAIN_AUDIT_DIR: fixtureA.skillsDir }, async () => {
+        await withEnv({ MODUSBRAIN_AUDIT_DIR: fixtureA.skillsDir }, async () => {
           await runOnce(fixtureA, { reflectMode: 'failure-only' });
           expect(failOnly.successReflectCalls).toBe(0);
         });
@@ -819,7 +819,7 @@ describe('skillopt T3 — F11 held-out gate, ablation opts, no-DB-pollution', ()
         successEdit: { op: 'add', anchor: 'People', content: '<!-- success note -->', reason: 'note' },
       });
       try {
-        await withEnv({ GBRAIN_AUDIT_DIR: fixtureB.skillsDir }, async () => {
+        await withEnv({ MODUSBRAIN_AUDIT_DIR: fixtureB.skillsDir }, async () => {
           await runOnce(fixtureB);
           expect(both.successReflectCalls).toBeGreaterThan(0);
         });
@@ -836,7 +836,7 @@ describe('skillopt T3 — F11 held-out gate, ablation opts, no-DB-pollution', ()
     try {
       installStub({ successEdit: benignEdit, failureEdit: null });
       try {
-        await withEnv({ GBRAIN_AUDIT_DIR: fixtureGated.skillsDir }, async () => {
+        await withEnv({ MODUSBRAIN_AUDIT_DIR: fixtureGated.skillsDir }, async () => {
           const result = await runOnce(fixtureGated);
           expect(result.outcome).toBe('no_improvement'); // gate rejected
         });
@@ -847,7 +847,7 @@ describe('skillopt T3 — F11 held-out gate, ablation opts, no-DB-pollution', ()
     try {
       installStub({ successEdit: benignEdit, failureEdit: null });
       try {
-        await withEnv({ GBRAIN_AUDIT_DIR: fixtureGreedy.skillsDir }, async () => {
+        await withEnv({ MODUSBRAIN_AUDIT_DIR: fixtureGreedy.skillsDir }, async () => {
           const result = await runOnce(fixtureGreedy, { disableValidationGate: true });
           expect(result.outcome).toBe('accepted'); // greedy
           expect(result.receipt.validation_gate_disabled).toBe(true);
@@ -870,7 +870,7 @@ describe('skillopt T3 — F11 held-out gate, ablation opts, no-DB-pollution', ()
         successEdit: null,
       });
       try {
-        await withEnv({ GBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
+        await withEnv({ MODUSBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
           await runOnce(fixture);
         });
       } finally { uninstallStub(); }
@@ -892,7 +892,7 @@ describe('skillopt T3 — runtime deadline + receipt score honesty', () => {
         successEdit: null,
       });
       try {
-        await withEnv({ GBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
+        await withEnv({ MODUSBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
           // maxRuntimeMin:0 → deadline == run start; the first step's deadline
           // check fires after the baseline eval has already elapsed → abort.
           const result = await runOnce(fixture, { maxRuntimeMin: 0 });
@@ -913,7 +913,7 @@ describe('skillopt T3 — runtime deadline + receipt score honesty', () => {
     try {
       installStub({ successEdit: null, failureEdit: null }); // baseline already perfect; no edits
       try {
-        await withEnv({ GBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
+        await withEnv({ MODUSBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
           const r = (await runOnce(fixture)).receipt;
           // Real baseline, not the old hardcoded 0.
           expect(r.baseline_sel_score).toBeGreaterThan(0.9);
@@ -939,7 +939,7 @@ describe('skillopt T3 — held-out independence guard', () => {
         successEdit: null,
       });
       try {
-        await withEnv({ GBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
+        await withEnv({ MODUSBRAIN_AUDIT_DIR: fixture.skillsDir }, async () => {
           await expect(runOnce(fixture, { heldOutPath })).rejects.toThrow(/independent|shares .* task_id/i);
         });
       } finally { uninstallStub(); }

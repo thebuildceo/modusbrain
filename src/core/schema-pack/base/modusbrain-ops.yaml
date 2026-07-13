@@ -1,9 +1,9 @@
 # ModusBrain operational skills schema pack extension.
 # Adds the `skill` page type for compiled operational procedures.
-api_version: gbrain-schema-pack-v1
+api_version: modusbrain-schema-pack-v1
 name: modusbrain-ops
 version: "0.1.0"
-description: "Operational skill artifacts — versioned, confidence-gated procedures for agent execution. Extends GBrain for Company Brain workflows."
+description: "Operational skill artifacts — versioned, confidence-gated procedures for agent execution. Extends ModusBrain for Company Brain workflows."
 extends: gbrain-base
 
 page_types:

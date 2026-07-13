@@ -33,9 +33,9 @@ import {
   RetryAbortError,
 } from '../../src/core/retry.ts';
 
-// Minimal GBrainError shape mirrors the typed problem/detail fields from
+// Minimal ModusBrainError shape mirrors the typed problem/detail fields from
 // db.ts:getConnection so the retry-matcher extension recognizes it.
-class FakeGBrainError extends Error {
+class FakeModusBrainError extends Error {
   problem: string;
   detail: string;
   constructor(problem: string, detail: string) {
@@ -46,13 +46,13 @@ class FakeGBrainError extends Error {
 }
 
 describe('isRetryableConnError extension (v0.41.2.1, re-exported from retry.ts)', () => {
-  test('GBrainError with problem="No database connection" is retryable', () => {
-    const err = new FakeGBrainError('No database connection', 'connect() has not been called');
+  test('ModusBrainError with problem="No database connection" is retryable', () => {
+    const err = new FakeModusBrainError('No database connection', 'connect() has not been called');
     expect(isRetryableConnError(err)).toBe(true);
   });
 
-  test('GBrainError with other problem is NOT retryable', () => {
-    const err = new FakeGBrainError('Schema mismatch', 'expected vector(1536), got vector(1024)');
+  test('ModusBrainError with other problem is NOT retryable', () => {
+    const err = new FakeModusBrainError('Schema mismatch', 'expected vector(1536), got vector(1024)');
     expect(isRetryableConnError(err)).toBe(false);
   });
 
@@ -93,12 +93,12 @@ describe('withRetry primitive — v0.41.2.1 back-compat contract', () => {
     expect(calls).toBe(2);
   });
 
-  test('retries on GBrainError "No database connection"; second succeeds', async () => {
+  test('retries on ModusBrainError "No database connection"; second succeeds', async () => {
     let calls = 0;
     const result = await withRetry(
       async () => {
         calls++;
-        if (calls === 1) throw new FakeGBrainError('No database connection', 'connect() has not been called');
+        if (calls === 1) throw new FakeModusBrainError('No database connection', 'connect() has not been called');
         return 'ok';
       },
       { delayMs: 0 },
@@ -363,9 +363,9 @@ describe('resolveBulkRetryOpts env-override (D3 cherry-pick, codex M-10/M-12)', 
 
   test('all 3 vars set: overrides apply', () => {
     const out = resolveBulkRetryOpts({
-      GBRAIN_BULK_MAX_RETRIES: '5',
-      GBRAIN_BULK_RETRY_BASE_MS: '2000',
-      GBRAIN_BULK_RETRY_MAX_MS: '15000',
+      MODUSBRAIN_BULK_MAX_RETRIES: '5',
+      MODUSBRAIN_BULK_RETRY_BASE_MS: '2000',
+      MODUSBRAIN_BULK_RETRY_MAX_MS: '15000',
     });
     expect(out.maxRetries).toBe(5);
     expect(out.delayMs).toBe(2000);
@@ -373,39 +373,39 @@ describe('resolveBulkRetryOpts env-override (D3 cherry-pick, codex M-10/M-12)', 
     expect(out.jitter).toBe('decorrelated'); // not env-overridable
   });
 
-  test('GBRAIN_BULK_MAX_RETRIES=0: accepted (debug-mode disable)', () => {
-    const out = resolveBulkRetryOpts({ GBRAIN_BULK_MAX_RETRIES: '0' });
+  test('MODUSBRAIN_BULK_MAX_RETRIES=0: accepted (debug-mode disable)', () => {
+    const out = resolveBulkRetryOpts({ MODUSBRAIN_BULK_MAX_RETRIES: '0' });
     expect(out.maxRetries).toBe(0);
   });
 
-  test('GBRAIN_BULK_MAX_RETRIES=negative: throws with paste-ready hint', () => {
-    expect(() => resolveBulkRetryOpts({ GBRAIN_BULK_MAX_RETRIES: '-1' }))
-      .toThrow(/GBRAIN_BULK_MAX_RETRIES.*>= 0.*Fix: export/);
+  test('MODUSBRAIN_BULK_MAX_RETRIES=negative: throws with paste-ready hint', () => {
+    expect(() => resolveBulkRetryOpts({ MODUSBRAIN_BULK_MAX_RETRIES: '-1' }))
+      .toThrow(/MODUSBRAIN_BULK_MAX_RETRIES.*>= 0.*Fix: export/);
   });
 
-  test('GBRAIN_BULK_MAX_RETRIES=non-int: throws', () => {
-    expect(() => resolveBulkRetryOpts({ GBRAIN_BULK_MAX_RETRIES: '3.5' }))
-      .toThrow(/GBRAIN_BULK_MAX_RETRIES/);
-    expect(() => resolveBulkRetryOpts({ GBRAIN_BULK_MAX_RETRIES: 'foo' }))
-      .toThrow(/GBRAIN_BULK_MAX_RETRIES/);
+  test('MODUSBRAIN_BULK_MAX_RETRIES=non-int: throws', () => {
+    expect(() => resolveBulkRetryOpts({ MODUSBRAIN_BULK_MAX_RETRIES: '3.5' }))
+      .toThrow(/MODUSBRAIN_BULK_MAX_RETRIES/);
+    expect(() => resolveBulkRetryOpts({ MODUSBRAIN_BULK_MAX_RETRIES: 'foo' }))
+      .toThrow(/MODUSBRAIN_BULK_MAX_RETRIES/);
   });
 
-  test('GBRAIN_BULK_RETRY_BASE_MS=0 or negative: throws (delays must be > 0)', () => {
-    expect(() => resolveBulkRetryOpts({ GBRAIN_BULK_RETRY_BASE_MS: '0' }))
+  test('MODUSBRAIN_BULK_RETRY_BASE_MS=0 or negative: throws (delays must be > 0)', () => {
+    expect(() => resolveBulkRetryOpts({ MODUSBRAIN_BULK_RETRY_BASE_MS: '0' }))
       .toThrow(/> 0/);
-    expect(() => resolveBulkRetryOpts({ GBRAIN_BULK_RETRY_BASE_MS: '-100' }))
+    expect(() => resolveBulkRetryOpts({ MODUSBRAIN_BULK_RETRY_BASE_MS: '-100' }))
       .toThrow(/> 0/);
   });
 
-  test('GBRAIN_BULK_RETRY_MAX_MS < base: throws', () => {
+  test('MODUSBRAIN_BULK_RETRY_MAX_MS < base: throws', () => {
     expect(() => resolveBulkRetryOpts({
-      GBRAIN_BULK_RETRY_BASE_MS: '5000',
-      GBRAIN_BULK_RETRY_MAX_MS: '3000',
-    })).toThrow(/>= GBRAIN_BULK_RETRY_BASE_MS=5000/);
+      MODUSBRAIN_BULK_RETRY_BASE_MS: '5000',
+      MODUSBRAIN_BULK_RETRY_MAX_MS: '3000',
+    })).toThrow(/>= MODUSBRAIN_BULK_RETRY_BASE_MS=5000/);
   });
 
   test('empty string env values treated as unset', () => {
-    const out = resolveBulkRetryOpts({ GBRAIN_BULK_MAX_RETRIES: '' });
+    const out = resolveBulkRetryOpts({ MODUSBRAIN_BULK_MAX_RETRIES: '' });
     expect(out.maxRetries).toBe(BULK_RETRY_OPTS.maxRetries);
   });
 });

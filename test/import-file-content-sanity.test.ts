@@ -12,7 +12,7 @@ import { isQuarantined, getContentFlag, CONTENT_FLAG_KEY } from '../src/core/qua
 
 let engine: PGLiteEngine;
 let auditDir: string;
-let gbrainHomeDir: string;
+let modusbrainHomeDir: string;
 
 beforeAll(async () => {
   engine = new PGLiteEngine();
@@ -28,19 +28,19 @@ beforeEach(async () => {
   await resetPgliteState(engine);
 });
 
-/** Wrap an importFromContent call with GBRAIN_HOME + GBRAIN_AUDIT_DIR
+/** Wrap an importFromContent call with MODUSBRAIN_HOME + MODUSBRAIN_AUDIT_DIR
  *  pointed at fresh tempdirs so config and audit writes don't leak
- *  between tests or pollute the developer's real ~/.gbrain. */
+ *  between tests or pollute the developer's real ~/.modusbrain. */
 async function withIsolatedHome<T>(fn: () => Promise<T>): Promise<T> {
-  gbrainHomeDir = mkdtempSync(join(tmpdir(), 'cs-gate-home-'));
+  modusbrainHomeDir = mkdtempSync(join(tmpdir(), 'cs-gate-home-'));
   auditDir = mkdtempSync(join(tmpdir(), 'cs-gate-audit-'));
   try {
     return await withEnv({
-      GBRAIN_HOME: gbrainHomeDir,
-      GBRAIN_AUDIT_DIR: auditDir,
+      MODUSBRAIN_HOME: modusbrainHomeDir,
+      MODUSBRAIN_AUDIT_DIR: auditDir,
     }, fn);
   } finally {
-    rmSync(gbrainHomeDir, { recursive: true, force: true });
+    rmSync(modusbrainHomeDir, { recursive: true, force: true });
     rmSync(auditDir, { recursive: true, force: true });
   }
 }
@@ -333,14 +333,14 @@ my own note.`;
 });
 
 describe('importFromContent — kill-switch bypass', () => {
-  test('GBRAIN_NO_SANITY=1 lets junk through with bypass audit + stderr', async () => {
-    const gbrainHomeDirLocal = mkdtempSync(join(tmpdir(), 'cs-bypass-home-'));
+  test('MODUSBRAIN_NO_SANITY=1 lets junk through with bypass audit + stderr', async () => {
+    const modusbrainHomeDirLocal = mkdtempSync(join(tmpdir(), 'cs-bypass-home-'));
     const auditDirLocal = mkdtempSync(join(tmpdir(), 'cs-bypass-audit-'));
     try {
       await withEnv({
-        GBRAIN_HOME: gbrainHomeDirLocal,
-        GBRAIN_AUDIT_DIR: auditDirLocal,
-        GBRAIN_NO_SANITY: '1',
+        MODUSBRAIN_HOME: modusbrainHomeDirLocal,
+        MODUSBRAIN_AUDIT_DIR: auditDirLocal,
+        MODUSBRAIN_NO_SANITY: '1',
       }, async () => {
         const content = `---
 title: 'Attention Required! | Cloudflare'
@@ -358,7 +358,7 @@ junk body`;
         expect(isEmbedSkipped(fm)).toBe(false);
       });
     } finally {
-      rmSync(gbrainHomeDirLocal, { recursive: true, force: true });
+      rmSync(modusbrainHomeDirLocal, { recursive: true, force: true });
       rmSync(auditDirLocal, { recursive: true, force: true });
     }
   });

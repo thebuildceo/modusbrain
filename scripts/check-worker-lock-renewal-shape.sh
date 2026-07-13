@@ -34,7 +34,7 @@ ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 cd "$ROOT"
 
 # Allow tests to override the target file for fixture-based meta-tests.
-TARGET="${GBRAIN_LOCK_RENEWAL_SHAPE_TARGET:-src/core/minions/worker.ts}"
+TARGET="${MODUSBRAIN_LOCK_RENEWAL_SHAPE_TARGET:-src/core/minions/worker.ts}"
 
 if [ ! -f "$TARGET" ]; then
   echo "ERROR: shape guard target file not found: $TARGET"

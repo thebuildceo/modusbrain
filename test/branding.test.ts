@@ -9,11 +9,11 @@ describe('branding', () => {
     expect(BRAND.domain).toBe('modusbrain.com');
   });
 
-  test('brandEnv prefers MODUSBRAIN_ over GBRAIN_', async () => {
+  test('brandEnv prefers MODUSBRAIN_ over MODUSBRAIN_', async () => {
     const key = 'TEST_BRAND_ENV_' + Date.now();
     await withEnv(
       {
-        [`GBRAIN_${key}`]: 'legacy',
+        [`MODUSBRAIN_${key}`]: 'legacy',
         [`MODUSBRAIN_${key}`]: 'modus',
       },
       () => {
@@ -23,10 +23,10 @@ describe('branding', () => {
   });
 
   test('brandHelp rewrites user-facing strings', () => {
-    const out = brandHelp('Run gbrain init; config at ~/.gbrain');
+    const out = brandHelp('Run modusbrain init; config at ~/.modusbrain');
     expect(out).toContain('modusbrain');
     expect(out).toContain('.modusbrain');
-    expect(out).not.toContain('gbrain init');
+    expect(out).not.toContain('modusbrain init');
   });
 
   test('cliCmd formats commands', () => {

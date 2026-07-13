@@ -13,15 +13,15 @@
  * rows) and safe to re-run. PGLite engines no-op cleanly.
  *
  * Phases (all idempotent):
- *   A. Schema   — gbrain init --migrate-only (no schema changes in v0.12.2
+ *   A. Schema   — modusbrain init --migrate-only (no schema changes in v0.12.2
  *                 but we still apply for consistency with v0.12.0).
- *   B. Repair   — gbrain repair-jsonb (the actual JSONB fix).
- *   C. Verify   — gbrain repair-jsonb --dry-run --json; assert 0 remaining.
+ *   B. Repair   — modusbrain repair-jsonb (the actual JSONB fix).
+ *   C. Verify   — modusbrain repair-jsonb --dry-run --json; assert 0 remaining.
  *   D. Record   — append completed.jsonl.
  */
 
 import { execSync } from 'child_process';
-import { runGbrainSubprocess } from './in-process.ts';
+import { runModusbrainSubprocess } from './in-process.ts';
 import type { Migration, OrchestratorOpts, OrchestratorResult, OrchestratorPhaseResult } from './types.ts';
 import { childGlobalFlags } from '../../core/cli-options.ts';
 // Bug 3 — ledger writes moved to the runner (apply-migrations.ts).
@@ -48,7 +48,7 @@ function phaseBRepair(opts: OrchestratorOpts): OrchestratorPhaseResult {
   if (opts.dryRun) return { name: 'jsonb_repair', status: 'skipped', detail: 'dry-run' };
   try {
     // stdio: 'inherit' — child's stderr progress streams straight through.
-    runGbrainSubprocess('gbrain repair-jsonb' + childGlobalFlags(), { timeoutMs: 600_000 });
+    runModusbrainSubprocess('modusbrain repair-jsonb' + childGlobalFlags(), { timeoutMs: 600_000 });
     return { name: 'jsonb_repair', status: 'complete' };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
@@ -66,7 +66,7 @@ function phaseCVerify(opts: OrchestratorOpts): OrchestratorPhaseResult {
     // Any accidental stdout progress from the child would break JSON.parse
     // (per Codex review #12). NOTE: we deliberately do NOT pass
     // --progress-json here — this child is parsed, not watched.
-    const out = execSync('gbrain repair-jsonb --dry-run --json', {
+    const out = execSync('modusbrain repair-jsonb --dry-run --json', {
       encoding: 'utf-8', timeout: 60_000, env: process.env,
       stdio: ['ignore', 'pipe', 'inherit'],
     });
@@ -128,12 +128,12 @@ export const v0_12_2: Migration = {
   featurePitch: {
     headline: 'Postgres frontmatter queries now work — JSONB double-encode bug fixed and existing rows auto-repaired',
     description:
-      'gbrain v0.12.0-and-earlier silently stored JSONB columns as quoted string literals on ' +
+      'modusbrain v0.12.0-and-earlier silently stored JSONB columns as quoted string literals on ' +
       'Postgres/Supabase (PGLite was unaffected). Every `frontmatter->>\'key\'` returned NULL ' +
       'and GIN indexes were inert. v0.12.2 fixes the writes AND auto-repairs every existing ' +
       'string-typed row in pages.frontmatter, raw_data.data, ingest_log.pages_updated, ' +
       'files.metadata, and page_versions.frontmatter. The migration is idempotent. Pages ' +
-      'truncated by the splitBody horizontal-rule bug can be recovered with `gbrain sync --full`.',
+      'truncated by the splitBody horizontal-rule bug can be recovered with `modusbrain sync --full`.',
   },
   orchestrator,
 };

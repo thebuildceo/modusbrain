@@ -1,5 +1,5 @@
 /**
- * gbrain remote-source git helpers (v0.28).
+ * modusbrain remote-source git helpers (v0.28).
  *
  * Single source of SSRF-defensive git invocations. parseRemoteUrl delegates
  * to isInternalUrl from src/core/url-safety.ts (covers scheme allowlist,
@@ -11,7 +11,7 @@
  *
  * Tailscale 100.64/10 trips the integrations.ts allowlist (CGNAT line in
  * url-safety.ts isPrivateIpv4). For self-hosted internal git servers
- * reachable only via Tailscale, set GBRAIN_ALLOW_PRIVATE_REMOTES=1; loud
+ * reachable only via Tailscale, set MODUSBRAIN_ALLOW_PRIVATE_REMOTES=1; loud
  * stderr warning at use site is the operator's signal.
  */
 import { execFileSync } from 'child_process';
@@ -79,7 +79,7 @@ export interface ParsedRemoteUrl {
  * Rejects: non-https schemes, embedded credentials, path traversal, and
  * internal/private targets via isInternalUrl.
  *
- * GBRAIN_ALLOW_PRIVATE_REMOTES=1 lets the URL through with a stderr warning.
+ * MODUSBRAIN_ALLOW_PRIVATE_REMOTES=1 lets the URL through with a stderr warning.
  * Needed for self-hosted git over Tailscale (CGNAT 100.64/10) and similar.
  */
 export function parseRemoteUrl(s: string): ParsedRemoteUrl {
@@ -108,15 +108,15 @@ export function parseRemoteUrl(s: string): ParsedRemoteUrl {
     throw new RemoteUrlError('path_traversal', 'URL must not contain path-traversal (..)');
   }
   if (isInternalUrl(s)) {
-    if (process.env.GBRAIN_ALLOW_PRIVATE_REMOTES === '1') {
+    if (process.env.MODUSBRAIN_ALLOW_PRIVATE_REMOTES === '1') {
       console.error(
-        `[gbrain] WARN: GBRAIN_ALLOW_PRIVATE_REMOTES=1, accepting internal/private URL: ${url.hostname}`,
+        `[modusbrain] WARN: MODUSBRAIN_ALLOW_PRIVATE_REMOTES=1, accepting internal/private URL: ${url.hostname}`,
       );
     } else {
       throw new RemoteUrlError(
         'internal_target',
         `URL targets internal/private network: ${url.hostname} ` +
-          `(set GBRAIN_ALLOW_PRIVATE_REMOTES=1 for self-hosted git over Tailscale or similar)`,
+          `(set MODUSBRAIN_ALLOW_PRIVATE_REMOTES=1 for self-hosted git over Tailscale or similar)`,
       );
     }
   }
@@ -141,7 +141,7 @@ export class GitOperationError extends Error {
 }
 
 export const GIT_ENV = {
-  // Confine to the gbrain SSRF model — no credential helpers, no SSH askpass,
+  // Confine to the modusbrain SSRF model — no credential helpers, no SSH askpass,
   // no GUI prompts. Inherit PATH so git itself is findable.
   GIT_TERMINAL_PROMPT: '0',
   GCM_INTERACTIVE: 'never',
@@ -304,20 +304,20 @@ export function validateRepoState(
 }
 
 // ── Durability helpers (v0.42.44) ───────────────────────────────────────────
-// Used by the brain-repo durability feature (`gbrain sources harden/pull`) and
+// Used by the brain-repo durability feature (`modusbrain sources harden/pull`) and
 // the DB-free pull cron. These are the auth-capable, rebase-aware counterparts
 // to the strict read-only `pullRepo` (which stays `--ff-only` for `sync.ts`).
 
 /**
  * Global SSRF flags for the durability fetch/pull/push paths. Identical to
  * GIT_SSRF_FLAGS except `protocol.file.allow` honors the env escape hatch
- * `GBRAIN_GIT_ALLOW_FILE_TRANSPORT=1` (mirrors GBRAIN_ALLOW_PRIVATE_REMOTES) so
+ * `MODUSBRAIN_GIT_ALLOW_FILE_TRANSPORT=1` (mirrors MODUSBRAIN_ALLOW_PRIVATE_REMOTES) so
  * self-hosted local-filesystem remotes — and the test suite — can use the file
  * transport. Default stays `never`. These ops act on an ALREADY-validated origin
  * (set + checked at clone time); `http.followRedirects=false` is the live guard.
  */
 function durableSsrfFlags(): string[] {
-  const fileAllow = process.env.GBRAIN_GIT_ALLOW_FILE_TRANSPORT === '1' ? 'always' : 'never';
+  const fileAllow = process.env.MODUSBRAIN_GIT_ALLOW_FILE_TRANSPORT === '1' ? 'always' : 'never';
   return [
     '-c', 'http.followRedirects=false',
     '-c', `protocol.file.allow=${fileAllow}`,

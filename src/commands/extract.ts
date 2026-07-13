@@ -11,7 +11,7 @@
  * primitive's audit JSONL value justifies the ceremony. No code change
  * in v0.41.13.0; cost-free extract continues as-is.
  *
- * gbrain extract — Extract links and timeline entries from brain content.
+ * modusbrain extract — Extract links and timeline entries from brain content.
  *
  * Two data sources:
  *   --source fs  (default): walk markdown files on disk
@@ -19,9 +19,9 @@
  *                           with no local checkout, e.g. live MCP servers)
  *
  * Subcommands:
- *   gbrain extract links    [--source fs|db] [--dir <brain>] [--dry-run] [--json] [--type T] [--since DATE]
- *   gbrain extract timeline [--source fs|db] [--dir <brain>] [--dry-run] [--json] [--type T] [--since DATE]
- *   gbrain extract all      [--source fs|db] [--dir <brain>] [--dry-run] [--json] [--type T] [--since DATE]
+ *   modusbrain extract links    [--source fs|db] [--dir <brain>] [--dry-run] [--json] [--type T] [--since DATE]
+ *   modusbrain extract timeline [--source fs|db] [--dir <brain>] [--dry-run] [--json] [--type T] [--since DATE]
+ *   modusbrain extract all      [--source fs|db] [--dir <brain>] [--dry-run] [--json] [--type T] [--since DATE]
  *
  * The DB-source path uses the v0.10.3 graph extractor (typed link inference,
  * within-page dedup, snapshot iteration so concurrent writes don't corrupt
@@ -77,12 +77,12 @@ const BATCH_SIZE = 100;
 // bound: the per-batch byte cap CDX-5 described can't run post-fetch (the fetch
 // itself is the OOM point), so a small default count is the real safety net —
 // 25 caps the worst case at ~625MB even if every page is a 25MB transcript.
-// Normal pages are KBs; raise via GBRAIN_EXTRACT_STALE_BATCH for throughput.
-const STALE_BATCH_SIZE = Math.max(1, Number(process.env.GBRAIN_EXTRACT_STALE_BATCH) || 25);
+// Normal pages are KBs; raise via MODUSBRAIN_EXTRACT_STALE_BATCH for throughput.
+const STALE_BATCH_SIZE = Math.max(1, Number(process.env.MODUSBRAIN_EXTRACT_STALE_BATCH) || 25);
 // v0.42.7: wall-clock budget for one `extract --stale` invocation (default
 // 30 min). `--catch-up` removes the cap (loops until 0 stale). Mirrors
 // embedAllStale's time-budget shape.
-const STALE_TIME_BUDGET_MS = Math.max(1000, Number(process.env.GBRAIN_EXTRACT_TIME_BUDGET_MS) || 30 * 60 * 1000);
+const STALE_TIME_BUDGET_MS = Math.max(1000, Number(process.env.MODUSBRAIN_EXTRACT_TIME_BUDGET_MS) || 30 * 60 * 1000);
 
 /**
  * v0.42.7 (#1696): best-effort extraction stamp for the source-correct write
@@ -404,7 +404,7 @@ export async function extractLinksFromFile(
     // Single hit on the ancestor path → emit one edge with the inferred
     // verb type. Multiple hits (only possible when globalBasename is on
     // AND ancestor walk missed) → emit one edge per match, all tagged
-    // `wikilink_basename` so users can audit via `gbrain graph-query
+    // `wikilink_basename` so users can audit via `modusbrain graph-query
     // <slug> --type wikilink_basename`.
     const isBasename = resolvedSlugs.length > 1
       || (globalBasename && resolvedSlugs.length === 1
@@ -585,7 +585,7 @@ export async function runExtractCore(engine: BrainEngine, opts: ExtractOpts): Pr
     return result;
   }
 
-  // Full walk path: CLI `gbrain extract` or first-run.
+  // Full walk path: CLI `modusbrain extract` or first-run.
   if (opts.mode === 'links' || opts.mode === 'all') {
     const r = await extractLinksFromDir(engine, opts.dir, dryRun, jsonMode, workers, opts.signal);
     result.links_created = r.created;
@@ -607,9 +607,9 @@ export async function runExtract(engine: BrainEngine, args: string[]) {
   // BEFORE the existing links/timeline/all subcommand validation so they
   // can use their own arg parsing.
   //
-  //   gbrain extract status [--source-id ID] [--kind X] [--run-id Y] [--json]
-  //   gbrain extract benchmark --pack X --kind Y [--json]
-  //   gbrain extract --explain <kind>
+  //   modusbrain extract status [--source-id ID] [--kind X] [--run-id Y] [--json]
+  //   modusbrain extract benchmark --pack X --kind Y [--json]
+  //   modusbrain extract --explain <kind>
   if (subcommand === 'status') {
     const { runExtractStatus } = await import('./extract-status.ts');
     return runExtractStatus(engine, args.slice(1));
@@ -623,10 +623,10 @@ export async function runExtract(engine: BrainEngine, args: string[]) {
     return runExtractExplain(engine, args);
   }
 
-  // v0.42.7 (#1696): `gbrain extract --stale` — incremental link+timeline sweep
+  // v0.42.7 (#1696): `modusbrain extract --stale` — incremental link+timeline sweep
   // over pages whose links_extracted_at watermark is stale. Intercepts BEFORE
-  // the links|timeline|all subcommand validation so `gbrain extract --stale`
-  // works with no subcommand (and `gbrain extract all --stale` too). DB-source
+  // the links|timeline|all subcommand validation so `modusbrain extract --stale`
+  // works with no subcommand (and `modusbrain extract all --stale` too). DB-source
   // only — reads page content from the DB so it runs on checkout-less brains.
   if (args.includes('--stale')) {
     const sIdx = args.indexOf('--source');
@@ -654,14 +654,14 @@ export async function runExtract(engine: BrainEngine, args: string[]) {
   const explicitDir = dirIdx >= 0 && dirIdx + 1 < args.length;
   // When --dir is not passed, resolve from the configured brain source
   // BEFORE falling back to '.' (the prior default). The bare `.` default was
-  // a footgun: a user who runs `gbrain extract links` from anywhere outside
+  // a footgun: a user who runs `modusbrain extract links` from anywhere outside
   // their brain dir (e.g., a project checkout with a node_modules tree) had
   // the recursive walker grab tens of thousands of unrelated .md files,
   // attempt to extract links between them, then write 0 rows because the
   // synthetic from_slugs don't match any pages row. The output ("created 0
   // links from 28989 pages") looks like a no-op, but it walked 28K junk files
   // first. Resolving from sources(local_path) makes the no-arg invocation
-  // match what `gbrain sync` already does, and keeps cwd-cwd usage available
+  // match what `modusbrain sync` already does, and keeps cwd-cwd usage available
   // via explicit `--dir .`.
   let brainDir = explicitDir ? args[dirIdx + 1] : '.';
   const sourceIdx = args.indexOf('--source');
@@ -722,31 +722,31 @@ export async function runExtract(engine: BrainEngine, args: string[]) {
   }
 
   if (!subcommand || !['links', 'timeline', 'all'].includes(subcommand)) {
-    console.error(`Usage: gbrain extract <subcommand> [flags]
+    console.error(`Usage: modusbrain extract <subcommand> [flags]
 
 Extraction (existing):
-  gbrain extract links    [--source fs|db] [--source-id <id>] [--dir <brain-dir>] [--dry-run] [--json] [--type T] [--since DATE] [--workers N]
-  gbrain extract timeline [--source fs|db] [--source-id <id>] [--dir <brain-dir>] [--dry-run] [--json] [--type T] [--since DATE] [--workers N]
-  gbrain extract all      [--source fs|db] [--source-id <id>] [--dir <brain-dir>] [--dry-run] [--json] [--type T] [--since DATE] [--workers N]
-  gbrain extract <links|timeline> --by-mention --source db
-  gbrain extract <links|timeline|all> --ner --source db
-  gbrain extract <timeline|all> --from-meetings
+  modusbrain extract links    [--source fs|db] [--source-id <id>] [--dir <brain-dir>] [--dry-run] [--json] [--type T] [--since DATE] [--workers N]
+  modusbrain extract timeline [--source fs|db] [--source-id <id>] [--dir <brain-dir>] [--dry-run] [--json] [--type T] [--since DATE] [--workers N]
+  modusbrain extract all      [--source fs|db] [--source-id <id>] [--dir <brain-dir>] [--dry-run] [--json] [--type T] [--since DATE] [--workers N]
+  modusbrain extract <links|timeline> --by-mention --source db
+  modusbrain extract <links|timeline|all> --ner --source db
+  modusbrain extract <timeline|all> --from-meetings
 
 Incremental sweep (v0.42.7):
-  gbrain extract --stale [--source-id <id>] [--catch-up] [--dry-run] [--json]
+  modusbrain extract --stale [--source-id <id>] [--catch-up] [--dry-run] [--json]
       Re-extract links + timeline ONLY for pages whose extraction is stale
       (never extracted, edited since, or extractor bumped). DB-source; safe to
       cron. --catch-up loops past the 30-min wall-clock budget until 0 remain.
 
 Inspection (v0.42):
-  gbrain extract --explain <kind> [--json]
+  modusbrain extract --explain <kind> [--json]
       Print resolution chain for one pack-declared extractable kind.
-  gbrain extract benchmark --pack <name> --kind <type> [--json]
+  modusbrain extract benchmark --pack <name> --kind <type> [--json]
       Run a pack's fixture corpus through the extractor (v0.42 reports
       fixture shape; LLM dispatch comes in v0.43+).
 
 Status (v0.42):
-  gbrain extract status [--source-id ID] [--kind X] [--verbose] [--json]
+  modusbrain extract status [--source-id ID] [--kind X] [--verbose] [--json]
       Per-kind 7-day rollup: cost, halt rate, eval pass/fail counts.`);
     process.exit(1);
   }
@@ -764,7 +764,7 @@ Status (v0.42):
     console.error(
       `--by-mention requires --source db (currently --source fs). The mention scanner ` +
       `needs the engine to build the entity gazetteer. Re-run as:\n\n` +
-      `  gbrain extract ${subcommand} --by-mention --source db` +
+      `  modusbrain extract ${subcommand} --by-mention --source db` +
       (sourceIdFilter ? ` --source-id ${sourceIdFilter}` : '') +
       (since ? ` --since ${since}` : '') +
       (dryRun ? ' --dry-run' : '') + '\n',
@@ -774,7 +774,7 @@ Status (v0.42):
   if (byMention && subcommand === 'timeline') {
     console.error(
       `--by-mention is a links-pass only; it does not apply to timeline extraction. ` +
-      `Re-run as 'gbrain extract links --by-mention' or 'gbrain extract all --by-mention'.`,
+      `Re-run as 'modusbrain extract links --by-mention' or 'modusbrain extract all --by-mention'.`,
     );
     process.exit(2);
   }
@@ -783,7 +783,7 @@ Status (v0.42):
     console.error(
       `--ner requires --source db (currently --source fs). NER extraction needs the engine ` +
       `to build the entity gazetteer + read schema-pack link_types. Re-run as:\n\n` +
-      `  gbrain extract ${subcommand} --ner --source db` +
+      `  modusbrain extract ${subcommand} --ner --source db` +
       (sourceIdFilter ? ` --source-id ${sourceIdFilter}` : '') +
       (since ? ` --since ${since}` : '') +
       (dryRun ? ' --dry-run' : '') + '\n',
@@ -800,7 +800,7 @@ Status (v0.42):
   if (fromMeetings && source === 'fs') {
     console.error(
       `--from-meetings requires --source db (currently --source fs). Re-run as:\n\n` +
-      `  gbrain extract timeline --from-meetings --source db` +
+      `  modusbrain extract timeline --from-meetings --source db` +
       (sourceIdFilter ? ` --source-id ${sourceIdFilter}` : '') +
       (dryRun ? ' --dry-run' : '') + '\n',
     );
@@ -808,13 +808,13 @@ Status (v0.42):
   }
   if (fromMeetings && subcommand !== 'timeline' && subcommand !== 'all') {
     console.error(
-      `--from-meetings is a timeline-pass only. Re-run as 'gbrain extract timeline --from-meetings' or 'gbrain extract all --from-meetings'.`,
+      `--from-meetings is a timeline-pass only. Re-run as 'modusbrain extract timeline --from-meetings' or 'modusbrain extract all --from-meetings'.`,
     );
     process.exit(2);
   }
 
   // FS source needs a brain dir. When --dir wasn't passed, resolve from
-  // sources(local_path) — same path `gbrain sync` uses — instead of
+  // sources(local_path) — same path `modusbrain sync` uses — instead of
   // silently walking cwd. See the brainDir comment above for the footgun.
   if (source === 'fs' && !explicitDir) {
     const { getDefaultSourcePath } = await import('../core/source-resolver.ts');
@@ -825,7 +825,7 @@ Status (v0.42):
       console.error(
         `No brain directory configured. Pass --dir <path> explicitly, or use --source db ` +
         `to extract from already-synced pages. To register a brain dir as the default, ` +
-        `run: gbrain sources add default --path <brain-dir>`,
+        `run: modusbrain sources add default --path <brain-dir>`,
       );
       process.exit(1);
     }
@@ -989,7 +989,7 @@ async function extractForSlugs(
       // v0.41.18.0: engine self-retries on Supavisor blip. auditSite routes
       // the audit JSONL emission. Per-snapshot try/catch preserves the
       // log-and-continue contract for exhausted retries.
-      linksCreated += await engine.addLinksBatch(snapshot, { auditSite: 'extract.links_inc' }); // gbrain-allow-direct-insert: gbrain extract command — canonical link reconciliation from markdown body
+      linksCreated += await engine.addLinksBatch(snapshot, { auditSite: 'extract.links_inc' }); // modusbrain-allow-direct-insert: modusbrain extract command — canonical link reconciliation from markdown body
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       if (!jsonMode) console.error(`  link batch error (${snapshot.length} rows lost): ${msg}`);
@@ -1105,7 +1105,7 @@ async function extractLinksFromDir(
     const snapshot = batch.slice();
     batch.length = 0;
     try {
-      created += await engine.addLinksBatch(snapshot, { auditSite: 'extract.links_fs' }); // gbrain-allow-direct-insert: gbrain extract command — canonical link reconciliation from markdown body
+      created += await engine.addLinksBatch(snapshot, { auditSite: 'extract.links_fs' }); // modusbrain-allow-direct-insert: modusbrain extract command — canonical link reconciliation from markdown body
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       if (jsonMode) {
@@ -1248,7 +1248,7 @@ export async function extractLinksForSlugs(
     try {
       const content = readFileSync(filePath, 'utf-8');
       for (const link of await extractLinksFromFile(content, slug + '.md', allSlugs, { globalBasename })) {
-        try { await engine.addLink(link.from_slug, link.to_slug, link.context, link.link_type, link.link_source, undefined, undefined, linkOpts); created++; } catch { /* skip */ } // gbrain-allow-direct-insert: gbrain extract single-row fallback when batch path declines a row
+        try { await engine.addLink(link.from_slug, link.to_slug, link.context, link.link_type, link.link_source, undefined, undefined, linkOpts); created++; } catch { /* skip */ } // modusbrain-allow-direct-insert: modusbrain extract single-row fallback when batch path declines a row
       }
     } catch { /* skip */ }
   }
@@ -1272,7 +1272,7 @@ export async function extractTimelineForSlugs(
     try {
       const content = readFileSync(filePath, 'utf-8');
       for (const entry of extractTimelineFromContent(content, slug)) {
-        try { await engine.addTimelineEntry(entry.slug, { date: entry.date, source: entry.source, summary: entry.summary, detail: entry.detail }, entryOpts); created++; } catch { /* skip */ } // gbrain-allow-direct-insert: gbrain extract single-row fallback for timeline entries
+        try { await engine.addTimelineEntry(entry.slug, { date: entry.date, source: entry.source, summary: entry.summary, detail: entry.detail }, entryOpts); created++; } catch { /* skip */ } // modusbrain-allow-direct-insert: modusbrain extract single-row fallback for timeline entries
       }
     } catch { /* skip */ }
   }
@@ -1298,7 +1298,7 @@ async function extractLinksFromDB(
   const sourceIdFilter = opts?.sourceIdFilter;
   // C3 (D6): the links_extracted_at watermark covers links AND timeline, so a
   // links-ONLY run must NOT stamp it (that would hide timeline staleness for
-  // `gbrain extract links --source db`). Only stamp when the caller ran BOTH
+  // `modusbrain extract links --source db`). Only stamp when the caller ran BOTH
   // (subcommand 'all'). Caller passes stampWatermark accordingly.
   const stampWatermark = opts?.stampWatermark ?? false;
   // Batch resolver: pg_trgm + exact only, NO search fallback. Dodges the
@@ -1352,7 +1352,7 @@ async function extractLinksFromDB(
   }
   let processed = 0, created = 0;
   // v0.42.7 (#1696): pages whose links we extracted this run — stamped after
-  // the loop so a manual `gbrain extract links|all --source db` clears the
+  // the loop so a manual `modusbrain extract links|all --source db` clears the
   // links_extraction_lag doctor signal. Non-dry-run only.
   const processedRefs: Array<{ slug: string; source_id: string }> = [];
 
@@ -1368,7 +1368,7 @@ async function extractLinksFromDB(
     const snapshot = batch.slice();
     batch.length = 0;
     try {
-      created += await engine.addLinksBatch(snapshot, { auditSite: 'extract.links_db' }); // gbrain-allow-direct-insert: gbrain extract command — canonical link reconciliation from markdown body
+      created += await engine.addLinksBatch(snapshot, { auditSite: 'extract.links_db' }); // modusbrain-allow-direct-insert: modusbrain extract command — canonical link reconciliation from markdown body
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       if (jsonMode) {
@@ -1392,7 +1392,7 @@ async function extractLinksFromDB(
     const fullContent = page.compiled_truth + '\n' + page.timeline;
     // --include-frontmatter default OFF in v0.13 (codex tension 5, back-compat).
     // Migration orchestrator explicitly enables it for the one-time backfill;
-    // user-invoked `gbrain extract links` stays outgoing-only.
+    // user-invoked `modusbrain extract links` stays outgoing-only.
     // Issue #972: globalBasename routes bare `[[name]]` wikilinks through
     // basename lookup; off by default for back-compat.
     const extracted = await extractPageLinks(
@@ -1573,7 +1573,7 @@ async function extractTimelineFromDB(
 }
 
 /**
- * v0.42.7 (#1696) — `gbrain extract --stale`: incremental link + timeline
+ * v0.42.7 (#1696) — `modusbrain extract --stale`: incremental link + timeline
  * extraction over pages whose `links_extracted_at` watermark is stale (NULL,
  * older than LINK_EXTRACTOR_VERSION_TS, or older than the page's updated_at).
  * DB-source (works on checkout-less Postgres/Supabase brains). Mirrors
@@ -1687,7 +1687,7 @@ async function extractStaleFromDB(
     // ON CONFLICT DO NOTHING + timeline dedups, so partial-chunk writes are
     // idempotent on re-extraction.
     for (let i = 0; i < linkRows.length; i += BATCH_SIZE) {
-      linksCreated += await engine.addLinksBatch(linkRows.slice(i, i + BATCH_SIZE), { auditSite: 'extract.stale' }); // gbrain-allow-direct-insert: gbrain extract --stale — canonical link reconciliation from markdown body
+      linksCreated += await engine.addLinksBatch(linkRows.slice(i, i + BATCH_SIZE), { auditSite: 'extract.stale' }); // modusbrain-allow-direct-insert: modusbrain extract --stale — canonical link reconciliation from markdown body
     }
     for (let i = 0; i < timelineRows.length; i += BATCH_SIZE) {
       timelineCreated += await engine.addTimelineEntriesBatch(timelineRows.slice(i, i + BATCH_SIZE), { auditSite: 'extract.stale' });
@@ -1709,7 +1709,7 @@ async function extractStaleFromDB(
   if (!jsonMode) {
     console.log(`Extract --stale: ${linksCreated} link(s) + ${timelineCreated} timeline entr(ies) from ${pagesProcessed} page(s).`);
     if (budgetHit && staleRemaining > 0) {
-      console.log(`Time budget reached — ${staleRemaining} page(s) still stale. Re-run 'gbrain extract --stale' (or pass --catch-up) to continue.`);
+      console.log(`Time budget reached — ${staleRemaining} page(s) still stale. Re-run 'modusbrain extract --stale' (or pass --catch-up) to continue.`);
     }
   } else {
     process.stdout.write(JSON.stringify({
@@ -1805,7 +1805,7 @@ async function extractMentionsFromDb(
   async function flushBatch() {
     if (batch.length === 0) return;
     try {
-      created += await engine.addLinksBatch(batch, { auditSite: 'extract.by_mention' }); // gbrain-allow-direct-insert: gbrain extract --by-mention — canonical auto-link write from body-text mention scan
+      created += await engine.addLinksBatch(batch, { auditSite: 'extract.by_mention' }); // modusbrain-allow-direct-insert: modusbrain extract --by-mention — canonical auto-link write from body-text mention scan
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       if (jsonMode) {

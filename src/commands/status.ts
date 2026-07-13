@@ -1,9 +1,9 @@
 /**
- * `gbrain status` — single-screen brain health dashboard.
+ * `modusbrain status` — single-screen brain health dashboard.
  *
  * The command that answers "is my brain healthy and working?" without
- * making operators run five other commands (gbrain sources status, gbrain
- * stats, gbrain jobs supervisor status, gbrain jobs list, tail audit logs).
+ * making operators run five other commands (modusbrain sources status, modusbrain
+ * stats, modusbrain jobs supervisor status, modusbrain jobs list, tail audit logs).
  *
  * Six sections:
  *   - Sync       — per-source last_sync_at + staleness
@@ -11,7 +11,7 @@
  *                  last TARGETED run (any autopilot-* job). Reflects
  *                  v0.36.4.0's health-aware autopilot (healthy brains run
  *                  targeted handlers most ticks, full cycle every ~60min).
- *   - Locks      — active rows in gbrain_cycle_locks
+ *   - Locks      — active rows in modusbrain_cycle_locks
  *   - Workers    — supervisor health from the audit JSONL
  *   - Queue      — live minion_jobs counts BY status (NO time window —
  *                  old stuck jobs are exactly what status surfaces)
@@ -37,7 +37,7 @@
 
 import type { BrainEngine } from '../core/engine.ts';
 import { existsSync, readFileSync } from 'node:fs';
-import { gbrainPath, loadConfig, isThinClient } from '../core/config.ts';
+import { modusbrainPath, loadConfig, isThinClient } from '../core/config.ts';
 import { callRemoteTool, unpackToolResult } from '../core/mcp-client.ts';
 import { VERSION } from '../version.ts';
 import {
@@ -105,7 +105,7 @@ export interface AutopilotStatus {
 
 export interface StatusReport {
   schema_version: typeof SCHEMA_VERSION;
-  /** #1984: the local gbrain CLI version, so a poller can pin behavior to a build. */
+  /** #1984: the local modusbrain CLI version, so a poller can pin behavior to a build. */
   version: string;
   /** #1984: the remote brain server's version (thin-client only; present when reported). */
   remote_version?: string;
@@ -240,7 +240,7 @@ async function buildLocks(engine: BrainEngine): Promise<LockRow[]> {
   try {
     const rows = await engine.executeRaw<Row>(
       `SELECT id, holder_pid, holder_host, acquired_at, ttl_expires_at
-         FROM gbrain_cycle_locks
+         FROM modusbrain_cycle_locks
         WHERE ttl_expires_at > NOW()
         ORDER BY acquired_at`,
     );
@@ -261,7 +261,7 @@ async function buildQueueCounts(engine: BrainEngine): Promise<QueueCounts> {
   const counts: QueueCounts = { active: 0, waiting: 0, completed: 0, failed: 0, dead: 0 };
   try {
     // Live counts, NO time window (codex MAJOR-6). Old stuck waiting/active
-    // jobs are the failure mode `gbrain status` should surface, not hide.
+    // jobs are the failure mode `modusbrain status` should surface, not hide.
     const rows = await engine.executeRaw<Row>(
       `SELECT status, COUNT(*)::text AS count FROM minion_jobs GROUP BY status`,
     );
@@ -298,7 +298,7 @@ function buildWorkerSummary(): WorkerSummary {
 }
 
 function buildAutopilotStatus(): AutopilotStatus {
-  const lockPath = gbrainPath('autopilot.lock');
+  const lockPath = modusbrainPath('autopilot.lock');
   const lockfile_present = existsSync(lockPath);
   let pid: number | null = null;
   let running = false;
@@ -355,7 +355,7 @@ async function buildLocalReport(
     mode: 'local',
   };
 
-  // #1984: a shared budget so `gbrain status --deadline-ms=N` never blocks a
+  // #1984: a shared budget so `modusbrain status --deadline-ms=N` never blocks a
   // poller past N. Each async section is raced against the REMAINING budget, so
   // one slow/hung section (cross-region DB, lock contention) can't strand the
   // whole snapshot — it's marked stale and the rest still return.
@@ -486,7 +486,7 @@ async function buildThinClientReport(
 function renderHuman(report: StatusReport): string {
   const lines: string[] = [];
   lines.push('');
-  lines.push('GBrain Status');
+  lines.push('ModusBrain Status');
   lines.push('=============');
   const ver = report.remote_version && report.remote_version !== report.version
     ? `v${report.version} (remote v${report.remote_version})`
@@ -592,9 +592,9 @@ function renderHuman(report: StatusReport): string {
       if (a.running) {
         lines.push(`  running (PID ${a.pid})`);
       } else if (a.lockfile_present) {
-        lines.push(`  stale lockfile (PID ${a.pid ?? '?'} not alive). Run \`gbrain autopilot --install\` to restart.`);
+        lines.push(`  stale lockfile (PID ${a.pid ?? '?'} not alive). Run \`modusbrain autopilot --install\` to restart.`);
       } else {
-        lines.push('  not running. Install with `gbrain autopilot --install`.');
+        lines.push('  not running. Install with `modusbrain autopilot --install`.');
       }
     }
     lines.push('');
@@ -691,7 +691,7 @@ export async function runStatus(
   const sectionFlag = parseSectionFlag(args);
   if (sectionFlag === 'usage_error') {
     stderr(
-      `gbrain status: invalid --section. Valid: ${VALID_SECTIONS.join('|')}\n`,
+      `modusbrain status: invalid --section. Valid: ${VALID_SECTIONS.join('|')}\n`,
     );
     return { exitCode: 2 };
   }
@@ -700,7 +700,7 @@ export async function runStatus(
 
   const deadlineMs = parseDeadlineFlag(args);
   if (deadlineMs === 'usage_error') {
-    stderr('gbrain status: --deadline-ms must be a positive number of milliseconds\n');
+    stderr('modusbrain status: --deadline-ms must be a positive number of milliseconds\n');
     return { exitCode: 2 };
   }
 
@@ -713,13 +713,13 @@ export async function runStatus(
       report = await buildThinClientReport(cfg, { sections, deadlineMs });
     } else {
       if (!engine) {
-        stderr('gbrain status: no engine connected (DB unreachable?). Run `gbrain doctor` to diagnose.\n');
+        stderr('modusbrain status: no engine connected (DB unreachable?). Run `modusbrain doctor` to diagnose.\n');
         return { exitCode: 1 };
       }
       report = await buildLocalReport(engine, { sections, deadlineMs });
     }
   } catch (err) {
-    stderr(`gbrain status: snapshot failed: ${(err as Error).message}\n`);
+    stderr(`modusbrain status: snapshot failed: ${(err as Error).message}\n`);
     return { exitCode: 1 };
   }
 

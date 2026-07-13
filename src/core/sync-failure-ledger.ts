@@ -9,7 +9,7 @@
 //      (incremental + full/runImport) through one shared policy.
 //   2. Give a visible, per-(source,path) record of what failed, with the
 //      commit hash to re-attempt after fixing the source file.
-//   3. `gbrain sync --skip-failed` acknowledges a known-bad set.
+//   3. `modusbrain sync --skip-failed` acknowledges a known-bad set.
 //   4. BOUNDED AUTO-SKIP: a file that fails N consecutive syncs is
 //      auto-skipped so a single poison file can't wedge ALL indexing
 //      forever — without ever silently dropping a FRESH failure, and
@@ -17,7 +17,7 @@
 //
 // This module is a LEAF (imports only fs/path/crypto/config) so it can be
 // re-exported from sync.ts without a circular dependency. The state lives
-// in `~/.gbrain/sync-failures.jsonl`, one JSON object per line.
+// in `~/.modusbrain/sync-failures.jsonl`, one JSON object per line.
 //
 // State machine (per (source_id, path)):
 //
@@ -52,7 +52,7 @@ import {
   statSync as _statSync,
 } from 'fs';
 import { join as _joinPath } from 'path';
-import { gbrainPath as _gbrainPath } from './config.ts';
+import { modusbrainPath as _modusbrainPath } from './config.ts';
 import { createHash as _createHash } from 'crypto';
 
 export const DEFAULT_SOURCE_ID = 'default';
@@ -100,11 +100,11 @@ export function isSkippablePath(path: string): boolean {
 }
 
 /**
- * Resolve the auto-skip threshold from `GBRAIN_SYNC_AUTOSKIP_AFTER`
+ * Resolve the auto-skip threshold from `MODUSBRAIN_SYNC_AUTOSKIP_AFTER`
  * (default 3). `0` disables the valve entirely (pure fail-closed).
  */
 export function resolveAutoSkipThreshold(): number {
-  const raw = process.env.GBRAIN_SYNC_AUTOSKIP_AFTER;
+  const raw = process.env.MODUSBRAIN_SYNC_AUTOSKIP_AFTER;
   if (raw === undefined || raw === '') return DEFAULT_AUTOSKIP_AFTER;
   const n = Number(raw);
   if (!Number.isFinite(n) || n < 0) return DEFAULT_AUTOSKIP_AFTER;
@@ -207,7 +207,7 @@ export function formatCodeBreakdown(
 }
 
 function _failuresDir(): string {
-  return _gbrainPath();
+  return _modusbrainPath();
 }
 
 export function syncFailuresPath(): string {
@@ -476,7 +476,7 @@ function _recordAndClear(
 
 /**
  * Public single-purpose recorder (no clear). Used by callers outside the
- * sync gate (e.g. `gbrain import`). Increments attempts like the gate.
+ * sync gate (e.g. `modusbrain import`). Increments attempts like the gate.
  */
 export function recordFailures(
   sourceId: string,

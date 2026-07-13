@@ -17,7 +17,7 @@
 import { describe, test, expect, beforeAll, afterAll } from 'bun:test';
 import { PGLiteEngine } from '../src/core/pglite-engine.ts';
 
-delete process.env.GBRAIN_PGLITE_SNAPSHOT;
+delete process.env.MODUSBRAIN_PGLITE_SNAPSHOT;
 
 async function setupBrain(): Promise<PGLiteEngine> {
   const engine = new PGLiteEngine();
@@ -266,30 +266,30 @@ describe('search visibility (soft-deleted pages hidden from searchKeyword)', () 
     await engine.putPage('people/nora', {
       type: 'note' as any,
       title: 'Nora',
-      compiled_truth: 'gbrainquantum signature term occurs here',
+      compiled_truth: 'modusbrainquantum signature term occurs here',
       timeline: '',
       frontmatter: {},
     });
     await engine.putPage('people/oscar', {
       type: 'note' as any,
       title: 'Oscar',
-      compiled_truth: 'gbrainquantum signature term occurs here too',
+      compiled_truth: 'modusbrainquantum signature term occurs here too',
       timeline: '',
       frontmatter: {},
     });
     // Force chunk creation so search has something to index.
     await engine.upsertChunks('people/nora', [
-      { chunk_index: 0, chunk_text: 'gbrainquantum signature term occurs here', chunk_source: 'compiled_truth' as any },
+      { chunk_index: 0, chunk_text: 'modusbrainquantum signature term occurs here', chunk_source: 'compiled_truth' as any },
     ]);
     await engine.upsertChunks('people/oscar', [
-      { chunk_index: 0, chunk_text: 'gbrainquantum signature term occurs here too', chunk_source: 'compiled_truth' as any },
+      { chunk_index: 0, chunk_text: 'modusbrainquantum signature term occurs here too', chunk_source: 'compiled_truth' as any },
     ]);
 
-    const before = await engine.searchKeyword('gbrainquantum');
+    const before = await engine.searchKeyword('modusbrainquantum');
     expect(before.length).toBe(2);
 
     await engine.softDeletePage('people/nora');
-    const after = await engine.searchKeyword('gbrainquantum');
+    const after = await engine.searchKeyword('modusbrainquantum');
     const slugs = after.map((r) => r.slug);
     expect(slugs).not.toContain('people/nora');
     expect(slugs).toContain('people/oscar');
@@ -306,18 +306,18 @@ describe('search visibility (soft-deleted pages hidden from searchKeyword)', () 
       `SELECT id FROM pages WHERE slug = 'archived-src/secret'`,
     );
     await engine.executeRaw(
-      `INSERT INTO content_chunks (page_id, chunk_index, chunk_text, chunk_source) VALUES ($1, 0, 'gbrainsemaphore unique term', 'compiled_truth')`,
+      `INSERT INTO content_chunks (page_id, chunk_index, chunk_text, chunk_source) VALUES ($1, 0, 'modusbrainsemaphore unique term', 'compiled_truth')`,
       [pageRows[0].id],
     );
     // Trigger should populate search_vector via the schema trigger.
-    const before = await engine.searchKeyword('gbrainsemaphore');
+    const before = await engine.searchKeyword('modusbrainsemaphore');
     expect(before.length).toBe(1);
 
     // Archive the source.
     await engine.executeRaw(
       `UPDATE sources SET archived = true, archived_at = now(), archive_expires_at = now() + INTERVAL '72 hours' WHERE id = 'archived-src'`,
     );
-    const after = await engine.searchKeyword('gbrainsemaphore');
+    const after = await engine.searchKeyword('modusbrainsemaphore');
     expect(after.length).toBe(0);
   });
 });

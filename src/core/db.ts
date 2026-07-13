@@ -1,5 +1,5 @@
 import postgres from 'postgres';
-import { GBrainError, type EngineConfig } from './types.ts';
+import { ModusBrainError, type EngineConfig } from './types.ts';
 import { SCHEMA_SQL } from './schema-embedded.ts';
 import type { BrainEngine } from './engine.ts';
 import { verifySchema } from './schema-verify.ts';
@@ -11,14 +11,14 @@ let connectedUrl: string | null = null;
  * #1972: hard upper bound (seconds) on a single pool `.end()` drain. postgres.js
  * accepts `{ timeout }` but applies it internally — against PgBouncer
  * transaction-mode the drain can still hang, and a stubbed `.end()` ignores it
- * entirely. So `endPoolBounded` ALSO wraps each end in a gbrain-owned
+ * entirely. So `endPoolBounded` ALSO wraps each end in a modusbrain-owned
  * Promise.race and passes this value as the postgres.js hint so a healthy drain
  * still finishes fast.
  */
 export const POOL_END_TIMEOUT_SECONDS = 2;
 
 /**
- * #1972: end a postgres.js pool with a gbrain-owned hard bound. Resolves as soon
+ * #1972: end a postgres.js pool with a modusbrain-owned hard bound. Resolves as soon
  * as `.end()` settles OR after POOL_END_TIMEOUT_SECONDS + a small slack — so
  * teardown never hangs (the prior bare `.end()` blocked until the CLI's 10s
  * force-exit fired, which `process.exit()`s and truncated pending stdout, e.g.
@@ -51,8 +51,8 @@ export async function endPoolBounded(
 /**
  * Default pool size for Postgres connections. Users on the Supabase transaction
  * pooler (port 6543) or any multi-tenant pooler can lower this to avoid
- * MaxClients errors when `gbrain upgrade` spawns subprocesses that each open
- * their own pool. Set `GBRAIN_POOL_SIZE=2` (or similar) before the command.
+ * MaxClients errors when `modusbrain upgrade` spawns subprocesses that each open
+ * their own pool. Set `MODUSBRAIN_POOL_SIZE=2` (or similar) before the command.
  */
 const DEFAULT_POOL_SIZE_FALLBACK = 10;
 
@@ -65,7 +65,7 @@ const DEFAULT_POOL_SIZE_FALLBACK = 10;
  *
  * This is a heuristic, not a protocol guarantee. A direct-Postgres server
  * deliberately bound to 6543 will also get `prepare: false`; the
- * `GBRAIN_PREPARE=true` env var (or `?prepare=true` on the URL) is the
+ * `MODUSBRAIN_PREPARE=true` env var (or `?prepare=true` on the URL) is the
  * documented escape hatch.
  */
 const AUTO_DETECT_PORTS = new Set(['6543']);
@@ -74,7 +74,7 @@ const AUTO_DETECT_PORTS = new Set(['6543']);
  * Decide whether to force `prepare: true`/`false` on the postgres.js client.
  *
  * Precedence:
- *   1. `GBRAIN_PREPARE` env var (`true`/`1` or `false`/`0`)
+ *   1. `MODUSBRAIN_PREPARE` env var (`true`/`1` or `false`/`0`)
  *   2. `?prepare=true|false` query param on the URL
  *   3. Auto-detect: port 6543 → `false`
  *   4. Default: `undefined` (caller omits the option; postgres.js default stands)
@@ -84,7 +84,7 @@ const AUTO_DETECT_PORTS = new Set(['6543']);
  * `undefined` through to `postgres(url, {prepare: undefined})`.
  */
 export function resolvePrepare(url: string): boolean | undefined {
-  const envPrepare = process.env.GBRAIN_PREPARE;
+  const envPrepare = process.env.MODUSBRAIN_PREPARE;
   if (envPrepare === 'false' || envPrepare === '0') return false;
   if (envPrepare === 'true' || envPrepare === '1') return true;
 
@@ -106,7 +106,7 @@ export function resolvePrepare(url: string): boolean | undefined {
 
 export function resolvePoolSize(explicit?: number): number {
   if (typeof explicit === 'number' && explicit > 0) return explicit;
-  const raw = process.env.GBRAIN_POOL_SIZE;
+  const raw = process.env.MODUSBRAIN_POOL_SIZE;
   if (raw) {
     const parsed = parseInt(raw, 10);
     if (Number.isFinite(parsed) && parsed > 0) return parsed;
@@ -135,9 +135,9 @@ export function resolvePoolSize(explicit?: number): number {
  *     long-running embed passes)
  *
  * Override per-GUC with env vars:
- *   - GBRAIN_STATEMENT_TIMEOUT
- *   - GBRAIN_IDLE_TX_TIMEOUT
- *   - GBRAIN_CLIENT_CHECK_INTERVAL (Postgres 14+; empty default - opt-in
+ *   - MODUSBRAIN_STATEMENT_TIMEOUT
+ *   - MODUSBRAIN_IDLE_TX_TIMEOUT
+ *   - MODUSBRAIN_CLIENT_CHECK_INTERVAL (Postgres 14+; empty default - opt-in
  *     only since older self-hosted Postgres rejects this startup param)
  *
  * Set any env var to '0' or 'off' to disable that GUC entirely.
@@ -165,12 +165,12 @@ export function resolveSessionTimeouts(): Record<string, string> {
     const val = raw ?? defaultVal;
     if (val) out[gucKey] = val;
   };
-  add('GBRAIN_STATEMENT_TIMEOUT', 'statement_timeout', DEFAULT_STATEMENT_TIMEOUT);
-  add('GBRAIN_IDLE_TX_TIMEOUT', 'idle_in_transaction_session_timeout', DEFAULT_IDLE_TX_TIMEOUT);
+  add('MODUSBRAIN_STATEMENT_TIMEOUT', 'statement_timeout', DEFAULT_STATEMENT_TIMEOUT);
+  add('MODUSBRAIN_IDLE_TX_TIMEOUT', 'idle_in_transaction_session_timeout', DEFAULT_IDLE_TX_TIMEOUT);
   // client_connection_check_interval is opt-in: Postgres 14+ only, and some
   // managed pooler tiers reject unknown startup parameters. Users can enable
   // it explicitly once they know their Postgres version supports it.
-  add('GBRAIN_CLIENT_CHECK_INTERVAL', 'client_connection_check_interval', '');
+  add('MODUSBRAIN_CLIENT_CHECK_INTERVAL', 'client_connection_check_interval', '');
   return out;
 }
 
@@ -191,10 +191,10 @@ export async function setSessionDefaults(_sql: ReturnType<typeof postgres>): Pro
 
 export function getConnection(): ReturnType<typeof postgres> {
   if (!sql) {
-    throw new GBrainError(
+    throw new ModusBrainError(
       'No database connection',
       'connect() has not been called',
-      'Run gbrain init --supabase or gbrain init --url <connection_string>',
+      'Run modusbrain init --supabase or modusbrain init --url <connection_string>',
     );
   }
   return sql;
@@ -218,17 +218,17 @@ export async function connect(config: EngineConfig): Promise<boolean> {
   if (sql) {
     // Warn if a different URL is passed — the old connection is still in use
     if (config.database_url && connectedUrl && config.database_url !== connectedUrl) {
-      console.warn('[gbrain] connect() called with a different database_url but a connection already exists. Using existing connection.');
+      console.warn('[modusbrain] connect() called with a different database_url but a connection already exists. Using existing connection.');
     }
     return false; // joined an existing singleton — caller is a borrower
   }
 
   const url = config.database_url;
   if (!url) {
-    throw new GBrainError(
+    throw new ModusBrainError(
       'No database URL',
       'database_url is missing from config',
-      'Run gbrain init --supabase or gbrain init --url <connection_string>',
+      'Run modusbrain init --supabase or modusbrain init --url <connection_string>',
     );
   }
 
@@ -246,8 +246,8 @@ export async function connect(config: EngineConfig): Promise<boolean> {
       // Silence postgres NOTICE-level messages by default ("relation already
       // exists, skipping" floods stdout under idempotent CREATE statements
       // during migrations + initSchema, and breaks stdout-parsing callers like
-      // `gbrain jobs submit --json | ...`). Opt back in with GBRAIN_PG_NOTICES=1.
-      onnotice: process.env.GBRAIN_PG_NOTICES === '1' ? undefined : () => {},
+      // `modusbrain jobs submit --json | ...`). Opt back in with MODUSBRAIN_PG_NOTICES=1.
+      onnotice: process.env.MODUSBRAIN_PG_NOTICES === '1' ? undefined : () => {},
     };
     if (Object.keys(timeouts).length > 0) {
       opts.connection = timeouts;
@@ -256,7 +256,7 @@ export async function connect(config: EngineConfig): Promise<boolean> {
       opts.prepare = prepare;
       if (!prepare) {
         console.warn(
-          '[gbrain] Prepared statements disabled (PgBouncer transaction-mode convention on port 6543). Override with GBRAIN_PREPARE=true if your pooler runs in session mode.',
+          '[modusbrain] Prepared statements disabled (PgBouncer transaction-mode convention on port 6543). Override with MODUSBRAIN_PREPARE=true if your pooler runs in session mode.',
         );
       }
     }
@@ -272,10 +272,10 @@ export async function connect(config: EngineConfig): Promise<boolean> {
     sql = null;
     connectedUrl = null;
     const msg = e instanceof Error ? e.message : String(e);
-    throw new GBrainError(
+    throw new ModusBrainError(
       'Cannot connect to database',
       msg,
-      'Check your connection URL in ~/.gbrain/config.json',
+      'Check your connection URL in ~/.modusbrain/config.json',
     );
   }
 }
@@ -348,7 +348,7 @@ export async function connectWithRetry(
   config: EngineConfig & { poolSize?: number },
   opts: ConnectWithRetryOpts = {},
 ): Promise<void> {
-  const noRetry = opts.noRetry ?? (process.env.GBRAIN_NO_RETRY_CONNECT === '1');
+  const noRetry = opts.noRetry ?? (process.env.MODUSBRAIN_NO_RETRY_CONNECT === '1');
   const attempts = noRetry ? 1 : (opts.attempts ?? 3);
   const baseDelayMs = opts.baseDelayMs ?? 1000;
   const log = opts.log ?? ((line) => console.warn(line));

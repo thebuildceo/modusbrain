@@ -1,8 +1,8 @@
 /**
- * Self-upgrade decision + state foundation (v0.42 self-upgrading-gbrain wave).
+ * Self-upgrade decision + state foundation (v0.42 self-upgrading-modusbrain wave).
  *
- * Mirrors gstack's invocation-riding update mechanism for gbrain: a throttled
- * check that rides every `gbrain` invocation (CLI / MCP), emits a marker, and
+ * Mirrors gstack's invocation-riding update mechanism for modusbrain: a throttled
+ * check that rides every `modusbrain` invocation (CLI / MCP), emits a marker, and
  * either prompts (mode=notify) or silently upgrades (mode=auto, opt-in). A
  * second silent channel lives in the autopilot daemon. Both channels share the
  * cache + snooze + lock state defined here so they can never double-upgrade.
@@ -20,15 +20,15 @@
  * command. The version string is regex-validated AND monotonic-checked before
  * it reaches the agent's context (a malicious brain page / MCP response can
  * neither forge a "downgrade-as-upgrade" nor change the action — the action is
- * always the hardcoded `gbrain upgrade` / `gbrain self-upgrade`).
+ * always the hardcoded `modusbrain upgrade` / `modusbrain self-upgrade`).
  *
  * NO DB. The hot path runs before `connectEngine()` and thin clients have no
- * local DB, so all state is file-based under `~/.gbrain/` (honors GBRAIN_HOME).
+ * local DB, so all state is file-based under `~/.modusbrain/` (honors MODUSBRAIN_HOME).
  */
 
 import { closeSync, mkdirSync, openSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { gbrainPath } from './config.ts';
+import { modusbrainPath } from './config.ts';
 import { acquirePackLock, type PackLockOpts } from './schema-pack/pack-lock.ts';
 import { isMinorOrMajorBump, isValidVersionString, parseSemver, semverGt, semverLte } from './semver.ts';
 
@@ -239,19 +239,19 @@ export function parseMarker(line: string): UpdateMarker | null {
 // ── State file paths ────────────────────────────────────────────────────────
 
 export function updateCachePath(): string {
-  return gbrainPath('last-update-check');
+  return modusbrainPath('last-update-check');
 }
 
 export function snoozePath(): string {
-  return gbrainPath('update-snoozed');
+  return modusbrainPath('update-snoozed');
 }
 
 export function justUpgradedPath(): string {
-  return gbrainPath('just-upgraded-from');
+  return modusbrainPath('just-upgraded-from');
 }
 
 /**
- * Record the version we just upgraded FROM, so the next `gbrain` invocation's
+ * Record the version we just upgraded FROM, so the next `modusbrain` invocation's
  * startup hook can print the one-time `JUST_UPGRADED <from> <to>` confirmation
  * and then delete the breadcrumb. Best-effort: a failed write just means no
  * confirmation line. Atomic so a concurrent read never sees a torn file.
@@ -266,7 +266,7 @@ export function writeJustUpgraded(fromVersion: string): void {
 
 /** Directory for the self-upgrade + refresh single-flight locks. */
 export function locksDir(): string {
-  return gbrainPath('.locks');
+  return modusbrainPath('.locks');
 }
 
 // ── Cache (untrusted local state: atomic write, strict parse, mtime-TTL) ─────
@@ -471,14 +471,14 @@ function normalizeMode(raw: unknown): SelfUpgradeMode | null {
 
 /**
  * Resolve the effective mode from env > file-plane config > default `notify`.
- * Takes a loosely-typed config so it doesn't pull the full GBrainConfig type
- * onto the hot path. Env (`GBRAIN_SELF_UPGRADE_MODE`) is the operator / CI
+ * Takes a loosely-typed config so it doesn't pull the full ModusBrainConfig type
+ * onto the hot path. Env (`MODUSBRAIN_SELF_UPGRADE_MODE`) is the operator / CI
  * escape hatch.
  */
 export function resolveSelfUpgradeMode(
   cfg: { self_upgrade?: { mode?: string } } | null | undefined,
 ): SelfUpgradeMode {
-  const env = normalizeMode(process.env.GBRAIN_SELF_UPGRADE_MODE);
+  const env = normalizeMode(process.env.MODUSBRAIN_SELF_UPGRADE_MODE);
   if (env) return env;
   const fromCfg = normalizeMode(cfg?.self_upgrade?.mode);
   if (fromCfg) return fromCfg;

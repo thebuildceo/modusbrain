@@ -6,7 +6,7 @@
 
 ## Why
 
-A production gbrain brain (186K pages) had accreted **94 distinct
+A production modusbrain brain (186K pages) had accreted **94 distinct
 `pages.type` values** in 9 clusters of redundancy. The type system is
 the foundation for schema packs, search filtering, extract behavior,
 enrichment routing, and expert routing. When types are noisy, every
@@ -70,17 +70,17 @@ via mapping_rules (codex D9 security hardening).
 ## Migration flow
 
 ```
-gbrain onboard --check                         # surfaces pack_upgrade_available
+modusbrain onboard --check                         # surfaces pack_upgrade_available
         ↓
-gbrain onboard --check --explain               # per-cluster narrative dry-run
+modusbrain onboard --check --explain               # per-cluster narrative dry-run
         ↓
-gbrain jobs submit unify-types \               # PROTECTED + manual_only
+modusbrain jobs submit unify-types \               # PROTECTED + manual_only
   --allow-protected \
   --params '{"target_pack":"gbrain-base-v2"}'
         ↓
 Handler runs 4 phases:
   ┌─────────────────────────────────────┐
-  │ Phase 1: Preflight + lock           │ → gbrain-unify db-lock (60min TTL)
+  │ Phase 1: Preflight + lock           │ → modusbrain-unify db-lock (60min TTL)
   ├─────────────────────────────────────┤
   │ Phase 2: Retype explicit rules      │ → chunked UPDATE 1000/batch
   ├─────────────────────────────────────┤
@@ -97,7 +97,7 @@ Handler runs 4 phases:
   │ Phase 8: Verify + celebrate         │ → assert ≤16 types; stderr summary
   └─────────────────────────────────────┘
         ↓
-gbrain onboard --check                         # pack_upgrade_available cleared
+modusbrain onboard --check                         # pack_upgrade_available cleared
                                                # type_proliferation cleared
 ```
 
@@ -108,9 +108,9 @@ Every primitive ships with a documented rollback:
 | Operation | Rollback |
 |-----------|----------|
 | Retype | `frontmatter.legacy_type = <original>` preserved on every page (D8). One SQL UPDATE restores types: `UPDATE pages SET type = frontmatter->>'legacy_type' WHERE frontmatter ? 'legacy_type'`. |
-| Page-to-link | Source page soft-deleted with 72h TTL. `gbrain pages restore <slug>` within 72h. Link row stays harmless if source restored. |
-| Page-to-alias | Source page soft-deleted with 72h TTL. `gbrain pages restore <slug>` within 72h. Alias row stays harmless (or `DELETE FROM slug_aliases WHERE alias_slug = <slug>` to clean up). |
-| Active-pack flip | `gbrain schema use gbrain-base` reverses the flip. |
+| Page-to-link | Source page soft-deleted with 72h TTL. `modusbrain pages restore <slug>` within 72h. Link row stays harmless if source restored. |
+| Page-to-alias | Source page soft-deleted with 72h TTL. `modusbrain pages restore <slug>` within 72h. Alias row stays harmless (or `DELETE FROM slug_aliases WHERE alias_slug = <slug>` to clean up). |
+| Active-pack flip | `modusbrain schema use gbrain-base` reverses the flip. |
 
 ## What if my brain doesn't fit?
 
@@ -123,10 +123,10 @@ post-unify on ANY brain.
 For brains with substantial custom types that deserve their own canonical
 (e.g. `researcher` for an academic brain), the right move is:
 
-1. Fork gbrain-base-v2: `gbrain schema fork gbrain-base-v2 my-pack`
+1. Fork gbrain-base-v2: `modusbrain schema fork gbrain-base-v2 my-pack`
 2. Edit your fork to add page_types + mapping_rules covering your
    custom domain.
-3. Target your fork: `gbrain jobs submit unify-types --allow-protected
+3. Target your fork: `modusbrain jobs submit unify-types --allow-protected
    --params '{"target_pack":"my-pack"}'`
 
 Your fork can also declare `migration_from: {pack: gbrain-base-v2,

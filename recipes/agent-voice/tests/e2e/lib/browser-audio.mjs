@@ -4,7 +4,7 @@
  * Drives a Chromium browser through the agent-voice WebRTC flow with a
  * pre-recorded WAV file injected via Chromium's
  * `--use-file-for-fake-audio-capture` flag. Reads the `?test=1`-gated
- * `window._gbrainTest` namespace for counter + Blob extraction.
+ * `window._modusbrainTest` namespace for counter + Blob extraction.
  *
  * Usage:
  *   import { runBrowserRoundtrip } from './lib/browser-audio.mjs';
@@ -96,7 +96,7 @@ export async function runBrowserRoundtrip(opts) {
     // Phase 1: setupDone (SDP exchange complete; call active).
     const setupT0 = Date.now();
     await page.waitForFunction(
-      () => window._gbrainTest && window._gbrainTest.setupDone === true,
+      () => window._modusbrainTest && window._modusbrainTest.setupDone === true,
       { timeout: 25000 },
     );
     timings.setupMs = Date.now() - setupT0;
@@ -104,7 +104,7 @@ export async function runBrowserRoundtrip(opts) {
     // Phase 2: audioSendCount > 0 (mic → WebRTC → server pipe alive).
     const sendT0 = Date.now();
     await page.waitForFunction(
-      () => window._gbrainTest && window._gbrainTest.audioSendCount > 0,
+      () => window._modusbrainTest && window._modusbrainTest.audioSendCount > 0,
       { timeout: 25000 },
     );
     timings.audioSendMs = Date.now() - sendT0;
@@ -114,7 +114,7 @@ export async function runBrowserRoundtrip(opts) {
     let playReached = false;
     try {
       await page.waitForFunction(
-        () => window._gbrainTest && window._gbrainTest.audioPlayCount > 0,
+        () => window._modusbrainTest && window._modusbrainTest.audioPlayCount > 0,
         { timeout: Math.max(5000, timeoutMs - (Date.now() - t0)) },
       );
       playReached = true;
@@ -130,13 +130,13 @@ export async function runBrowserRoundtrip(opts) {
 
     // Read counters + extract Blob via page.evaluate.
     const finalCounters = await page.evaluate(() => ({
-      setupDone: !!window._gbrainTest?.setupDone,
-      audioSendCount: window._gbrainTest?.audioSendCount || 0,
-      audioPlayCount: window._gbrainTest?.audioPlayCount || 0,
-      hasBlob: !!window._gbrainTest?.lastResponseBlob,
-      blobSize: window._gbrainTest?.lastResponseBlob?.size || 0,
-      error: window._gbrainTest?.log
-        ? window._gbrainTest.log.find((l) => /ERROR/.test(l.text))?.text || null
+      setupDone: !!window._modusbrainTest?.setupDone,
+      audioSendCount: window._modusbrainTest?.audioSendCount || 0,
+      audioPlayCount: window._modusbrainTest?.audioPlayCount || 0,
+      hasBlob: !!window._modusbrainTest?.lastResponseBlob,
+      blobSize: window._modusbrainTest?.lastResponseBlob?.size || 0,
+      error: window._modusbrainTest?.log
+        ? window._modusbrainTest.log.find((l) => /ERROR/.test(l.text))?.text || null
         : null,
     }));
 
@@ -144,7 +144,7 @@ export async function runBrowserRoundtrip(opts) {
     if (captureBlob && finalCounters.hasBlob) {
       // Extract the Blob bytes via base64 hop (Buffer-of-arrayBuffer through evaluate).
       const blobBase64 = await page.evaluate(async () => {
-        const blob = window._gbrainTest.lastResponseBlob;
+        const blob = window._modusbrainTest.lastResponseBlob;
         if (!blob) return null;
         const arrayBuffer = await blob.arrayBuffer();
         const bytes = new Uint8Array(arrayBuffer);

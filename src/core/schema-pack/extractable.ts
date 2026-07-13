@@ -72,8 +72,8 @@ export function isExtractableType(
  * want pack-supplied prompts + fixtures opt into the struct shape per
  * `ExtractableSpec`.
  *
- * Consumed by `gbrain extract benchmark`, `gbrain extract --explain`,
- * and `gbrain schema scaffold-extractable`.
+ * Consumed by `modusbrain extract benchmark`, `modusbrain extract --explain`,
+ * and `modusbrain schema scaffold-extractable`.
  */
 export function extractableSpecsFromPack(
   pack: Pick<SchemaPackManifest, 'page_types'>,

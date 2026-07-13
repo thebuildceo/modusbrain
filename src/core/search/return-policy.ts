@@ -8,7 +8,7 @@
  * failsafe guarantees a human never gets a silent blank when candidates exist.
  *
  * WHY intent-driven caps and NOT a score-cliff detector: the PrecisionMemBench
- * Phase-1 instrumentation (gbrain-evals) measured that the rank1→rank2 score
+ * Phase-1 instrumentation (modusbrain-evals) measured that the rank1→rank2 score
  * gap is ~identical whether rank-1 is correct (0.602) or wrong (0.569) — RRF's
  * mechanical decay, not a trustworthy separatrix. The right belief is rank-1 in
  * 94% of single-answer cases, so "return a tight set" is the whole win;

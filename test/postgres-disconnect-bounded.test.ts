@@ -1,5 +1,5 @@
 /**
- * #1972 — gbrain-owned hard bound on pool teardown.
+ * #1972 — modusbrain-owned hard bound on pool teardown.
  *
  * The bug: `pool.end()` against PgBouncer transaction-mode never drains, so
  * disconnect blocked until the CLI's 10s force-exit fired and truncated stdout.
@@ -22,7 +22,7 @@ describe('endPoolBounded', () => {
     expect(calledWith).toEqual({ timeout: POOL_END_TIMEOUT_SECONDS });
   });
 
-  test('resolves within the gbrain bound even when .end() NEVER settles', async () => {
+  test('resolves within the modusbrain bound even when .end() NEVER settles', async () => {
     // This is the PgBouncer hang: .end() returns a promise that never resolves.
     // The bare `await pool.end()` would hang until the CLI's 10s force-exit.
     const pool = { end: () => new Promise<void>(() => { /* never resolves */ }) };

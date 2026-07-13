@@ -33,7 +33,7 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-  await engine.executeRaw(`DELETE FROM gbrain_cycle_locks WHERE id LIKE 'test-takeover-%'`);
+  await engine.executeRaw(`DELETE FROM modusbrain_cycle_locks WHERE id LIKE 'test-takeover-%'`);
 });
 
 const LOCAL = hostname();
@@ -79,7 +79,7 @@ describe('classifyHolderLiveness', () => {
 /** Insert a held, NOT-TTL-expired lock row for the given holder. */
 async function seedHeldLock(id: string, holderPid: number, holderHost: string, ageSeconds: number) {
   await engine.executeRaw(
-    `INSERT INTO gbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at, last_refreshed_at)
+    `INSERT INTO modusbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at, last_refreshed_at)
      VALUES ($1, $2, $3, NOW() - ($4 || ' seconds')::interval, NOW() + INTERVAL '10 minutes', NOW() - ($4 || ' seconds')::interval)`,
     [id, holderPid, holderHost, String(ageSeconds)],
   );

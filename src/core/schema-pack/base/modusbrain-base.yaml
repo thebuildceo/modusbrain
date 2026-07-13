@@ -17,15 +17,15 @@
 #
 # Aliases: empty by default. v0.38 ships gbrain-base with NO alias graph
 # edges so existing search behavior is unchanged. Users opt into alias
-# relationships via `gbrain schema review-candidates` or by editing their
+# relationships via `modusbrain schema review-candidates` or by editing their
 # own pack manifest. Codex F8 + E8 — no implicit primitive-sibling
 # expansion.
 
-api_version: gbrain-schema-pack-v1
+api_version: modusbrain-schema-pack-v1
 name: gbrain-base
 version: 1.0.0
 description: Universal starter pack reproducing pre-v0.38 hardcoded behavior
-gbrain_min_version: 0.38.0
+modusbrain_min_version: 0.38.0
 extends: null
 borrow_from: []
 
@@ -112,7 +112,7 @@ page_types:
     # backstop uses hardcoded ELIGIBLE_TYPES in src/core/facts/eligibility.ts
     # which does NOT read pack extractable, so the flip has zero
     # behavioral effect on the backstop today. Power-users who want
-    # concept extraction run `gbrain extract-facts --type concept --force`
+    # concept extraction run `modusbrain extract-facts --type concept --force`
     # explicitly. The pack-driven-ELIGIBLE_TYPES refactor (which would
     # make this flag actually drive backstop behavior) is a v0.42+ TODO.
     extractable: true
@@ -235,8 +235,8 @@ page_types:
   # v0.41.11+ — long-running chat/transcript pages. Lives under
   # conversations/. `temporal` primitive (events through time, not an
   # entity surface). `extractable: true` because the batch facts
-  # extraction command (gbrain extract-conversation-facts) walks
-  # these by type. Promoted from gbrain-recommended into gbrain-base
+  # extraction command (modusbrain extract-conversation-facts) walks
+  # these by type. Promoted from modusbrain-recommended into gbrain-base
   # because imported chat history is now a universal pattern, not
   # an operational-brain niche.
   - name: conversation

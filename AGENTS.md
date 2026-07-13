@@ -1,4 +1,4 @@
-# Agents working on GBrain
+# Agents working on ModusBrain
 
 This is your install + operating protocol. Claude Code reads `./CLAUDE.md` automatically.
 Everyone else (Codex, Cursor, OpenClaw, Aider, Continue, or an LLM fetching via URL):
@@ -6,25 +6,25 @@ start here.
 
 ## Install (5 min)
 
-1. Install gbrain via Bun (the canonical path):
+1. Install modusbrain via Bun (the canonical path):
    ```bash
    curl -fsSL https://bun.sh/install | bash
    export PATH="$HOME/.bun/bin:$PATH"
-   bun install -g github:garrytan/gbrain
+   bun install -g github:garrytan/modusbrain
    ```
-   If `bun install -g` aborts or `gbrain doctor` reports `schema_version: 0`,
+   If `bun install -g` aborts or `modusbrain doctor` reports `schema_version: 0`,
    the CLI prints a recovery hint pointing at [#218](https://github.com/garrytan/gbrain/issues/218).
-   Run `gbrain apply-migrations --yes` to recover, or fall back to the
-   deterministic install: `git clone https://github.com/garrytan/gbrain.git ~/gbrain && cd ~/gbrain && bun install && bun link`.
-2. Init the brain: `gbrain init` (defaults to PGLite, zero-config). For 1000+ files or
+   Run `modusbrain apply-migrations --yes` to recover, or fall back to the
+   deterministic install: `git clone https://github.com/garrytan/gbrain.git ~/modusbrain && cd ~/modusbrain && bun install && bun link`.
+2. Init the brain: `modusbrain init` (defaults to PGLite, zero-config). For 1000+ files or
    multi-machine sync, init suggests Postgres + pgvector via Supabase.
-3. **STOP — ask the user about search mode.** `gbrain init` auto-applied a
+3. **STOP — ask the user about search mode.** `modusbrain init` auto-applied a
    default but printed a 9-cell cost matrix (mode × downstream model)
    preceded by `[AGENT]` markers. You MUST relay the matrix to the operator
    and confirm their choice before continuing. Cost spread between corners
    is 25x — silent acceptance is the wrong default. See
    [`./INSTALL_FOR_AGENTS.md`](./INSTALL_FOR_AGENTS.md) Step 3.5 for the
-   exact ask-the-user protocol. Same banner fires on `gbrain post-upgrade`
+   exact ask-the-user protocol. Same banner fires on `modusbrain post-upgrade`
    for existing users (search modes were added in v0.32.3).
 4. Read [`./INSTALL_FOR_AGENTS.md`](./INSTALL_FOR_AGENTS.md) for the full 9-step flow
    (API keys, identity, cron, verification).
@@ -48,7 +48,7 @@ start here.
 
 ## Trust boundary (critical)
 
-GBrain distinguishes **trusted local CLI callers** (`OperationContext.remote = false`,
+ModusBrain distinguishes **trusted local CLI callers** (`OperationContext.remote = false`,
 set by `src/cli.ts`) from **untrusted agent-facing callers** (`remote = true`, set by
 `src/mcp/server.ts`). Security-sensitive operations like `file_upload` tighten filesystem
 confinement when `remote = true` and default to strict behavior when unset. If you are
@@ -59,22 +59,22 @@ writing or reviewing an operation, consult `src/core/operations.ts` for the cont
 - **Configure:** [`docs/ENGINES.md`](./docs/ENGINES.md),
   [`docs/guides/live-sync.md`](./docs/guides/live-sync.md),
   [`docs/mcp/DEPLOY.md`](./docs/mcp/DEPLOY.md).
-- **Debug:** [`docs/GBRAIN_VERIFY.md`](./docs/GBRAIN_VERIFY.md),
-  [`docs/guides/minions-fix.md`](./docs/guides/minions-fix.md), `gbrain doctor --fix`.
-- **Migrate / upgrade:** `gbrain upgrade` (binary self-update + schema migrations + post-upgrade prompts),
+- **Debug:** [`docs/MODUSBRAIN_VERIFY.md`](./docs/MODUSBRAIN_VERIFY.md),
+  [`docs/guides/minions-fix.md`](./docs/guides/minions-fix.md), `modusbrain doctor --fix`.
+- **Migrate / upgrade:** `modusbrain upgrade` (binary self-update + schema migrations + post-upgrade prompts),
   [`docs/UPGRADING_DOWNSTREAM_AGENTS.md`](./docs/UPGRADING_DOWNSTREAM_AGENTS.md),
-  [`skills/migrations/`](./skills/migrations/), `gbrain apply-migrations --yes` (manual schema-only).
+  [`skills/migrations/`](./skills/migrations/), `modusbrain apply-migrations --yes` (manual schema-only).
 - **Eval retrieval changes:** capture is off by default. To benchmark a
   retrieval change against real captured queries, set
-  `GBRAIN_CONTRIBUTOR_MODE=1`, then `gbrain eval export --since 7d > base.ndjson`
-  and `gbrain eval replay --against base.ndjson`. For public benchmark
-  coverage (LongMemEval, ground-truth scoring), `gbrain eval longmemeval
+  `MODUSBRAIN_CONTRIBUTOR_MODE=1`, then `modusbrain eval export --since 7d > base.ndjson`
+  and `modusbrain eval replay --against base.ndjson`. For public benchmark
+  coverage (LongMemEval, ground-truth scoring), `modusbrain eval longmemeval
   <dataset.jsonl>` (v0.28.8) runs against an isolated in-memory PGLite
-  per question — your `~/.gbrain` is never opened. Full guide:
+  per question — your `~/.modusbrain` is never opened. Full guide:
   [`docs/eval-bench.md`](./docs/eval-bench.md).
 - **Drive the brain to a target health score (v0.36.4.0):** the one-command
-  loop. `gbrain doctor --remediation-plan --json` previews what would be
-  fixed; `gbrain doctor --remediate --yes --target-score 90 --max-usd 5`
+  loop. `modusbrain doctor --remediation-plan --json` previews what would be
+  fixed; `modusbrain doctor --remediate --yes --target-score 90 --max-usd 5`
   walks a dependency-ordered plan (sync before extract, embed after
   consolidate), re-checking score between every step, refusing to spend
   past the cost cap. Empty brains (no entity pages) or unconfigured embedding
@@ -86,12 +86,12 @@ writing or reviewing an operation, consult `src/core/operations.ts` for the cont
 - **Track a founder/company over time (v0.35.7):** when an entity has
   typed metric claims in its `## Facts` fence (`metric: mrr`, `value: 50000`,
   `unit: USD`, `period: monthly` columns), run
-  `gbrain eval trajectory <entity-slug>` for the chronological history
-  with regressions auto-flagged, or `gbrain founder scorecard <entity-slug>`
+  `modusbrain eval trajectory <entity-slug>` for the chronological history
+  with regressions auto-flagged, or `modusbrain founder scorecard <entity-slug>`
   for a four-signal JSON rollup (claim_accuracy / consistency /
   growth_trajectory / red_flags). MCP op `find_trajectory` exposes the
   same data — read scope, visibility-filtered for remote callers. **v0.40.2.0:**
-  `gbrain think` now uses this substrate automatically on temporal /
+  `modusbrain think` now uses this substrate automatically on temporal /
   knowledge_update intent (default ON; flip `think.trajectory_enabled=false`
   to opt out). Migration v82 added `facts.event_type` so non-metric event
   rows (`meeting`, `job_change`, `location_change`) ride through the same
@@ -120,7 +120,7 @@ Ship via the `/ship` skill, not by hand. The full release + contributor process
 ## Privacy
 
 Never commit real names of people, companies, or funds into public artifacts. See the
-Privacy rule in `./CLAUDE.md`. GBrain pages reference real contacts; public docs must
+Privacy rule in `./CLAUDE.md`. ModusBrain pages reference real contacts; public docs must
 use generic placeholders (`alice-example`, `acme-example`, `fund-a`).
 
 ## Forks

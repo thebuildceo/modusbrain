@@ -1,6 +1,6 @@
 # Schema Packs
 
-A schema pack tells gbrain what shape your brain takes — which directories
+A schema pack tells modusbrain what shape your brain takes — which directories
 exist, what types live in them, how the agent should infer types from
 paths, and which link verbs connect what to what. The schema pack is the
 **dynamic, always-consulted artifact** every skill reads when filing,
@@ -22,47 +22,47 @@ Two bundled packs:
   analysis, guide, hardware, architecture, etc. (the original
   `ALL_PAGE_TYPES` list).
 
-- **`gbrain-recommended`** — extends `gbrain-base` with the 13 additional
-  directories described in `docs/GBRAIN_RECOMMENDED_SCHEMA.md`: deal,
+- **`modusbrain-recommended`** — extends `gbrain-base` with the 13 additional
+  directories described in `docs/MODUSBRAIN_RECOMMENDED_SCHEMA.md`: deal,
   meeting, concept, project, source, daily, personal, civic, original,
   place, trip, conversation, writing. If you like the documented
   operational-brain pattern, activate this with:
 
   ```bash
-  gbrain schema use gbrain-recommended
+  modusbrain schema use modusbrain-recommended
   ```
 
-Plus user-installed packs at `~/.gbrain/schema-packs/<name>/pack.yaml`
-that you author with `gbrain schema init` or `gbrain schema fork`.
+Plus user-installed packs at `~/.modusbrain/schema-packs/<name>/pack.yaml`
+that you author with `modusbrain schema init` or `modusbrain schema fork`.
 
 ## CLI surface
 
 Five inspection verbs (shipped in v0.38):
 
 ```bash
-gbrain schema active     # show resolved pack + which tier set it
-gbrain schema list       # list bundled + installed packs
-gbrain schema show       # pretty-print the active pack
-gbrain schema validate   # validate a manifest's shape
-gbrain schema use <pack> # activate a pack (writes ~/.gbrain/config.json)
+modusbrain schema active     # show resolved pack + which tier set it
+modusbrain schema list       # list bundled + installed packs
+modusbrain schema show       # pretty-print the active pack
+modusbrain schema validate   # validate a manifest's shape
+modusbrain schema use <pack> # activate a pack (writes ~/.modusbrain/config.json)
 ```
 
 Eight authoring + discovery verbs (shipped in v0.39):
 
 ```bash
-gbrain schema detect              # propose types matching brain shape
-gbrain schema suggest             # LLM-refined proposals on top of detect
-gbrain schema review-candidates   # promote / rename / ignore candidates
-gbrain schema review-orphans      # surface pages with no matching type
-gbrain schema init <name>         # scaffold a stub pack    (experimental)
-gbrain schema fork <a> <b>        # copy + rename a pack    (experimental)
-gbrain schema edit <name>         # surface the pack path   (experimental)
-gbrain schema diff <a> <b>        # set-diff two packs      (experimental)
-gbrain schema graph               # ASCII type listing      (experimental)
-gbrain schema lint                # flag duplicates + missing prefixes
-gbrain schema explain <type>      # plain-English type description (experimental)
-gbrain schema downgrade --to <p>  # restore previous pack (recovery)
-gbrain schema usage --since 30d   # per-verb invocation counts (D14 telemetry)
+modusbrain schema detect              # propose types matching brain shape
+modusbrain schema suggest             # LLM-refined proposals on top of detect
+modusbrain schema review-candidates   # promote / rename / ignore candidates
+modusbrain schema review-orphans      # surface pages with no matching type
+modusbrain schema init <name>         # scaffold a stub pack    (experimental)
+modusbrain schema fork <a> <b>        # copy + rename a pack    (experimental)
+modusbrain schema edit <name>         # surface the pack path   (experimental)
+modusbrain schema diff <a> <b>        # set-diff two packs      (experimental)
+modusbrain schema graph               # ASCII type listing      (experimental)
+modusbrain schema lint                # flag duplicates + missing prefixes
+modusbrain schema explain <type>      # plain-English type description (experimental)
+modusbrain schema downgrade --to <p>  # restore previous pack (recovery)
+modusbrain schema usage --since 30d   # per-verb invocation counts (D14 telemetry)
 ```
 
 The verbs marked `experimental` are demand-gated per D14: their usage is
@@ -77,11 +77,11 @@ this chain top-down. First match wins.
 | Tier | Source | Notes |
 |------|--------|-------|
 | 1 | Per-call `schema_pack` opt | CLI only (`ctx.remote === false`); MCP rejected. |
-| 2 | `GBRAIN_SCHEMA_PACK` env | Process-scope override. |
+| 2 | `MODUSBRAIN_SCHEMA_PACK` env | Process-scope override. |
 | 3 | Per-source DB config key `schema_pack:source:<id>` | New in v0.38. |
 | 4 | Brain-wide DB config key `schema_pack` | |
-| 5 | `gbrain.yml schema:` section | Repo-checked. |
-| 6 | `~/.gbrain/config.json` `schema_pack` field | What `gbrain schema use` writes. |
+| 5 | `modusbrain.yml schema:` section | Repo-checked. |
+| 6 | `~/.modusbrain/config.json` `schema_pack` field | What `modusbrain schema use` writes. |
 | 7 | Default: `gbrain-base` | Always present. |
 
 ## How the agent uses the active pack
@@ -103,25 +103,25 @@ Every read + write path consults the active pack at runtime:
 
 ## The magical moment (T2-T4 + T10)
 
-Persona A (Notion refugee) installs gbrain, imports her exports, and the
+Persona A (Notion refugee) installs modusbrain, imports her exports, and the
 brain looks unfamiliar — the default `gbrain-base` pack expects
 `people/`, `companies/`, etc., but her files live under `Projects/`,
 `Reading/`, `Daily Notes/`. The friction signal fires in two places:
 
-1. **Import warn (T7):** the end of `gbrain import` prints
+1. **Import warn (T7):** the end of `modusbrain import` prints
    `[schema] X of Y pages (Z%) have no type matching the active schema
-   pack. Run gbrain schema detect to propose a pack matching your
+   pack. Run modusbrain schema detect to propose a pack matching your
    content shape.`
-2. **`gbrain doctor` schema_pack_consistency check** keeps surfacing
+2. **`modusbrain doctor` schema_pack_consistency check** keeps surfacing
    the warning persistently after the import session ends.
 
 She runs the magical moment:
 
 ```bash
-gbrain schema detect              # heuristic clustering on her actual shape
-gbrain schema suggest             # LLM-refined proposals
-gbrain schema review-candidates   # human gate on promotion
-gbrain schema review-candidates --apply Projects/   # accept
+modusbrain schema detect              # heuristic clustering on her actual shape
+modusbrain schema suggest             # LLM-refined proposals
+modusbrain schema review-candidates   # human gate on promotion
+modusbrain schema review-candidates --apply Projects/   # accept
 ```
 
 The agent (via the new EIIRP skill) automates phases 1-3 of this for any
@@ -131,20 +131,20 @@ the agent maintains, not a hardcoded ceremony the user authors.
 ## Authoring your own pack
 
 ```bash
-gbrain schema init my-pack            # scaffolds ~/.gbrain/schema-packs/my-pack/pack.yaml
-$EDITOR ~/.gbrain/schema-packs/my-pack/pack.yaml
-gbrain schema validate my-pack        # check shape
-gbrain schema use my-pack             # activate
-gbrain schema active                  # confirm
+modusbrain schema init my-pack            # scaffolds ~/.modusbrain/schema-packs/my-pack/pack.yaml
+$EDITOR ~/.modusbrain/schema-packs/my-pack/pack.yaml
+modusbrain schema validate my-pack        # check shape
+modusbrain schema use my-pack             # activate
+modusbrain schema active                  # confirm
 ```
 
 A minimal pack:
 
 ```yaml
-api_version: gbrain-schema-pack-v1
+api_version: modusbrain-schema-pack-v1
 name: my-pack
 version: 0.0.1
-gbrain_min_version: 0.39.0
+modusbrain_min_version: 0.39.0
 extends: gbrain-base   # inherits everything from base; add overrides below
 description: |
   My personal pack.
@@ -159,7 +159,7 @@ page_types:
     expert_routing: false
 
   # Add more types here. Each maps a path prefix to a primitive +
-  # opt-in flags. See src/core/schema-pack/base/gbrain-recommended.yaml
+  # opt-in flags. See src/core/schema-pack/base/modusbrain-recommended.yaml
   # for a worked example.
 
 link_types: []
@@ -173,20 +173,20 @@ filing_rules: []
 ## Recovery + revert
 
 The single-PR cathedral is hard to revert atomically. Per codex finding
-#4 from plan-eng-review, T20 ships `gbrain schema downgrade` to restore
+#4 from plan-eng-review, T20 ships `modusbrain schema downgrade` to restore
 the active-pack config field:
 
 ```bash
-gbrain schema downgrade --to gbrain-base
-# OR auto-detect previous from ~/.gbrain/schema-pack-history.jsonl:
-gbrain schema downgrade
+modusbrain schema downgrade --to gbrain-base
+# OR auto-detect previous from ~/.modusbrain/schema-pack-history.jsonl:
+modusbrain schema downgrade
 ```
 
 **Code revert alone is NOT sufficient.** The full revert procedure:
 
 1. `git revert <merge-commit>` — restores the code.
-2. `gbrain schema downgrade --to gbrain-base` — restores config.
-3. (Optional) `gbrain pages purge-deleted --older-than 0h` — drops
+2. `modusbrain schema downgrade --to gbrain-base` — restores config.
+3. (Optional) `modusbrain pages purge-deleted --older-than 0h` — drops
    v0.39-typed pages that no longer have a matching type in the active
    pack.
 
@@ -196,19 +196,19 @@ restored pack so no eviction is needed.
 
 ## Distribution
 
-`.gbrain-schema` tarballs ride the same v0.37 skillpack pipeline as
-`.gbrain-skillpack` tarballs (T14 artifact abstraction). The
+`.modusbrain-schema` tarballs ride the same v0.37 skillpack pipeline as
+`.modusbrain-skillpack` tarballs (T14 artifact abstraction). The
 discriminator is `api_version` in the manifest:
 
-- `gbrain-schema-pack-v1` → schemapack
+- `modusbrain-schema-pack-v1` → schemapack
 - `gbrain-skillpack-v1` → skillpack
 
 Both install via the same scaffold + copy path; install targets are
-`~/.gbrain/schema-packs/<name>/` and `~/.gbrain/skillpacks/<name>/`
+`~/.modusbrain/schema-packs/<name>/` and `~/.modusbrain/skillpacks/<name>/`
 respectively.
 
-Publication to the public registries (`garrytan/gbrain-schema-registry`,
-`garrytan/gbrain-skillpack-registry`) follows the same publish-as-PR
+Publication to the public registries (`garrytan/modusbrain-schema-registry`,
+`garrytan/modusbrain-skillpack-registry`) follows the same publish-as-PR
 workflow as v0.37 skillpack publishing.
 
 ## What's deferred to v0.40+

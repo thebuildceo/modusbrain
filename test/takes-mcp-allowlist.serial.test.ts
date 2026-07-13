@@ -206,7 +206,7 @@ describe('per-token takes-holder allow-list — get_versions body channel', () =
 
 describe('think op — read-only on remote callers (Lane D landed)', () => {
   test('remote save/take is forced read-only via remote_persisted_blocked flag', async () => {
-    // Hermetic no-key: neutralize BOTH env var AND ~/.gbrain config key, else a
+    // Hermetic no-key: neutralize BOTH env var AND ~/.modusbrain config key, else a
     // configured machine fires a real LLM call and the warning flips to
     // LLM_OUTPUT_NOT_JSON. runThink then returns gather-only + NO_ANTHROPIC_API_KEY.
     const result = await withoutAnthropicKey(() => dispatchToolCall(engine, 'think', { question: 'q', save: true, take: true }, {

@@ -2,7 +2,7 @@
  * In-process migration helpers (v0.41.37.0 #1605).
  *
  * Why this exists: migration schema phases used to shell out to a child
- * `gbrain init --migrate-only` via `execSync`. On Windows + bun + Supabase
+ * `modusbrain init --migrate-only` via `execSync`. On Windows + bun + Supabase
  * pooler, the spawned CHILD process dies with `getaddrinfo ENOTFOUND` before it
  * can connect — even though the PARENT connects fine and `env: process.env` is
  * passed. It is a bun-on-Windows child-process DNS-resolution failure, not an
@@ -11,12 +11,12 @@
  * pattern; this generalizes it to every engine + every schema phase.
  *
  * `runMigrateOnlyCore` is the single source of truth for "bring schema to head"
- * — `init.ts:initMigrateOnly` (the `gbrain init --migrate-only` CLI path) and
+ * — `init.ts:initMigrateOnly` (the `modusbrain init --migrate-only` CLI path) and
  * the migration orchestrators both call it, so the configureGateway-before-
  * initSchema fix can't drift between them.
  *
- * `runGbrainSubprocess` is the diagnostic wrapper for the REMAINING (non-schema)
- * gbrain-subprocess spawns (extract/repair/stats). It captures child stderr and
+ * `runModusbrainSubprocess` is the diagnostic wrapper for the REMAINING (non-schema)
+ * modusbrain-subprocess spawns (extract/repair/stats). It captures child stderr and
  * folds it into the thrown error so a Windows failure shows the real
  * `getaddrinfo ENOTFOUND` line instead of the bare `Command failed: ...`.
  */
@@ -27,7 +27,7 @@ import { loadConfig, toEngineConfig } from '../../core/config.ts';
 import { createEngine } from '../../core/engine-factory.ts';
 
 /** Default wall-clock guard for in-process initSchema. Matches the 600s cap
- *  the old `execSync('gbrain init --migrate-only', { timeout: 600_000 })` used,
+ *  the old `execSync('modusbrain init --migrate-only', { timeout: 600_000 })` used,
  *  so a hung schema bring-up surfaces as a phase failure instead of wedging
  *  the whole cascade. */
 export const MIGRATE_ONLY_TIMEOUT_MS = 600_000;
@@ -51,7 +51,7 @@ export class MigrateOnlyError extends Error {
 
 /**
  * Bring the configured brain's schema to head, in-process. Mirrors what
- * `gbrain init --migrate-only` did via subprocess: configureGateway →
+ * `modusbrain init --migrate-only` did via subprocess: configureGateway →
  * createEngine → connect → initSchema → disconnect. Idempotent (initSchema is
  * a no-op when already at head). Throws `MigrateOnlyError` on no-config or
  * timeout so callers report a failed phase rather than hanging.
@@ -60,7 +60,7 @@ export async function runMigrateOnlyCore(opts?: { timeoutMs?: number }): Promise
   const config = loadConfig();
   if (!config) {
     throw new MigrateOnlyError(
-      'No brain configured. Run `gbrain init` (interactive) or `gbrain init --pglite` / `gbrain init --supabase` first.',
+      'No brain configured. Run `modusbrain init` (interactive) or `modusbrain init --pglite` / `modusbrain init --supabase` first.',
     );
   }
 
@@ -93,17 +93,17 @@ export async function runMigrateOnlyCore(opts?: { timeoutMs?: number }): Promise
 }
 
 /**
- * Run a `gbrain ...` subcommand as a subprocess, capturing child stderr so a
+ * Run a `modusbrain ...` subcommand as a subprocess, capturing child stderr so a
  * failure surfaces the real reason. Used for the non-schema backfill phases
  * (extract/repair/stats) that aren't yet in-process. On Windows these may still
  * fail with `getaddrinfo ENOTFOUND`, but the operator now sees WHY instead of a
  * bare `Command failed`. Returns captured stdout (utf-8) on success.
  *
- * Note: stderr is piped (captured), so gbrain progress lines (which go to
+ * Note: stderr is piped (captured), so modusbrain progress lines (which go to
  * stderr) are not shown live during these phases — acceptable for a one-shot
  * `apply-migrations` run; the failure reason matters more than live progress.
  */
-export function runGbrainSubprocess(cmd: string, opts?: { timeoutMs?: number }): string {
+export function runModusbrainSubprocess(cmd: string, opts?: { timeoutMs?: number }): string {
   try {
     const out = execSync(cmd, {
       stdio: ['inherit', 'pipe', 'pipe'],

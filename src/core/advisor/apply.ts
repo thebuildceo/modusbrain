@@ -1,5 +1,5 @@
 /**
- * advisor/apply.ts — pure resolution + validation for `gbrain advisor --apply`.
+ * advisor/apply.ts — pure resolution + validation for `modusbrain advisor --apply`.
  *
  * Kept separate from the CLI command so the allowlist + injection guard are
  * unit-testable without spawning a process. The CLI confirms + executes; this
@@ -9,7 +9,7 @@
  *   - Only findings carrying a `dispatch_id` are runnable (the allowlist).
  *   - The command is a STRUCTURED argv; it is rejected if any token contains a
  *     shell metacharacter (defense in depth — we never invoke a shell).
- *   - argv[0] must be 'gbrain' (the advisor never runs arbitrary binaries).
+ *   - argv[0] must be 'modusbrain' (the advisor never runs arbitrary binaries).
  */
 
 import type { AdvisorReport } from './types.ts';
@@ -30,8 +30,8 @@ export function resolveApplyTarget(report: AdvisorReport, id: string): ApplyReso
   if (!argv || argv.length === 0) {
     return { ok: false, error: `Finding "${id}" has no runnable command.`, runnable };
   }
-  if (argv[0] !== 'gbrain') {
-    return { ok: false, error: `Refusing to run: fix does not invoke gbrain.`, runnable };
+  if (argv[0] !== 'modusbrain') {
+    return { ok: false, error: `Refusing to run: fix does not invoke modusbrain.`, runnable };
   }
   if (!argv.every((a) => typeof a === 'string' && !SHELL_META.test(a))) {
     return { ok: false, error: `Refusing to run: fix command contains unexpected characters.`, runnable };

@@ -1,8 +1,8 @@
 # Comprehensive Software Check Report
 
 **Date:** 2026-07-13  
-**Repo:** `C:\Users\Shubham\Downloads\gbrain-master\gbrain-master`  
-**Scope requested:** Analyze the three ModusBrain/GBrain project files, scan the repository, run every practical local test/check, and report whether the software is working perfectly.  
+**Repo:** `C:\Users\Shubham\Downloads\modusbrain-master\modusbrain-master`  
+**Scope requested:** Analyze the three ModusBrain/ModusBrain project files, scan the repository, run every practical local test/check, and report whether the software is working perfectly.  
 **Source files analyzed:**
 - `company-brain-rfs-analysis.md`
 - `cursor_modusbrain_feature_enhancement.md`
@@ -229,14 +229,14 @@ Representative failures:
 ```text
 serve --http never became ready ... stderr: error: Module not found
 ENOENT: no such file or directory, uv_spawn 'bun'
-Expected ".gbrain" worker path, received ".modusbrain" worker path
+Expected ".modusbrain" worker path, received ".modusbrain" worker path
 watch SIGINT lifecycle never became ready
 ```
 
 Interpretation:
 
 - Some failures are environment/PATH related.
-- Some failures are rebrand-contract related, especially `.gbrain` vs `.modusbrain` expectations.
+- Some failures are rebrand-contract related, especially `.modusbrain` vs `.modusbrain` expectations.
 
 ### Direct Unit Test Run
 
@@ -354,13 +354,13 @@ Primary areas:
 
 ### 2. The operational-skills layer is not wired into the operation contract correctly
 
-The new operation handlers appear to use the wrong parameter/context shape. GBrain’s architecture requires operations to follow the central `src/core/operations.ts` contract. The errors show the implementation is using fields like `topic`, `slug`, `risk_tier`, and `source_id` on `OperationContext` instead of parsing them from operation params.
+The new operation handlers appear to use the wrong parameter/context shape. ModusBrain’s architecture requires operations to follow the central `src/core/operations.ts` contract. The errors show the implementation is using fields like `topic`, `slug`, `risk_tier`, and `source_id` on `OperationContext` instead of parsing them from operation params.
 
 ### 3. The rebrand is incomplete from a test-contract perspective
 
 User-facing branding exists in `package.json`, `src/core/branding.ts`, and docs, but tests still expose mismatches:
 
-- Expected `.gbrain`, received `.modusbrain`.
+- Expected `.modusbrain`, received `.modusbrain`.
 - `MODUSBRAIN_DATABASE_URL` is documented/implemented but not accepted by the type union.
 - Launch docs still contain `your-org/modusbrain` placeholders.
 

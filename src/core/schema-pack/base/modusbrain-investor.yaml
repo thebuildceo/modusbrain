@@ -1,4 +1,4 @@
-# gbrain-investor — investor/YC lens pack
+# modusbrain-investor — investor/YC lens pack
 #
 # v0.41 lens packs wave. Declares the investor work surface that the user
 # (YC president) already runs every day across the your OpenClaw agent + brain:
@@ -35,15 +35,15 @@
 #
 # Cron consolidation: existing your OpenClaw's crons (yc-radar-weekly,
 # yc-portfolio-health monthly, yc-oh-ingest daily) continue running on
-# their own schedules in your OpenClaw — gbrain-investor doesn't displace
+# their own schedules in your OpenClaw — modusbrain-investor doesn't displace
 # them, only declares their output types + calibration semantics. v0.42+
 # may migrate those crons too once their phase contracts stabilize.
 
-api_version: gbrain-schema-pack-v1
-name: gbrain-investor
+api_version: modusbrain-schema-pack-v1
+name: modusbrain-investor
 version: 1.0.0
 description: "Investor / YC president lens. Adds thesis + bet_resolution_log types to the deal/investor/company/person surface that already exists in gbrain-base. Declares deal_success / founder_evaluation / market_call calibration domains feeding the widened calibration_profile."
-gbrain_min_version: 0.41.0
+modusbrain_min_version: 0.41.0
 extends: gbrain-base
 
 # Borrow deal + person + company + yc from gbrain-base — they remain

@@ -42,8 +42,8 @@ import { readRecentLockRenewalEvents } from '../src/core/audit/lock-renewal-audi
 // AFTER withEnv exits, under the wrong env). Persistent module-level
 // is the deterministic fix.
 const auditDir = fs.mkdtempSync(path.join(os.tmpdir(), 'lr-e2e-'));
-const PRIOR_AUDIT_DIR = process.env.GBRAIN_AUDIT_DIR;
-process.env.GBRAIN_AUDIT_DIR = auditDir;
+const PRIOR_AUDIT_DIR = process.env.MODUSBRAIN_AUDIT_DIR;
+process.env.MODUSBRAIN_AUDIT_DIR = auditDir;
 
 let engine: PGLiteEngine;
 let queue: MinionQueue;
@@ -61,9 +61,9 @@ afterAll(async () => {
   await engine.disconnect();
   try { fs.rmSync(auditDir, { recursive: true, force: true }); } catch { /* */ }
   if (PRIOR_AUDIT_DIR === undefined) {
-    delete process.env.GBRAIN_AUDIT_DIR;
+    delete process.env.MODUSBRAIN_AUDIT_DIR;
   } else {
-    process.env.GBRAIN_AUDIT_DIR = PRIOR_AUDIT_DIR;
+    process.env.MODUSBRAIN_AUDIT_DIR = PRIOR_AUDIT_DIR;
   }
 });
 

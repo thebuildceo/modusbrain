@@ -1,8 +1,8 @@
 /**
- * advisor/collect-version.ts — gbrain version drift.
+ * advisor/collect-version.ts — modusbrain version drift.
  *
  * Reads the update CACHE only — never the network (the advisor op must stay fast
- * and cron-safe). The cache is refreshed out-of-band by `gbrain check-update` /
+ * and cron-safe). The cache is refreshed out-of-band by `modusbrain check-update` /
  * the self-upgrade refresh path.
  */
 
@@ -26,9 +26,9 @@ export const collectVersion: AdvisorCollector = {
       {
         id: 'version_drift',
         severity: 'warn',
-        title: `gbrain ${latest} is available — you're on ${ctx.version}.`,
+        title: `modusbrain ${latest} is available — you're on ${ctx.version}.`,
         detail: 'A newer release shipped fixes and features. Upgrading keeps the brain current.',
-        fix: { command_argv: ['gbrain', 'upgrade'] },
+        fix: { command_argv: ['modusbrain', 'upgrade'] },
         collector: 'version',
         ask_user: true,
       },

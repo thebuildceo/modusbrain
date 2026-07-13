@@ -4,7 +4,7 @@
  * Consolidates the realpath-containment idiom that previously lived only in
  * `sources-ops.ts` (`isPathContained`) and `validateUploadPath`
  * (`operations.ts`), and adds `isTrustedDotfile` — the multi-user-host trust
- * gate for walk-up routing dotfiles (`.gbrain-source` / `.gbrain-mount`).
+ * gate for walk-up routing dotfiles (`.modusbrain-source` / `.modusbrain-mount`).
  *
  * Threat model (POSIX multi-user host): an attacker who can write into a
  * shared ancestor directory of the victim's CWD (`/tmp`, `/var/tmp`,
@@ -25,7 +25,7 @@ import { resolve as resolvePath, relative, isAbsolute, dirname, basename, join }
 /**
  * Symlink-safe path confinement: realpath BOTH sides, then a separator-aware
  * prefix check. A plain `startsWith()` on un-resolved paths would let a
- * `parent/skills` symlink → `/etc` (or `$GBRAIN_HOME/clones/<id>` → `/etc`)
+ * `parent/skills` symlink → `/etc` (or `$MODUSBRAIN_HOME/clones/<id>` → `/etc`)
  * bypass the boundary; resolving first defeats that.
  *
  * Returns true iff `child` exists AND its realpath is `parent`'s realpath or a

@@ -145,9 +145,9 @@ export async function resolveCodeReadiness(
 export function readinessHint(r: CodeGraphReadiness): string | null {
   switch (r.status) {
     case 'not_built':
-      return 'Symbol graph not built (no code indexed in scope). Run `gbrain sync` to index code.';
+      return 'Symbol graph not built (no code indexed in scope). Run `modusbrain sync` to index code.';
     case 'indexing':
-      return 'Symbol graph still building (edges pending resolution). Re-run after the next `gbrain dream` cycle / autopilot tick.';
+      return 'Symbol graph still building (edges pending resolution). Re-run after the next `modusbrain dream` cycle / autopilot tick.';
     case 'unknown':
       return 'Readiness check unavailable (DB error). Treat the empty result as best-effort.';
     case 'ready':

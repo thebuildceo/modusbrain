@@ -7,7 +7,7 @@ import { brandHelp } from '../core/branding.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-import { saveConfig, loadConfig, loadConfigFileOnly, toEngineConfig, gbrainPath, configPath, isThinClient, effectiveEnvDatabaseUrl, type GBrainConfig } from '../core/config.ts';
+import { saveConfig, loadConfig, loadConfigFileOnly, toEngineConfig, modusbrainPath, configPath, isThinClient, effectiveEnvDatabaseUrl, type ModusBrainConfig } from '../core/config.ts';
 import { createEngine } from '../core/engine-factory.ts';
 import { discoverOAuth, mintClientCredentialsToken, smokeTestMcp } from '../core/remote-mcp-probe.ts';
 import { runInitEmbedCheck } from '../core/init-embed-check.ts';
@@ -15,11 +15,11 @@ import { runInitEmbedCheck } from '../core/init-embed-check.ts';
 export async function runInit(args: string[]) {
   // Help guard: cli.ts only routes --help to printOpHelp() for shared-op
   // commands; CLI_ONLY commands (init, embed, etc.) fall through to their
-  // handler with --help in argv. Without this guard, `gbrain init --help`
+  // handler with --help in argv. Without this guard, `modusbrain init --help`
   // proceeds into the smart-detection branch below, scans cwd for .md files,
   // and on a directory with 1000+ files (e.g. $HOME for someone whose brain
   // and notes share a root) silently overwrites the existing Supabase config
-  // with a fresh PGLite brain at ~/.gbrain/brain.pglite. Confirmed in the
+  // with a fresh PGLite brain at ~/.modusbrain/brain.pglite. Confirmed in the
   // wild — flipped a working `engine: postgres` config to `engine: pglite`
   // on a brain with 10K+ pages. Help should never mutate state.
   if (args.includes('--help') || args.includes('-h')) {
@@ -58,13 +58,13 @@ export async function runInit(args: string[]) {
 
   // Re-run guard (A8): if thin-client config is already present, refuse to
   // create a local engine without --force. Catches the scripted-setup-loop
-  // friction (running setup-gbrain repeatedly on a thin-client machine).
+  // friction (running setup-modusbrain repeatedly on a thin-client machine).
   const existing = loadConfig();
   if (isThinClient(existing) && !isForce && !isMigrateOnly) {
     const url = existing!.remote_mcp!.mcp_url;
     const msg = `Thin-client config already present at ${configPath()} (remote_mcp.mcp_url=${url}).\n` +
       `Re-init would create a local engine and conflict with the remote MCP setup.\n` +
-      `Use --force to overwrite, or \`gbrain init --mcp-only --force\` to refresh thin-client config.`;
+      `Use --force to overwrite, or \`modusbrain init --mcp-only --force\` to refresh thin-client config.`;
     if (jsonOutput) {
       console.log(JSON.stringify({ status: 'error', reason: 'thin_client_config_present', mcp_url: url, message: msg }));
     } else {
@@ -75,7 +75,7 @@ export async function runInit(args: string[]) {
 
   // Schema-only path: apply initSchema against the already-configured engine
   // without ever calling saveConfig. Used by apply-migrations, the stopgap
-  // script, and the postinstall hook. Bare `gbrain init` defaults to PGLite
+  // script, and the postinstall hook. Bare `modusbrain init` defaults to PGLite
   // and overwrites any existing Postgres config — we must never take that
   // branch from a migration orchestrator.
   //
@@ -98,7 +98,7 @@ export async function runInit(args: string[]) {
   // v0.37 (D9): --no-embedding opts into deferred-setup mode (D9 escape hatch).
   const noEmbedding = args.includes('--no-embedding');
   // v0.42 (#1780 Gap 2): --skip-embed-check bypasses the init-time embedding
-  // key validation (also honored via GBRAIN_INIT_SKIP_EMBED_CHECK=1).
+  // key validation (also honored via MODUSBRAIN_INIT_SKIP_EMBED_CHECK=1).
   const skipEmbedCheck = args.includes('--skip-embed-check');
   const aiOpts = await resolveAIOptions({
     verbose: embModelIdx !== -1 ? args[embModelIdx + 1] : null,
@@ -119,8 +119,8 @@ export async function runInit(args: string[]) {
         console.log(`Found ~${fileCount} .md files. For a brain this size, Supabase gives faster`);
         console.log('search and remote access ($25/mo). PGLite works too but search will be slower at scale.');
         console.log('');
-        console.log('  gbrain init --supabase   Set up with Supabase (recommended for large brains)');
-        console.log('  gbrain init --pglite     Use local PGLite anyway');
+        console.log('  modusbrain init --supabase   Set up with Supabase (recommended for large brains)');
+        console.log('  modusbrain init --pglite     Use local PGLite anyway');
         console.log('');
         // Default to PGLite, let the user choose Supabase if they want
       }
@@ -137,12 +137,12 @@ export async function runInit(args: string[]) {
     // effectiveEnvDatabaseUrl applies the #427 guard: a DATABASE_URL that Bun
     // auto-loaded from a .env in cwd must not seed a brain config — that is
     // the "init inside a web-app checkout writes the app's DB into
-    // ~/.gbrain/config.json" failure mode.
+    // ~/.modusbrain/config.json" failure mode.
     const envUrl = effectiveEnvDatabaseUrl();
     if (envUrl) {
       databaseUrl = envUrl;
     } else {
-      console.error('--non-interactive requires --url <connection_string> or GBRAIN_DATABASE_URL env var');
+      console.error('--non-interactive requires --url <connection_string> or MODUSBRAIN_DATABASE_URL env var');
       process.exit(1);
     }
   } else {
@@ -172,7 +172,7 @@ interface ResolvedAIOptions {
 }
 
 /**
- * Resolve AI provider options for `gbrain init`.
+ * Resolve AI provider options for `modusbrain init`.
  *
  * Precedence (per touchpoint, top wins):
  *   1. Explicit flag (--embedding-model / --expansion-model / --chat-model)
@@ -192,12 +192,12 @@ async function resolveAIOptions(opts: ResolveAIOptionsArgs): Promise<ResolvedAIO
   const out: ResolvedAIOptions = {};
 
   // --- D5: persisted config wins on re-init -----------------------------------
-  // When `~/.gbrain/config.json` already has embedding_model set (a re-init
+  // When `~/.modusbrain/config.json` already has embedding_model set (a re-init
   // against an existing brain), honor it BEFORE env detection. Without this
   // the env-detection branch fires unnecessarily on every re-init, and a
   // non-TTY re-init with no env keys exits 1 (D3) even though the brain is
   // already correctly configured. Caught by CI's E2E init sequence where
-  // multiple tests share `~/.gbrain` and only the first init has flags.
+  // multiple tests share `~/.modusbrain` and only the first init has flags.
   //
   // The deferred-setup sentinel (`embedding_disabled: true`) is also honored —
   // a re-init without --no-embedding shouldn't re-trigger fail-loud when the
@@ -226,7 +226,7 @@ async function resolveAIOptions(opts: ResolveAIOptionsArgs): Promise<ResolvedAIO
     const { getRecipe } = await import('../core/ai/recipes/index.ts');
     const recipe = getRecipe(shorthand);
     if (!recipe) {
-      console.error(`Unknown provider: ${shorthand}. Run \`gbrain providers list\` to see known providers.`);
+      console.error(`Unknown provider: ${shorthand}. Run \`modusbrain providers list\` to see known providers.`);
       process.exit(1);
     }
     // v0.32 D8=A: recipes flagged user_provided_models (litellm, llama-server)
@@ -236,7 +236,7 @@ async function resolveAIOptions(opts: ResolveAIOptionsArgs): Promise<ResolvedAIO
     if (recipe.touchpoints.embedding?.user_provided_models === true) {
       console.error(
         `Provider ${shorthand} requires you to specify the model + dimensions explicitly:\n` +
-        `  gbrain init --embedding-model ${shorthand}:<your-model-id> --embedding-dimensions <N>\n` +
+        `  modusbrain init --embedding-model ${shorthand}:<your-model-id> --embedding-dimensions <N>\n` +
         (recipe.setup_hint ? `\nSetup: ${recipe.setup_hint}` : '')
       );
       process.exit(1);
@@ -400,13 +400,13 @@ function printNoEmbeddingProviderHint(typos: Array<{ userSet: string; suggested:
   console.error('  export OPENAI_API_KEY=sk-…        # openai:text-embedding-3-large (1536d)');
   console.error('  export ZEROENTROPY_API_KEY=ze-…   # zeroentropyai:zembed-1 (2560d, Matryoshka)');
   console.error('  export VOYAGE_API_KEY=pa-…        # voyage:voyage-3-large (1024d)');
-  console.error('Then re-run: gbrain init --pglite');
+  console.error('Then re-run: modusbrain init --pglite');
   console.error('');
   console.error('Or pick explicitly:');
-  console.error('  gbrain init --pglite --embedding-model openai:text-embedding-3-large');
+  console.error('  modusbrain init --pglite --embedding-model openai:text-embedding-3-large');
   console.error('');
-  console.error('Or defer setup: gbrain init --pglite --no-embedding');
-  console.error('  (you can configure later with `gbrain config set embedding_model <id>`)');
+  console.error('Or defer setup: modusbrain init --pglite --no-embedding');
+  console.error('  (you can configure later with `modusbrain config set embedding_model <id>`)');
   // D13: surface near-miss env vars (e.g. OPENAPI_API_KEY → OPENAI_API_KEY).
   if (typos.length > 0) {
     console.error('');
@@ -548,15 +548,15 @@ async function initMigrateOnly(opts: { jsonOutput: boolean }) {
 }
 
 /**
- * `gbrain init --mcp-only` — thin-client setup. Writes a `remote_mcp` config
+ * `modusbrain init --mcp-only` — thin-client setup. Writes a `remote_mcp` config
  * field, runs three pre-flight smokes (OAuth discovery, token round-trip,
  * MCP initialize), and never creates a local engine.
  *
  * Required flags (or env vars):
- *   --issuer-url <url>          (or GBRAIN_REMOTE_ISSUER_URL)
- *   --mcp-url <url>             (or GBRAIN_REMOTE_MCP_URL)
- *   --oauth-client-id <id>      (or GBRAIN_REMOTE_CLIENT_ID)
- *   --oauth-client-secret <s>   (or GBRAIN_REMOTE_CLIENT_SECRET; preferred)
+ *   --issuer-url <url>          (or MODUSBRAIN_REMOTE_ISSUER_URL)
+ *   --mcp-url <url>             (or MODUSBRAIN_REMOTE_MCP_URL)
+ *   --oauth-client-id <id>      (or MODUSBRAIN_REMOTE_CLIENT_ID)
+ *   --oauth-client-secret <s>   (or MODUSBRAIN_REMOTE_CLIENT_SECRET; preferred)
  *
  * Re-run semantics: if a thin-client config already exists, --force overwrites;
  * otherwise refuses with a hint pointing at the existing mcp_url.
@@ -572,10 +572,10 @@ async function initRemoteMcp(opts: {
     const i = args.indexOf(flag);
     return i !== -1 ? args[i + 1] : null;
   };
-  const issuerUrl = (arg('--issuer-url') ?? process.env.GBRAIN_REMOTE_ISSUER_URL ?? '').trim();
-  const mcpUrl = (arg('--mcp-url') ?? process.env.GBRAIN_REMOTE_MCP_URL ?? '').trim();
-  const clientId = (arg('--oauth-client-id') ?? process.env.GBRAIN_REMOTE_CLIENT_ID ?? '').trim();
-  const clientSecret = (arg('--oauth-client-secret') ?? process.env.GBRAIN_REMOTE_CLIENT_SECRET ?? '').trim();
+  const issuerUrl = (arg('--issuer-url') ?? process.env.MODUSBRAIN_REMOTE_ISSUER_URL ?? '').trim();
+  const mcpUrl = (arg('--mcp-url') ?? process.env.MODUSBRAIN_REMOTE_MCP_URL ?? '').trim();
+  const clientId = (arg('--oauth-client-id') ?? process.env.MODUSBRAIN_REMOTE_CLIENT_ID ?? '').trim();
+  const clientSecret = (arg('--oauth-client-secret') ?? process.env.MODUSBRAIN_REMOTE_CLIENT_SECRET ?? '').trim();
 
   function fail(reason: string, message: string, extra: Record<string, unknown> = {}): never {
     if (jsonOutput) {
@@ -586,10 +586,10 @@ async function initRemoteMcp(opts: {
     process.exit(1);
   }
 
-  if (!issuerUrl) fail('missing_issuer_url', '--issuer-url is required (or set GBRAIN_REMOTE_ISSUER_URL). Example: --issuer-url https://brain-host.local:3001');
-  if (!mcpUrl) fail('missing_mcp_url', '--mcp-url is required (or set GBRAIN_REMOTE_MCP_URL). Example: --mcp-url https://brain-host.local:3001/mcp');
-  if (!clientId) fail('missing_client_id', '--oauth-client-id is required (or set GBRAIN_REMOTE_CLIENT_ID). Get it from `gbrain auth register-client` on the host.');
-  if (!clientSecret) fail('missing_client_secret', '--oauth-client-secret is required (or set GBRAIN_REMOTE_CLIENT_SECRET). Get it from `gbrain auth register-client` on the host.');
+  if (!issuerUrl) fail('missing_issuer_url', '--issuer-url is required (or set MODUSBRAIN_REMOTE_ISSUER_URL). Example: --issuer-url https://brain-host.local:3001');
+  if (!mcpUrl) fail('missing_mcp_url', '--mcp-url is required (or set MODUSBRAIN_REMOTE_MCP_URL). Example: --mcp-url https://brain-host.local:3001/mcp');
+  if (!clientId) fail('missing_client_id', '--oauth-client-id is required (or set MODUSBRAIN_REMOTE_CLIENT_ID). Get it from `modusbrain auth register-client` on the host.');
+  if (!clientSecret) fail('missing_client_secret', '--oauth-client-secret is required (or set MODUSBRAIN_REMOTE_CLIENT_SECRET). Get it from `modusbrain auth register-client` on the host.');
 
   // Re-run guard for --mcp-only specifically: refuse without --force to
   // avoid silently rotating credentials on a working install.
@@ -616,7 +616,7 @@ async function initRemoteMcp(opts: {
     fail(
       `discovery_${disco.reason}`,
       `Pre-flight failed: OAuth discovery on ${issuerUrl} — ${disco.message}\n` +
-      `Hint: confirm the issuer_url, that the host is reachable, and that \`gbrain serve --http\` is running there.`,
+      `Hint: confirm the issuer_url, that the host is reachable, and that \`modusbrain serve --http\` is running there.`,
       { detail: disco.message, ...(disco.status ? { status: disco.status } : {}) },
     );
   }
@@ -628,7 +628,7 @@ async function initRemoteMcp(opts: {
     fail(
       `token_${tokenRes.reason}`,
       `Pre-flight failed: OAuth /token — ${tokenRes.message}\n` +
-      `Hint: the host operator can run \`gbrain auth register-client <name> --grant-types client_credentials --scopes read,write,admin\` to mint fresh credentials.`,
+      `Hint: the host operator can run \`modusbrain auth register-client <name> --grant-types client_credentials --scopes read,write,admin\` to mint fresh credentials.`,
       { detail: tokenRes.message, ...(tokenRes.status ? { status: tokenRes.status } : {}) },
     );
   }
@@ -650,14 +650,14 @@ async function initRemoteMcp(opts: {
   // the existing config — only overwrite remote_mcp + drop engine/database
   // fields if this install is converting from local-engine to thin-client.
   // For first-time setup, write a minimal config.
-  const baseConfig: Partial<GBrainConfig> = existing
+  const baseConfig: Partial<ModusBrainConfig> = existing
     ? { ...existing, database_url: undefined, database_path: undefined }
     : {};
   // engine field is required on the type; leave it inferred to 'postgres'
   // for default purposes — it's never used because the dispatch guard
   // short-circuits any DB-bound path before connectEngine.
-  const config: GBrainConfig = {
-    ...(baseConfig as GBrainConfig),
+  const config: ModusBrainConfig = {
+    ...(baseConfig as ModusBrainConfig),
     engine: existing?.engine ?? 'postgres',
     remote_mcp: {
       issuer_url: issuerUrl.replace(/\/+$/, ''),
@@ -666,7 +666,7 @@ async function initRemoteMcp(opts: {
       // Only persist the secret to disk if it didn't come from the env var.
       // Env-var-supplied secrets stay in env; on-disk copy is opt-in via
       // the --oauth-client-secret flag (or absent env var).
-      ...(process.env.GBRAIN_REMOTE_CLIENT_SECRET === clientSecret
+      ...(process.env.MODUSBRAIN_REMOTE_CLIENT_SECRET === clientSecret
         ? {}
         : { oauth_client_secret: clientSecret }),
     },
@@ -695,8 +695,8 @@ async function initRemoteMcp(opts: {
     console.log('');
     console.log('Next steps:');
     console.log(`  1. Configure your agent's MCP client to point at ${config.remote_mcp!.mcp_url} (Claude Desktop / Hermes / openclaw).`);
-    console.log('  2. Run `gbrain doctor` to re-verify connectivity at any time.');
-    console.log('  3. Run `gbrain remote ping` after writing markdown if you want the host to re-index immediately (Tier B).');
+    console.log('  2. Run `modusbrain doctor` to re-verify connectivity at any time.');
+    console.log('  3. Run `modusbrain remote ping` after writing markdown if you want the host to re-index immediately (Tier B).');
   }
 }
 
@@ -707,7 +707,7 @@ async function initRemoteMcp(opts: {
  * them to config.json.
  *
  * v0.37 fix wave (Lane B.1/B.2/B.3): pre-fix, the gateway was only configured
- * when a flag was passed. Bare `gbrain init --pglite` left the gateway
+ * when a flag was passed. Bare `modusbrain init --pglite` left the gateway
  * unconfigured and engine.initSchema() fell through to stale OpenAI/1536
  * defaults — schema sized to 1536 while the ZE default emitted 1280. Now
  * the gateway is ALWAYS configured before initSchema; the schema matches
@@ -716,12 +716,12 @@ async function initRemoteMcp(opts: {
 async function configureGatewayWithMergedPrecedence(
   aiOpts?: { embedding_model?: string; embedding_dimensions?: number; expansion_model?: string; chat_model?: string },
 ): Promise<{ embedding_model: string; embedding_dimensions: number; expansion_model: string; chat_model: string }> {
-  const existingFile = loadConfigFileOnly() ?? ({} as GBrainConfig);
+  const existingFile = loadConfigFileOnly() ?? ({} as ModusBrainConfig);
   // loadConfig() merges env on top of file — perfect for the gateway path,
   // where env should win over a stale file. NOT used for the save path
   // (see B.4), which uses loadConfigFileOnly so transient env state never
   // pollutes config.json.
-  const envOverlay = loadConfig() ?? ({} as GBrainConfig);
+  const envOverlay = loadConfig() ?? ({} as ModusBrainConfig);
 
   const merged = {
     embedding_model: aiOpts?.embedding_model ?? envOverlay.embedding_model ?? existingFile.embedding_model,
@@ -773,10 +773,10 @@ function printResolvedAIChoice(
       console.warn('  Heads up: ZEROENTROPY_API_KEY is not set.');
       console.warn('  Set it before first embed:');
       console.warn('    export ZEROENTROPY_API_KEY=...');
-      console.warn('  Or add to ~/.gbrain/config.json:');
+      console.warn('  Or add to ~/.modusbrain/config.json:');
       console.warn('    "zeroentropy_api_key": "..."');
       console.warn('  Or pick a different provider:');
-      console.warn('    gbrain init --pglite --embedding-model openai:text-embedding-3-large --embedding-dimensions 1536');
+      console.warn('    modusbrain init --pglite --embedding-model openai:text-embedding-3-large --embedding-dimensions 1536');
     }
   }
 }
@@ -792,7 +792,7 @@ async function initPGLite(opts: {
   /** v0.42 (#1780 Gap 2): skip the init-time embedding-key validation. */
   skipEmbedCheck?: boolean;
 }) {
-  const dbPath = opts.customPath || gbrainPath('brain.pglite');
+  const dbPath = opts.customPath || modusbrainPath('brain.pglite');
   console.log(`Setting up local brain with PGLite (no server needed)...`);
 
   // v0.37.10.0 T6 (D11): preflight schema dim BEFORE any DB write or schema
@@ -804,7 +804,7 @@ async function initPGLite(opts: {
   let resolvedModel: string | undefined;
   if (opts.aiOpts?.noEmbedding) {
     // D9 deferred-setup mode: skip preflight, no model/dim resolved.
-    console.log(`  --no-embedding: deferred setup — configure with \`gbrain config set embedding_model <id>\` before import`);
+    console.log(`  --no-embedding: deferred setup — configure with \`modusbrain config set embedding_model <id>\` before import`);
   } else if (opts.aiOpts?.embedding_model) {
     const { resolveSchemaEmbeddingDim } = await import('../core/embedding-dim-check.ts');
     const pre = resolveSchemaEmbeddingDim({
@@ -847,7 +847,7 @@ async function initPGLite(opts: {
   // (generalizes the prior ZeroEntropy-only warning). Config-only diagnose
   // catches a missing key; a best-effort live test-embed catches an
   // invalid/expired key. Loud warning to stderr, init still succeeds.
-  // Skipped by --no-embedding / --skip-embed-check / GBRAIN_INIT_SKIP_EMBED_CHECK=1.
+  // Skipped by --no-embedding / --skip-embed-check / MODUSBRAIN_INIT_SKIP_EMBED_CHECK=1.
   const embedCheck = await runInitEmbedCheck({
     resolvedModel,
     resolvedDim,
@@ -865,7 +865,7 @@ async function initPGLite(opts: {
     // v0.28.5 (A4) + v0.37.11.0 Lane B.5: refuse to silently re-template an
     // existing brain with a mismatched embedding dimension. Catches both the
     // explicit-flag case (v0.28.5) AND the bare-init case where a user with
-    // a 1536 brain runs `gbrain init --pglite` after upgrading to v0.36+
+    // a 1536 brain runs `modusbrain init --pglite` after upgrading to v0.36+
     // and would silently end up with runtime ZE/1280 against a 1536 column
     // (Lane B.5). Fresh-install case is now structurally impossible after
     // v0.37.10.0 T6's preflight.
@@ -904,7 +904,7 @@ async function initPGLite(opts: {
       const after = await readContentChunksEmbeddingDim(engine);
       if (after.exists && after.dims !== null && after.dims !== resolvedDim) {
         console.error('\nUNEXPECTED: post-initSchema invariant assertion failed.');
-        console.error('  This is a bug. Please file an issue with the output of `gbrain doctor`.\n');
+        console.error('  This is a bug. Please file an issue with the output of `modusbrain doctor`.\n');
         console.error(embeddingMismatchMessage({
           currentDims: after.dims,
           requestedDims: resolvedDim,
@@ -925,8 +925,8 @@ async function initPGLite(opts: {
     // CLI flags this invocation > existing file plane > resolved defaults.
     // Use loadConfigFileOnly() — loadConfig() would poison config.json with
     // any DATABASE_URL the current process happens to have set (CDX2-7).
-    const existingFile = loadConfigFileOnly() ?? ({} as GBrainConfig);
-    const config: GBrainConfig = {
+    const existingFile = loadConfigFileOnly() ?? ({} as ModusBrainConfig);
+    const config: ModusBrainConfig = {
       ...existingFile,
       engine: 'pglite',
       database_path: dbPath,
@@ -947,8 +947,8 @@ async function initPGLite(opts: {
     // (existing config wins on re-init, so a prior opt-out is preserved).
     config.mcp = { publish_skills: true, ...(config.mcp ?? {}) };
     // v0.42: new installs default self-upgrade to NOTIFY (a nudge on every
-    // gbrain invocation). mode_prompted=true so the upgrade-time banner doesn't
-    // also fire on a fresh install. Hands-off: gbrain config set self_upgrade.mode auto
+    // modusbrain invocation). mode_prompted=true so the upgrade-time banner doesn't
+    // also fire on a fresh install. Hands-off: modusbrain config set self_upgrade.mode auto
     config.self_upgrade = { mode: 'notify', mode_prompted: true, ...(config.self_upgrade ?? {}) };
     saveConfig(config);
     if (opts.schemaPack) {
@@ -981,14 +981,14 @@ async function initPGLite(opts: {
       if (stats.page_count > 0) {
         console.log('');
         console.log('Existing brain detected. To wire up the v0.10.3 knowledge graph:');
-        console.log('  gbrain extract links --source db        (typed link backfill)');
-        console.log('  gbrain extract timeline --source db     (structured timeline backfill)');
-        console.log('  gbrain stats                            (verify links > 0)');
+        console.log('  modusbrain extract links --source db        (typed link backfill)');
+        console.log('  modusbrain extract timeline --source db     (structured timeline backfill)');
+        console.log('  modusbrain stats                            (verify links > 0)');
       } else {
-        console.log('Next: gbrain import <dir>');
+        console.log('Next: modusbrain import <dir>');
       }
       console.log('');
-      console.log('When you outgrow local: gbrain migrate --to supabase');
+      console.log('When you outgrow local: modusbrain migrate --to supabase');
       reportModStatus();
       const { printAdvisoryIfRecommended } = await import('../core/skillpack/post-install-advisory.ts');
       const { VERSION } = await import('../version.ts');
@@ -1027,7 +1027,7 @@ async function initPostgres(opts: {
   let resolvedDim: number | undefined;
   let resolvedModel: string | undefined;
   if (opts.aiOpts?.noEmbedding) {
-    console.log(`  --no-embedding: deferred setup — configure with \`gbrain config set embedding_model <id>\` before import`);
+    console.log(`  --no-embedding: deferred setup — configure with \`modusbrain config set embedding_model <id>\` before import`);
   } else if (opts.aiOpts?.embedding_model) {
     const { resolveSchemaEmbeddingDim } = await import('../core/embedding-dim-check.ts');
     const pre = resolveSchemaEmbeddingDim({
@@ -1061,7 +1061,7 @@ async function initPostgres(opts: {
   // v0.42 (#1780 Gap 2): validate the embedding key at init for ALL providers
   // (generalizes the prior ZeroEntropy-only warning). Same contract as the
   // PGLite path: loud warning to stderr, init still succeeds; skipped by
-  // --no-embedding / --skip-embed-check / GBRAIN_INIT_SKIP_EMBED_CHECK=1.
+  // --no-embedding / --skip-embed-check / MODUSBRAIN_INIT_SKIP_EMBED_CHECK=1.
   const embedCheck = await runInitEmbedCheck({
     resolvedModel,
     resolvedDim,
@@ -1153,7 +1153,7 @@ async function initPostgres(opts: {
       const after = await readContentChunksEmbeddingDim(engine);
       if (after.exists && after.dims !== null && after.dims !== resolvedDim) {
         console.error('\nUNEXPECTED: post-initSchema invariant assertion failed.');
-        console.error('  This is a bug. Please file an issue with the output of `gbrain doctor`.\n');
+        console.error('  This is a bug. Please file an issue with the output of `modusbrain doctor`.\n');
         console.error(embeddingMismatchMessage({
           currentDims: after.dims,
           requestedDims: resolvedDim,
@@ -1168,8 +1168,8 @@ async function initPostgres(opts: {
     // v0.37.10.0 T7 (D9) + v0.37.11.0 Lane B.4 (Postgres mirror): atomic
     // embedding-config persistence on top of the existing file-plane config.
     // Same precedence + same merge contract as the PGLite path above.
-    const existingFile = loadConfigFileOnly() ?? ({} as GBrainConfig);
-    const config: GBrainConfig = {
+    const existingFile = loadConfigFileOnly() ?? ({} as ModusBrainConfig);
+    const config: ModusBrainConfig = {
       ...existingFile,
       engine: 'postgres',
       database_url: databaseUrl,
@@ -1189,11 +1189,11 @@ async function initPostgres(opts: {
     // (existing config wins on re-init, so a prior opt-out is preserved).
     config.mcp = { publish_skills: true, ...(config.mcp ?? {}) };
     // v0.42: new installs default self-upgrade to NOTIFY (a nudge on every
-    // gbrain invocation). mode_prompted=true so the upgrade-time banner doesn't
-    // also fire on a fresh install. Hands-off: gbrain config set self_upgrade.mode auto
+    // modusbrain invocation). mode_prompted=true so the upgrade-time banner doesn't
+    // also fire on a fresh install. Hands-off: modusbrain config set self_upgrade.mode auto
     config.self_upgrade = { mode: 'notify', mode_prompted: true, ...(config.self_upgrade ?? {}) };
     saveConfig(config);
-    console.log('Config saved to ~/.gbrain/config.json');
+    console.log('Config saved to ~/.modusbrain/config.json');
     if (opts.schemaPack) {
       process.stderr.write(
         `[init] Using schema pack: ${opts.schemaPack} (override with --schema-pack <name>)\n`,
@@ -1220,11 +1220,11 @@ async function initPostgres(opts: {
       if (stats.page_count > 0) {
         console.log('');
         console.log('Existing brain detected. To wire up the v0.10.3 knowledge graph:');
-        console.log('  gbrain extract links --source db        (typed link backfill)');
-        console.log('  gbrain extract timeline --source db     (structured timeline backfill)');
-        console.log('  gbrain stats                            (verify links > 0)');
+        console.log('  modusbrain extract links --source db        (typed link backfill)');
+        console.log('  modusbrain extract timeline --source db     (structured timeline backfill)');
+        console.log('  modusbrain stats                            (verify links > 0)');
       } else {
-        console.log('Next: gbrain import <dir>');
+        console.log('Next: modusbrain import <dir>');
       }
       reportModStatus();
       const { printAdvisoryIfRecommended } = await import('../core/skillpack/post-install-advisory.ts');
@@ -1274,7 +1274,7 @@ async function supabaseWizard(): Promise<string> {
     execSync('bunx supabase --version', { stdio: 'pipe' });
     console.log('Supabase CLI detected.');
     console.log('To auto-provision, run: bunx supabase login && bunx supabase projects create');
-    console.log('Then use: gbrain init --url <your-connection-string>');
+    console.log('Then use: modusbrain init --url <your-connection-string>');
   } catch {
     console.log('Supabase CLI not found.');
   }
@@ -1406,8 +1406,8 @@ export function detectGStack(): { found: boolean; path: string | null; host: str
  * into the agent workspace. Uses minimal defaults, not the soul-audit interview.
  */
 export function installDefaultTemplates(workspaceDir: string): string[] {
-  const gbrainRoot = dirname(dirname(__dirname)); // up from src/commands/ to repo root
-  const templatesDir = join(gbrainRoot, 'templates');
+  const modusbrainRoot = dirname(dirname(__dirname)); // up from src/commands/ to repo root
+  const templatesDir = join(modusbrainRoot, 'templates');
   const installed: string[] = [];
 
   const templates = [
@@ -1435,8 +1435,8 @@ export function installDefaultTemplates(workspaceDir: string): string[] {
  */
 export function reportModStatus(): void {
   const gstack = detectGStack();
-  const gbrainRoot = dirname(dirname(__dirname));
-  const skillsDir = join(gbrainRoot, 'skills');
+  const modusbrainRoot = dirname(dirname(__dirname));
+  const skillsDir = join(modusbrainRoot, 'skills');
 
   let skillCount = 0;
   try {
@@ -1447,7 +1447,7 @@ export function reportModStatus(): void {
   } catch { /* manifest not found */ }
 
   console.log('');
-  console.log('--- GBrain Mod Status ---');
+  console.log('--- ModusBrain Mod Status ---');
   console.log(`Skills: ${skillCount} loaded`);
   console.log(`GStack: ${gstack.found ? `found (${gstack.host})` : 'not found'}`);
   if (!gstack.found) {
@@ -1456,28 +1456,28 @@ export function reportModStatus(): void {
     console.log('  cd ~/.claude/skills/gstack && ./setup');
   }
   console.log('Resolver: skills/RESOLVER.md');
-  console.log('Soul audit: run `gbrain soul-audit` to customize agent identity');
+  console.log('Soul audit: run `modusbrain soul-audit` to customize agent identity');
   // Retrieval Reflex (#1981): the deterministic pointer layer is ON by default
   // (no action needed). The policy skill is installed into the HOST repo on
   // request — we PRINT the command rather than silently mutating the host repo.
   console.log('Retrieval reflex: on by default (entity pointers injected per turn)');
   console.log('  Install the policy skill into your agent repo:');
-  console.log('  gbrain integrations install retrieval-reflex --target <host-repo>');
+  console.log('  modusbrain integrations install retrieval-reflex --target <host-repo>');
   console.log('');
 }
 
 function printInitHelp() {
   console.log(brandHelp(`
-gbrain init — initialize a brain (PGLite or Supabase Postgres)
+modusbrain init — initialize a brain (PGLite or Supabase Postgres)
 
 USAGE
-  gbrain init [flags]
+  modusbrain init [flags]
 
 ENGINE SELECTION (mutually exclusive)
   --pglite              Use embedded PGLite (zero-config, default for <1000 .md files)
   --supabase            Use Supabase Postgres (recommended for 1000+ files)
   --url <URL>           Use a manual Postgres connection string
-  --mcp-only            Thin-client mode: connect to a remote gbrain MCP, no local engine
+  --mcp-only            Thin-client mode: connect to a remote modusbrain MCP, no local engine
 
 OPTIONS
   --force               Overwrite an existing config (gated by default)
@@ -1498,18 +1498,18 @@ OPTIONS
                         Default subagent driver (v0.27+)
   --no-embedding        Defer embedding setup (skips the embedding-key check)
   --skip-embed-check    Skip the init-time embedding-key validation (config +
-                        live test-embed). Also via GBRAIN_INIT_SKIP_EMBED_CHECK=1
+                        live test-embed). Also via MODUSBRAIN_INIT_SKIP_EMBED_CHECK=1
 
 EXAMPLES
-  gbrain init --pglite                      # Local-only, no API keys
-  gbrain init --supabase                    # Interactive Supabase setup
-  gbrain init --url postgresql://...        # Use a custom Postgres
-  gbrain init --mcp-only --url https://...  # Thin-client mode
+  modusbrain init --pglite                      # Local-only, no API keys
+  modusbrain init --supabase                    # Interactive Supabase setup
+  modusbrain init --url postgresql://...        # Use a custom Postgres
+  modusbrain init --mcp-only --url https://...  # Thin-client mode
 
 NOTES
-  - Bare \`gbrain init\` in a directory with 1000+ .md files defaults to Supabase
+  - Bare \`modusbrain init\` in a directory with 1000+ .md files defaults to Supabase
     interactive setup. With <1000 files (or with --pglite explicitly), defaults
-    to PGLite at ~/.gbrain/brain.pglite.
+    to PGLite at ~/.modusbrain/brain.pglite.
   - Existing config is preserved unless --force is passed.
 `.trim()));
 }

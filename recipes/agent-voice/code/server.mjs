@@ -156,7 +156,7 @@ async function handleSession(req, res) {
     tools: getEffectiveAllowlist().map((name) => ({
       type: 'function',
       name,
-      description: `gbrain operation: ${name}`,
+      description: `modusbrain operation: ${name}`,
       parameters: { type: 'object', properties: {}, additionalProperties: true },
     })),
   };

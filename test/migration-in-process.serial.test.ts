@@ -1,7 +1,7 @@
 // v0.41.37.0 #1605 — migration schema phases run IN-PROCESS (was a
-// `gbrain init --migrate-only` subprocess that died with getaddrinfo ENOTFOUND
+// `modusbrain init --migrate-only` subprocess that died with getaddrinfo ENOTFOUND
 // on Windows+bun+Supabase). runMigrateOnlyCore is the single in-process path;
-// runGbrainSubprocess captures child stderr for the remaining backfill spawns.
+// runModusbrainSubprocess captures child stderr for the remaining backfill spawns.
 import { describe, test, expect } from 'bun:test';
 import { tmpdir } from 'os';
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, readdirSync } from 'fs';
@@ -14,7 +14,7 @@ import {
 import { PGLiteEngine } from '../src/core/pglite-engine.ts';
 import {
   runMigrateOnlyCore,
-  runGbrainSubprocess,
+  runModusbrainSubprocess,
   MigrateOnlyError,
 } from '../src/commands/migrations/in-process.ts';
 
@@ -59,18 +59,18 @@ describe('#1605 runMigrateOnlyCore (in-process schema)', () => {
     const home = mkdtempSync(join(tmpdir(), 'mip-noconf-'));
     await expect(
       withEnv(
-        { GBRAIN_HOME: home, DATABASE_URL: undefined, GBRAIN_DATABASE_URL: undefined },
+        { MODUSBRAIN_HOME: home, DATABASE_URL: undefined, MODUSBRAIN_DATABASE_URL: undefined },
         () => runMigrateOnlyCore(),
       ),
     ).rejects.toBeInstanceOf(MigrateOnlyError);
   });
 });
 
-describe('#1605 runGbrainSubprocess (stderr capture)', () => {
+describe('#1605 runModusbrainSubprocess (stderr capture)', () => {
   test('folds child stderr into the thrown error', () => {
     let msg = '';
     try {
-      runGbrainSubprocess("sh -c 'echo BOOM_STDERR 1>&2; exit 1'");
+      runModusbrainSubprocess("sh -c 'echo BOOM_STDERR 1>&2; exit 1'");
     } catch (e) {
       msg = e instanceof Error ? e.message : String(e);
     }
@@ -78,16 +78,16 @@ describe('#1605 runGbrainSubprocess (stderr capture)', () => {
   });
 
   test('returns child stdout on success', () => {
-    const out = runGbrainSubprocess("sh -c 'echo hello-stdout'");
+    const out = runModusbrainSubprocess("sh -c 'echo hello-stdout'");
     expect(out).toContain('hello-stdout');
   });
 });
 
 describe('#1605 structural guard: schema phases are in-process', () => {
-  test('no schema phase still execSyncs `gbrain init --migrate-only`', () => {
+  test('no schema phase still execSyncs `modusbrain init --migrate-only`', () => {
     for (const f of SCHEMA_PHASE_FILES) {
       const src = readFileSync(join(MIGRATION_DIR, `${f}.ts`), 'utf-8');
-      expect(src).not.toContain("execSync('gbrain init --migrate-only'");
+      expect(src).not.toContain("execSync('modusbrain init --migrate-only'");
     }
   });
 
@@ -103,7 +103,7 @@ describe('#1605 structural guard: schema phases are in-process', () => {
     }
   });
 
-  test('NO migration orchestrator anywhere spawns `gbrain init --migrate-only`', () => {
+  test('NO migration orchestrator anywhere spawns `modusbrain init --migrate-only`', () => {
     // All-files invariant (not just the 9): the subprocess spawn is the
     // Windows-ENOTFOUND bug class. Other files (v0_22_4, v0_28_0, v0_31_0,
     // v0_14_0, v0_32_2) define an in-process phaseASchema that never spawned —
@@ -111,7 +111,7 @@ describe('#1605 structural guard: schema phases are in-process', () => {
     const files = readdirSync(MIGRATION_DIR).filter(n => /^v\d/.test(n) && n.endsWith('.ts'));
     for (const n of files) {
       const src = readFileSync(join(MIGRATION_DIR, n), 'utf-8');
-      expect(src).not.toContain("execSync('gbrain init --migrate-only'");
+      expect(src).not.toContain("execSync('modusbrain init --migrate-only'");
     }
   });
 });

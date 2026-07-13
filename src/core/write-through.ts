@@ -4,14 +4,14 @@
  * After a page row lands in the DB (via importFromContent / putPage), this
  * renders the row to markdown via `serializePageToMarkdown` and writes it to
  * `sync.repo_path` so the brain repo has a committable `.md` artifact that
- * round-trips cleanly through `gbrain sync`. The file is rendered FROM the DB
+ * round-trips cleanly through `modusbrain sync`. The file is rendered FROM the DB
  * row, so the two sinks cannot diverge.
  *
  * Extracted from the v0.38 `put_page` write-through (operations.ts) so the
- * `put_page` op AND `gbrain brainstorm/lsd --save` share one implementation
+ * `put_page` op AND `modusbrain brainstorm/lsd --save` share one implementation
  * instead of hand-rolling parallel (and divergent) copies. The extraction also
  * upgraded the write to be ATOMIC — the original used a bare `writeFileSync`
- * into a live git tree that `gbrain sync` / autopilot actively walk, so a crash
+ * into a live git tree that `modusbrain sync` / autopilot actively walk, so a crash
  * mid-write left a partial `.md` that sync would fail to parse. We now write to
  * a unique temp sibling and `rename` into place (rename is atomic on the same
  * filesystem), matching the `.tmp + rename` convention used by
@@ -65,7 +65,7 @@ export interface WritePageThroughOpts {
  * Render the DB row for `slug` to markdown and atomically write it under
  * `sync.repo_path`. Never throws — failures are reported via the result's
  * `skipped` / `error` fields (the DB write is the durable sink; the file is
- * best-effort and reconciled by the next `gbrain sync`).
+ * best-effort and reconciled by the next `modusbrain sync`).
  */
 export async function writePageThrough(
   engine: BrainEngine,

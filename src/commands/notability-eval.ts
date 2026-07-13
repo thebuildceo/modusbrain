@@ -1,9 +1,9 @@
 /**
- * v0.31.2 — `gbrain notability-eval` mining + review CLI.
+ * v0.31.2 — `modusbrain notability-eval` mining + review CLI.
  *
  * Two subcommands:
  *
- *   gbrain notability-eval mine [--target-high N] [--target-medium N]
+ *   modusbrain notability-eval mine [--target-high N] [--target-medium N]
  *                                [--target-low N] [--out PATH]
  *      Walks meetings/, personal/, daily/ in the brain repo (resolved
  *      via `sync.repo_path` config), splits each markdown body into
@@ -11,17 +11,17 @@
  *      stratified-samples to target counts (default 20/20/10), writes
  *      candidates JSONL for hand-confirmation.
  *
- *   gbrain notability-eval review [--in PATH] [--out PATH]
+ *   modusbrain notability-eval review [--in PATH] [--out PATH]
  *      Walks the candidates JSONL one-by-one in TTY: shows the paragraph,
  *      asks for HIGH/MEDIUM/LOW confirmation, writes confirmed cases
- *      to `~/.gbrain/eval/notability-real.jsonl`.
+ *      to `~/.modusbrain/eval/notability-real.jsonl`.
  *
  * Eval set is two-tier (CLAUDE.md privacy rule):
  *   - Public anonymized: test/fixtures/notability-eval-public.jsonl
  *     (40 synthetic cases shipped with the repo, runs in CI).
- *   - Private real: ~/.gbrain/eval/notability-real.jsonl (50 mined
+ *   - Private real: ~/.modusbrain/eval/notability-real.jsonl (50 mined
  *     cases from the user's actual brain, local-only, runs only when
- *     GBRAIN_NOTABILITY_EVAL_REAL=1).
+ *     MODUSBRAIN_NOTABILITY_EVAL_REAL=1).
  *
  * Test harness lives at test/notability-eval.test.ts and computes
  * precision@HIGH, recall@HIGH, F1, confusion matrix. Soft gate: warn
@@ -31,7 +31,7 @@
 import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync, statSync } from 'fs';
 import { join, resolve } from 'path';
 import type { BrainEngine } from '../core/engine.ts';
-import { gbrainPath } from '../core/config.ts';
+import { modusbrainPath } from '../core/config.ts';
 
 const DEFAULT_TARGETS = { high: 20, medium: 20, low: 10 } as const;
 const DEFAULT_CORPUS_DIRS = ['meetings/', 'personal/', 'daily/'] as const;
@@ -66,12 +66,12 @@ interface MineOpts {
 
 /** Resolve the path where mining writes its candidates JSONL. */
 export function defaultMiningOutPath(): string {
-  return gbrainPath('eval', 'notability-mining-candidates.jsonl');
+  return modusbrainPath('eval', 'notability-mining-candidates.jsonl');
 }
 
 /** Resolve the path where review writes confirmed cases. */
 export function defaultReviewOutPath(): string {
-  return gbrainPath('eval', 'notability-real.jsonl');
+  return modusbrainPath('eval', 'notability-real.jsonl');
 }
 
 /**
@@ -329,7 +329,7 @@ export async function runNotabilityEval(args: RunNotabilityEvalArgs): Promise<vo
       // eslint-disable-next-line no-console
       console.log(`Wrote ${candidates.length} candidates to ${out}`);
       // eslint-disable-next-line no-console
-      console.log(`Run \`gbrain notability-eval review --in ${out}\` to hand-confirm tiers.`);
+      console.log(`Run \`modusbrain notability-eval review --in ${out}\` to hand-confirm tiers.`);
       return;
     }
 
@@ -383,11 +383,11 @@ export async function runNotabilityEval(args: RunNotabilityEvalArgs): Promise<vo
     default:
       // eslint-disable-next-line no-console
       console.log([
-        'gbrain notability-eval — eval suite for the notability gate.',
+        'modusbrain notability-eval — eval suite for the notability gate.',
         '',
         'Subcommands:',
         '  mine   Walk the brain repo, sample paragraphs, write candidates.',
-        '  review Hand-confirm tiers in a TTY. Writes ~/.gbrain/eval/notability-real.jsonl.',
+        '  review Hand-confirm tiers in a TTY. Writes ~/.modusbrain/eval/notability-real.jsonl.',
         '',
         'Flags:',
         '  --target-high N   Default 20',

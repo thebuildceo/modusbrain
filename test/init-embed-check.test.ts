@@ -15,7 +15,7 @@
 
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { withEnv } from './helpers/with-env.ts';
-import type { GBrainConfig } from '../src/core/config.ts';
+import type { ModusBrainConfig } from '../src/core/config.ts';
 import { runInitEmbedCheck } from '../src/core/init-embed-check.ts';
 import { __setEmbedTransportForTests, resetGateway } from '../src/core/ai/gateway.ts';
 
@@ -44,8 +44,8 @@ describe('runInitEmbedCheck — skip paths', () => {
     expect(warned).toHaveLength(0);
   });
 
-  test('GBRAIN_INIT_SKIP_EMBED_CHECK=1 skips entirely', async () => {
-    await withEnv({ GBRAIN_INIT_SKIP_EMBED_CHECK: '1' }, async () => {
+  test('MODUSBRAIN_INIT_SKIP_EMBED_CHECK=1 skips entirely', async () => {
+    await withEnv({ MODUSBRAIN_INIT_SKIP_EMBED_CHECK: '1' }, async () => {
       const { warn, warned } = capture();
       const r = await runInitEmbedCheck({ resolvedModel: OPENAI, warn });
       expect(r.skipped).toBe('env');
@@ -67,7 +67,7 @@ describe('runInitEmbedCheck — config diagnose', () => {
         resolvedModel: OPENAI,
         resolvedDim: 1536,
         apiKey: undefined,
-        loadFileConfig: () => ({} as GBrainConfig),
+        loadFileConfig: () => ({} as ModusBrainConfig),
         warn,
       });
       expect(r.ok).toBe(false);
@@ -89,7 +89,7 @@ describe('runInitEmbedCheck — config diagnose', () => {
         resolvedModel: OPENAI,
         resolvedDim: 1536,
         // key lives in config.json (file plane), not the shell env
-        loadFileConfig: () => ({ openai_api_key: 'sk-from-config-file' } as GBrainConfig),
+        loadFileConfig: () => ({ openai_api_key: 'sk-from-config-file' } as ModusBrainConfig),
         skipLiveProbe: true, // config-only: this is the diagnose regression
         warn,
       });
@@ -105,7 +105,7 @@ describe('runInitEmbedCheck — config diagnose', () => {
         resolvedModel: OPENAI,
         resolvedDim: 1536,
         apiKey: 'sk-from-flag',
-        loadFileConfig: () => ({} as GBrainConfig),
+        loadFileConfig: () => ({} as ModusBrainConfig),
         skipLiveProbe: true,
         warn,
       });
@@ -125,7 +125,7 @@ describe('runInitEmbedCheck — live probe (best-effort)', () => {
         usage: { tokens: 1 },
       }) as any);
       const { warn, warned } = capture();
-      const r = await runInitEmbedCheck({ resolvedModel: OPENAI, resolvedDim: 1536, loadFileConfig: () => ({} as GBrainConfig), warn });
+      const r = await runInitEmbedCheck({ resolvedModel: OPENAI, resolvedDim: 1536, loadFileConfig: () => ({} as ModusBrainConfig), warn });
       expect(r.ok).toBe(true);
       expect(r.live_ok).toBe(true);
       expect(warned).toHaveLength(0);
@@ -136,7 +136,7 @@ describe('runInitEmbedCheck — live probe (best-effort)', () => {
     await withEnv({ OPENAI_API_KEY: 'sk-test' }, async () => {
       __setEmbedTransportForTests(async () => { throw new Error('401 unauthorized: bad api key'); });
       const { warn, warned } = capture();
-      const r = await runInitEmbedCheck({ resolvedModel: OPENAI, resolvedDim: 1536, loadFileConfig: () => ({} as GBrainConfig), warn });
+      const r = await runInitEmbedCheck({ resolvedModel: OPENAI, resolvedDim: 1536, loadFileConfig: () => ({} as ModusBrainConfig), warn });
       expect(r.ok).toBe(true);
       expect(r.live_ok).toBe(false);
       expect(r.live_reason).toBe('auth');

@@ -3,7 +3,7 @@
  *
  * Pre-v0.36, runThink instantiated `new Anthropic()` directly. Closing #952
  * routed it through gateway.chat() so MCP stdio launches pick up
- * `anthropic_api_key` from gbrain config instead of process.env.
+ * `anthropic_api_key` from modusbrain config instead of process.env.
  *
  * The adapter shape was determined by plan-eng-review D10 (cross-model
  * tension D10 with codex C7+C8+C9+C10):
@@ -76,7 +76,7 @@ describe('think gateway adapter — model-id normalization', () => {
   });
 
   test('tryBuildGatewayClient returns null when ANTHROPIC_API_KEY is absent (preserves legacy NO_ANTHROPIC_API_KEY signal)', async () => {
-    await withEnv({ ANTHROPIC_API_KEY: undefined, GBRAIN_HOME: emptyHome() }, async () => {
+    await withEnv({ ANTHROPIC_API_KEY: undefined, MODUSBRAIN_HOME: emptyHome() }, async () => {
       const client = await __thinkAdapter.tryBuildGatewayClient('claude-opus-4-7');
       expect(client).toBeNull();
     });
@@ -86,7 +86,7 @@ describe('think gateway adapter — model-id normalization', () => {
     await withEnv({ ANTHROPIC_API_KEY: 'sk-test-key' }, async () => {
       expect(__thinkAdapter.hasAnthropicKey()).toBe(true);
     });
-    await withEnv({ ANTHROPIC_API_KEY: undefined, GBRAIN_HOME: emptyHome() }, async () => {
+    await withEnv({ ANTHROPIC_API_KEY: undefined, MODUSBRAIN_HOME: emptyHome() }, async () => {
       expect(__thinkAdapter.hasAnthropicKey()).toBe(false);
     });
   });
@@ -115,7 +115,7 @@ describe('think gateway adapter — #1698 slash form + explicit-model fork', () 
   });
 
   test('explicit anthropic model with no key THROWS (unavailable)', async () => {
-    await withEnv({ ANTHROPIC_API_KEY: undefined, GBRAIN_HOME: emptyHome() }, async () => {
+    await withEnv({ ANTHROPIC_API_KEY: undefined, MODUSBRAIN_HOME: emptyHome() }, async () => {
       await expect(
         __thinkAdapter.tryBuildGatewayClient('anthropic:claude-sonnet-4-6', { explicitModel: true }),
       ).rejects.toThrow(/not usable.*unavailable/);
@@ -164,7 +164,7 @@ describe('think gateway adapter — #1698 slash form + explicit-model fork', () 
   // 'no LLM available' stub). A future refactor that turns this into a graceful path fails here.
   test('D1 backstop: explicit non-anthropic model, no key → BUILDS then create() THROWS (never a stub)', async () => {
     await withEnv(
-      { ANTHROPIC_API_KEY: undefined, DEEPSEEK_API_KEY: undefined, OPENAI_API_KEY: undefined, GBRAIN_HOME: emptyHome() },
+      { ANTHROPIC_API_KEY: undefined, DEEPSEEK_API_KEY: undefined, OPENAI_API_KEY: undefined, MODUSBRAIN_HOME: emptyHome() },
       async () => {
         resetGateway();  // unconfigured → gateway.chat() throws AIConfigError at create()
         // deepseek:deepseek-chat passes validateModelId (real recipe + chat touchpoint) — the
@@ -193,7 +193,7 @@ describe('think gateway adapter — graceful fallback shape', () => {
     expect(m.role).toBe('assistant');
     expect(m.content[0].type).toBe('text');
     expect(m.content[0].text).toContain('no LLM available');
-    expect(m.content[0].text).toContain('gbrain config');
+    expect(m.content[0].text).toContain('modusbrain config');
     expect(m.usage.input_tokens).toBe(0);
     expect(m.usage.output_tokens).toBe(0);
     expect(m.stop_reason).toBe('end_turn');

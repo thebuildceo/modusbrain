@@ -3,7 +3,7 @@
 // Parity gate: `inferTypeFromPack(path, gbrain-base)` must produce
 // IDENTICAL output to the legacy `inferType(path)` for every known
 // path prefix. If this drifts, gbrain-base.yaml is out of sync with
-// the GBRAIN_BASE_PATH_PREFIXES table in markdown.ts.
+// the MODUSBRAIN_BASE_PATH_PREFIXES table in markdown.ts.
 //
 // Extension test: a user pack adding `paper: { path_prefixes:
 // ['papers/'] }` must route `papers/foo.md` to 'paper' (the pack
@@ -16,7 +16,7 @@ import { loadPackFromFile } from '../src/core/schema-pack/loader.ts';
 import { parseSchemaPackManifest } from '../src/core/schema-pack/manifest-v1.ts';
 import { join } from 'node:path';
 
-const GBRAIN_BASE_PATH = join(import.meta.dir, '../src/core/schema-pack/base/gbrain-base.yaml');
+const MODUSBRAIN_BASE_PATH = join(import.meta.dir, '../src/core/schema-pack/base/gbrain-base.yaml');
 
 // Representative paths covering every gbrain-base path-prefix entry.
 const PARITY_FIXTURES: ReadonlyArray<{ path: string; expected: string; reason: string }> = [
@@ -50,7 +50,7 @@ const PARITY_FIXTURES: ReadonlyArray<{ path: string; expected: string; reason: s
 
 describe('inferTypeFromPack (T7a) — gbrain-base parity', () => {
   test('parity: every known path maps to the same type via pack as via legacy', () => {
-    const pack = loadPackFromFile(GBRAIN_BASE_PATH);
+    const pack = loadPackFromFile(MODUSBRAIN_BASE_PATH);
     for (const { path, expected, reason } of PARITY_FIXTURES) {
       const actual = inferTypeFromPack(path, pack);
       // For parity, the pack result MUST match the legacy hardcoded result.
@@ -69,7 +69,7 @@ describe('inferTypeFromPack (T7a) — gbrain-base parity', () => {
   test('user pack extends gbrain-base with researcher type', () => {
     // Synthetic pack declaring a new type with its own prefix.
     const pack = parseSchemaPackManifest({
-      api_version: 'gbrain-schema-pack-v1',
+      api_version: 'modusbrain-schema-pack-v1',
       name: 'research-test',
       version: '0.1.0',
       extends: null,
@@ -89,7 +89,7 @@ describe('inferTypeFromPack (T7a) — gbrain-base parity', () => {
     // E.g. a pack mid-construction with no page_types declared — should
     // not crash, should match gbrain-base behavior.
     const emptyPack = parseSchemaPackManifest({
-      api_version: 'gbrain-schema-pack-v1',
+      api_version: 'modusbrain-schema-pack-v1',
       name: 'empty',
       version: '0.1.0',
       extends: null,
@@ -101,12 +101,12 @@ describe('inferTypeFromPack (T7a) — gbrain-base parity', () => {
   });
 
   test('undefined filePath returns concept default', () => {
-    const pack = loadPackFromFile(GBRAIN_BASE_PATH);
+    const pack = loadPackFromFile(MODUSBRAIN_BASE_PATH);
     expect(inferTypeFromPack(undefined, pack)).toBe('concept');
   });
 
   test('case-insensitive matching', () => {
-    const pack = loadPackFromFile(GBRAIN_BASE_PATH);
+    const pack = loadPackFromFile(MODUSBRAIN_BASE_PATH);
     expect(inferTypeFromPack('PEOPLE/Alice.md', pack)).toBe('person');
     expect(inferTypeFromPack('Companies/ACME.md', pack)).toBe('company');
   });

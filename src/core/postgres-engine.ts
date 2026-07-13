@@ -54,7 +54,7 @@ import type {
   EmotionalWeightInputRow, EmotionalWeightWriteRow,
   EnrichCandidatesOpts, EnrichCandidate,
 } from './types.ts';
-import { GBrainError, PAGE_SORT_SQL, ENRICH_ORDER_SQL } from './types.ts';
+import { ModusBrainError, PAGE_SORT_SQL, ENRICH_ORDER_SQL } from './types.ts';
 import { finalizeLastSeen } from './chronicle/last-seen.ts';
 import { computeAnomaliesFromBuckets } from './cycle/anomaly.ts';
 import * as db from './db.ts';
@@ -151,7 +151,7 @@ export class PostgresEngine implements BrainEngine {
     // module / never-connected path (style 'module' or null) keeps the legacy
     // getConnection() behavior.
     if (this._connectionStyle === 'instance') {
-      throw new GBrainError(
+      throw new ModusBrainError(
         'No database connection',
         'instance connection pool was torn down (socket reaped or mid-process disconnect)',
         'Transient — the operation reconnects and retries. If it persists, check pooler/Supavisor health.',
@@ -166,13 +166,13 @@ export class PostgresEngine implements BrainEngine {
     const url = config.database_url;
     if (config.poolSize) {
       // Instance-level connection for worker isolation. resolvePoolSize lets
-      // GBRAIN_POOL_SIZE cap below the caller's requested size when set — the
+      // MODUSBRAIN_POOL_SIZE cap below the caller's requested size when set — the
       // env var is a user escape hatch, so it wins.
       const url = config.database_url;
-      if (!url) throw new GBrainError('No database URL', 'database_url is missing', 'Provide --url');
+      if (!url) throw new ModusBrainError('No database URL', 'database_url is missing', 'Provide --url');
       const size = Math.min(config.poolSize, db.resolvePoolSize(config.poolSize));
       // Honor PgBouncer transaction-mode detection on worker-instance pools too.
-      // Without this, `gbrain jobs work` against a Supabase pooler URL hits
+      // Without this, `modusbrain jobs work` against a Supabase pooler URL hits
       // "prepared statement does not exist" under load just like the module
       // singleton did before v0.15.4.
       const prepare = db.resolvePrepare(url);
@@ -189,8 +189,8 @@ export class PostgresEngine implements BrainEngine {
         // Silence postgres NOTICE-level messages by default. See db.ts for
         // rationale (stdout-parsing callers like jobs-submit --json break when
         // idempotent CREATE migrations flood stdout). Opt back in with
-        // GBRAIN_PG_NOTICES=1.
-        onnotice: process.env.GBRAIN_PG_NOTICES === '1' ? undefined : () => {},
+        // MODUSBRAIN_PG_NOTICES=1.
+        onnotice: process.env.MODUSBRAIN_PG_NOTICES === '1' ? undefined : () => {},
       };
       if (Object.keys(timeouts).length > 0) {
         opts.connection = timeouts;
@@ -252,7 +252,7 @@ export class PostgresEngine implements BrainEngine {
       this.connectionManager = null;
     }
     if (this._sql) {
-      // #1972: gbrain-owned hard bound so a PgBouncer drain that never settles
+      // #1972: modusbrain-owned hard bound so a PgBouncer drain that never settles
       // can't block teardown until the CLI's 10s force-exit truncates stdout.
       await db.endPoolBounded(this._sql);
       this._sql = null;
@@ -1546,7 +1546,7 @@ export class PostgresEngine implements BrainEngine {
     const symbolKind = opts?.symbolKind;
 
     if (opts?.limit && opts.limit > MAX_SEARCH_LIMIT) {
-      console.warn(`[gbrain] Warning: search limit clamped from ${opts.limit} to ${MAX_SEARCH_LIMIT}`);
+      console.warn(`[modusbrain] Warning: search limit clamped from ${opts.limit} to ${MAX_SEARCH_LIMIT}`);
     }
 
     const detailLow = opts?.detail === 'low';
@@ -1705,7 +1705,7 @@ export class PostgresEngine implements BrainEngine {
     const symbolKind = opts?.symbolKind;
 
     if (opts?.limit && opts.limit > MAX_SEARCH_LIMIT) {
-      console.warn(`[gbrain] Warning: search limit clamped from ${opts.limit} to ${MAX_SEARCH_LIMIT}`);
+      console.warn(`[modusbrain] Warning: search limit clamped from ${opts.limit} to ${MAX_SEARCH_LIMIT}`);
     }
 
     // Source-aware ranking applies here too — searchKeywordChunks is the
@@ -1820,7 +1820,7 @@ export class PostgresEngine implements BrainEngine {
     const symbolKind = opts?.symbolKind;
 
     if (opts?.limit && opts.limit > MAX_SEARCH_LIMIT) {
-      console.warn(`[gbrain] Warning: search limit clamped from ${opts.limit} to ${MAX_SEARCH_LIMIT}`);
+      console.warn(`[modusbrain] Warning: search limit clamped from ${opts.limit} to ${MAX_SEARCH_LIMIT}`);
     }
 
     const vecStr = '[' + Array.from(embedding).join(',') + ']';
@@ -1910,7 +1910,7 @@ export class PostgresEngine implements BrainEngine {
     // ResolvedColumn, undefined) and produces a canonical descriptor.
     //
     // v0.36 Phase 3: 'embedding_multimodal' is the unified column populated
-    // by `gbrain reindex --multimodal`. Carries BOTH text and image content
+    // by `modusbrain reindex --multimodal`. Carries BOTH text and image content
     // in Voyage multimodal-3 space — no modality filter; the column itself
     // is the discriminator (rows without embedding_multimodal aren't searched).
     const resolvedCol = normalizeEngineColumn(opts?.embeddingColumn);
@@ -2406,7 +2406,7 @@ export class PostgresEngine implements BrainEngine {
     //
     // D7: optional source_id filter. NULL/undefined = scan all sources
     // (pre-existing behavior); a value scopes to that source so
-    // `gbrain embed --stale --source X` actually does what it says.
+    // `modusbrain embed --stale --source X` actually does what it says.
     //
     // v0.41 (D4+D8): NOT (frontmatter ? 'embed_skip') filter applied via
     // the always-JOINed pages row. Soft-blocked pages won't surface in
@@ -2753,7 +2753,7 @@ export class PostgresEngine implements BrainEngine {
     opts?: { sourceId?: string; sourceIds?: string[] },
   ): Promise<{ link_source: string | null; count: number }[]> {
     const sql = this.sql;
-    // v114 (#1941): distinct provenances + counts for `gbrain link-sources`.
+    // v114 (#1941): distinct provenances + counts for `modusbrain link-sources`.
     // Scope by the FROM page's source (consistent with getLinks). Federated
     // {sourceIds} takes precedence over scalar {sourceId}; neither = unscoped.
     const sourceCondition =
@@ -3125,7 +3125,7 @@ export class PostgresEngine implements BrainEngine {
 
     // v0.41.18.0 D12: filter mentions OUT of backlink-count for search
     // ranking. `link_source='mentions'` rows are auto-linked body-text
-    // mentions from `gbrain extract links --by-mention`; they're
+    // mentions from `modusbrain extract links --by-mention`; they're
     // graph-completeness signal, NOT human-intent signal. Counting them
     // toward backlinks would shift search ranking globally on first
     // --by-mention run, boosting popular-mention pages over intentional-
@@ -4699,7 +4699,7 @@ export class PostgresEngine implements BrainEngine {
       RETURNING 1
     `;
     if (result.length === 0) {
-      throw new GBrainError('TAKE_ROW_NOT_FOUND', `take not found at page_id=${pageId} row=${rowNum}`, 'list takes for this page with `gbrain takes <slug>` to see valid row numbers');
+      throw new ModusBrainError('TAKE_ROW_NOT_FOUND', `take not found at page_id=${pageId} row=${rowNum}`, 'list takes for this page with `modusbrain takes <slug>` to see valid row numbers');
     }
   }
 
@@ -4713,9 +4713,9 @@ export class PostgresEngine implements BrainEngine {
       const [existing] = await tx`
         SELECT resolved_at FROM takes WHERE page_id = ${pageId} AND row_num = ${oldRow}
       `;
-      if (!existing) throw new GBrainError('TAKE_ROW_NOT_FOUND', `take not found at page_id=${pageId} row=${oldRow}`, 'list takes with `gbrain takes <slug>`');
+      if (!existing) throw new ModusBrainError('TAKE_ROW_NOT_FOUND', `take not found at page_id=${pageId} row=${oldRow}`, 'list takes with `modusbrain takes <slug>`');
       if ((existing as { resolved_at?: unknown }).resolved_at) {
-        throw new GBrainError('TAKE_RESOLVED_IMMUTABLE', `take ${pageId}#${oldRow} is resolved`, 'resolved bets are immutable; add a new take instead');
+        throw new ModusBrainError('TAKE_RESOLVED_IMMUTABLE', `take ${pageId}#${oldRow} is resolved`, 'resolved bets are immutable; add a new take instead');
       }
       const [maxRow] = await tx`SELECT COALESCE(MAX(row_num), 0) + 1 AS next FROM takes WHERE page_id = ${pageId}`;
       const newRowNum = Number((maxRow as { next?: number })?.next ?? 1);
@@ -4737,9 +4737,9 @@ export class PostgresEngine implements BrainEngine {
   async resolveTake(pageId: number, rowNum: number, resolution: TakeResolution): Promise<void> {
     const sql = this.sql;
     const [existing] = await sql`SELECT resolved_at FROM takes WHERE page_id = ${pageId} AND row_num = ${rowNum}`;
-    if (!existing) throw new GBrainError('TAKE_ROW_NOT_FOUND', `take not found at page_id=${pageId} row=${rowNum}`, 'list takes for this page with `gbrain takes <slug>` to see valid row numbers');
+    if (!existing) throw new ModusBrainError('TAKE_ROW_NOT_FOUND', `take not found at page_id=${pageId} row=${rowNum}`, 'list takes for this page with `modusbrain takes <slug>` to see valid row numbers');
     if ((existing as { resolved_at?: unknown }).resolved_at) {
-      throw new GBrainError('TAKE_ALREADY_RESOLVED', `take ${pageId}#${rowNum} already resolved`, 'resolution is immutable; add a new take to record a new outcome');
+      throw new ModusBrainError('TAKE_ALREADY_RESOLVED', `take ${pageId}#${rowNum} already resolved`, 'resolution is immutable; add a new take to record a new outcome');
     }
     // v0.30.0: derive (quality, outcome) tuple. quality wins when both set.
     // Schema CHECK enforces consistency as a defense-in-depth backstop.
@@ -5031,7 +5031,7 @@ export class PostgresEngine implements BrainEngine {
     // not 0. Semantically an empty brain has no coverage problem to penalize
     // — there's nothing to embed, nothing to link, nothing to orphan. The
     // pre-fix "empty = 0" caused fresh-init brains to score as critically
-    // unhealthy on `gbrain doctor`, which was a structural surprise to users
+    // unhealthy on `modusbrain doctor`, which was a structural surprise to users
     // who'd just successfully run init. PGLite path has the same fix.
     const embedCoverageScore = pageCount === 0 ? 35 : Math.round(embedCoverage * 35);
     const linkDensityScore = pageCount === 0 ? 25 : Math.round(linkDensity * 25);
@@ -5601,7 +5601,7 @@ export class PostgresEngine implements BrainEngine {
     const since = filter?.since ?? new Date(0);
     const tool = filter?.tool ?? null;
     // id DESC tiebreaker so same-millisecond inserts return deterministically
-    // — without this, `gbrain eval export --since` could dupe or miss rows
+    // — without this, `modusbrain eval export --since` could dupe or miss rows
     // across non-overlapping windows.
     const rows = tool
       ? await sql`

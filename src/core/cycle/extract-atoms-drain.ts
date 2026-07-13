@@ -101,7 +101,7 @@ export async function runExtractAtomsDrain(
 
 // ─── Shared wiring helper (v0.42.x #1685 DECISION 5A) ──────────────────────
 //
-// ONE drain path, three callers: `gbrain dream --phase extract_atoms --drain`
+// ONE drain path, three callers: `modusbrain dream --phase extract_atoms --drain`
 // (dream.ts), the `extract-atoms-drain` Minion handler (jobs.ts), and the
 // autopilot auto-drain submission (which routes through the handler). Before
 // this helper the lock/batch/count wiring lived inline in dream.ts:482; a second
@@ -120,8 +120,8 @@ export async function runExtractAtomsDrain(
 export interface DrainForSourceOpts {
   /**
    * The RESOLVED source id, or `undefined` for the legacy unscoped cycle.
-   * `undefined` → `cycleLockIdFor(undefined)` = the bare `gbrain-cycle` lock the
-   * unscoped routine cycle holds; a real id → `gbrain-cycle:<id>`. Either way the
+   * `undefined` → `cycleLockIdFor(undefined)` = the bare `modusbrain-cycle` lock the
+   * unscoped routine cycle holds; a real id → `modusbrain-cycle:<id>`. Either way the
    * drain and the routine cycle for THIS source genuinely contend (Codex #9).
    * The extraction/backlog source is `sourceId ?? 'default'`.
    */

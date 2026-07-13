@@ -16,7 +16,7 @@ import { writeReceipt } from '../src/core/cross-modal-eval/receipt-write.ts';
 import { withEnv } from './helpers/with-env.ts';
 
 function makeTempDir(): string {
-  return mkdtempSync(join(tmpdir(), 'gbrain-cme-cli-'));
+  return mkdtempSync(join(tmpdir(), 'modusbrain-cme-cli-'));
 }
 
 describe('cross-modal-eval CLI helpers', () => {
@@ -178,15 +178,15 @@ describe('cross-modal-eval CLI helpers', () => {
     }
   });
 
-  test('GBRAIN_HOME isolates receipts under <home>/.gbrain/eval-receipts', async () => {
+  test('MODUSBRAIN_HOME isolates receipts under <home>/.modusbrain/eval-receipts', async () => {
     const dir = makeTempDir();
     try {
-      await withEnv({ GBRAIN_HOME: dir }, async () => {
-        const { gbrainPath } = await import('../src/core/config.ts');
-        const path = gbrainPath('eval-receipts');
+      await withEnv({ MODUSBRAIN_HOME: dir }, async () => {
+        const { modusbrainPath } = await import('../src/core/config.ts');
+        const path = modusbrainPath('eval-receipts');
         expect(path.startsWith(dir)).toBe(true);
         expect(path.endsWith('eval-receipts')).toBe(true);
-        expect(path.includes('.gbrain')).toBe(true);
+        expect(path.includes('.modusbrain')).toBe(true);
       });
     } finally {
       rmSync(dir, { recursive: true, force: true });

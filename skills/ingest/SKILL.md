@@ -32,7 +32,7 @@ Ingest meetings, articles, media, documents, and conversations into the brain.
 
 - Every fact written to a brain page carries an inline `[Source: ...]` citation with date and provenance.
 - Every entity mention creates a back-link from the entity's page to the page mentioning them (Iron Law).
-- Raw sources are preserved for provenance via `gbrain files upload-raw` with automatic size routing.
+- Raw sources are preserved for provenance via `modusbrain files upload-raw` with automatic size routing.
 - State sections are rewritten with current best understanding, never appended to.
 - Entity detection fires on every inbound message; notable entities get pages or updates.
 
@@ -59,11 +59,11 @@ Every fact written to a brain page must carry an inline `[Source: ...]` citation
 
 1. **Parse the source.** Extract people, companies, dates, and events from the input.
 2. **For each entity mentioned:**
-   - Read the entity's page from gbrain to check if it exists
+   - Read the entity's page from modusbrain to check if it exists
    - If exists: update compiled_truth (rewrite State section with new info, don't append)
-   - If new: check notability gate, then store the page in gbrain with the appropriate type and slug
-3. **Append to timeline.** Add a timeline entry in gbrain for each event, with date, summary, and source citation.
-4. **Create cross-reference links.** Link entities in gbrain for every entity pair mentioned together, using the appropriate relationship type.
+   - If new: check notability gate, then store the page in modusbrain with the appropriate type and slug
+3. **Append to timeline.** Add a timeline entry in modusbrain for each event, with date, summary, and source citation.
+4. **Create cross-reference links.** Link entities in modusbrain for every entity pair mentioned together, using the appropriate relationship type.
 5. **Back-link all entities.** Update EVERY mentioned entity's page with a back-link to this page (Iron Law).
 6. **Timeline merge.** The same event appears on ALL mentioned entities' timelines. If Alice met Bob at Acme Corp, the event goes on Alice's page, Bob's page, and Acme Corp's page.
 
@@ -77,15 +77,15 @@ the signal detection loop that makes the brain compound over time.
 1. **Scan the message** for entity mentions: people, companies, concepts, original
    thinking. Fire on every message (no exceptions unless purely operational).
 2. **For each entity detected:**
-   - `gbrain search "name"` -- does a page already exist?
-   - **If yes:** load context with `gbrain get <slug>`. Use the compiled truth to
+   - `modusbrain search "name"` -- does a page already exist?
+   - **If yes:** load context with `modusbrain get <slug>`. Use the compiled truth to
      inform your response. Update the page if the message contains new information.
    - **If no:** assess notability (see `skills/_brain-filing-rules.md`). If the entity
-     is worth tracking, create a new page with `gbrain put <type/slug>` and populate
+     is worth tracking, create a new page with `modusbrain put <type/slug>` and populate
      with what you know.
-3. **After creating or updating pages:** sync to gbrain:
+3. **After creating or updating pages:** sync to modusbrain:
    ```bash
-   gbrain sync --no-pull --no-embed
+   modusbrain sync --no-pull --no-embed
    ```
 4. **Don't block the conversation.** Entity detection and enrichment should happen
    alongside the response, not before it. The user shouldn't wait for brain writes
@@ -220,9 +220,9 @@ if the post is primarily about a person/company.
 
 Every ingested item must have its raw source preserved for provenance.
 
-**Use `gbrain files upload-raw` for automatic size routing:**
+**Use `modusbrain files upload-raw` for automatic size routing:**
 ```bash
-gbrain files upload-raw <file> --page <page-slug> --type <type>
+modusbrain files upload-raw <file> --page <page-slug> --type <type>
 ```
 
 - **< 100 MB text/PDF**: stays in git (brain repo `.raw/` sidecar directories)
@@ -243,10 +243,10 @@ type: transcript
 ```
 
 **Accessing stored files:**
-- `gbrain files signed-url <storage-path>` -- generate 1-hour signed URL for viewing/sharing
-- `gbrain files restore <dir>` -- download back to local from cloud storage
+- `modusbrain files signed-url <storage-path>` -- generate 1-hour signed URL for viewing/sharing
+- `modusbrain files restore <dir>` -- download back to local from cloud storage
 
-Use `put_raw_data` in gbrain to store raw API responses and metadata (JSON, not binary).
+Use `put_raw_data` in modusbrain to store raw API responses and metadata (JSON, not binary).
 
 ## Test Before Bulk
 
@@ -301,11 +301,11 @@ Raw source: [preserved at path / uploaded to cloud]
 
 ## Tools Used
 
-- Read a page from gbrain (get_page)
-- Store/update a page in gbrain (put_page)
-- Add a timeline entry in gbrain (add_timeline_entry)
-- Link entities in gbrain (add_link)
+- Read a page from modusbrain (get_page)
+- Store/update a page in modusbrain (put_page)
+- Add a timeline entry in modusbrain (add_timeline_entry)
+- Link entities in modusbrain (add_link)
 - List tags for a page (get_tags)
-- Tag a page in gbrain (add_tag)
-- Store raw data in gbrain (put_raw_data)
-- Check backlinks in gbrain (get_backlinks)
+- Tag a page in modusbrain (add_tag)
+- Store raw data in modusbrain (put_raw_data)
+- Check backlinks in modusbrain (get_backlinks)

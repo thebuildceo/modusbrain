@@ -1,6 +1,6 @@
 # Post-install hint
 
-When `gbrain integrations install agent-voice --target <repo>` completes, print this to stdout (or to the install agent's conversation surface) so the operator knows what to do next.
+When `modusbrain integrations install agent-voice --target <repo>` completes, print this to stdout (or to the install agent's conversation surface) so the operator knows what to do next.
 
 ---
 
@@ -73,7 +73,7 @@ Or the full openclaw-wrapped flow (requires `OPENCLAW_BIN`, `ANTHROPIC_API_KEY`)
 
 ```bash
 export AGENT_VOICE_FULL_E2E=1
-gbrain claw-test --scenario voice-agent-install --live --agent openclaw
+modusbrain claw-test --scenario voice-agent-install --live --agent openclaw
 # → ~$1-2/run; friction-discovery test, NOT a ship gate
 ```
 
@@ -89,10 +89,10 @@ Synthetic canonical baselines are committed under `tests/evals/baseline-runs/can
 
 ### 8. Update later
 
-When gbrain ships a new agent-voice reference, refresh your local copy:
+When modusbrain ships a new agent-voice reference, refresh your local copy:
 
 ```bash
-gbrain integrations install agent-voice --target <target-repo> --refresh
+modusbrain integrations install agent-voice --target <target-repo> --refresh
 ```
 
-The refresh classifies each file (identical / stale / locally-modified / source-deleted / host-deleted) and lets you decide per-file. See `<target>/services/voice-agent/code/install/refresh-algorithm.md` (copied from gbrain) for the contract.
+The refresh classifies each file (identical / stale / locally-modified / source-deleted / host-deleted) and lets you decide per-file. See `<target>/services/voice-agent/code/install/refresh-algorithm.md` (copied from modusbrain) for the contract.

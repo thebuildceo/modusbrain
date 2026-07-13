@@ -4,7 +4,7 @@
  * Because the other pricing tables are DERIVED from CANONICAL_PRICING (not
  * hand-copied), cross-table price drift — the kind that left Opus 4.7 at
  * $15/$75 in takes-quality-eval while anthropic-pricing.ts had $5/$25
- * (gbrain#1819) — is structurally impossible. The "drift guard" below is a
+ * (modusbrain#1819) — is structurally impossible. The "drift guard" below is a
  * regression trip-wire: it asserts each derived view still equals canonical, so
  * if anyone later re-hardcodes a view back into a duplicate, CI catches it. The
  * cross-modal panel check is genuinely load-bearing — it asserts canonical
@@ -35,7 +35,7 @@ describe('CANONICAL_PRICING — table integrity', () => {
     }
   });
 
-  test('Opus 4.8 present at $5/$25 (closes gbrain#1819)', () => {
+  test('Opus 4.8 present at $5/$25 (closes modusbrain#1819)', () => {
     expect(CANONICAL_PRICING['anthropic:claude-opus-4-8']).toEqual({ input: 5.0, output: 25.0 });
   });
 

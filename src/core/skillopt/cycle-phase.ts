@@ -5,7 +5,7 @@
  * `last_run_at` (>7d by default; configurable). Per-skill cap $0.50;
  * brain-wide cap $2.00 (both configurable). Bundled-skill safety
  * (D16): bundled skills never auto-mutate — proposed.md is written
- * to `~/.gbrain/skillopt-proposed-bundled/<skill>.md` for review.
+ * to `~/.modusbrain/skillopt-proposed-bundled/<skill>.md` for review.
  *
  * Per-skill last-run state lives in `config` table keyed
  * `cycle.skillopt.last_run.<skill>` so the cycle is cheap to re-enter
@@ -13,7 +13,7 @@
  *
  * Each per-skill invocation runs with epochs=1 (incremental nightly
  * improvement, not full optimization). Users who want a full multi-epoch
- * run invoke `gbrain skillopt <name> --epochs N` directly.
+ * run invoke `modusbrain skillopt <name> --epochs N` directly.
  */
 
 import * as fs from 'node:fs';
@@ -67,7 +67,7 @@ export async function runPhaseSkillopt(opts: SkilloptPhaseOpts): Promise<Skillop
       phase: 'skillopt',
       status: 'skipped',
       duration_ms: Date.now() - start,
-      summary: 'feature flag off (gbrain config set cycle.skillopt.enabled true to enable)',
+      summary: 'feature flag off (modusbrain config set cycle.skillopt.enabled true to enable)',
       details: { reason: 'feature_flag_off' },
     };
   }

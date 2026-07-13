@@ -10,7 +10,7 @@
  *   - --all (skillSlug: null) installs every bundled skill
  *   - dry-run reports outcomes but writes nothing
  *   - IRON-RULE regressions: no managed block, no lockfile, no
- *     cumulative-slugs receipt, no .gbrain-skillpack.lock file
+ *     cumulative-slugs receipt, no .modusbrain-skillpack.lock file
  */
 
 import { describe, expect, it, afterEach } from 'bun:test';
@@ -30,12 +30,12 @@ afterEach(() => {
   }
 });
 
-interface GbrainFixture {
-  gbrainRoot: string;
+interface ModusbrainFixture {
+  modusbrainRoot: string;
 }
 
-function scratchGbrain(opts: { withPairedSource?: boolean } = {}): GbrainFixture {
-  const root = mkdtempSync(join(tmpdir(), 'sp-scaffold-gbrain-'));
+function scratchModusbrain(opts: { withPairedSource?: boolean } = {}): ModusbrainFixture {
+  const root = mkdtempSync(join(tmpdir(), 'sp-scaffold-modusbrain-'));
   created.push(root);
   mkdirSync(join(root, 'src', 'cli.ts').replace('cli.ts', ''), { recursive: true });
   writeFileSync(join(root, 'src', 'cli.ts'), '// stub');
@@ -70,7 +70,7 @@ function scratchGbrain(opts: { withPairedSource?: boolean } = {}): GbrainFixture
     join(root, 'openclaw.plugin.json'),
     JSON.stringify(
       {
-        name: 'gbrain-test',
+        name: 'modusbrain-test',
         version: '0.33.0-test',
         skills: ['skills/book-mirror', 'skills/query'],
         shared_deps: ['skills/conventions', 'skills/_brain-filing-rules.md'],
@@ -79,7 +79,7 @@ function scratchGbrain(opts: { withPairedSource?: boolean } = {}): GbrainFixture
       2,
     ),
   );
-  return { gbrainRoot: root };
+  return { modusbrainRoot: root };
 }
 
 function scratchWorkspace(): string {
@@ -90,11 +90,11 @@ function scratchWorkspace(): string {
 
 describe('runScaffold — happy path', () => {
   it('copies a single skill plus shared deps to the workspace', () => {
-    const { gbrainRoot } = scratchGbrain();
+    const { modusbrainRoot } = scratchModusbrain();
     const ws = scratchWorkspace();
 
     const result = runScaffold({
-      gbrainRoot,
+      modusbrainRoot,
       targetWorkspace: ws,
       skillSlug: 'book-mirror',
     });
@@ -107,11 +107,11 @@ describe('runScaffold — happy path', () => {
   });
 
   it('copies paired source files declared in frontmatter `sources:`', () => {
-    const { gbrainRoot } = scratchGbrain({ withPairedSource: true });
+    const { modusbrainRoot } = scratchModusbrain({ withPairedSource: true });
     const ws = scratchWorkspace();
 
     const result = runScaffold({
-      gbrainRoot,
+      modusbrainRoot,
       targetWorkspace: ws,
       skillSlug: 'book-mirror',
     });
@@ -124,10 +124,10 @@ describe('runScaffold — happy path', () => {
   });
 
   it('--all (skillSlug: null) installs every bundled skill', () => {
-    const { gbrainRoot } = scratchGbrain();
+    const { modusbrainRoot } = scratchModusbrain();
     const ws = scratchWorkspace();
 
-    runScaffold({ gbrainRoot, targetWorkspace: ws, skillSlug: null });
+    runScaffold({ modusbrainRoot, targetWorkspace: ws, skillSlug: null });
 
     expect(existsSync(join(ws, 'skills', 'book-mirror', 'SKILL.md'))).toBe(true);
     expect(existsSync(join(ws, 'skills', 'query', 'SKILL.md'))).toBe(true);
@@ -136,11 +136,11 @@ describe('runScaffold — happy path', () => {
 
 describe('runScaffold — refuses to overwrite (user owns the files)', () => {
   it('re-running is idempotent (every file skipped_existing)', () => {
-    const { gbrainRoot } = scratchGbrain();
+    const { modusbrainRoot } = scratchModusbrain();
     const ws = scratchWorkspace();
 
-    runScaffold({ gbrainRoot, targetWorkspace: ws, skillSlug: 'book-mirror' });
-    const second = runScaffold({ gbrainRoot, targetWorkspace: ws, skillSlug: 'book-mirror' });
+    runScaffold({ modusbrainRoot, targetWorkspace: ws, skillSlug: 'book-mirror' });
+    const second = runScaffold({ modusbrainRoot, targetWorkspace: ws, skillSlug: 'book-mirror' });
 
     expect(second.summary.wroteNew).toBe(0);
     expect(second.summary.skippedExisting).toBeGreaterThan(0);
@@ -148,24 +148,24 @@ describe('runScaffold — refuses to overwrite (user owns the files)', () => {
   });
 
   it('preserves local edits to a scaffolded file', () => {
-    const { gbrainRoot } = scratchGbrain();
+    const { modusbrainRoot } = scratchModusbrain();
     const ws = scratchWorkspace();
 
-    runScaffold({ gbrainRoot, targetWorkspace: ws, skillSlug: 'book-mirror' });
+    runScaffold({ modusbrainRoot, targetWorkspace: ws, skillSlug: 'book-mirror' });
     writeFileSync(join(ws, 'skills', 'book-mirror', 'SKILL.md'), 'MY EDITS');
 
-    runScaffold({ gbrainRoot, targetWorkspace: ws, skillSlug: 'book-mirror' });
+    runScaffold({ modusbrainRoot, targetWorkspace: ws, skillSlug: 'book-mirror' });
     expect(readFileSync(join(ws, 'skills', 'book-mirror', 'SKILL.md'), 'utf-8')).toBe('MY EDITS');
   });
 
   it('does not overwrite existing shared-dep files', () => {
-    const { gbrainRoot } = scratchGbrain();
+    const { modusbrainRoot } = scratchModusbrain();
     const ws = scratchWorkspace();
 
     mkdirSync(join(ws, 'skills', 'conventions'), { recursive: true });
     writeFileSync(join(ws, 'skills', 'conventions', 'quality.md'), 'USER OWNS THIS');
 
-    runScaffold({ gbrainRoot, targetWorkspace: ws, skillSlug: 'book-mirror' });
+    runScaffold({ modusbrainRoot, targetWorkspace: ws, skillSlug: 'book-mirror' });
     expect(readFileSync(join(ws, 'skills', 'conventions', 'quality.md'), 'utf-8')).toBe(
       'USER OWNS THIS',
     );
@@ -174,7 +174,7 @@ describe('runScaffold — refuses to overwrite (user owns the files)', () => {
 
 describe('runScaffold — partial-state policy (F-CDX-6)', () => {
   it('skill dir exists but paired source missing → copies the paired source only', () => {
-    const { gbrainRoot } = scratchGbrain({ withPairedSource: true });
+    const { modusbrainRoot } = scratchModusbrain({ withPairedSource: true });
     const ws = scratchWorkspace();
 
     // First, scaffold without the paired source declared (simulating "skill
@@ -184,10 +184,10 @@ describe('runScaffold — partial-state policy (F-CDX-6)', () => {
     writeFileSync(join(ws, 'skills', 'book-mirror', 'SKILL.md'), '# pre-existing skill content\n');
     writeFileSync(join(ws, 'skills', 'book-mirror', 'routing-eval.jsonl'), '{}\n');
 
-    // Now scaffold (gbrain bundle has the paired source declared); the
+    // Now scaffold (modusbrain bundle has the paired source declared); the
     // existing skill files are preserved, the missing paired source lands.
     const result = runScaffold({
-      gbrainRoot,
+      modusbrainRoot,
       targetWorkspace: ws,
       skillSlug: 'book-mirror',
     });
@@ -202,11 +202,11 @@ describe('runScaffold — partial-state policy (F-CDX-6)', () => {
 
 describe('runScaffold — dry-run', () => {
   it('reports outcomes without writing anything', () => {
-    const { gbrainRoot } = scratchGbrain();
+    const { modusbrainRoot } = scratchModusbrain();
     const ws = scratchWorkspace();
 
     const result = runScaffold({
-      gbrainRoot,
+      modusbrainRoot,
       targetWorkspace: ws,
       skillSlug: 'book-mirror',
       dryRun: true,
@@ -220,11 +220,11 @@ describe('runScaffold — dry-run', () => {
 
 describe('runScaffold — error paths', () => {
   it('unknown skill slug → ScaffoldError(unknown_skill)', () => {
-    const { gbrainRoot } = scratchGbrain();
+    const { modusbrainRoot } = scratchModusbrain();
     const ws = scratchWorkspace();
 
     try {
-      runScaffold({ gbrainRoot, targetWorkspace: ws, skillSlug: 'does-not-exist' });
+      runScaffold({ modusbrainRoot, targetWorkspace: ws, skillSlug: 'does-not-exist' });
       throw new Error('expected throw');
     } catch (err) {
       expect(err).toBeInstanceOf(ScaffoldError);
@@ -235,39 +235,39 @@ describe('runScaffold — error paths', () => {
 
 describe('runScaffold — IRON-RULE regressions (R1, R2)', () => {
   it('R1: never writes managed-block markers to RESOLVER.md/AGENTS.md', () => {
-    const { gbrainRoot } = scratchGbrain();
+    const { modusbrainRoot } = scratchModusbrain();
     const ws = scratchWorkspace();
 
     // Pre-create a RESOLVER.md so we can check it survives untouched.
     writeFileSync(join(ws, 'RESOLVER.md'), '# my routing\n');
 
-    runScaffold({ gbrainRoot, targetWorkspace: ws, skillSlug: 'book-mirror' });
+    runScaffold({ modusbrainRoot, targetWorkspace: ws, skillSlug: 'book-mirror' });
 
     const resolver = readFileSync(join(ws, 'RESOLVER.md'), 'utf-8');
     expect(resolver).toBe('# my routing\n');
-    expect(resolver).not.toContain('gbrain:skillpack:begin');
-    expect(resolver).not.toContain('gbrain:skillpack:end');
-    expect(resolver).not.toContain('gbrain:skillpack:manifest');
+    expect(resolver).not.toContain('modusbrain:skillpack:begin');
+    expect(resolver).not.toContain('modusbrain:skillpack:end');
+    expect(resolver).not.toContain('modusbrain:skillpack:manifest');
   });
 
-  it('R2: never writes a .gbrain-skillpack.lock file', () => {
-    const { gbrainRoot } = scratchGbrain();
+  it('R2: never writes a .modusbrain-skillpack.lock file', () => {
+    const { modusbrainRoot } = scratchModusbrain();
     const ws = scratchWorkspace();
 
-    runScaffold({ gbrainRoot, targetWorkspace: ws, skillSlug: 'book-mirror' });
+    runScaffold({ modusbrainRoot, targetWorkspace: ws, skillSlug: 'book-mirror' });
 
-    expect(existsSync(join(ws, '.gbrain-skillpack.lock'))).toBe(false);
+    expect(existsSync(join(ws, '.modusbrain-skillpack.lock'))).toBe(false);
     // Lock should also not exist anywhere in the workspace tree.
-    expect(readdirSync(ws)).not.toContain('.gbrain-skillpack.lock');
+    expect(readdirSync(ws)).not.toContain('.modusbrain-skillpack.lock');
   });
 
   it('R2: never writes a cumulative-slugs receipt anywhere in workspace', () => {
-    const { gbrainRoot } = scratchGbrain();
+    const { modusbrainRoot } = scratchModusbrain();
     const ws = scratchWorkspace();
 
     writeFileSync(join(ws, 'AGENTS.md'), 'existing agents content\n');
 
-    runScaffold({ gbrainRoot, targetWorkspace: ws, skillSlug: 'book-mirror' });
+    runScaffold({ modusbrainRoot, targetWorkspace: ws, skillSlug: 'book-mirror' });
 
     expect(readFileSync(join(ws, 'AGENTS.md'), 'utf-8')).not.toContain('cumulative-slugs');
   });

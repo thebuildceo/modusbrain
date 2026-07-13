@@ -1,5 +1,5 @@
 /**
- * Structural tests for `gbrain dream` argv parsing (v0.21).
+ * Structural tests for `modusbrain dream` argv parsing (v0.21).
  *
  * Verifies the help text + parser source contains the new flags
  * (--input, --date, --from, --to) and that conflict detection is wired.
@@ -102,7 +102,7 @@ describe('dream CLI flag wiring', () => {
 
     test('declares archived-source guard', () => {
       expect(dreamSrc).toMatch(/source.*is archived/);
-      expect(dreamSrc).toContain('gbrain sources restore');
+      expect(dreamSrc).toContain('modusbrain sources restore');
     });
   });
 

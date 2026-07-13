@@ -5,7 +5,7 @@ import { tmpdir } from 'os';
 import { acquireLock, releaseLock, type LockHandle } from '../src/core/pglite-lock';
 import { withEnv } from './helpers/with-env.ts';
 
-const TEST_DIR = join(tmpdir(), 'gbrain-lock-test-' + process.pid);
+const TEST_DIR = join(tmpdir(), 'modusbrain-lock-test-' + process.pid);
 
 describe('pglite-lock', () => {
   beforeEach(() => {
@@ -21,10 +21,10 @@ describe('pglite-lock', () => {
   test('acquires and releases lock', async () => {
     const lock = await acquireLock(TEST_DIR);
     expect(lock.acquired).toBe(true);
-    expect(existsSync(join(TEST_DIR, '.gbrain-lock'))).toBe(true);
+    expect(existsSync(join(TEST_DIR, '.modusbrain-lock'))).toBe(true);
 
     await releaseLock(lock);
-    expect(existsSync(join(TEST_DIR, '.gbrain-lock'))).toBe(false);
+    expect(existsSync(join(TEST_DIR, '.modusbrain-lock'))).toBe(false);
   });
 
   test('creates missing data directory before acquiring lock', async () => {
@@ -33,10 +33,10 @@ describe('pglite-lock', () => {
     const lock = await acquireLock(missingDataDir);
     expect(lock.acquired).toBe(true);
     expect(existsSync(missingDataDir)).toBe(true);
-    expect(existsSync(join(missingDataDir, '.gbrain-lock'))).toBe(true);
+    expect(existsSync(join(missingDataDir, '.modusbrain-lock'))).toBe(true);
 
     await releaseLock(lock);
-    expect(existsSync(join(missingDataDir, '.gbrain-lock'))).toBe(false);
+    expect(existsSync(join(missingDataDir, '.modusbrain-lock'))).toBe(false);
   });
 
   test('prevents concurrent lock acquisition', async () => {
@@ -51,7 +51,7 @@ describe('pglite-lock', () => {
 
   test('detects and cleans stale lock from dead process', async () => {
     // Simulate a stale lock from a dead process
-    const lockDir = join(TEST_DIR, '.gbrain-lock');
+    const lockDir = join(TEST_DIR, '.modusbrain-lock');
     mkdirSync(lockDir);
     writeFileSync(join(lockDir, 'lock'), JSON.stringify({
       pid: 999999999, // Non-existent PID
@@ -77,7 +77,7 @@ describe('pglite-lock', () => {
 
   test('lock file contains PID and command', async () => {
     const lock = await acquireLock(TEST_DIR);
-    const lockData = JSON.parse(readFileSync(join(TEST_DIR, '.gbrain-lock', 'lock'), 'utf-8'));
+    const lockData = JSON.parse(readFileSync(join(TEST_DIR, '.modusbrain-lock', 'lock'), 'utf-8'));
 
     expect(lockData.pid).toBe(process.pid);
     expect(lockData.acquired_at).toBeDefined();
@@ -92,7 +92,7 @@ describe('pglite-lock', () => {
 
     // Simulate DB already closed
     await releaseLock(lock);
-    expect(existsSync(join(TEST_DIR, '.gbrain-lock'))).toBe(false);
+    expect(existsSync(join(TEST_DIR, '.modusbrain-lock'))).toBe(false);
 
     // Second acquisition should work
     const lock2 = await acquireLock(TEST_DIR);
@@ -111,7 +111,7 @@ describe('pglite-lock #2058 heartbeat + steal-grace', () => {
   });
 
   function writeHolder(fields: { pid: number; acquiredAgoMs: number; refreshedAgoMs: number }) {
-    const lockDir = join(TEST_DIR, '.gbrain-lock');
+    const lockDir = join(TEST_DIR, '.modusbrain-lock');
     mkdirSync(lockDir, { recursive: true });
     const now = Date.now();
     writeFileSync(join(lockDir, 'lock'), JSON.stringify({
@@ -130,7 +130,7 @@ describe('pglite-lock #2058 heartbeat + steal-grace', () => {
 
     await expect(acquireLock(TEST_DIR, { timeoutMs: 1200 })).rejects.toThrow(/Timed out/);
     // Holder's lock still present (was never stolen).
-    expect(existsSync(join(TEST_DIR, '.gbrain-lock'))).toBe(true);
+    expect(existsSync(join(TEST_DIR, '.modusbrain-lock'))).toBe(true);
   });
 
   test('a LIVE PID whose heartbeat went stale past the grace window IS reaped', async () => {
@@ -143,9 +143,9 @@ describe('pglite-lock #2058 heartbeat + steal-grace', () => {
     await releaseLock(lock);
   });
 
-  test('GBRAIN_PGLITE_LOCK_STEAL_GRACE_SECONDS tunes the grace window', async () => {
+  test('MODUSBRAIN_PGLITE_LOCK_STEAL_GRACE_SECONDS tunes the grace window', async () => {
     // withEnv keeps the process-global mutation isolated across shard files.
-    await withEnv({ GBRAIN_PGLITE_LOCK_STEAL_GRACE_SECONDS: '5' }, async () => {
+    await withEnv({ MODUSBRAIN_PGLITE_LOCK_STEAL_GRACE_SECONDS: '5' }, async () => {
       // Refreshed 30s ago — fresh under the 600s default, STALE under 5s.
       writeHolder({ pid: process.pid, acquiredAgoMs: 60_000, refreshedAgoMs: 30_000 });
       const lock = await acquireLock(TEST_DIR, { timeoutMs: 2000 });
@@ -165,31 +165,31 @@ describe('pglite-lock #2058 heartbeat + steal-grace', () => {
     if (lock.heartbeat) clearInterval(lock.heartbeat); // stop our heartbeat for a deterministic test
 
     // Overwrite the lock file as if process B re-acquired it.
-    const lockFile = join(TEST_DIR, '.gbrain-lock', 'lock');
+    const lockFile = join(TEST_DIR, '.modusbrain-lock', 'lock');
     const bNow = Date.now() + 1;
     writeFileSync(lockFile, JSON.stringify({ pid: 999999, acquired_at: bNow, refreshed_at: bNow, command: 'process B' }));
 
     await releaseLock(lock); // our (stale) handle
 
     // B's lock survives — we did not clobber it.
-    expect(existsSync(join(TEST_DIR, '.gbrain-lock'))).toBe(true);
+    expect(existsSync(join(TEST_DIR, '.modusbrain-lock'))).toBe(true);
     const after = JSON.parse(readFileSync(lockFile, 'utf-8'));
     expect(after.pid).toBe(999999);
 
     // Cleanup for afterEach.
-    rmSync(join(TEST_DIR, '.gbrain-lock'), { recursive: true, force: true });
+    rmSync(join(TEST_DIR, '.modusbrain-lock'), { recursive: true, force: true });
   });
 
   test('acquire starts a heartbeat and seeds refreshed_at; release clears it', async () => {
     const lock: LockHandle = await acquireLock(TEST_DIR);
     expect(lock.acquired).toBe(true);
     expect(lock.heartbeat).toBeDefined();
-    const data = JSON.parse(readFileSync(join(TEST_DIR, '.gbrain-lock', 'lock'), 'utf-8'));
+    const data = JSON.parse(readFileSync(join(TEST_DIR, '.modusbrain-lock', 'lock'), 'utf-8'));
     expect(data.refreshed_at).toBeDefined();
     expect(typeof data.refreshed_at).toBe('number');
 
     await releaseLock(lock);
     expect(lock.heartbeat).toBeUndefined();
-    expect(existsSync(join(TEST_DIR, '.gbrain-lock'))).toBe(false);
+    expect(existsSync(join(TEST_DIR, '.modusbrain-lock'))).toBe(false);
   });
 });

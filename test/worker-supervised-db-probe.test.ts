@@ -1,6 +1,6 @@
 /**
  * issue #1801 fix #2 — the worker's DB-liveness probe runs EVEN under a
- * supervisor (GBRAIN_SUPERVISED=1), so a supervised worker whose own pool dies
+ * supervisor (MODUSBRAIN_SUPERVISED=1), so a supervised worker whose own pool dies
  * self-exits (db_dead → CLI process.exit(1) → supervisor respawns a fresh pool)
  * instead of sitting alive-but-wedged forever. Stall detection STAYS gated to
  * non-supervised (the supervisor's progress watchdog owns forward-progress).
@@ -51,7 +51,7 @@ async function runUntilUnhealthy(supervised: boolean): Promise<UnhealthyReason |
   const restore = breakLivenessProbe(engine);
   try {
     return await withEnv(
-      supervised ? { GBRAIN_SUPERVISED: '1' } : { GBRAIN_SUPERVISED: undefined },
+      supervised ? { MODUSBRAIN_SUPERVISED: '1' } : { MODUSBRAIN_SUPERVISED: undefined },
       async () => {
         const worker = new MinionWorker(engine, {
           queue: 'default',

@@ -13,18 +13,18 @@ const opts = {
 
 describe('v0.29.1 migration', () => {
   let tmp: string;
-  let oldGbrainHome: string | undefined;
+  let oldModusbrainHome: string | undefined;
 
   beforeEach(async () => {
-    oldGbrainHome = process.env.GBRAIN_HOME;
-    tmp = mkdtempSync(join(tmpdir(), 'gbrain-v0291-'));
-    process.env.GBRAIN_HOME = tmp;
+    oldModusbrainHome = process.env.MODUSBRAIN_HOME;
+    tmp = mkdtempSync(join(tmpdir(), 'modusbrain-v0291-'));
+    process.env.MODUSBRAIN_HOME = tmp;
 
-    const gbrainHome = join(tmp, '.gbrain');
+    const modusbrainHome = join(tmp, '.modusbrain');
     const dbPath = join(tmp, 'brain-db');
-    mkdirSync(gbrainHome, { recursive: true });
+    mkdirSync(modusbrainHome, { recursive: true });
     writeFileSync(
-      join(gbrainHome, 'config.json'),
+      join(modusbrainHome, 'config.json'),
       JSON.stringify({ engine: 'pglite', database_path: dbPath }, null, 2) + '\n',
     );
 
@@ -38,8 +38,8 @@ describe('v0.29.1 migration', () => {
   });
 
   afterEach(() => {
-    if (oldGbrainHome === undefined) delete process.env.GBRAIN_HOME;
-    else process.env.GBRAIN_HOME = oldGbrainHome;
+    if (oldModusbrainHome === undefined) delete process.env.MODUSBRAIN_HOME;
+    else process.env.MODUSBRAIN_HOME = oldModusbrainHome;
     rmSync(tmp, { recursive: true, force: true });
   });
 

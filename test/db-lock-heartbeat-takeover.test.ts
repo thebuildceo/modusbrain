@@ -36,7 +36,7 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-  await engine.executeRaw(`DELETE FROM gbrain_cycle_locks WHERE id LIKE 'test-hb-%'`);
+  await engine.executeRaw(`DELETE FROM modusbrain_cycle_locks WHERE id LIKE 'test-hb-%'`);
 });
 
 const LOCAL = hostname();
@@ -49,13 +49,13 @@ const LOCAL = hostname();
 async function seedExpiredLock(id: string, refreshedSecondsAgo: number | null): Promise<void> {
   if (refreshedSecondsAgo === null) {
     await engine.executeRaw(
-      `INSERT INTO gbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at, last_refreshed_at)
+      `INSERT INTO modusbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at, last_refreshed_at)
        VALUES ($1, $2, $3, NOW() - INTERVAL '1 hour', NOW() - INTERVAL '5 minutes', NULL)`,
       [id, process.pid, LOCAL],
     );
   } else {
     await engine.executeRaw(
-      `INSERT INTO gbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at, last_refreshed_at)
+      `INSERT INTO modusbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at, last_refreshed_at)
        VALUES ($1, $2, $3, NOW() - INTERVAL '1 hour', NOW() - INTERVAL '5 minutes', NOW() - ($4 || ' seconds')::interval)`,
       [id, process.pid, LOCAL, String(refreshedSecondsAgo)],
     );
@@ -64,7 +64,7 @@ async function seedExpiredLock(id: string, refreshedSecondsAgo: number | null): 
 
 async function refreshedAge(id: string): Promise<Date | null> {
   const rows = await engine.executeRaw<{ last_refreshed_at: string | null }>(
-    `SELECT last_refreshed_at FROM gbrain_cycle_locks WHERE id = $1`,
+    `SELECT last_refreshed_at FROM modusbrain_cycle_locks WHERE id = $1`,
     [id],
   );
   const v = rows[0]?.last_refreshed_at ?? null;
@@ -83,13 +83,13 @@ describe('resolveStealGraceSeconds', () => {
   });
 
   test('env override wins', async () => {
-    await withEnv({ GBRAIN_LOCK_STEAL_GRACE_SECONDS: '123' }, async () => {
+    await withEnv({ MODUSBRAIN_LOCK_STEAL_GRACE_SECONDS: '123' }, async () => {
       expect(resolveStealGraceSeconds(30)).toBe(123);
     });
   });
 
   test('bad env override falls back to derived', async () => {
-    await withEnv({ GBRAIN_LOCK_STEAL_GRACE_SECONDS: 'nope' }, async () => {
+    await withEnv({ MODUSBRAIN_LOCK_STEAL_GRACE_SECONDS: 'nope' }, async () => {
       expect(resolveStealGraceSeconds(30)).toBe(600);
     });
   });

@@ -66,7 +66,7 @@ describe('checkFederationHealth', () => {
     const check = await checkFederationHealth(engine);
     expect(check.status).toBe('warn');
     expect(check.message).toContain('stale-source');
-    expect(check.message).toContain('gbrain sync trigger --source stale-source');
+    expect(check.message).toContain('modusbrain sync trigger --source stale-source');
   });
 
   test('source with lag > 24h → fail with remediation', async () => {
@@ -76,7 +76,7 @@ describe('checkFederationHealth', () => {
     const check = await checkFederationHealth(engine);
     expect(check.status).toBe('fail');
     expect(check.message).toContain('dead-source');
-    expect(check.message).toContain('gbrain sync trigger');
+    expect(check.message).toContain('modusbrain sync trigger');
   });
 
   test('source with low embed coverage + chunks > 100 → warn', async () => {
@@ -102,7 +102,7 @@ describe('checkFederationHealth', () => {
     expect(check.status).toBe('warn');
     expect(check.message).toContain('uncovered');
     expect(check.message).toContain('embed coverage');
-    expect(check.message).toContain('gbrain jobs submit embed-backfill');
+    expect(check.message).toContain('modusbrain jobs submit embed-backfill');
   });
 
   test('synced + zero pages → ok (vacuous truth, no coverage warn)', async () => {

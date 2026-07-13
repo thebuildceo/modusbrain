@@ -1,17 +1,17 @@
 /**
  * MinionSupervisor — Process manager for the Minion worker.
  *
- * Spawns `gbrain jobs work` as a child process and restarts it on crash
+ * Spawns `modusbrain jobs work` as a child process and restarts it on crash
  * with exponential backoff. Provides health monitoring, PID file locking
  * (atomic via O_CREAT|O_EXCL), and graceful shutdown.
  *
  * ENGINE: Postgres only. PGLite uses an exclusive file lock that blocks
- * any separate worker process, so `gbrain jobs supervisor` cannot work
+ * any separate worker process, so `modusbrain jobs supervisor` cannot work
  * against a PGLite brain — `src/commands/jobs.ts` rejects that combination
  * at the CLI layer. The health-check SQL below assumes Postgres schema.
  *
  * Usage:
- *   gbrain jobs supervisor [--concurrency N] [--queue Q] [--pid-file PATH]
+ *   modusbrain jobs supervisor [--concurrency N] [--queue Q] [--pid-file PATH]
  *                          [--max-crashes N] [--health-interval N]
  *                          [--allow-shell-jobs] [--json]
  *
@@ -70,15 +70,15 @@ export interface SupervisorOpts {
   concurrency: number;
   /** Queue name (passed to child). Default: 'default'. */
   queue: string;
-  /** PID file path. Default: `${HOME}/.gbrain/supervisor.pid` (parent dir auto-created). */
+  /** PID file path. Default: `${HOME}/.modusbrain/supervisor.pid` (parent dir auto-created). */
   pidFile: string;
   /** Max consecutive crashes before giving up. Default: 10. */
   maxCrashes: number;
   /** Health check interval in ms. Default: 60000. */
   healthInterval: number;
-  /** Path to the gbrain CLI executable (MUST be a compiled binary; .ts sources cannot be spawned). */
+  /** Path to the modusbrain CLI executable (MUST be a compiled binary; .ts sources cannot be spawned). */
   cliPath: string;
-  /** Allow shell jobs on child worker. Default: false. When true, sets GBRAIN_ALLOW_SHELL_JOBS=1 on child env. */
+  /** Allow shell jobs on child worker. Default: false. When true, sets MODUSBRAIN_ALLOW_SHELL_JOBS=1 on child env. */
   allowShellJobs: boolean;
   /** JSON mode: emit JSONL events on stderr, reserve stdout for data payloads. Default: false. */
   json: boolean;
@@ -87,7 +87,7 @@ export interface SupervisorOpts {
    *  resolveDefaultMaxRssMb() (issue #1678) instead of a flat default.
    *  Set to 0 to spawn the worker without a watchdog. */
   maxRssMb: number;
-  /** Niceness (issue #1815) the operator requested via `--nice` / `GBRAIN_NICE`,
+  /** Niceness (issue #1815) the operator requested via `--nice` / `MODUSBRAIN_NICE`,
    *  or undefined to inherit. When set, the worker is spawned with `--nice N` so
    *  it re-applies the value (the supervisor itself is reniced by the CLI layer,
    *  before construction). The apply RESULT is computed in jobs.ts and passed in
@@ -136,7 +136,7 @@ export interface SupervisorOpts {
 }
 
 export const DEFAULT_PID_FILE: string = (() => {
-  const envOverride = process.env.GBRAIN_SUPERVISOR_PID_FILE;
+  const envOverride = process.env.MODUSBRAIN_SUPERVISOR_PID_FILE;
   if (envOverride && envOverride.length > 0) return envOverride;
   const home = process.env.HOME ?? '/tmp';
   // #1849: key the default pidfile on the brain id so two DIFFERENT brains
@@ -147,7 +147,7 @@ export const DEFAULT_PID_FILE: string = (() => {
   // singleton authority; this just removes the common-case footgun.
   let brainId = 'default';
   try { brainId = currentBrainId(); } catch { /* fallback 'default' */ }
-  return `${home}/.gbrain/supervisor-${brainId}.pid`;
+  return `${home}/.modusbrain/supervisor-${brainId}.pid`;
 })();
 
 const DEFAULTS: Omit<SupervisorOpts, 'cliPath'> = {
@@ -171,7 +171,7 @@ const DEFAULTS: Omit<SupervisorOpts, 'cliPath'> = {
 };
 
 /**
- * Build the argv the supervisor uses to spawn `gbrain jobs work`. Extracted from
+ * Build the argv the supervisor uses to spawn `modusbrain jobs work`. Extracted from
  * runSuperviseLoop so it's unit-testable (issue #1815, Codex). Appends `--nice N`
  * when the operator requested a niceness, alongside the existing concurrency /
  * queue / max-rss flags. The spawned worker re-applies the niceness to itself;
@@ -201,11 +201,11 @@ const WEDGE_RESTART_GRACE_MS = 35_000;
 /**
  * issue #1994: resolve the hard permanent-give-up ceiling. Default
  * maxCrashes × HARD_STOP_CRASH_MULTIPLIER; operators override (or disable with
- * 0 = never auto-stop) via GBRAIN_SUPERVISOR_HARD_STOP_CRASHES. A negative or
+ * 0 = never auto-stop) via MODUSBRAIN_SUPERVISOR_HARD_STOP_CRASHES. A negative or
  * non-integer override is ignored (falls back to the default).
  */
 export function resolveHardStopMaxCrashes(maxCrashes: number): number {
-  const raw = process.env.GBRAIN_SUPERVISOR_HARD_STOP_CRASHES;
+  const raw = process.env.MODUSBRAIN_SUPERVISOR_HARD_STOP_CRASHES;
   if (raw !== undefined && raw !== '') {
     const n = Number(raw);
     if (Number.isInteger(n) && n >= 0) return n;
@@ -315,8 +315,8 @@ export const ExitCodes = {
  * pidfile path. TTL > refresh-interval × max-failures so we always exit
  * before our lock could lapse and let a second supervisor take over.
  */
-// Exported (issue #2227) so observability surfaces (`gbrain jobs supervisor
-// status`, `gbrain doctor`) compute the lock-freshness steal grace with the
+// Exported (issue #2227) so observability surfaces (`modusbrain jobs supervisor
+// status`, `modusbrain doctor`) compute the lock-freshness steal grace with the
 // SAME TTL the supervisor refreshes against, when detecting a live supervisor
 // via the DB lock instead of the (possibly split-$HOME) pidfile.
 export const SUPERVISOR_LOCK_TTL_MIN = 5;
@@ -333,11 +333,11 @@ const SUPERVISOR_LOCK_REFRESH_MAX_FAILURES = 3; // 3 × 60s = 180s < 5min TTL
  * to different ids and BOTH acquired the "singleton" lock in the one shared
  * locks table. Queue-only keying makes same-DB + same-queue collide correctly,
  * while different physical databases never collide (separate locks tables).
- * Exported so `gbrain doctor` queries the same row to surface the holder +
+ * Exported so `modusbrain doctor` queries the same row to surface the holder +
  * effective --max-rss.
  */
 export function supervisorLockId(queue: string): string {
-  return `gbrain-supervisor:${queue}`;
+  return `modusbrain-supervisor:${queue}`;
 }
 
 /**
@@ -584,7 +584,7 @@ export class MinionSupervisor {
       concurrency: this.opts.concurrency,
       queue: this.opts.queue,
       max_crashes: this.opts.maxCrashes,
-      // #1849: record the EFFECTIVE --max-rss so `gbrain doctor` can surface
+      // #1849: record the EFFECTIVE --max-rss so `modusbrain doctor` can surface
       // the cap a rogue second supervisor would have fought over.
       max_rss_mb: this.opts.maxRssMb,
       // Niceness (issue #1815): record requested + effective so doctor/status can
@@ -741,7 +741,7 @@ export class MinionSupervisor {
    *   'unwritable' — can't write to the PID path (permission / missing parent, exit code 3).
    */
   private acquirePidLock(): 'acquired' | 'held' | 'unwritable' {
-    // Ensure parent directory exists. Idempotent; creates ~/.gbrain on fresh installs.
+    // Ensure parent directory exists. Idempotent; creates ~/.modusbrain on fresh installs.
     try {
       mkdirSync(dirname(this.opts.pidFile), { recursive: true });
     } catch (err: unknown) {
@@ -750,7 +750,7 @@ export class MinionSupervisor {
         console.error(
           `Cannot create PID file directory ${dirname(this.opts.pidFile)}: ${
             err instanceof Error ? err.message : String(err)
-          }. Set GBRAIN_SUPERVISOR_PID_FILE or pass --pid-file to a writable location.`
+          }. Set MODUSBRAIN_SUPERVISOR_PID_FILE or pass --pid-file to a writable location.`
         );
         return 'unwritable';
       }
@@ -815,7 +815,7 @@ export class MinionSupervisor {
       console.error(
         `Cannot write PID file ${this.opts.pidFile}: ${
           err instanceof Error ? err.message : String(err)
-        }. Set GBRAIN_SUPERVISOR_PID_FILE or pass --pid-file to a writable location.`
+        }. Set MODUSBRAIN_SUPERVISOR_PID_FILE or pass --pid-file to a writable location.`
       );
       return 'unwritable';
     }
@@ -831,20 +831,20 @@ export class MinionSupervisor {
   private async runSuperviseLoop(): Promise<void> {
     const workerArgs = [...(this.opts._cliArgsPrefix ?? []), ...buildWorkerArgs(this.opts)];
 
-    // Build child env. Explicit handling for GBRAIN_ALLOW_SHELL_JOBS:
+    // Build child env. Explicit handling for MODUSBRAIN_ALLOW_SHELL_JOBS:
     // inherit only when caller opts in, otherwise strip from the clone.
     const env: Record<string, string | undefined> = { ...process.env };
     if (this.opts.allowShellJobs) {
-      env.GBRAIN_ALLOW_SHELL_JOBS = '1';
+      env.MODUSBRAIN_ALLOW_SHELL_JOBS = '1';
     } else {
-      delete env.GBRAIN_ALLOW_SHELL_JOBS;
+      delete env.MODUSBRAIN_ALLOW_SHELL_JOBS;
     }
     // Signal to the child worker that it's running under a supervisor.
     // issue #1801: the worker's DB-liveness probe STILL runs under supervision
     // (it's the only "is MY pool dead" signal; the supervisor watches a
     // different connection). This env var only makes the worker skip its STALL
     // detection — the supervisor's progress watchdog owns forward-progress.
-    env.GBRAIN_SUPERVISED = '1';
+    env.MODUSBRAIN_SUPERVISED = '1';
 
     this.childSupervisor = new ChildWorkerSupervisor({
       cliPath: this.opts.cliPath,
@@ -853,7 +853,7 @@ export class MinionSupervisor {
       maxCrashes: this.opts.maxCrashes,
       // issue #1994: hard permanent-give-up ceiling (the runaway backstop).
       // Operators can raise/lower or disable (0 = never auto-stop) via
-      // GBRAIN_SUPERVISOR_HARD_STOP_CRASHES; default is maxCrashes × 10.
+      // MODUSBRAIN_SUPERVISOR_HARD_STOP_CRASHES; default is maxCrashes × 10.
       hardStopMaxCrashes: resolveHardStopMaxCrashes(this.opts.maxCrashes),
       _backoffFloorMs: this.opts._backoffFloorMs,
       isStopping: () => this.stopping,

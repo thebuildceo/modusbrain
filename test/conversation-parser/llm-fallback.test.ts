@@ -71,7 +71,7 @@ describe('runLlmFallback', () => {
 
   test('provider unavailable: returns null without calling transport', async () => {
     await withEnv(
-      { ANTHROPIC_API_KEY: undefined as unknown as string, GBRAIN_HOME: emptyHome() },
+      { ANTHROPIC_API_KEY: undefined as unknown as string, MODUSBRAIN_HOME: emptyHome() },
       async () => {
         let calls = 0;
         const result = await runLlmFallback({

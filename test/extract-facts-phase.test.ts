@@ -48,11 +48,11 @@ Body.
 
 ## Facts
 
-<!--- gbrain:facts:begin -->
+<!--- modusbrain:facts:begin -->
 | # | claim | kind | confidence | visibility | notability | valid_from | valid_until | source | context |
 |---|-------|------|------------|------------|------------|------------|-------------|--------|---------|
 ${rows}
-<!--- gbrain:facts:end -->
+<!--- modusbrain:facts:end -->
 `;
 
 describe('runExtractFacts — happy path', () => {

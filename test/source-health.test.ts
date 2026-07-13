@@ -35,7 +35,7 @@ const HOUR = 3600_000;
  * dir + its HEAD sha so tests can seed `sources.last_commit` to match.
  */
 function makeGitRepo(commitDate: Date, registry: string[]): { dir: string; head: string } {
-  const dir = mkdtempSync(join(tmpdir(), 'gbrain-srchealth-'));
+  const dir = mkdtempSync(join(tmpdir(), 'modusbrain-srchealth-'));
   registry.push(dir);
   const iso = commitDate.toISOString();
   const env = {
@@ -138,7 +138,7 @@ describe('newestCommitMs', () => {
 
   test('null for null / non-git / missing paths', () => {
     expect(newestCommitMs(null)).toBeNull();
-    expect(newestCommitMs('/tmp/gbrain-does-not-exist-' + Date.now())).toBeNull();
+    expect(newestCommitMs('/tmp/modusbrain-does-not-exist-' + Date.now())).toBeNull();
   });
 
   test('returns the HEAD committer time in ms', () => {

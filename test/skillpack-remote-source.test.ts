@@ -158,7 +158,7 @@ describe('resolveSource — tarball', () => {
         author: 'a',
         license: 'MIT',
         homepage: 'https://example.com',
-        gbrain_min_version: '0.36.0',
+        modusbrain_min_version: '0.36.0',
         skills: ['skills/foo'],
       }),
     );

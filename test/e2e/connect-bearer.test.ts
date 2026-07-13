@@ -1,8 +1,8 @@
 /**
- * E2E for `gbrain connect`'s D4 raw-bearer smoke probe (connect-probe.ts).
+ * E2E for `modusbrain connect`'s D4 raw-bearer smoke probe (connect-probe.ts).
  *
- * Spins up a real `gbrain serve --http` against a hermetic PGLite brain (no
- * Postgres / Docker), mints a legacy bearer token via `gbrain auth create`,
+ * Spins up a real `modusbrain serve --http` against a hermetic PGLite brain (no
+ * Postgres / Docker), mints a legacy bearer token via `modusbrain auth create`,
  * then drives the real MCP SDK probe against `/mcp`:
  *   - real token  → ok, returns get_brain_identity payload
  *   - wrong token → not ok, reason 'auth'
@@ -34,14 +34,14 @@ describe('connect bearer probe E2E (PGLite + real serve --http)', () => {
   let serverReady = false;
 
   beforeAll(async () => {
-    home = mkdtempSync(join(tmpdir(), 'gbrain-connect-e2e-'));
+    home = mkdtempSync(join(tmpdir(), 'modusbrain-connect-e2e-'));
     // Hermetic PGLite: strip any ambient Postgres URL so `init --pglite` and the
     // spawned `serve` actually use PGLite. Without this, a dev/CI shell with
     // DATABASE_URL set leaks it into the subprocess and the brain comes up on
     // Postgres, breaking the `engine: pglite` assertion.
-    const env: Record<string, string | undefined> = { ...process.env, GBRAIN_HOME: home };
+    const env: Record<string, string | undefined> = { ...process.env, MODUSBRAIN_HOME: home };
     delete env.DATABASE_URL;
-    delete env.GBRAIN_DATABASE_URL;
+    delete env.MODUSBRAIN_DATABASE_URL;
 
     bunExecFileSync( ['run', 'src/cli.ts', 'init', '--pglite', '--no-embedding', '--non-interactive'], {
       cwd: process.cwd(), env, stdio: 'ignore',
@@ -49,7 +49,7 @@ describe('connect bearer probe E2E (PGLite + real serve --http)', () => {
     const authOut = bunExecFileSync( ['run', 'src/cli.ts', 'auth', 'create', 'e2e-connect'], {
       cwd: process.cwd(), env, encoding: 'utf8',
     });
-    token = (authOut.match(/gbrain_[a-f0-9]{64}/) ?? [''])[0];
+    token = (authOut.match(/modusbrain_[a-f0-9]{64}/) ?? [''])[0];
     if (!token) throw new Error(`auth create did not yield a token:\n${authOut}`);
 
     // Register the OAuth client BEFORE spawning serve — PGLite is single-writer,
@@ -99,7 +99,7 @@ describe('connect bearer probe E2E (PGLite + real serve --http)', () => {
 
   test('wrong token classifies as auth', async () => {
     expect(serverReady).toBe(true);
-    const r = await probeBrainIdentity(MCP_URL, 'gbrain_deadbeef', { timeoutMs: 15_000 });
+    const r = await probeBrainIdentity(MCP_URL, 'modusbrain_deadbeef', { timeoutMs: 15_000 });
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.reason).toBe('auth');
   }, 30_000);
@@ -113,7 +113,7 @@ describe('connect bearer probe E2E (PGLite + real serve --http)', () => {
 
   // -------------------------------------------------------------------------
   // Real-CLI coverage: drive the actual `claude` / `codex` binaries through
-  // `gbrain connect --install` against the live server. Sandboxed via HOME /
+  // `modusbrain connect --install` against the live server. Sandboxed via HOME /
   // CODEX_HOME so the dev machine's real agent config is untouched. Skips
   // gracefully when a binary isn't on PATH (e.g. CI without the CLIs).
   // -------------------------------------------------------------------------
@@ -124,14 +124,14 @@ describe('connect bearer probe E2E (PGLite + real serve --http)', () => {
   const HAS_CLAUDE = hasBin('claude');
   const HAS_CODEX = hasBin('codex');
 
-  // Run `gbrain connect <args>` as a subprocess with extra env (HOME/CODEX_HOME
-  // sandbox + GBRAIN_REMOTE_TOKEN). spawnSync captures stderr too — connect's
+  // Run `modusbrain connect <args>` as a subprocess with extra env (HOME/CODEX_HOME
+  // sandbox + MODUSBRAIN_REMOTE_TOKEN). spawnSync captures stderr too — connect's
   // "Verified" / "Added" lines go to stderr.
   const runConnectCli = (args: string[], extraEnv: Record<string, string>): { code: number; out: string } => {
     const r = bunSpawnSync(['run', 'src/cli.ts', 'connect', ...args], {
       cwd: process.cwd(),
       encoding: 'utf8',
-      env: { ...process.env, GBRAIN_HOME: home, ...extraEnv },
+      env: { ...process.env, MODUSBRAIN_HOME: home, ...extraEnv },
     });
     return { code: r.status ?? 1, out: `${r.stdout ?? ''}\n${r.stderr ?? ''}` };
   };
@@ -144,11 +144,11 @@ describe('connect bearer probe E2E (PGLite + real serve --http)', () => {
       expect(r.code).toBe(0);
       expect(r.out).toMatch(/Verified/);
       // The real `claude` CLI actually registered the server.
-      const got = spawnSync('claude', ['mcp', 'get', 'gbrain'], { encoding: 'utf8', env: { ...process.env, HOME: claudeHome } });
+      const got = spawnSync('claude', ['mcp', 'get', 'modusbrain'], { encoding: 'utf8', env: { ...process.env, HOME: claudeHome } });
       expect(got.status).toBe(0);
       expect(`${got.stdout ?? ''}${got.stderr ?? ''}`).toContain(`:${PORT}/mcp`);
     } finally {
-      try { spawnSync('claude', ['mcp', 'remove', 'gbrain'], { env: { ...process.env, HOME: claudeHome } }); } catch { /* best-effort */ }
+      try { spawnSync('claude', ['mcp', 'remove', 'modusbrain'], { env: { ...process.env, HOME: claudeHome } }); } catch { /* best-effort */ }
       rmSync(claudeHome, { recursive: true, force: true });
     }
   }, 60_000);
@@ -157,15 +157,15 @@ describe('connect bearer probe E2E (PGLite + real serve --http)', () => {
     expect(serverReady).toBe(true);
     const codexHome = mkdtempSync(join(tmpdir(), 'gb-codex-'));
     try {
-      const r = runConnectCli([MCP_URL, '--token', token, '--agent', 'codex', '--install', '--yes'], { CODEX_HOME: codexHome, GBRAIN_REMOTE_TOKEN: token });
+      const r = runConnectCli([MCP_URL, '--token', token, '--agent', 'codex', '--install', '--yes'], { CODEX_HOME: codexHome, MODUSBRAIN_REMOTE_TOKEN: token });
       expect(r.code).toBe(0);
       expect(r.out).toMatch(/Verified/);
       // The real `codex` CLI registered the streamable-http server with the
       // env-var bearer — and the token never lands in Codex config.
-      const got = spawnSync('codex', ['mcp', 'get', 'gbrain'], { encoding: 'utf8', env: { ...process.env, CODEX_HOME: codexHome } });
+      const got = spawnSync('codex', ['mcp', 'get', 'modusbrain'], { encoding: 'utf8', env: { ...process.env, CODEX_HOME: codexHome } });
       expect(got.status).toBe(0);
       const text = `${got.stdout ?? ''}${got.stderr ?? ''}`;
-      expect(text).toContain('GBRAIN_REMOTE_TOKEN');
+      expect(text).toContain('MODUSBRAIN_REMOTE_TOKEN');
       expect(text).not.toContain(token);
       expect(text).toContain(`:${PORT}/mcp`);
     } finally {

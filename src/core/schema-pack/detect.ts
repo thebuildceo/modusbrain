@@ -1,11 +1,11 @@
-// v0.39 T2 — gbrain schema detect: SQL-driven heuristic clustering.
+// v0.39 T2 — modusbrain schema detect: SQL-driven heuristic clustering.
 //
 // Walks pages.source_path prefixes + frontmatter `type:` distribution to
 // propose a candidate schema-pack manifest matching the brain's actual
 // shape. Pure data layer (no LLM); T3's runSuggest layers refinement on top.
 //
 // Output shape mirrors SchemaPackManifest v1 so a candidate can be
-// validated + applied via `gbrain schema use <candidate-name>` after
+// validated + applied via `modusbrain schema use <candidate-name>` after
 // review-candidates promotes it.
 //
 // Privacy: type names + slug prefixes come from the user's own brain. No
@@ -82,10 +82,10 @@ export function buildCandidate(opts: {
   });
 
   return {
-    api_version: 'gbrain-schema-pack-v1' as const,
+    api_version: 'modusbrain-schema-pack-v1' as const,
     name: 'detected-candidate',
     version: '0.0.1',
-    description: 'Auto-detected from brain shape via `gbrain schema detect`. Review with `gbrain schema review-candidates` before activating.',
+    description: 'Auto-detected from brain shape via `modusbrain schema detect`. Review with `modusbrain schema review-candidates` before activating.',
     page_types,
     takes_kinds: ['fact', 'take', 'bet', 'hunch'],
   };

@@ -204,7 +204,7 @@ export async function runPageToLinkCore(
         pagesToSoftDelete.push(r.slug);
       }
       if (linksBuffer.length > 0) {
-        await ctx.engine.addLinksBatch(linksBuffer); // gbrain-allow-direct-insert: page-to-link mapping_rules under unify-types convert edge-shaped pages to canonical link rows; PROTECTED Minion handler, source-scoped, atomic per-rule
+        await ctx.engine.addLinksBatch(linksBuffer); // modusbrain-allow-direct-insert: page-to-link mapping_rules under unify-types convert edge-shaped pages to canonical link rows; PROTECTED Minion handler, source-scoped, atomic per-rule
         converted = linksBuffer.length;
       }
       for (const slug of pagesToSoftDelete) {

@@ -10,7 +10,7 @@
  * modifications past the pin.
  *
  * These are the IRON-RULE regression tests. Marked `.serial.test.ts` because
- * they spawn git subprocesses, mutate `process.env.GBRAIN_SYNC_CHECKPOINT_EVERY`,
+ * they spawn git subprocesses, mutate `process.env.MODUSBRAIN_SYNC_CHECKPOINT_EVERY`,
  * and share one PGLite engine across tests (PGLite forces serial workers, so
  * the batch loop is exercised without the parallel worker-pool branch).
  */
@@ -94,14 +94,14 @@ describe('#1794 — resumable incremental sync (pinned target)', () => {
 
   beforeEach(async () => {
     await resetPgliteState(engine);
-    repoPath = mkdtempSync(join(tmpdir(), 'gbrain-1794-'));
+    repoPath = mkdtempSync(join(tmpdir(), 'modusbrain-1794-'));
     gitInit(repoPath);
     // Baseline commit so the first sync has a real anchor.
     commitPages(repoPath, { 'base.md': pageMd('Base') }, 'initial');
   });
 
   afterEach(() => {
-    delete process.env.GBRAIN_SYNC_CHECKPOINT_EVERY;
+    delete process.env.MODUSBRAIN_SYNC_CHECKPOINT_EVERY;
     if (repoPath) rmSync(repoPath, { recursive: true, force: true });
   });
 
@@ -144,7 +144,7 @@ describe('#1794 — resumable incremental sync (pinned target)', () => {
   // ── B. CRITICAL: real abort banks progress, second run converges ──────────
   test('[CRITICAL] killed mid-import banks progress; next run converges', async () => {
     const { performSync } = await import('../src/commands/sync.ts');
-    process.env.GBRAIN_SYNC_CHECKPOINT_EVERY = '1'; // flush after every file
+    process.env.MODUSBRAIN_SYNC_CHECKPOINT_EVERY = '1'; // flush after every file
 
     await performSync(engine, { repoPath, full: true, noPull: true, noEmbed: true });
     const c0 = (await lastCommitConfig())!;
@@ -378,19 +378,19 @@ describe('#1794 pure helpers', () => {
   });
 
   test('resolveMaxConnections parses env, ignores garbage', () => {
-    const prev = process.env.GBRAIN_MAX_CONNECTIONS;
+    const prev = process.env.MODUSBRAIN_MAX_CONNECTIONS;
     try {
-      delete process.env.GBRAIN_MAX_CONNECTIONS;
+      delete process.env.MODUSBRAIN_MAX_CONNECTIONS;
       expect(resolveMaxConnections()).toBeUndefined();
-      process.env.GBRAIN_MAX_CONNECTIONS = '20';
+      process.env.MODUSBRAIN_MAX_CONNECTIONS = '20';
       expect(resolveMaxConnections()).toBe(20);
-      process.env.GBRAIN_MAX_CONNECTIONS = 'nope';
+      process.env.MODUSBRAIN_MAX_CONNECTIONS = 'nope';
       expect(resolveMaxConnections()).toBeUndefined();
-      process.env.GBRAIN_MAX_CONNECTIONS = '0';
+      process.env.MODUSBRAIN_MAX_CONNECTIONS = '0';
       expect(resolveMaxConnections()).toBeUndefined();
     } finally {
-      if (prev === undefined) delete process.env.GBRAIN_MAX_CONNECTIONS;
-      else process.env.GBRAIN_MAX_CONNECTIONS = prev;
+      if (prev === undefined) delete process.env.MODUSBRAIN_MAX_CONNECTIONS;
+      else process.env.MODUSBRAIN_MAX_CONNECTIONS = prev;
     }
   });
 

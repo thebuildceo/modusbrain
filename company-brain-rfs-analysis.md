@@ -2,26 +2,26 @@
 
 **Product name:** ModusBrain · **Domain:** [modusbrain.com](https://modusbrain.com)  
 **Launch playbook:** [MODUSBRAIN_LAUNCH.md](./MODUSBRAIN_LAUNCH.md) (website, Mintlify, DNS, pricing)  
-**Base engine:** [GBrain](https://github.com/garrytan/gbrain) (MIT License)  
+**Base engine:** [ModusBrain](https://github.com/garrytan/gbrain) (MIT License)  
 **Target:** Y Combinator "Company Brain" Request for Startups — Tom Blomfield
 
-> Built on the open-source GBrain engine (MIT licensed), extended with a skill-compilation and safe-execution layer purpose-built for autonomous company operations.
+> Built on the open-source ModusBrain engine (MIT licensed), extended with a skill-compilation and safe-execution layer purpose-built for autonomous company operations.
 
 ---
 
 ## 1. Attribution & Positioning (read this first)
 
-This project is built **on top of** GBrain. Forking and extending it is fully permitted under the MIT license, provided the original license and copyright notice are retained.
+This project is built **on top of** ModusBrain. Forking and extending it is fully permitted under the MIT license, provided the original license and copyright notice are retained.
 
 **Do not:**
 
-- Present GBrain's retrieval/graph/dream-cycle engine as your own invention.
+- Present ModusBrain's retrieval/graph/dream-cycle engine as your own invention.
 - Reuse Garry Tan's first-person bio or OpenClaw-specific framing in your product docs.
 - Omit the MIT license/attribution when you publish.
 
 **Honest pitch:**
 
-> "GBrain solved the hardest 70% — pulling scattered knowledge into a current, cited memory layer. ModusBrain adds the last 30%: compiling that memory into versioned, confidence-gated skills that AI agents can safely execute against, not just query."
+> "ModusBrain solved the hardest 70% — pulling scattered knowledge into a current, cited memory layer. ModusBrain adds the last 30%: compiling that memory into versioned, confidence-gated skills that AI agents can safely execute against, not just query."
 
 ---
 
@@ -32,14 +32,14 @@ This project is built **on top of** GBrain. Forking and extending it is fully pe
 
 | RFS Requirement                         | Before           | Now (ModusBrain layer)                          |
 | --------------------------------------- | ---------------- | ----------------------------------------------- |
-| Pulls knowledge from fragmented sources | ✅ GBrain         | ✅ Unchanged                                     |
-| Structures it                           | ✅ GBrain         | ✅ + `skill` / `procedure` page types            |
+| Pulls knowledge from fragmented sources | ✅ ModusBrain         | ✅ Unchanged                                     |
+| Structures it                           | ✅ ModusBrain         | ✅ + `skill` / `procedure` page types            |
 | Keeps it current                        | ✅ Dream Cycle    | ✅ + re-compile on correction threshold          |
-| Not just search/chatbot                 | ✅ `gbrain think` | ✅ + `gbrain skill execute`                      |
+| Not just search/chatbot                 | ✅ `modusbrain think` | ✅ + `modusbrain skill execute`                      |
 | Living map of how company works         | ⚠️ Partial       | ✅ Operational skills capture procedures         |
 | Executable skills for AI                | ❌ Gap            | ✅ **Versioned skill artifacts (v1→v2→v3)**      |
 | Safe, consistent agent actions          | ❌ Gap            | ✅ **Risk tiers + confidence gating + approval** |
-| Multi-user / team memory                | ✅ GBrain         | ✅ Unchanged                                     |
+| Multi-user / team memory                | ✅ ModusBrain         | ✅ Unchanged                                     |
 
 
 
@@ -49,14 +49,14 @@ This project is built **on top of** GBrain. Forking and extending it is fully pe
 
 | Phase     | Feature             | Code location                                                                     |
 | --------- | ------------------- | --------------------------------------------------------------------------------- |
-| **1**     | Skill compilation   | `src/core/operational-skills/compile.ts`, `gbrain opskill compile`                |
+| **1**     | Skill compilation   | `src/core/operational-skills/compile.ts`, `modusbrain opskill compile`                |
 | **1**     | Skill page type     | `src/core/schema-pack/base/modusbrain-ops.yaml`                                   |
 | **1**     | DB schema           | Migration v123 `operational_skills_layer` in `src/core/migrate.ts`                |
 | **2**     | Confidence gating   | `src/core/operational-skills/confidence.ts`, `execute.ts`                         |
-| **2**     | Approval workflow   | `gbrain opskill approve`, `gbrain opskill approve-token`                          |
-| **3**     | Conflict queue      | `gbrain opskill flag-conflict`, `gbrain opskill resolve`                          |
-| **4**     | Action audit trail  | `operational_skill_actions` table, `gbrain opskill audit`                         |
-| **5**     | Feedback loop       | `src/core/operational-skills/feedback.ts`, `gbrain opskill correct`               |
+| **2**     | Approval workflow   | `modusbrain opskill approve`, `modusbrain opskill approve-token`                          |
+| **3**     | Conflict queue      | `modusbrain opskill flag-conflict`, `modusbrain opskill resolve`                          |
+| **4**     | Action audit trail  | `operational_skill_actions` table, `modusbrain opskill audit`                         |
+| **5**     | Feedback loop       | `src/core/operational-skills/feedback.ts`, `modusbrain opskill correct`               |
 | **MCP**   | Remote agent API    | `compile_operational_skill`, `execute_operational_skill`, etc. in `operations.ts` |
 | **Tests** | Full phase coverage | `test/operational-skills.test.ts`                                                 |
 
@@ -74,7 +74,7 @@ This project is built **on top of** GBrain. Forking and extending it is fully pe
 ```bash
 # Install Bun + dependencies
 curl -fsSL https://bun.sh/install | bash
-cd gbrain-master
+cd modusbrain-master
 bun install --ignore-scripts   # skip postinstall on Windows if needed
 
 # Init brain (defaults to embedded PGLite)
@@ -126,7 +126,7 @@ bun run src/cli.ts opskill correct refund-handling \
   --by bob@company.com
 ```
 
-> **CLI note:** `gbrain skill <name>` still fetches host skillpack instructions (existing GBrain). Operational skills use `gbrain opskill ...` or `gbrain skill compile|approve|execute|...`.
+> **CLI note:** `modusbrain skill <name>` still fetches host skillpack instructions (existing ModusBrain). Operational skills use `modusbrain opskill ...` or `modusbrain skill compile|approve|execute|...`.
 
 
 
@@ -135,16 +135,16 @@ bun run src/cli.ts opskill correct refund-handling \
 
 | Command                                                             | Purpose                      |
 | ------------------------------------------------------------------- | ---------------------------- |
-| `gbrain opskill compile "<topic>"`                                  | Draft skill from brain pages |
-| `gbrain opskill approve <slug> --by <user>`                         | Promote draft → active       |
-| `gbrain opskill list`                                               | List all skills              |
-| `gbrain opskill show <slug>`                                        | Version history + metadata   |
-| `gbrain opskill execute <slug> --task "..." --context JSON`         | Run with gating              |
-| `gbrain opskill approve-token <slug>`                               | Issue 1h approval token      |
-| `gbrain opskill flag-conflict <slug> --description "..."`           | Open conflict queue item     |
-| `gbrain opskill resolve <id> --by <user> --note "..."`              | Resolve + re-compile         |
-| `gbrain opskill audit [--slug X]`                                   | Agent action audit trail     |
-| `gbrain opskill correct <slug> --original "..." --correction "..."` | Feedback loop                |
+| `modusbrain opskill compile "<topic>"`                                  | Draft skill from brain pages |
+| `modusbrain opskill approve <slug> --by <user>`                         | Promote draft → active       |
+| `modusbrain opskill list`                                               | List all skills              |
+| `modusbrain opskill show <slug>`                                        | Version history + metadata   |
+| `modusbrain opskill execute <slug> --task "..." --context JSON`         | Run with gating              |
+| `modusbrain opskill approve-token <slug>`                               | Issue 1h approval token      |
+| `modusbrain opskill flag-conflict <slug> --description "..."`           | Open conflict queue item     |
+| `modusbrain opskill resolve <id> --by <user> --note "..."`              | Resolve + re-compile         |
+| `modusbrain opskill audit [--slug X]`                                   | Agent action audit trail     |
+| `modusbrain opskill correct <slug> --original "..." --correction "..."` | Feedback loop                |
 
 
 Add `--json` to any command for machine-readable output.
@@ -204,7 +204,7 @@ Draft skills are **always refused** for remote/untrusted agents.
 ### Phase 4 — Action Audit Trail
 
 Every execution logs: skill slug, version, confidence, action taken, result, agent ID.  
-Separate from GBrain's citation trail (knowledge provenance vs action provenance).
+Separate from ModusBrain's citation trail (knowledge provenance vs action provenance).
 
 ### Phase 5 — Closed Feedback Loop
 
@@ -247,14 +247,14 @@ After N corrections (default: 2), auto-triggers re-compilation.
 
 - Version history proves which policy version was active when agent acted
 - Block policy during open contradictions
-- Export audit via `gbrain skill audit --json`
+- Export audit via `modusbrain skill audit --json`
 
 
 
 ### Enterprise IT (1000+ employees)
 
 - Postgres + pgvector via Supabase for multi-machine sync
-- Per-source isolation for team brains (`--source`, `GBRAIN_SOURCE`)
+- Per-source isolation for team brains (`--source`, `MODUSBRAIN_SOURCE`)
 - OAuth-scoped MCP for department-level access control
 
 
@@ -285,14 +285,14 @@ bun run test
 
 ## 7. Rebrand to ModusBrain — Step-by-Step Guide
 
-When you're ready to rebrand from `gbrain` → `modusbrain`:
+When you're ready to rebrand from `modusbrain` → `modusbrain`:
 
 ### Step 1 — Binary & package name
 
 
 | File           | Change                                                                     |
 | -------------- | -------------------------------------------------------------------------- |
-| `package.json` | `"name": "modusbrain"`, update `bin.gbrain` → `"modusbrain": "src/cli.ts"` |
+| `package.json` | `"name": "modusbrain"`, update `bin.modusbrain` → `"modusbrain": "src/cli.ts"` |
 | `VERSION`      | Keep semver, optionally reset to `1.0.0.0` for launch                      |
 | `src/cli.ts`   | Update help text references                                                |
 | Build script   | `bun build --compile --outfile bin/modusbrain src/cli.ts`                  |
@@ -304,18 +304,18 @@ When you're ready to rebrand from `gbrain` → `modusbrain`:
 
 ```bash
 # 1. User-facing strings only (NOT internal module paths on first pass)
-rg -l 'GBrain' --glob '!node_modules' --glob '!bun.lock' --glob '!CHANGELOG.md'
-rg -l 'gbrain' docs/ README.md skills/ company-brain-rfs-analysis.md
+rg -l 'ModusBrain' --glob '!node_modules' --glob '!bun.lock' --glob '!CHANGELOG.md'
+rg -l 'modusbrain' docs/ README.md skills/ company-brain-rfs-analysis.md
 
-# 2. CLI command string in docs/help (keep `gbrain` as alias during transition)
+# 2. CLI command string in docs/help (keep `modusbrain` as alias during transition)
 # Replace in: README.md, docs/, skills/, AGENTS.md, INSTALL_FOR_AGENTS.md
 
 # 3. Config directory (breaking change — document migration)
-# ~/.gbrain → ~/.modusbrain
+# ~/.modusbrain → ~/.modusbrain
 # Update: src/core/config.ts paths, docs/guides/
 
 # 4. Environment variables
-# GBRAIN_* → MODUSBRAIN_* (keep GBRAIN_* as deprecated aliases for one release)
+# MODUSBRAIN_* → MODUSBRAIN_* (keep MODUSBRAIN_* as deprecated aliases for one release)
 
 # 5. MCP / API identifiers
 # gbrain-skillpack-v1 → modusbrain-skillpack-v1 (new major, keep reader for old)
@@ -323,13 +323,13 @@ rg -l 'gbrain' docs/ README.md skills/ company-brain-rfs-analysis.md
 
 
 
-### Step 3 — Keep GBrain attribution
+### Step 3 — Keep ModusBrain attribution
 
 In `README.md` and `LICENSE`:
 
 ```markdown
-ModusBrain is built on [GBrain](https://github.com/garrytan/gbrain) (MIT License).
-Copyright (c) 2024 Garry Tan — GBrain engine portions used under MIT.
+ModusBrain is built on [ModusBrain](https://github.com/garrytan/gbrain) (MIT License).
+Copyright (c) 2024 Garry Tan — ModusBrain engine portions used under MIT.
 Copyright (c) 2026 Your Company — ModusBrain extensions.
 ```
 
@@ -340,8 +340,8 @@ Copyright (c) 2026 Your Company — ModusBrain extensions.
 - [ ] Domain: modusbrain.com (or your choice)
 - [ ] Hero: "The company brain agents can safely execute against"
 - [ ] Feature sections map to Phases 1–5 above
-- [ ] "Built on GBrain" footer badge with link
-- [ ] Docs site: replace `gbrain` CLI examples with `modusbrain`
+- [ ] "Built on ModusBrain" footer badge with link
+- [ ] Docs site: replace `modusbrain` CLI examples with `modusbrain`
 - [ ] GitHub repo rename or new org repo with attribution in README
 
 
@@ -366,7 +366,7 @@ modusbrain opskill list
 
 ## 8. Suggested MVP / YC Application Sequence
 
-1. ✅ Fork GBrain, retain license — done
+1. ✅ Fork ModusBrain, retain license — done
 2. ✅ Ship Phase 1–5 — done (this implementation)
 3. **Next:** Get one design partner on one workflow (refund handling)
 4. **Next:** Rebrand to ModusBrain + landing page
@@ -378,5 +378,5 @@ modusbrain opskill list
 
 ## 9. One-Line Pitch
 
-> "GBrain solved the hardest 70% of the Company Brain problem. ModusBrain adds versioned, confidence-gated skills that AI agents execute against safely — with audit trails, conflict queues, and a closed feedback loop."
+> "ModusBrain solved the hardest 70% of the Company Brain problem. ModusBrain adds versioned, confidence-gated skills that AI agents execute against safely — with audit trails, conflict queues, and a closed feedback loop."
 

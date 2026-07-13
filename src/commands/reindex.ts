@@ -1,5 +1,5 @@
 /**
- * v0.32.7 CJK wave — `gbrain reindex --markdown` sweep.
+ * v0.32.7 CJK wave — `modusbrain reindex --markdown` sweep.
  *
  * Walks markdown pages whose `chunker_version` is below
  * MARKDOWN_CHUNKER_VERSION and re-imports each through the standard
@@ -7,8 +7,8 @@
  * success so re-runs are idempotent and a partial sweep can resume.
  *
  * Driven by:
- *   - `gbrain upgrade` post-upgrade hook (after the cost-estimate prompt).
- *   - Operators running `gbrain reindex --markdown` directly.
+ *   - `modusbrain upgrade` post-upgrade hook (after the cost-estimate prompt).
+ *   - Operators running `modusbrain reindex --markdown` directly.
  *
  * Performance: batched 100 at a time so a 50K-page brain reindex doesn't
  * hold a single transaction open. `--limit` caps total work for triage
@@ -45,7 +45,7 @@ interface ReindexOpts {
   repoPath?: string;
   /**
    * Skip the embedding call during re-chunk. New chunks land with NULL
-   * embedding and the next `gbrain embed --stale` pass fills them in.
+   * embedding and the next `modusbrain embed --stale` pass fills them in.
    * Useful for offline / no-API-key brains and for tests.
    */
   noEmbed?: boolean;
@@ -147,9 +147,9 @@ export async function runReindex(engine: BrainEngine, args: string[]): Promise<R
   // own routing here.
   if (!args.includes('--markdown')) {
     if (opts.json) {
-      process.stdout.write(JSON.stringify({ error: 'gbrain reindex requires a target flag, e.g. --markdown' }) + '\n');
+      process.stdout.write(JSON.stringify({ error: 'modusbrain reindex requires a target flag, e.g. --markdown' }) + '\n');
     } else {
-      process.stderr.write('Usage: gbrain reindex --markdown [--limit N] [--dry-run] [--json] [--repo PATH]\n');
+      process.stderr.write('Usage: modusbrain reindex --markdown [--limit N] [--dry-run] [--json] [--repo PATH]\n');
     }
     setCliExitVerdict(2);
     return { pending: 0, reindexed: 0, skipped: 0, failed: 0, dryRun: !!opts.dryRun, chunkerVersion: MARKDOWN_CHUNKER_VERSION };

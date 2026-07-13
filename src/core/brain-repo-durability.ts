@@ -3,7 +3,7 @@
  *
  * Problem: fresh headless agents (OpenClaw/Hermes) fall out of sync with their
  * knowledge-wiki git repos — writes sit local-only and never push, long-lived
- * sessions edit a stale tree. The moment gbrain is given a PAT + a GitHub URL
+ * sessions edit a stale tree. The moment modusbrain is given a PAT + a GitHub URL
  * for a brain repo, `hardenBrainRepo` makes durability work, idempotently:
  *
  *   1. pull current state (divergence-safe rebase; skip-on-dirty)
@@ -15,7 +15,7 @@
  *   6. a DB-free pull cron (every 30 min)
  *   7. verify by authenticated push-probe (proves push auth; no heartbeat)
  *
- * Trust boundary (this is gbrain's FIRST push path + FIRST secret storage):
+ * Trust boundary (this is modusbrain's FIRST push path + FIRST secret storage):
  *  - The hook is LOCAL + untracked so a pulled commit can't rewrite executed
  *    code next to the PAT. Both hook and helper render from ONE bash template
  *    (PUSH_RETRY) — DRY at the TS source level, NOT by the hook sourcing a
@@ -85,43 +85,43 @@ export interface UnhardenOpts {
 
 // ── Banners / markers (idempotency keys) ────────────────────────────────────
 
-const HOOK_BANNER = '# gbrain brain-durability post-commit hook (v0.42.44+)';
-const HELPER_BANNER = '# gbrain brain-commit-push helper (v0.42.44+)';
-const AGENTS_BEGIN = '<!-- BEGIN gbrain-brain-durability (managed; do not edit between markers) -->';
-const AGENTS_END = '<!-- END gbrain-brain-durability -->';
+const HOOK_BANNER = '# modusbrain brain-durability post-commit hook (v0.42.44+)';
+const HELPER_BANNER = '# modusbrain brain-commit-push helper (v0.42.44+)';
+const AGENTS_BEGIN = '<!-- BEGIN modusbrain-brain-durability (managed; do not edit between markers) -->';
+const AGENTS_END = '<!-- END modusbrain-brain-durability -->';
 const HELPER_REL = 'scripts/brain-commit-push.sh';
-const CRED_MANAGED_KEY = 'gbrain.durability.managedcredential';
+const CRED_MANAGED_KEY = 'modusbrain.durability.managedcredential';
 
-function gbrainHome(): string {
-  return process.env.GBRAIN_HOME || join(process.env.HOME || '', '.gbrain');
+function modusbrainHome(): string {
+  return process.env.MODUSBRAIN_HOME || join(process.env.HOME || '', '.modusbrain');
 }
 
-/** Resolve the gbrain CLI path for the cron wrapper (inlined to avoid a
- *  core→commands import). which gbrain → process.execPath → argv[1] → "gbrain". */
-function resolveGbrainCliPath(): string {
+/** Resolve the modusbrain CLI path for the cron wrapper (inlined to avoid a
+ *  core→commands import). which modusbrain → process.execPath → argv[1] → "modusbrain". */
+function resolveModusbrainCliPath(): string {
   try {
-    const which = execSync('which gbrain', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+    const which = execSync('which modusbrain', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
     if (which) return which;
   } catch { /* not on PATH */ }
   const exec = process.execPath ?? '';
-  if (exec.endsWith('/gbrain') || exec.endsWith('\\gbrain.exe')) return exec;
+  if (exec.endsWith('/modusbrain') || exec.endsWith('\\modusbrain.exe')) return exec;
   const arg1 = process.argv[1] ?? '';
-  if (arg1.endsWith('/gbrain') || arg1.endsWith('\\gbrain.exe')) return arg1;
-  return 'gbrain';
+  if (arg1.endsWith('/modusbrain') || arg1.endsWith('\\modusbrain.exe')) return arg1;
+  return 'modusbrain';
 }
 function credStoreFile(): string {
-  return join(gbrainHome(), 'git-credentials');
+  return join(modusbrainHome(), 'git-credentials');
 }
 function pushLogPath(): string {
-  return join(gbrainHome(), 'brain-push.log');
+  return join(modusbrainHome(), 'brain-push.log');
 }
 
 // ── Shared bash push-retry template (DRY at the TS source — D7) ──────────────
 // Rendered into BOTH the (committed) helper and the (local, untracked) hook so
 // there is one source of truth without the hook executing repo-controlled code.
-const PUSH_RETRY = `# --- gbrain durability push-retry (generated; one source of truth) ---
-gbrain_shell_home() {
-  _home="\${GBRAIN_HOME:-$HOME/.gbrain}"
+const PUSH_RETRY = `# --- modusbrain durability push-retry (generated; one source of truth) ---
+modusbrain_shell_home() {
+  _home="\${MODUSBRAIN_HOME:-$HOME/.modusbrain}"
   if command -v cygpath >/dev/null 2>&1; then
     cygpath -u "$_home" 2>/dev/null || printf '%s\\n' "$_home"
   else
@@ -130,13 +130,13 @@ gbrain_shell_home() {
 }
 brain_push() {
   _branch="$1"
-  _log="$(gbrain_shell_home)/brain-push.log"
+  _log="$(modusbrain_shell_home)/brain-push.log"
   mkdir -p "$(dirname "$_log")" 2>/dev/null || true
   _gd="$(git rev-parse --git-dir 2>/dev/null || echo .git)"
   # Serialize concurrent pushes (commit bursts) so they coalesce instead of a
   # rebase-retry herd. No-op if flock is unavailable.
   if command -v flock >/dev/null 2>&1; then
-    exec 9>"$_gd/gbrain-push.lock"
+    exec 9>"$_gd/modusbrain-push.lock"
     flock -w 30 9 || { echo "$(date -u +%FT%TZ) [push] lock-timeout $_branch" >>"$_log"; return 0; }
   fi
   if git push origin "HEAD:$_branch" >>"$_log" 2>&1; then
@@ -147,7 +147,7 @@ brain_push() {
     echo "$(date -u +%FT%TZ) [push] ok-after-rebase $_branch $(git rev-parse --short HEAD 2>/dev/null)" >>"$_log"; return 0
   fi
   git rebase --abort >/dev/null 2>&1 || true
-  echo "$(date -u +%FT%TZ) [push] LOCAL-ONLY, NEEDS ATTENTION: $_branch @ $(git rev-parse --short HEAD 2>/dev/null) could not reach origin. Run: gbrain sources pull <id> && git push" >>"$_log"
+  echo "$(date -u +%FT%TZ) [push] LOCAL-ONLY, NEEDS ATTENTION: $_branch @ $(git rev-parse --short HEAD 2>/dev/null) could not reach origin. Run: modusbrain sources pull <id> && git push" >>"$_log"
   return 1
 }`;
 
@@ -161,7 +161,7 @@ set -euo pipefail
 
 _branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo HEAD)"
 if [ "$_branch" = "HEAD" ]; then
-  _log="$(gbrain_shell_home)/brain-push.log"
+  _log="$(modusbrain_shell_home)/brain-push.log"
   mkdir -p "$(dirname "$_log")" 2>/dev/null || true
   echo "$(date -u +%FT%TZ) [push] detached HEAD; skip" >> "$_log" 2>/dev/null || true
   exit 0
@@ -207,7 +207,7 @@ if git diff --cached --quiet; then echo "nothing to commit"; exit 0; fi
 git commit -m "$_msg"
 
 if brain_push "$_branch"; then exit 0; fi
-echo "PUSH FAILED — commit is local-only, NEEDS ATTENTION (see ${'$'}{GBRAIN_HOME:-$HOME/.gbrain}/brain-push.log)" >&2
+echo "PUSH FAILED — commit is local-only, NEEDS ATTENTION (see ${'$'}{MODUSBRAIN_HOME:-$HOME/.modusbrain}/brain-push.log)" >&2
 exit 4
 `;
 }
@@ -228,7 +228,7 @@ function renderTaxonomyLines(): string {
 
 function renderManagedBlock(): string {
   return `${AGENTS_BEGIN}
-<!-- gbrain durability rules. This block is regenerated by \`gbrain sources harden\`.
+<!-- modusbrain durability rules. This block is regenerated by \`modusbrain sources harden\`.
      Do not index as user knowledge; do not edit between the markers. -->
 ## Brain durability rules (always on)
 
@@ -241,7 +241,7 @@ ${renderTaxonomyLines()}
 2. **Every write is committed AND pushed — push is never deferred.** After any
    persistent write, run \`scripts/brain-commit-push.sh "<msg>" <path>\` (it commits,
    pushes, and FAILS LOUDLY if the push doesn't land), then confirm links resolve
-   with \`gbrain check-resolvable\`. Do not move on until the push succeeded. The
+   with \`modusbrain check-resolvable\`. Do not move on until the push succeeded. The
    post-commit hook is only a best-effort fallback — the helper is the guarantee.
 
 3. **Pull before you touch anything.** Run \`git fetch && git pull --rebase\` at
@@ -421,7 +421,7 @@ function wireRepoCredential(repoPath: string, pat: string, dryRun: boolean): { s
   if (dryRun) return { status: 'fixed', detail: 'would wire repo-scoped credential (dry-run)' };
 
   mkdirSync(dirname(store), { recursive: true, mode: 0o700 });
-  try { chmodSync(gbrainHome(), 0o700); } catch { /* */ }
+  try { chmodSync(modusbrainHome(), 0o700); } catch { /* */ }
   let body = existsSync(store) ? readFileSync(store, 'utf-8') : '';
   if (!body.split('\n').some(l => l === line)) {
     if (body.length && !body.endsWith('\n')) body += '\n';
@@ -445,10 +445,10 @@ function removeCredentialWiring(repoPath: string): boolean {
 // ── Minimal DB-free pull cron (D2 + D12) ────────────────────────────────────
 
 function cronLabel(sourceId: string): string {
-  return `com.gbrain.brain-pull.${sourceId.replace(/[^A-Za-z0-9._-]/g, '_')}`;
+  return `com.modusbrain.brain-pull.${sourceId.replace(/[^A-Za-z0-9._-]/g, '_')}`;
 }
 function cronWrapperPath(sourceId: string): string {
-  return join(gbrainHome(), `brain-pull-${sourceId.replace(/[^A-Za-z0-9._-]/g, '_')}.sh`);
+  return join(modusbrainHome(), `brain-pull-${sourceId.replace(/[^A-Za-z0-9._-]/g, '_')}.sh`);
 }
 function launchdPlistPath(sourceId: string): string {
   return join(process.env.HOME || '', 'Library', 'LaunchAgents', `${cronLabel(sourceId)}.plist`);
@@ -459,7 +459,7 @@ function launchdPlistPath(sourceId: string): string {
 export function renderCronWrapper(sourceId: string, repoPath: string, branch: string, cli: string, logPath: string): string {
   const q = (s: string) => s.replace(/'/g, "'\\''");
   return `#!/bin/bash
-# Auto-generated by gbrain sources harden — DB-free durability pull (${sourceId}).
+# Auto-generated by modusbrain sources harden — DB-free durability pull (${sourceId}).
 # Sources the shell profile for secrets, then runs the hardened, DB-free pull.
 [ -f ~/.zshenv ] && source ~/.zshenv 2>/dev/null
 source ~/.zshrc 2>/dev/null || source ~/.bashrc 2>/dev/null || true
@@ -474,7 +474,7 @@ exec '${q(cli)}' sources pull --path '${q(repoPath)}' --branch '${q(branch)}'
 
 function writeCronWrapper(sourceId: string, repoPath: string, branch: string): string {
   const wrapper = cronWrapperPath(sourceId);
-  const body = renderCronWrapper(sourceId, repoPath, branch, resolveGbrainCliPath(), pushLogPath());
+  const body = renderCronWrapper(sourceId, repoPath, branch, resolveModusbrainCliPath(), pushLogPath());
   mkdirSync(dirname(wrapper), { recursive: true });
   writeFileSync(wrapper, body, { mode: 0o755 });
   return wrapper;
@@ -489,8 +489,8 @@ export function generateBrainPullPlist(label: string, wrapperPath: string, home:
   <key>Label</key><string>${esc(label)}</string>
   <key>ProgramArguments</key><array><string>${esc(wrapperPath)}</string></array>
   <key>StartInterval</key><integer>${intervalSec}</integer>
-  <key>StandardOutPath</key><string>${esc(home)}/.gbrain/brain-pull.log</string>
-  <key>StandardErrorPath</key><string>${esc(home)}/.gbrain/brain-pull.err</string>
+  <key>StandardOutPath</key><string>${esc(home)}/.modusbrain/brain-pull.log</string>
+  <key>StandardErrorPath</key><string>${esc(home)}/.modusbrain/brain-pull.err</string>
 </dict>
 </plist>`;
 }
@@ -553,9 +553,9 @@ function removeDurabilityCron(sourceId: string): boolean {
 export interface AcceptPatResult { token: string; source: string; warnings: string[]; }
 
 /**
- * Resolve a PAT: --pat-file (preferred) > GBRAIN_GITHUB_PAT env. Never a bare CLI
+ * Resolve a PAT: --pat-file (preferred) > MODUSBRAIN_GITHUB_PAT env. Never a bare CLI
  * arg (process-listing leak). Validates non-empty; WARNs loudly on loose perms
- * but continues (mirrors GBRAIN_ALLOW_PRIVATE_REMOTES). Returns null if none.
+ * but continues (mirrors MODUSBRAIN_ALLOW_PRIVATE_REMOTES). Returns null if none.
  */
 export function acceptPat(opts: { patFile?: string }): AcceptPatResult | null {
   const warnings: string[] = [];
@@ -569,8 +569,8 @@ export function acceptPat(opts: { patFile?: string }): AcceptPatResult | null {
     if (!token) throw new Error(`--pat-file is empty: ${opts.patFile}`);
     return { token, source: 'pat-file', warnings };
   }
-  const env = (process.env.GBRAIN_GITHUB_PAT || '').trim();
-  if (env) return { token: env, source: 'env:GBRAIN_GITHUB_PAT', warnings };
+  const env = (process.env.MODUSBRAIN_GITHUB_PAT || '').trim();
+  if (env) return { token: env, source: 'env:MODUSBRAIN_GITHUB_PAT', warnings };
   return null;
 }
 
@@ -688,7 +688,7 @@ function commitScaffolding(repoPath: string, branch: string, redact: (s: string)
       stdio: ['ignore', 'pipe', 'ignore'], timeout: 10_000, env: { ...process.env, ...GIT_ENV },
     }).toString().trim();
     if (!staged) return { status: 'ok', detail: 'scaffolding already committed' };
-    execFileSync('git', ['-C', repoPath, 'commit', '-m', 'chore(gbrain): install brain durability scaffolding'], {
+    execFileSync('git', ['-C', repoPath, 'commit', '-m', 'chore(modusbrain): install brain durability scaffolding'], {
       stdio: 'ignore', timeout: 30_000, env: { ...process.env, ...GIT_ENV },
     });
     execFileSync('git', ['-C', repoPath, ...['-c', 'http.followRedirects=false'], 'push', 'origin', `HEAD:${branch}`], {
@@ -718,9 +718,9 @@ export async function unhardenBrainRepo(opts: UnhardenOpts): Promise<DurabilityS
   const cronRemoved = removeDurabilityCron(sourceId);
   steps.push({ step: 'cron', status: cronRemoved ? 'fixed' : 'skipped', detail: cronRemoved ? 'cron removed' : 'no cron' });
   const hookRemoved = isGitRepo(repoPath) ? uninstallLocalHook(repoPath) : false;
-  steps.push({ step: 'hook', status: hookRemoved ? 'fixed' : 'skipped', detail: hookRemoved ? 'hook removed' : 'no gbrain hook' });
+  steps.push({ step: 'hook', status: hookRemoved ? 'fixed' : 'skipped', detail: hookRemoved ? 'hook removed' : 'no modusbrain hook' });
   const credRemoved = isGitRepo(repoPath) ? removeCredentialWiring(repoPath) : false;
-  steps.push({ step: 'credential', status: credRemoved ? 'fixed' : 'skipped', detail: credRemoved ? 'credential wiring removed' : 'no gbrain credential wiring' });
+  steps.push({ step: 'credential', status: credRemoved ? 'fixed' : 'skipped', detail: credRemoved ? 'credential wiring removed' : 'no modusbrain credential wiring' });
   opts.logger?.(steps.map(s => `[${s.step}] ${s.status}: ${s.detail}`).join('\n'));
   return steps;
 }

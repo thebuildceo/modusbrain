@@ -10,14 +10,14 @@ import {
 } from '../src/core/binary-self-update.ts';
 
 const ASSETS: ReleaseAsset[] = [
-  { name: 'gbrain-darwin-arm64', url: 'https://example.com/darwin-arm64' },
-  { name: 'gbrain-linux-x64', url: 'https://example.com/linux-x64' },
+  { name: 'modusbrain-darwin-arm64', url: 'https://example.com/darwin-arm64' },
+  { name: 'modusbrain-linux-x64', url: 'https://example.com/linux-x64' },
 ];
 
 describe('expectedAssetName / resolvePlatformAsset', () => {
   test('maps the two published targets', () => {
-    expect(expectedAssetName('darwin', 'arm64')).toBe('gbrain-darwin-arm64');
-    expect(expectedAssetName('linux', 'x64')).toBe('gbrain-linux-x64');
+    expect(expectedAssetName('darwin', 'arm64')).toBe('modusbrain-darwin-arm64');
+    expect(expectedAssetName('linux', 'x64')).toBe('modusbrain-linux-x64');
   });
   test('null for unpublished platform/arch', () => {
     expect(expectedAssetName('darwin', 'x64')).toBeNull();
@@ -33,7 +33,7 @@ describe('expectedAssetName / resolvePlatformAsset', () => {
 });
 
 async function withTmp<T>(fn: (dir: string) => Promise<T>): Promise<T> {
-  const dir = mkdtempSync(join(tmpdir(), 'gbrain-binup-'));
+  const dir = mkdtempSync(join(tmpdir(), 'modusbrain-binup-'));
   try {
     return await fn(dir);
   } finally {
@@ -44,7 +44,7 @@ async function withTmp<T>(fn: (dir: string) => Promise<T>): Promise<T> {
 describe('runBinarySelfUpdate', () => {
   test('happy path: stages, smokes, atomically replaces the target', async () => {
     await withTmp(async (dir) => {
-      const target = join(dir, 'gbrain');
+      const target = join(dir, 'modusbrain');
       writeFileSync(target, 'OLD BINARY');
       const res = await runBinarySelfUpdate(target, {
         platform: 'darwin',
@@ -54,14 +54,14 @@ describe('runBinarySelfUpdate', () => {
         smoke: () => true,
       });
       expect(res.ok).toBe(true);
-      expect(res.asset).toBe('gbrain-darwin-arm64');
+      expect(res.asset).toBe('modusbrain-darwin-arm64');
       expect(readFileSync(target, 'utf8')).toBe('NEW BINARY');
     });
   });
 
   test('unsupported platform → unsupported_platform, target untouched', async () => {
     await withTmp(async (dir) => {
-      const target = join(dir, 'gbrain.exe');
+      const target = join(dir, 'modusbrain.exe');
       writeFileSync(target, 'OLD');
       const res = await runBinarySelfUpdate(target, {
         platform: 'win32',
@@ -76,7 +76,7 @@ describe('runBinarySelfUpdate', () => {
 
   test('fetch failure → fetch_failed, target untouched', async () => {
     await withTmp(async (dir) => {
-      const target = join(dir, 'gbrain');
+      const target = join(dir, 'modusbrain');
       writeFileSync(target, 'OLD');
       const res = await runBinarySelfUpdate(target, {
         platform: 'darwin',
@@ -90,7 +90,7 @@ describe('runBinarySelfUpdate', () => {
 
   test('asset missing from release → no_asset, target untouched', async () => {
     await withTmp(async (dir) => {
-      const target = join(dir, 'gbrain');
+      const target = join(dir, 'modusbrain');
       writeFileSync(target, 'OLD');
       const res = await runBinarySelfUpdate(target, {
         platform: 'linux',
@@ -104,7 +104,7 @@ describe('runBinarySelfUpdate', () => {
 
   test('download throws → download_failed, no staged leftover, target untouched', async () => {
     await withTmp(async (dir) => {
-      const target = join(dir, 'gbrain');
+      const target = join(dir, 'modusbrain');
       writeFileSync(target, 'OLD');
       const res = await runBinarySelfUpdate(target, {
         platform: 'darwin',
@@ -122,7 +122,7 @@ describe('runBinarySelfUpdate', () => {
 
   test('smoke fail → smoke_failed, staged discarded, target untouched', async () => {
     await withTmp(async (dir) => {
-      const target = join(dir, 'gbrain');
+      const target = join(dir, 'modusbrain');
       writeFileSync(target, 'OLD');
       const res = await runBinarySelfUpdate(target, {
         platform: 'darwin',

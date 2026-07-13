@@ -8,8 +8,8 @@
  * lock-renewal cathedral wave (see plan
  * `~/.claude/plans/system-instruction-you-are-working-humming-nygaard.md`).
  *
- * File: `~/.gbrain/audit/lock-renewal-YYYY-Www.jsonl` (ISO-week
- * rotation, honors `GBRAIN_AUDIT_DIR` via the shared `resolveAuditDir()`
+ * File: `~/.modusbrain/audit/lock-renewal-YYYY-Www.jsonl` (ISO-week
+ * rotation, honors `MODUSBRAIN_AUDIT_DIR` via the shared `resolveAuditDir()`
  * helper). Built on the v0.40.4.0 `audit-writer.ts` primitive — same
  * dual-week read window, same best-effort write contract.
  *
@@ -40,7 +40,7 @@
  *
  * Doctor wiring + dream-purge wiring are filed as v0.41.22+ follow-up
  * TODOs in TODOS.md. For v0.41.22.2 the operator surface is
- * `tail -F ~/.gbrain/audit/lock-renewal-*.jsonl`.
+ * `tail -F ~/.modusbrain/audit/lock-renewal-*.jsonl`.
  */
 
 import * as fs from 'fs';

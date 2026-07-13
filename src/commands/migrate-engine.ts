@@ -2,13 +2,13 @@
  * Engine migration: transfer brain data between PGLite and Postgres.
  *
  * Usage:
- *   gbrain migrate --to supabase [--url <connection_string>]
- *   gbrain migrate --to pglite [--path <db_path>]
- *   gbrain migrate --to <engine> --force  (overwrite non-empty target)
+ *   modusbrain migrate --to supabase [--url <connection_string>]
+ *   modusbrain migrate --to pglite [--path <db_path>]
+ *   modusbrain migrate --to <engine> --force  (overwrite non-empty target)
  */
 
 import { createEngine } from '../core/engine-factory.ts';
-import { loadConfig, saveConfig, toEngineConfig, gbrainPath, effectiveEnvDatabaseUrl, type GBrainConfig } from '../core/config.ts';
+import { loadConfig, saveConfig, toEngineConfig, modusbrainPath, effectiveEnvDatabaseUrl, type ModusBrainConfig } from '../core/config.ts';
 import type { BrainEngine } from '../core/engine.ts';
 import type { EngineConfig } from '../core/types.ts';
 import { writeFileSync, readFileSync, existsSync, unlinkSync } from 'fs';
@@ -25,7 +25,7 @@ interface MigrateOpts {
 function parseArgs(args: string[]): MigrateOpts {
   const toIdx = args.indexOf('--to');
   if (toIdx === -1 || !args[toIdx + 1]) {
-    throw new Error('Usage: gbrain migrate --to <supabase|pglite> [--url <url>] [--path <path>] [--force]');
+    throw new Error('Usage: modusbrain migrate --to <supabase|pglite> [--url <url>] [--path <path>] [--force]');
   }
 
   const targetRaw = args[toIdx + 1];
@@ -46,7 +46,7 @@ function parseArgs(args: string[]): MigrateOpts {
 }
 
 function getManifestPath(): string {
-  return gbrainPath('migrate-manifest.json');
+  return modusbrainPath('migrate-manifest.json');
 }
 
 interface MigrateManifest {
@@ -78,7 +78,7 @@ export async function runMigrateEngine(sourceEngine: BrainEngine, args: string[]
   const opts = parseArgs(args);
   const config = loadConfig();
   if (!config) {
-    console.error('No brain configured. Run: gbrain init');
+    console.error('No brain configured. Run: modusbrain init');
     process.exit(1);
   }
 
@@ -98,7 +98,7 @@ export async function runMigrateEngine(sourceEngine: BrainEngine, args: string[]
       process.exit(1);
     }
   } else {
-    targetConfig.database_path = opts.targetPath || gbrainPath('brain.pglite');
+    targetConfig.database_path = opts.targetPath || modusbrainPath('brain.pglite');
   }
 
   // Connect to target
@@ -250,7 +250,7 @@ export async function runMigrateEngine(sourceEngine: BrainEngine, args: string[]
   // v0.37 fix wave Lane C.4: these DB-plane writes are SCHEMA METADATA for
   // the target engine — they record "the schema was sized using this
   // embedding model + dimension." They are NOT the runtime gateway config
-  // (which lives in the file plane via `~/.gbrain/config.json`). When this
+  // (which lives in the file plane via `~/.modusbrain/config.json`). When this
   // function copies them, it's preserving the schema-applied state across
   // the migration, not re-pointing the gateway. The newConfig below
   // doesn't carry these fields because the user's existing file config
@@ -265,8 +265,8 @@ export async function runMigrateEngine(sourceEngine: BrainEngine, args: string[]
   // Update local config. v0.37 fix wave: preserve existing file-plane
   // embedding/expansion/chat config across the engine migration; only
   // the engine + connection target should change.
-  const existingFile = (await import('../core/config.ts')).loadConfigFileOnly() ?? ({} as GBrainConfig);
-  const newConfig: GBrainConfig = {
+  const existingFile = (await import('../core/config.ts')).loadConfigFileOnly() ?? ({} as ModusBrainConfig);
+  const newConfig: ModusBrainConfig = {
     ...existingFile,
     engine: opts.targetEngine,
     ...(opts.targetEngine === 'postgres'
@@ -317,7 +317,7 @@ async function verifyTarget(engine: BrainEngine, expectedPages: number): Promise
     if (health.embed_coverage >= 0.9) {
       console.log(`  ok  embeddings: ${pct}% coverage, ${health.missing_embeddings} missing`);
     } else {
-      console.warn(`  WARN embeddings: ${pct}% coverage, ${health.missing_embeddings} missing. Run: gbrain embed --stale`);
+      console.warn(`  WARN embeddings: ${pct}% coverage, ${health.missing_embeddings} missing. Run: modusbrain embed --stale`);
     }
   } catch (e) {
     console.warn(`  WARN embeddings: could not measure (${e instanceof Error ? e.message : String(e)})`);
@@ -330,11 +330,11 @@ async function verifyTarget(engine: BrainEngine, expectedPages: number): Promise
     if (schemaVersion >= LATEST_VERSION) {
       console.log(`  ok  schema: version ${schemaVersion}`);
     } else {
-      console.warn(`  WARN schema: version ${schemaVersion} (latest: ${LATEST_VERSION}). Run: gbrain apply-migrations --yes`);
+      console.warn(`  WARN schema: version ${schemaVersion} (latest: ${LATEST_VERSION}). Run: modusbrain apply-migrations --yes`);
     }
   } catch {
     console.warn('  WARN schema: version could not be read');
   }
 
-  console.log('  Full health check: gbrain doctor');
+  console.log('  Full health check: modusbrain doctor');
 }

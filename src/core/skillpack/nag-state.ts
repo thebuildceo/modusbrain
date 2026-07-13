@@ -1,6 +1,6 @@
 /**
  * skillpack/nag-state.ts — machine-owned install-nag state at
- * `~/.gbrain/skillpack-nag-state.json`.
+ * `~/.modusbrain/skillpack-nag-state.json`.
  *
  * Sibling of skillpack-state.json (the install-provenance ledger keyed by pack
  * name). This file tracks the OPPOSITE: declines of brain-resident packs the
@@ -19,9 +19,9 @@
 import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'fs';
 import { dirname } from 'path';
 
-import { gbrainPath } from '../config.ts';
+import { modusbrainPath } from '../config.ts';
 
-export const SKILLPACK_NAG_SCHEMA_VERSION = 'gbrain-skillpack-nag-v1' as const;
+export const SKILLPACK_NAG_SCHEMA_VERSION = 'modusbrain-skillpack-nag-v1' as const;
 
 /** Default declines before the advisory goes quiet for a given pack version. */
 export const DEFAULT_NAG_CEILING = 3;
@@ -68,7 +68,7 @@ export class NagStateError extends Error {
 const EMPTY: NagState = { schema_version: SKILLPACK_NAG_SCHEMA_VERSION, entries: [] };
 
 export function defaultNagStatePath(): string {
-  return gbrainPath('skillpack-nag-state.json');
+  return modusbrainPath('skillpack-nag-state.json');
 }
 
 /**

@@ -43,7 +43,7 @@ import { runGuardrails } from './guardrails.ts';
 /**
  * v0.20.0 Cathedral II Layer 8 D2 — markdown fence extraction helper.
  *
- * Roughly 40% of gbrain's brain is docs/guides/architecture notes with
+ * Roughly 40% of modusbrain's brain is docs/guides/architecture notes with
  * substantial inline code. In v0.19.0 those fenced code blocks chunk as
  * prose, so querying "how do we import from engine" ranks paragraphs
  * ABOUT the import above the actual import example. D2 walks the marked
@@ -99,10 +99,10 @@ function fenceTagToPseudoPath(lang: string | undefined): string | null {
  * Maximum code fences we'll extract from a single markdown page. Fence-bomb
  * DOS defense — a malicious markdown file with 10K ```ts blocks could
  * generate 10K chunks × embedding API calls. Override per-page via the
- * `GBRAIN_MAX_FENCES_PER_PAGE` env var if docs-heavy brains legitimately
+ * `MODUSBRAIN_MAX_FENCES_PER_PAGE` env var if docs-heavy brains legitimately
  * exceed 100 fences on a single page.
  */
-const MAX_FENCES_PER_PAGE = Number.parseInt(process.env.GBRAIN_MAX_FENCES_PER_PAGE || '100', 10);
+const MAX_FENCES_PER_PAGE = Number.parseInt(process.env.MODUSBRAIN_MAX_FENCES_PER_PAGE || '100', 10);
 
 /**
  * Walk the marked lexer output and extract recognizable code fences.
@@ -133,8 +133,8 @@ async function extractFencedChunks(
     if (!text) continue;
     if (fencesSeen >= MAX_FENCES_PER_PAGE) {
       console.warn(
-        `[gbrain] markdown fence cap hit (${MAX_FENCES_PER_PAGE} fences/page); skipping additional fences. ` +
-        `Override via GBRAIN_MAX_FENCES_PER_PAGE env var.`,
+        `[modusbrain] markdown fence cap hit (${MAX_FENCES_PER_PAGE} fences/page); skipping additional fences. ` +
+        `Override via MODUSBRAIN_MAX_FENCES_PER_PAGE env var.`,
       );
       break;
     }
@@ -160,7 +160,7 @@ async function extractFencedChunks(
     } catch (e: unknown) {
       // One fence failing shouldn't sink the page. Log + continue.
       console.warn(
-        `[gbrain] fence extraction failed for lang=${code.lang}: ${e instanceof Error ? e.message : String(e)}`,
+        `[modusbrain] fence extraction failed for lang=${code.lang}: ${e instanceof Error ? e.message : String(e)}`,
       );
     }
   }
@@ -240,7 +240,7 @@ export async function importFromContent(
     /**
      * v0.32.7 CJK wave (codex post-merge F1): bypass the
      * `existing.content_hash === hash` short-circuit and ALWAYS re-chunk +
-     * re-embed. Used by `gbrain reindex --markdown` so a chunker version
+     * re-embed. Used by `modusbrain reindex --markdown` so a chunker version
      * bump actually reaches unchanged-source pages. Without this, the
      * sweep silently no-ops on every page whose markdown body hasn't
      * been edited since the last import — defeating the whole purpose of
@@ -347,7 +347,7 @@ export async function importFromContent(
   //
   // Three outcomes:
   //   - kill-switch active (`content_sanity.disabled === true` /
-  //     `GBRAIN_NO_SANITY=1`) → assess + audit with bypass flag, emit
+  //     `MODUSBRAIN_NO_SANITY=1`) → assess + audit with bypass flag, emit
   //     loud stderr per offending ingest, but let everything through.
   //   - hard-block (junk pattern OR operator literal) → THROW
   //     ContentSanityBlockError. Existing exception flow at every
@@ -382,18 +382,18 @@ export async function importFromContent(
       effectiveCfg = await loadConfigWithEngine(engine, baseCfg);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      process.stderr.write(`[gbrain] content-sanity: DB config lift failed (${msg}); falling back to file/env\n`);
+      process.stderr.write(`[modusbrain] content-sanity: DB config lift failed (${msg}); falling back to file/env\n`);
     }
     const cs = effectiveCfg?.content_sanity ?? {};
-    // GBRAIN_NO_SANITY=1 fast-path: loadConfig() returns null when
-    // there's no `~/.gbrain/config.json` AND no DATABASE_URL env var
+    // MODUSBRAIN_NO_SANITY=1 fast-path: loadConfig() returns null when
+    // there's no `~/.modusbrain/config.json` AND no DATABASE_URL env var
     // (e.g., fresh PGLite-only setups, hermetic tests). The merged
     // content_sanity block never carries `disabled` in that case. Read
     // the kill-switch env directly so it works regardless of whether
     // any other config plumbing fired. Same direct-env-check pattern
     // applies to the patterns_enabled flip below.
     const sanityDisabled =
-      cs.disabled === true || process.env.GBRAIN_NO_SANITY === '1';
+      cs.disabled === true || process.env.MODUSBRAIN_NO_SANITY === '1';
     const extra_literals =
       cs.junk_patterns_enabled !== false && !sanityDisabled ? loadOperatorLiterals() : [];
     // Disposition for the high-confidence junk path: quarantine (hide) by
@@ -422,7 +422,7 @@ export async function importFromContent(
       });
       if (sanityResult.shouldQuarantine || sanityResult.shouldFlag) {
         process.stderr.write(
-          `[gbrain] content-sanity bypass (GBRAIN_NO_SANITY=1): ${slug} — ${sanityResult.reason_messages.join('; ')}\n`,
+          `[modusbrain] content-sanity bypass (MODUSBRAIN_NO_SANITY=1): ${slug} — ${sanityResult.reason_messages.join('; ')}\n`,
         );
       }
     } else if (sanityResult.shouldQuarantine) {
@@ -448,7 +448,7 @@ export async function importFromContent(
       // Default: quarantine (hide). Page lands with the marker, writes
       // zero chunks (chunking guard below widens to isQuarantined), is
       // excluded from search via QUARANTINE_FILTER_FRAGMENT, reviewable
-      // via get_page / `gbrain quarantine list`.
+      // via get_page / `modusbrain quarantine list`.
       parsed.frontmatter[QUARANTINE_KEY] = buildQuarantineMarker(reason, detail, {
         bytes: sanityResult.bytes,
       });
@@ -457,7 +457,7 @@ export async function importFromContent(
         disposition: 'quarantine',
       });
       process.stderr.write(
-        `[gbrain] content-sanity quarantine: ${slug} — ${detail} (hidden from search, reviewable via 'gbrain quarantine list')\n`,
+        `[modusbrain] content-sanity quarantine: ${slug} — ${detail} (hidden from search, reviewable via 'modusbrain quarantine list')\n`,
       );
     } else if (sanityResult.shouldFlag) {
       // Fuzzy markup-heavy OR oversize. The page stays usable; the agent
@@ -478,7 +478,7 @@ export async function importFromContent(
           disposition: 'soft_block',
         });
         process.stderr.write(
-          `[gbrain] content-sanity flag (oversized): ${slug} (${sanityResult.bytes} bytes) — page lands, embedding skipped, agent warned\n`,
+          `[modusbrain] content-sanity flag (oversized): ${slug} (${sanityResult.bytes} bytes) — page lands, embedding skipped, agent warned\n`,
         );
       } else {
         // markup_heavy: page ingests NORMALLY (keeps chunks, embeds). The
@@ -487,7 +487,7 @@ export async function importFromContent(
           disposition: 'flag',
         });
         process.stderr.write(
-          `[gbrain] content-sanity flag (markup_heavy): ${slug} (ratio ${sanityResult.markup_ratio?.toFixed(2)}) — stays searchable, agent warned\n`,
+          `[modusbrain] content-sanity flag (markup_heavy): ${slug} (ratio ${sanityResult.markup_ratio?.toFixed(2)}) — stays searchable, agent warned\n`,
         );
       }
     } else if (sanityResult.reasons.includes('oversize_warn')) {
@@ -496,13 +496,13 @@ export async function importFromContent(
         disposition: 'warn',
       });
       process.stderr.write(
-        `[gbrain] content-sanity warn: ${slug} (${sanityResult.bytes} bytes) — exceeds warn threshold, consider splitting\n`,
+        `[modusbrain] content-sanity warn: ${slug} (${sanityResult.bytes} bytes) — exceeds warn threshold, consider splitting\n`,
       );
     }
   }
 
   // v0.39.3.0 CV8 — DB content_hash excludes timestamp-bearing frontmatter
-  // keys so identical body content from `gbrain capture` (which stamps
+  // keys so identical body content from `modusbrain capture` (which stamps
   // `captured_at` and `ingested_at` per call) produces a stable hash.
   // Pre-fix, every capture-cli invocation produced a fresh hash because
   // the timestamp changed, defeating:
@@ -566,7 +566,7 @@ export async function importFromContent(
   // v0.41.13 (#1309) — identity-based cross-slug dedup pre-check.
   //
   // Catches the overlapping-ingest-roots bug class: when a user runs
-  // `gbrain import /vault/Subdir/` then later `gbrain import /vault/`,
+  // `modusbrain import /vault/Subdir/` then later `modusbrain import /vault/`,
   // the same file is ingested under two different slugs (e.g.
   // `vault/subdir/note` and `vault/note`). The slug-only check above
   // misses it because the slugs differ; this check identifies the true
@@ -779,7 +779,7 @@ export async function importFromContent(
     // the page write. updatePageContextualRetrievalState is a narrow
     // UPDATE that runs after putPage's INSERT/UPDATE so the row exists.
     // For opts.noEmbed callers, we skip stamping — the next embed pass
-    // (gbrain embed --stale or contextual reindex Minion) will set it.
+    // (modusbrain embed --stale or contextual reindex Minion) will set it.
     if (!opts.noEmbed) {
       await tx.updatePageContextualRetrievalState(
         slug,
@@ -798,7 +798,7 @@ export async function importFromContent(
     // (auto-tag / dream synthesize / signal-detector writes to the same
     // table). The pre-v0.41.37.0 "delete every existing tag not in the current
     // frontmatter" logic wiped ALL enrichment tags on every re-import — most
-    // visibly under `gbrain reindex --markdown` (#1621), which re-imports every
+    // visibly under `modusbrain reindex --markdown` (#1621), which re-imports every
     // page with forceRechunk. reindex is a re-chunk/re-embed op; it must not
     // destroy tags.
     //
@@ -831,7 +831,7 @@ export async function importFromContent(
     // page. addLink throws when either endpoint is missing (master tightened
     // this in v0.18.x), so we wrap each pair in try/catch — guides imported
     // before their code repo syncs are common, and the missing edges land
-    // later via `gbrain reconcile-links` (Layer 8 D3, v0.21.0).
+    // later via `modusbrain reconcile-links` (Layer 8 D3, v0.21.0).
     const codeRefs = extractCodeRefs(parsed.compiled_truth + '\n' + (parsed.timeline || ''));
     // For doc↔impl edges, both endpoints are within the same source as the
     // markdown page being imported. Cross-source edges (markdown in one
@@ -900,7 +900,7 @@ export async function importFromContent(
  * is only accepted when it matches `slugifyPath(relativePath)`. A mismatch is
  * rejected rather than silently honored — otherwise a file at `notes/random.md`
  * could declare `slug: people/elon` in frontmatter and overwrite the legitimate
- * `people/elon` page on the next `gbrain sync` or `gbrain import`. In shared
+ * `people/elon` page on the next `modusbrain sync` or `modusbrain import`. In shared
  * brains where PRs are mergeable, this is a silent page-hijack primitive.
  */
 export async function importFromFile(
@@ -946,7 +946,7 @@ export async function importFromFile(
   // This turns bare markdown files into fully-typed, dated, tagged pages
   // without requiring the user to manually add YAML headers.
   // The inference is applied to the in-memory content only; the file on disk
-  // is not modified. Use `gbrain frontmatter generate --fix` to write back.
+  // is not modified. Use `modusbrain frontmatter generate --fix` to write back.
   if (opts.inferFrontmatter !== false) {
     const { applyInference } = await import('./frontmatter-inference.ts');
     const { content: inferred, inferred: meta } = applyInference(relativePath, content);
@@ -1036,10 +1036,10 @@ export async function importFromFile(
  * predicate is the single place to update.
  *
  * Sibling decisions: `file_upload` doesn't write a page (uploads to
- * storage; the page itself is written via separate put_page); `gbrain
+ * storage; the page itself is written via separate put_page); `modusbrain
  * import` (bulk markdown import) intentionally skips the backstop to
  * avoid a cost spike on first-time imports of large brain repos. The
- * user runs `gbrain dream` or the consolidate phase to backfill facts
+ * user runs `modusbrain dream` or the consolidate phase to backfill facts
  * from bulk-imported pages.
  */
 export async function importCodeFile(
@@ -1148,7 +1148,7 @@ export async function importCodeFile(
         chunks[i]!.token_count = Math.ceil(chunks[i]!.chunk_text.length / 4);
       }
     } catch (e: unknown) {
-      console.warn(`[gbrain] embedding failed for code file ${slug}: ${e instanceof Error ? e.message : String(e)}`);
+      console.warn(`[modusbrain] embedding failed for code file ${slug}: ${e instanceof Error ? e.message : String(e)}`);
     }
   }
 
@@ -1260,7 +1260,7 @@ export async function importCodeFile(
       // Edge persistence is best-effort. A failed addCodeEdges must not
       // fail the overall import — the chunks + embeddings already
       // landed, which is the primary value.
-      console.warn(`[gbrain] edge extraction failed for ${slug}: ${edgeErr instanceof Error ? edgeErr.message : String(edgeErr)}`);
+      console.warn(`[modusbrain] edge extraction failed for ${slug}: ${edgeErr instanceof Error ? edgeErr.message : String(edgeErr)}`);
     }
   }
 
@@ -1281,7 +1281,7 @@ export type ImportFileResult = ImportResult;
  * HEIC/HEIF/AVIF need WASM decode to JPEG before Voyage will accept them.
  *
  * Other variants (BMP, TIFF, etc.) intentionally left out — they're rare in
- * the kinds of brains gbrain serves and adding them would expand the WASM
+ * the kinds of brains modusbrain serves and adding them would expand the WASM
  * decode surface meaningfully.
  */
 export const SUPPORTED_IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.heic', '.heif', '.avif'] as const;
@@ -1479,7 +1479,7 @@ async function maybeOcr(
   imgBuf: Buffer,
   mime: string,
 ): Promise<string> {
-  const opt = process.env.GBRAIN_EMBEDDING_IMAGE_OCR;
+  const opt = process.env.MODUSBRAIN_EMBEDDING_IMAGE_OCR;
   if (opt !== 'true') return '';
 
   // Counter helpers — quiet failure if config table is unavailable.
@@ -1495,7 +1495,7 @@ async function maybeOcr(
     const { isAvailable, generateOcrText } = await import('./ai/gateway.ts');
     if (!isAvailable('expansion')) {
       if (!_ocrWarnedThisSession) {
-        console.warn('[gbrain] OCR opt-in is true but expansion model is unavailable; skipping OCR for this session');
+        console.warn('[modusbrain] OCR opt-in is true but expansion model is unavailable; skipping OCR for this session');
         _ocrWarnedThisSession = true;
       }
       await bump('ocr_failed_no_key');
@@ -1506,7 +1506,7 @@ async function maybeOcr(
     return text;
   } catch (err) {
     if (!_ocrWarnedThisSession) {
-      console.warn(`[gbrain] OCR call failed (continuing without OCR text): ${err instanceof Error ? err.message : String(err)}`);
+      console.warn(`[modusbrain] OCR call failed (continuing without OCR text): ${err instanceof Error ? err.message : String(err)}`);
       _ocrWarnedThisSession = true;
     }
     await bump('ocr_failed_other');
@@ -1657,7 +1657,7 @@ export async function importImageFile(
       // Cherry-3: path-proximity auto-link to a sibling text page. The first
       // matching candidate gets an image_of edge. Best-effort — addLink
       // throws when the target doesn't exist; we silently skip for now and
-      // let `gbrain reconcile-links` pick up later additions.
+      // let `modusbrain reconcile-links` pick up later additions.
       for (const candidate of imageOfCandidates(imageSlug)) {
         const sibling = await tx.getPage(candidate);
         if (sibling) {

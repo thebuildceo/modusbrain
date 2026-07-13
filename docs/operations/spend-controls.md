@@ -1,18 +1,18 @@
 # Spend controls
 
-GBrain's embedding-spend gates in one place: every gate, its config key, default,
+ModusBrain's embedding-spend gates in one place: every gate, its config key, default,
 whether it blocks or just informs, how to widen or disable it, and how the
 `spend.posture` switch governs all of them.
 
-The orienting idea: **GBrain itself is rounding error; the spend that matters is
+The orienting idea: **ModusBrain itself is rounding error; the spend that matters is
 downstream embedding.** These gates exist so a routine sync or enrich can't run up
 an unexpected embedding bill, while never wedging an unattended cron.
 
 ## `spend.posture` — one switch for "cost is not my constraint"
 
 ```bash
-gbrain config set spend.posture tokenmax   # all cost gates become informational
-gbrain config set spend.posture gated      # default — gates enforce
+modusbrain config set spend.posture tokenmax   # all cost gates become informational
+modusbrain config set spend.posture gated      # default — gates enforce
 ```
 
 | Value | Effect |
@@ -64,7 +64,7 @@ Behavior above the floor:
 - **TTY:** prompts `[y/N]`.
 - **Non-interactive (cron/agent):** **auto-defers** embeds to capped backfill jobs and
   exits 0 — it never wedges the pipeline. The backlog drains via the jobs worker or
-  `gbrain embed --stale`. Pass `--yes` to embed inline instead.
+  `modusbrain embed --stale`. Pass `--yes` to embed inline instead.
 
 Output format splits on the explicit `--json` flag: `--json` emits a structured
 envelope; otherwise human text. Every gate message carries paste-ready knobs.
@@ -85,7 +85,7 @@ estimate is `delta + stale backlog`, labeled as such.
 - **Pre-pull window:** the gate fetches before estimating, so it prices what the run
   will pull. If a fetch fails (offline), it estimates against local HEAD and labels the
   result; the bounded residual is priced on the next run.
-- **Single-source `gbrain sync`** carries the same gate as `sync --all` (it previously
+- **Single-source `modusbrain sync`** carries the same gate as `sync --all` (it previously
   embedded inline with no preview).
 - **Recovery under parallel:** `--skip-failed` / `--retry-failed` work under parallel
   sync (the failure ledger is per-source and lock-serialized) — you no longer have to
@@ -95,17 +95,17 @@ estimate is `delta + stale backlog`, labeled as such.
 
 ```bash
 # Never gate this brain on cost:
-gbrain config set spend.posture tokenmax
+modusbrain config set spend.posture tokenmax
 
 # Widen the sync inline floor to $5:
-gbrain config set sync.cost_gate_min_usd 5
+modusbrain config set sync.cost_gate_min_usd 5
 
 # Disable the sync inline floor entirely:
-gbrain config set sync.cost_gate_min_usd off
+modusbrain config set sync.cost_gate_min_usd off
 
 # Lift the backfill 24h spend cap:
-gbrain config set embed.backfill_max_usd_per_source_24h off
+modusbrain config set embed.backfill_max_usd_per_source_24h off
 
 # Run enrich uncapped non-interactively:
-gbrain enrich --max-usd off        # or: gbrain config set spend.posture tokenmax
+modusbrain enrich --max-usd off        # or: modusbrain config set spend.posture tokenmax
 ```

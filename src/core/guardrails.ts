@@ -1,12 +1,12 @@
 /**
  * Vendor-neutral content guardrail seams.
  *
- * GBrain ingests content (markdown, code) into its retrieval layer and routes
+ * ModusBrain ingests content (markdown, code) into its retrieval layer and routes
  * queries/tool-inputs through an LLM gateway. A guardrail is an external
  * classifier — a content firewall, a PII scrubber, a prompt-injection detector —
  * that wants to *observe* the content flowing across those boundaries.
  *
- * This module exposes the seams without binding GBrain to any specific vendor.
+ * This module exposes the seams without binding ModusBrain to any specific vendor.
  * Zero guardrails are registered by default; the OSS distribution ships inert.
  * Operators (or vendor plugins) register a {@link GuardrailProvider} via
  * {@link registerGuardrailProvider}, and the five hook points below await it
@@ -16,7 +16,7 @@
  *
  * - **Observe-only.** `runGuardrails` returns `void`. Callers MUST NOT branch
  *   on any provider verdict. A guardrail cannot block, rewrite, drop, retry, or
- *   reorder GBrain behavior through this interface. Enforcement, if ever added,
+ *   reorder ModusBrain behavior through this interface. Enforcement, if ever added,
  *   gets its own explicitly-named seam and its own RFC.
  * - **Fail open.** Missing config, provider throw, timeout, network error, and
  *   malformed responses are all swallowed. A broken guardrail never breaks an
@@ -24,7 +24,7 @@
  * - **Inline await, no enqueue.** These hooks await the provider before
  *   proceeding so the classifier sees content at the exact pre-persist /
  *   pre-inference moment. Providers that want async fan-out own their own queue.
- * - **No verdict persistence.** GBrain does not write guardrail results to the
+ * - **No verdict persistence.** ModusBrain does not write guardrail results to the
  *   DB. Providers own their own audit trail.
  * - **Content boundaries.** Hooks pass the user/ingest-facing payload only:
  *   the markdown/code body, the last user message, the expansion query, the
@@ -53,7 +53,7 @@ export type GuardrailHook =
 /**
  * One guardrail invocation. `content` is the raw text the boundary handles;
  * `metadata` is provider-opaque, JSON-compatible context (slug, source kind,
- * tool name, model id, etc.). Neither field is mutated by GBrain.
+ * tool name, model id, etc.). Neither field is mutated by ModusBrain.
  */
 export interface GuardrailInput {
   hook: GuardrailHook;
@@ -63,9 +63,9 @@ export interface GuardrailInput {
 
 /**
  * A registered guardrail backend. `classify` is awaited inline. Its return
- * value is intentionally `unknown` and intentionally ignored by GBrain — the
+ * value is intentionally `unknown` and intentionally ignored by ModusBrain — the
  * type exists only so providers can return a typed verdict to *their own*
- * logging/audit code. GBrain never reads it.
+ * logging/audit code. ModusBrain never reads it.
  */
 export interface GuardrailProvider {
   /** Stable id for logs and dedupe (e.g. `"silmaril"`). */
@@ -108,7 +108,7 @@ export function hasGuardrails(): boolean {
  * content short-circuits before any provider runs.
  *
  * Inline await: when guardrails are registered, the caller awaits this. The
- * cost is bounded by each provider's own timeout discipline; GBrain does not
+ * cost is bounded by each provider's own timeout discipline; ModusBrain does not
  * impose one here so providers can tune per-deployment latency budgets.
  */
 export async function runGuardrails(input: GuardrailInput): Promise<void> {
@@ -128,8 +128,8 @@ export async function runGuardrails(input: GuardrailInput): Promise<void> {
           metadata: input.metadata,
         });
       } catch {
-        // Fail open. A guardrail provider MUST NOT be able to break GBrain.
-        // Provider-side logging is the provider's responsibility; GBrain does
+        // Fail open. A guardrail provider MUST NOT be able to break ModusBrain.
+        // Provider-side logging is the provider's responsibility; ModusBrain does
         // not log raw content here (could itself leak the classified payload).
       }
     }),

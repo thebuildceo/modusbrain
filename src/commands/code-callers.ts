@@ -1,5 +1,5 @@
 /**
- * gbrain code-callers <symbol>
+ * modusbrain code-callers <symbol>
  *
  * v0.20.0 Cathedral II Layer 10 (C4) — "who calls this symbol?" Reversed
  * view of the A1 call graph. Matches `to_symbol_qualified` in both
@@ -13,9 +13,9 @@
  *
  * Source resolution: when --source is omitted AND --all-sources is NOT set,
  * resolve through the full source-resolution chain via
- * `resolveScopedSourceOrThrow` (flag → env → .gbrain-source dotfile →
- * local_path → brain_default → sole_non_default), matching `gbrain sources
- * current`. A `.gbrain-source` pin selects the source; only a no-signal
+ * `resolveScopedSourceOrThrow` (flag → env → .modusbrain-source dotfile →
+ * local_path → brain_default → sole_non_default), matching `modusbrain sources
+ * current`. A `.modusbrain-source` pin selects the source; only a no-signal
  * multi-source brain still fails with `multiple_sources_ambiguous`. (Pre-
  * v0.41.30 this called `resolveDefaultSource` directly, which ignored the pin
  * and errored on every multi-source brain — Codex finding #7's source-scoped
@@ -32,7 +32,7 @@ import { resolveScopedSourceOrThrow, SourceResolutionError } from '../core/sourc
 import { formatSoleNonDefaultNudge } from '../core/source-resolver.ts';
 import { resolveCodeReadiness, readinessHint } from '../core/code-graph-readiness.ts';
 
-/** A bad/invalid `.gbrain-source` pin or GBRAIN_SOURCE value surfaces from
+/** A bad/invalid `.modusbrain-source` pin or MODUSBRAIN_SOURCE value surfaces from
  * `resolveSourceWithTier`'s `assertSourceExists` as a plain Error with one of
  * these message prefixes. Mirrors dream.ts:isResolverUserError so we surface a
  * clean usage error instead of an uncaught stack. */
@@ -41,7 +41,7 @@ function isResolverUserError(e: unknown): boolean {
   const m = e.message;
   return (m.startsWith('Source "') && m.includes(' not found.'))
     || m.startsWith('Invalid --source value')
-    || m.startsWith('Invalid GBRAIN_SOURCE value');
+    || m.startsWith('Invalid MODUSBRAIN_SOURCE value');
 }
 
 function parseFlag(args: string[], name: string): string | undefined {
@@ -63,7 +63,7 @@ export async function runCodeCallers(engine: BrainEngine, args: string[]): Promi
       class: 'UsageError',
       code: 'code_callers_requires_symbol',
       message: 'code-callers requires a symbol name',
-      hint: 'gbrain code-callers <symbol> [--source S | --all-sources] [--limit N] [--json]',
+      hint: 'modusbrain code-callers <symbol> [--source S | --all-sources] [--limit N] [--json]',
     });
     if (shouldEmitJson(args)) {
       console.log(JSON.stringify({ error: err.envelope }));
@@ -77,7 +77,7 @@ export async function runCodeCallers(engine: BrainEngine, args: string[]): Promi
   let sourceId = parseFlag(args, '--source');
 
   // When neither --source nor --all-sources is set, resolve through the full
-  // source-resolution chain (honors the .gbrain-source pin, env, local_path,
+  // source-resolution chain (honors the .modusbrain-source pin, env, local_path,
   // brain_default, sole_non_default). Only a no-signal multi-source brain
   // still errors as multiple_sources_ambiguous.
   if (!allSources && !sourceId) {
@@ -105,14 +105,14 @@ export async function runCodeCallers(engine: BrainEngine, args: string[]): Promi
         }
         process.exit(2);
       }
-      // Bad/invalid pin (.gbrain-source or GBRAIN_SOURCE points at a missing
+      // Bad/invalid pin (.modusbrain-source or MODUSBRAIN_SOURCE points at a missing
       // source) → clean usage error, not an uncaught stack.
       if (isResolverUserError(e)) {
         const env = errorFor({
           class: 'UsageError',
           code: 'invalid_source_pin',
           message: (e as Error).message,
-          hint: 'fix the .gbrain-source pin / GBRAIN_SOURCE value, or pass --source <id> / --all-sources',
+          hint: 'fix the .modusbrain-source pin / MODUSBRAIN_SOURCE value, or pass --source <id> / --all-sources',
         }).envelope;
         if (shouldEmitJson(args)) {
           console.log(JSON.stringify({ error: env }));

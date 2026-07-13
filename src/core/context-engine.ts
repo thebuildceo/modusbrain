@@ -1,5 +1,5 @@
 /**
- * GBrain Context Engine for OpenClaw
+ * ModusBrain Context Engine for OpenClaw
  *
  * Deterministic context injection: runs on every `assemble()` call to inject
  * structured temporal, spatial, and operational context into the system prompt.
@@ -102,8 +102,8 @@ export function __resetSdkLoadStateForTests(): void {
   _buildMemorySystemPromptAddition = undefined;
 }
 
-export const ENGINE_ID = 'gbrain-context';
-export const ENGINE_NAME = 'GBrain Context Engine';
+export const ENGINE_ID = 'modusbrain-context';
+export const ENGINE_NAME = 'ModusBrain Context Engine';
 /**
  * Engine contract version — bumps when the engine's public method shape
  * changes (ContextEngine interface, AssembleResult fields, etc), NOT when
@@ -565,7 +565,7 @@ function formatEventShort(evt: CalendarEvent, tz: string): string {
 
 function formatContextBlock(ctx: LiveContext): string {
   const lines: string[] = [
-    `## Live Context (deterministic, injected by gbrain-context engine)`,
+    `## Live Context (deterministic, injected by modusbrain-context engine)`,
   ];
 
   // Time/Day vs Timezone-unavailable branch.
@@ -621,7 +621,7 @@ function formatContextBlock(ctx: LiveContext): string {
 
 // ── Engine Implementation ───────────────────────────────────────────────
 
-export function createGBrainContextEngine(ctx: {
+export function createModusBrainContextEngine(ctx: {
   workspaceDir?: string;
   /**
    * Retrieval Reflex (#1981, D1=A): optional host-provided resolver. When the

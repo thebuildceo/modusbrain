@@ -1,17 +1,17 @@
 import { fileURLToPath } from 'url';
 /**
- * v0.36.1.x #1100: PGLite + `gbrain apply-migrations` chain spawn test.
+ * v0.36.1.x #1100: PGLite + `modusbrain apply-migrations` chain spawn test.
  *
- * Spawns `gbrain init --migrate-only` followed by `gbrain apply-migrations
+ * Spawns `modusbrain init --migrate-only` followed by `modusbrain apply-migrations
  * --yes --non-interactive` against a fresh tmpdir, asserts the full
  * migration chain walks to head without wedging on the v0.11.0 Minions
  * phase A subprocess deadlock.
  *
- * Pre-fix, this exact sequence hit `GBrain: Timed out waiting for PGLite
+ * Pre-fix, this exact sequence hit `ModusBrain: Timed out waiting for PGLite
  * lock` because:
  *   1. apply-migrations pre-flight schema-version probe held the
  *      single-writer lock briefly and raced the v0.11.0 subprocess.
- *   2. v0.11.0 phase A spawned `gbrain init --migrate-only` as a child;
+ *   2. v0.11.0 phase A spawned `modusbrain init --migrate-only` as a child;
  *      the child inherited HOME and tried to acquire the same lock.
  *
  * The fix routes phase A in-process for PGLite and skips the pre-flight
@@ -69,7 +69,7 @@ describe('apply-migrations on fresh PGLite (v0.36.1.x #1100)', () => {
   // per-spawn cold-start on Ubuntu CI (~10-20s) is the dominant cost; we
   // pay it 4 times here, not 8.
   test('init --migrate-only → apply-migrations --yes → re-run → --list (all exit 0)', async () => {
-    const home = mkdtempSync(join(tmpdir(), 'gbrain-pglite-spawn-'));
+    const home = mkdtempSync(join(tmpdir(), 'modusbrain-pglite-spawn-'));
     const shim = makeCliShim(REPO);
     try {
       const cfgDir = isolatedConfigDir(home);

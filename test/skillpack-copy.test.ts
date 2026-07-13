@@ -1,6 +1,6 @@
 /**
  * Tests for src/core/skillpack/copy.ts — the shared file-copy primitive
- * for scaffold (gbrain→host) and harvest (host→gbrain).
+ * for scaffold (modusbrain→host) and harvest (host→modusbrain).
  *
  * Pins the contract:
  *   - existing target → skipped (no overwrite, ever — user owns the file)
@@ -100,7 +100,7 @@ describe('copyArtifacts — existing target = skipped (never overwrites)', () =>
   it('skips an existing target file even when the source differs', () => {
     const src = scratch('copy-src-');
     const dst = scratch('copy-dst-');
-    writeFileSync(join(src, 'a.txt'), 'gbrain version');
+    writeFileSync(join(src, 'a.txt'), 'modusbrain version');
     writeFileSync(join(dst, 'a.txt'), 'user edits');
 
     const result = copyArtifacts(walkSourceDir(src, dst));
@@ -115,7 +115,7 @@ describe('copyArtifacts — existing target = skipped (never overwrites)', () =>
     const src = scratch('copy-src-');
     const dst = scratch('copy-dst-');
     writeFileSync(join(src, 'new.txt'), 'NEW');
-    writeFileSync(join(src, 'existing.txt'), 'gbrain version');
+    writeFileSync(join(src, 'existing.txt'), 'modusbrain version');
     writeFileSync(join(dst, 'existing.txt'), 'user owns this');
 
     const result = copyArtifacts(walkSourceDir(src, dst));

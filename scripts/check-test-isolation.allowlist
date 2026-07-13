@@ -35,7 +35,7 @@ test/embed.test.ts
 test/eval-capture.test.ts
 test/friction-cli.test.ts
 test/friction.test.ts
-test/gbrain-home-isolation.test.ts
+test/modusbrain-home-isolation.test.ts
 test/helpers/with-env.test.ts
 test/http-transport.test.ts
 test/init-migrate-only.test.ts

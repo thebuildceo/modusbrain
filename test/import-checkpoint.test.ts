@@ -31,7 +31,7 @@ function restoreStderr() {
 }
 
 beforeEach(() => {
-  workDir = mkdtempSync(join(tmpdir(), 'gbrain-checkpoint-'));
+  workDir = mkdtempSync(join(tmpdir(), 'modusbrain-checkpoint-'));
   cpPath = join(workDir, 'import-checkpoint.json');
 });
 

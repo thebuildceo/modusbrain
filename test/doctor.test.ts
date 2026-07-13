@@ -28,7 +28,7 @@ describe('doctor command', () => {
     expect(src).toContain("name: 'frontmatter_integrity'");
     expect(src).toContain('scanBrainSources');
     // Fix hint points at the right CLI command.
-    expect(src).toContain('gbrain frontmatter validate');
+    expect(src).toContain('modusbrain frontmatter validate');
   });
 
   test('Check interface supports issues array', async () => {
@@ -55,20 +55,20 @@ describe('doctor command', () => {
   });
 
   // Bug 7 — --fast should differentiate "no config anywhere" from "user
-  // chose --fast with GBRAIN_DATABASE_URL / config-file URL present".
-  test('getDbUrlSource reflects GBRAIN_DATABASE_URL env var', async () => {
+  // chose --fast with MODUSBRAIN_DATABASE_URL / config-file URL present".
+  test('getDbUrlSource reflects MODUSBRAIN_DATABASE_URL env var', async () => {
     const { getDbUrlSource } = await import('../src/core/config.ts');
-    const orig = process.env.GBRAIN_DATABASE_URL;
+    const orig = process.env.MODUSBRAIN_DATABASE_URL;
     const origAlt = process.env.DATABASE_URL;
     try {
-      process.env.GBRAIN_DATABASE_URL = 'postgresql://test@localhost/x';
-      expect(getDbUrlSource()).toBe('env:GBRAIN_DATABASE_URL');
-      delete process.env.GBRAIN_DATABASE_URL;
+      process.env.MODUSBRAIN_DATABASE_URL = 'postgresql://test@localhost/x';
+      expect(getDbUrlSource()).toBe('env:MODUSBRAIN_DATABASE_URL');
+      delete process.env.MODUSBRAIN_DATABASE_URL;
       process.env.DATABASE_URL = 'postgresql://test@localhost/x';
       expect(getDbUrlSource()).toBe('env:DATABASE_URL');
     } finally {
-      if (orig === undefined) delete process.env.GBRAIN_DATABASE_URL;
-      else process.env.GBRAIN_DATABASE_URL = orig;
+      if (orig === undefined) delete process.env.MODUSBRAIN_DATABASE_URL;
+      else process.env.MODUSBRAIN_DATABASE_URL = orig;
       if (origAlt === undefined) delete process.env.DATABASE_URL;
       else process.env.DATABASE_URL = origAlt;
     }
@@ -80,17 +80,17 @@ describe('doctor command', () => {
     // know where their URL is coming from.
     expect(source).toContain('Skipping DB checks (--fast mode, URL present from');
     // The null-source fallback must still mention both config + env paths.
-    expect(source).toContain('GBRAIN_DATABASE_URL');
+    expect(source).toContain('MODUSBRAIN_DATABASE_URL');
   });
 
   // v0.12.2 reliability wave — doctor detects JSONB double-encode + truncated
-  // bodies and points users at the standalone `gbrain repair-jsonb` command.
+  // bodies and points users at the standalone `modusbrain repair-jsonb` command.
   // Detection only; repair lives in src/commands/repair-jsonb.ts.
   test('doctor source contains jsonb_integrity and markdown_body_completeness checks', async () => {
     const source = await Bun.file(new URL('../src/commands/doctor.ts', import.meta.url)).text();
     expect(source).toContain('jsonb_integrity');
     expect(source).toContain('markdown_body_completeness');
-    expect(source).toContain('gbrain repair-jsonb');
+    expect(source).toContain('modusbrain repair-jsonb');
   });
 
   test('jsonb_integrity check covers the four JSONB sites fixed in v0.12.1', async () => {
@@ -152,7 +152,7 @@ describe('doctor command', () => {
       source.indexOf('// 5. RLS'),
       source.indexOf('// 6. Schema version'),
     );
-    // Severity upgraded from 'warn' to 'fail' so `gbrain doctor` exits 1 on gaps.
+    // Severity upgraded from 'warn' to 'fail' so `modusbrain doctor` exits 1 on gaps.
     expect(rlsBlock).toMatch(/status:\s*'fail'/);
     // Remediation SQL uses quoted identifiers — safe for names with hyphens,
     // reserved words, mixed case.
@@ -170,14 +170,14 @@ describe('doctor command', () => {
     expect(rlsBlock).toContain('PGLite');
   });
 
-  test('RLS check reads pg_description and recognizes the GBRAIN:RLS_EXEMPT escape hatch', async () => {
+  test('RLS check reads pg_description and recognizes the MODUSBRAIN:RLS_EXEMPT escape hatch', async () => {
     const source = await Bun.file(new URL('../src/commands/doctor.ts', import.meta.url)).text();
     const rlsBlock = source.slice(
       source.indexOf('// 5. RLS'),
       source.indexOf('// 6. Schema version'),
     );
     expect(rlsBlock).toContain('obj_description');
-    expect(rlsBlock).toContain('GBRAIN:RLS_EXEMPT');
+    expect(rlsBlock).toContain('MODUSBRAIN:RLS_EXEMPT');
     // The regex must require a non-empty reason= segment. "Blood" is in the
     // requirement to write a real justification, not just the prefix.
     expect(rlsBlock).toMatch(/reason=/);
@@ -204,20 +204,20 @@ describe('doctor command', () => {
   });
 
   // v0.31.7 IRON-RULE regression test for #376 + #536.
-  // The graph_coverage WARN message used to suggest stale verbs (`gbrain
-  // link-extract` / `gbrain timeline-extract`) that were removed in v0.16
-  // when extraction was consolidated into `gbrain extract <links|timeline|all>`.
+  // The graph_coverage WARN message used to suggest stale verbs (`modusbrain
+  // link-extract` / `modusbrain timeline-extract`) that were removed in v0.16
+  // when extraction was consolidated into `modusbrain extract <links|timeline|all>`.
   // PR #376 (FUSED-ID) flagged the stale hint; PR #536 (mayazbay) replaced it
-  // with the canonical `gbrain extract all`. Pin the user-facing copy so a
+  // with the canonical `modusbrain extract all`. Pin the user-facing copy so a
   // future edit can't silently re-regress to a stale verb.
-  test('graph_coverage hint uses canonical `gbrain extract all`, not removed verbs', async () => {
+  test('graph_coverage hint uses canonical `modusbrain extract all`, not removed verbs', async () => {
     const fs = await import('fs');
     const src = fs.readFileSync('src/commands/doctor.ts', 'utf8');
     // Canonical form (post-v0.16 single-verb consolidation).
-    expect(src).toContain('Run: gbrain extract all');
+    expect(src).toContain('Run: modusbrain extract all');
     // Stale verb names removed in v0.16 must not return.
-    expect(src).not.toContain('gbrain link-extract');
-    expect(src).not.toContain('gbrain timeline-extract');
+    expect(src).not.toContain('modusbrain link-extract');
+    expect(src).not.toContain('modusbrain timeline-extract');
   });
 
   // v0.32 — takes_weight_grid pure-helper export.
@@ -365,7 +365,7 @@ describe('doctor command', () => {
 // v0.31.8 D19 — wedge migration force-retry hint.
 //
 // The pre-v0.31.8 minions_migration check emitted a generic
-// `gbrain apply-migrations --yes` hint regardless of how partial the
+// `modusbrain apply-migrations --yes` hint regardless of how partial the
 // migration was. Operators wedged on v0.29.1 (3 consecutive partials)
 // needed `--force-retry <v>` first because the apply-migrations runner's
 // 3-consecutive-partials guard rejected plain --yes. The v0.31.8 fix
@@ -407,7 +407,7 @@ describe('v0.31.8 — wedge migration force-retry hint (D19)', () => {
     // versions render as a single copy-pasteable command line. Match BOTH
     // engine.ts blocks (local doctor + remote doctor) — the regex finds
     // either occurrence.
-    expect(source).toMatch(/wedged\.map\(v\s*=>\s*`gbrain apply-migrations --force-retry [^`]+`\)\.join\(' && '\)/);
+    expect(source).toMatch(/wedged\.map\(v\s*=>\s*`modusbrain apply-migrations --force-retry [^`]+`\)\.join\(' && '\)/);
   });
 
   test('remote doctor (doctorReportRemote) also emits the force-retry hint (D14)', async () => {
@@ -433,7 +433,7 @@ describe('v0.31.8 — wedge migration force-retry hint (D19)', () => {
 // Drift detection was stripped in v0.32.4 — the doctorReportRemote path runs
 // in the HTTP MCP server and walking DB-supplied local_path values from there
 // crosses a trust boundary. Drift belongs in multi_source_drift's existing
-// guard infrastructure (GBRAIN_DRIFT_LIMIT / GBRAIN_DRIFT_TIMEOUT_MS).
+// guard infrastructure (MODUSBRAIN_DRIFT_LIMIT / MODUSBRAIN_DRIFT_TIMEOUT_MS).
 // ============================================================================
 
 describe('v0.32.4 — sync_freshness check', () => {
@@ -463,7 +463,7 @@ describe('v0.32.4 — sync_freshness check', () => {
     expect(result.status).toBe('fail');
     expect(result.message).toContain('never been synced');
     expect(result.message).toContain(`'wiki'`); // source.id embedded
-    expect(result.message).toContain('gbrain sync --source <id>');
+    expect(result.message).toContain('modusbrain sync --source <id>');
   });
 
   test('last_sync_at > 72h ago → fail with day-rounded "Nd ago"', async () => {
@@ -557,10 +557,10 @@ describe('v0.32.4 — sync_freshness check', () => {
     expect(result.message).toContain('connection refused');
   });
 
-  test('env-var override: GBRAIN_SYNC_FRESHNESS_FAIL_HOURS=6 → 7h-stale fails', async () => {
+  test('env-var override: MODUSBRAIN_SYNC_FRESHNESS_FAIL_HOURS=6 → 7h-stale fails', async () => {
     const { checkSyncFreshness } = await import('../src/commands/doctor.ts');
-    const prev = process.env.GBRAIN_SYNC_FRESHNESS_FAIL_HOURS;
-    process.env.GBRAIN_SYNC_FRESHNESS_FAIL_HOURS = '6';
+    const prev = process.env.MODUSBRAIN_SYNC_FRESHNESS_FAIL_HOURS;
+    process.env.MODUSBRAIN_SYNC_FRESHNESS_FAIL_HOURS = '6';
     try {
       const result = await checkSyncFreshness(makeStubEngine([
         { id: 'wiki', name: '', local_path: '/tmp/wiki', last_sync_at: agoMs(7 * 60 * 60 * 1000) },
@@ -568,8 +568,8 @@ describe('v0.32.4 — sync_freshness check', () => {
       expect(result.status).toBe('fail');
       expect(result.message).toContain('brain search is stale');
     } finally {
-      if (prev === undefined) delete process.env.GBRAIN_SYNC_FRESHNESS_FAIL_HOURS;
-      else process.env.GBRAIN_SYNC_FRESHNESS_FAIL_HOURS = prev;
+      if (prev === undefined) delete process.env.MODUSBRAIN_SYNC_FRESHNESS_FAIL_HOURS;
+      else process.env.MODUSBRAIN_SYNC_FRESHNESS_FAIL_HOURS = prev;
     }
   });
 
@@ -579,7 +579,7 @@ describe('v0.32.4 — sync_freshness check', () => {
       { id: 'wiki-id', name: 'My Wiki', local_path: '/tmp/wiki', last_sync_at: null },
     ]));
     expect(result.status).toBe('fail');
-    // User copy-pastes `gbrain sync --source wiki-id` (NOT "My Wiki"). Message
+    // User copy-pastes `modusbrain sync --source wiki-id` (NOT "My Wiki"). Message
     // must include the id so the CLI command actually works.
     expect(result.message).toContain(`'wiki-id'`);
   });
@@ -780,7 +780,7 @@ describe('v0.41.27.0 — sync_freshness git short-circuit', () => {
       { id: 'preupgrade', name: '', local_path: '/tmp/pre',
         last_sync_at: agoMs(30 * 60 * 60 * 1000),
         last_commit: 'abc',
-        chunker_version: '0',  // STALE — bumped via gbrain upgrade since last sync
+        chunker_version: '0',  // STALE — bumped via modusbrain upgrade since last sync
       },
     ]), { localOnly: true });
 
@@ -960,7 +960,7 @@ describe('v0.41.32.0 — commit-relative staleness', () => {
 // Supervisor crash classifier wiring. Pre-fix, doctor.ts:1013 counted every
 // `worker_exited` event as a crash regardless of `likely_cause`, inflating
 // `crashes_24h` to 120+/day from RSS-watchdog drains and SIGTERM stops.
-// These tests pin the read-side wiring so doctor and `gbrain jobs supervisor
+// These tests pin the read-side wiring so doctor and `modusbrain jobs supervisor
 // status` (jobs.ts:805) cannot drift: both go through `summarizeCrashes`.
 describe('supervisor crash classifier wiring (v0.35.x)', () => {
   test('doctor.ts uses summarizeCrashes — no ad-hoc worker_exited filter', async () => {
@@ -1097,7 +1097,7 @@ describe('v0.40.4 — graph_signals_coverage check', () => {
     const check = await checkGraphSignalsCoverage(engine);
     expect(check.status).toBe('warn');
     expect(check.message).toContain('0.0%');
-    expect(check.message).toContain('gbrain extract all');
+    expect(check.message).toContain('modusbrain extract all');
   });
 
   test('graph_signals enabled + >=30% coverage → ok with metric', async () => {
@@ -1259,7 +1259,7 @@ describe('issue #972 — link_resolution_opportunity check', () => {
     expect(check.message).toContain('5 of 5');
     expect(check.message).toContain('100%');
     expect(check.message).toContain(
-      'gbrain config set link_resolution.global_basename true',
+      'modusbrain config set link_resolution.global_basename true',
     );
   });
 
@@ -1334,7 +1334,7 @@ describe('v0.42 (#1699) — quarantined_pages + flagged_pages checks', () => {
 // ============================================================================
 // BUG 4 (v0.42.x) — doctor reports an actively-running sync via the live lock,
 // not stale freshness. Uses a REAL PGLiteEngine so inspectLock/syncLockId run
-// against actual gbrain_cycle_locks rows (the stub engine can't model a lock).
+// against actual modusbrain_cycle_locks rows (the stub engine can't model a lock).
 // ============================================================================
 describe('BUG 4 — in-progress sync via live lock, not stale freshness', () => {
   let engine: any;
@@ -1355,7 +1355,7 @@ describe('BUG 4 — in-progress sync via live lock, not stale freshness', () => 
   beforeEach(async () => {
     const { resetPgliteState } = await import('./helpers/reset-pglite.ts');
     await resetPgliteState(engine);
-    await engine.executeRaw(`DELETE FROM gbrain_cycle_locks`);
+    await engine.executeRaw(`DELETE FROM modusbrain_cycle_locks`);
   });
 
   const staleDate = () => new Date(Date.now() - 5 * 24 * 60 * 60 * 1000); // 5d ago
@@ -1372,7 +1372,7 @@ describe('BUG 4 — in-progress sync via live lock, not stale freshness', () => 
   // ttlMinutes > 0 → live lock; <= 0 → already-expired (wedged) holder.
   async function holdLock(sourceId: string, ttlMinutes: number) {
     await engine.executeRaw(
-      `INSERT INTO gbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at, last_refreshed_at)
+      `INSERT INTO modusbrain_cycle_locks (id, holder_pid, holder_host, acquired_at, ttl_expires_at, last_refreshed_at)
        VALUES ($1, 4242, 'testhost', now(), now() + ($2 || ' minutes')::interval, now())`,
       [syncLockId(sourceId), String(ttlMinutes)],
     );

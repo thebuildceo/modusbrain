@@ -2,7 +2,7 @@
  * `embed-backfill` minion handler (v0.40 Federated Sync v2).
  *
  * Decouples embedding from the sync pipeline so:
- *   - `gbrain sync --all` finishes fast (pages searchable via keyword
+ *   - `modusbrain sync --all` finishes fast (pages searchable via keyword
  *     immediately), embed-backfill catches up async (D18).
  *   - Webhook-driven syncs don't block on Voyage rate limits (D5 + D18).
  *   - Fresh-source onboarding (federate a 50K-page repo) doesn't make
@@ -13,7 +13,7 @@
  * cross-call rate-limiting (10min cooldown + 24h $25 rolling cap); this
  * handler handles within-run safety:
  *
- *   - D2: per-source DB lock (`gbrain-embed-backfill:<source>`) prevents
+ *   - D2: per-source DB lock (`modusbrain-embed-backfill:<source>`) prevents
  *     two embed-backfill jobs for the same source from running concurrently.
  *     If a second job claims while the first is mid-loop, it returns
  *     `already_in_progress` cleanly and the lock is the source of truth.
@@ -82,7 +82,7 @@ async function resolveBackfillPacer(
       ? jobData.pace
       : {}) as { perCallMode?: string; perCall?: Record<string, number | boolean> };
     // Codex P2: serialized job pace sits at the CONFIG tier (job choice beats
-    // standing config, but env beats both) so GBRAIN_PACE_* on the worker is a
+    // standing config, but env beats both) so MODUSBRAIN_PACE_* on the worker is a
     // real incident escape hatch for an already-queued job.
     const knobs = resolvePaceMode({
       mode: jobPace.perCallMode ?? cfg.mode,

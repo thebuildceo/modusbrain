@@ -16,7 +16,7 @@ export const PROTECTED_JOB_NAMES: ReadonlySet<string> = new Set([
   'shell',
   // v0.15: subagent + aggregator are protected because they call the
   // Anthropic API. MCP callers can't submit them directly; only the
-  // `gbrain agent run` CLI path (which sets allowProtectedSubmit) or a
+  // `modusbrain agent run` CLI path (which sets allowProtectedSubmit) or a
   // trusted local `submit_job` (ctx.remote=false) can insert these rows.
   'subagent',
   'subagent_aggregator',
@@ -48,8 +48,8 @@ export const PROTECTED_JOB_NAMES: ReadonlySet<string> = new Set([
   // pages to link rows, AND flips the active schema pack. One-time
   // consenting user decision. PROTECTED + manual_only in
   // src/core/onboard/render.ts:toOnboardRecommendation ensures autopilot
-  // can't auto-apply; user must run `gbrain onboard --auto-with-prompt`
-  // or submit explicitly via `gbrain jobs submit unify-types --allow-protected`.
+  // can't auto-apply; user must run `modusbrain onboard --auto-with-prompt`
+  // or submit explicitly via `modusbrain jobs submit unify-types --allow-protected`.
   'unify-types',
   // v0.42.0.0 — SkillOpt: optimizer Sonnet/Opus loops over a benchmark.
   // Preemptive register entry (v1 is CLI-only foreground; future Minion
@@ -60,7 +60,7 @@ export const PROTECTED_JOB_NAMES: ReadonlySet<string> = new Set([
   // calls Haiku to extract atoms (~$0.30/source/run), so it MUST NOT be
   // submittable by an MCP/OAuth-scoped caller — same posture as the protected
   // `extract-takes-from-pages`. Only trusted local callers (the autopilot
-  // auto-drain branch, an explicit `gbrain jobs submit extract-atoms-drain
+  // auto-drain branch, an explicit `modusbrain jobs submit extract-atoms-drain
   // --allow-protected`) can insert it.
   'extract-atoms-drain',
 ]);

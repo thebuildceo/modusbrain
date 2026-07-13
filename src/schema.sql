@@ -1,4 +1,4 @@
--- GBrain Postgres + pgvector schema
+-- ModusBrain Postgres + pgvector schema
 
 CREATE EXTENSION IF NOT EXISTS vector;
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
@@ -13,7 +13,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 --
 -- id:         immutable citation key. [a-z0-9-]{1,32} enforced at app layer.
 --             Used in [source:slug] citations, --source flag, wikilink syntax.
--- name:       mutable display label. Rename via `gbrain sources rename`.
+-- name:       mutable display label. Rename via `modusbrain sources rename`.
 -- local_path: optional git checkout root for filesystem-backed sources.
 -- config:     forward-compat JSONB. Currently used for federation + ACL slot.
 --             { "federated": bool, "access_policy": {...} }
@@ -119,7 +119,7 @@ CREATE TABLE IF NOT EXISTS pages (
   effective_date_source TEXT,
   import_filename       TEXT,
   salience_touched_at   TIMESTAMPTZ,
-  -- v0.37.0 (migration v79): real stale-page signal for `gbrain lsd`. Bumped
+  -- v0.37.0 (migration v79): real stale-page signal for `modusbrain lsd`. Bumped
   -- by op-layer write-back inside `search`/`query`/`get_page` op handlers
   -- (NOT inside engine methods — internal callers must not pollute the
   -- signal). NULL = never retrieved (LSD prioritizes these first).
@@ -129,7 +129,7 @@ CREATE TABLE IF NOT EXISTS pages (
   -- --source db`, or `extract --stale`). A page is stale for extraction when
   -- this is NULL, older than LINK_EXTRACTOR_VERSION_TS, or older than
   -- updated_at (edited-since-extract — the MCP put_page / sync --no-extract
-  -- path). Powers `gbrain extract --stale` + the `links_extraction_lag` doctor
+  -- path). Powers `modusbrain extract --stale` + the `links_extraction_lag` doctor
   -- check. NULL = never extracted.
   links_extracted_at    TIMESTAMPTZ,
   -- v0.40.3.0 contextual retrieval (renumbered from v81 to v90 on master
@@ -276,7 +276,7 @@ CREATE INDEX IF NOT EXISTS pages_last_retrieved_at_idx
   ON pages (last_retrieved_at);
 -- v0.42.7 (migration v112): composite B-tree backing `extract --stale` and the
 -- `links_extraction_lag` doctor check. source_id leads so source-scoped staleness
--- scans (`extract --stale --source X`, `gbrain doctor --source X`) are indexed;
+-- scans (`extract --stale --source X`, `modusbrain doctor --source X`) are indexed;
 -- the brain-wide COUNT still uses it via the leading column. NOT partial-NULL —
 -- the staleness predicate has a NULL arm AND a `< $versionTs` arm (B-tree sorts
 -- NULLs to one end, covering both). The `updated_at > links_extracted_at` arm is
@@ -343,7 +343,7 @@ CREATE INDEX IF NOT EXISTS idx_chunks_embedding_image
 CREATE INDEX IF NOT EXISTS idx_chunks_search_vector ON content_chunks USING GIN(search_vector);
 CREATE INDEX IF NOT EXISTS idx_chunks_symbol_qualified
   ON content_chunks(symbol_name_qualified) WHERE symbol_name_qualified IS NOT NULL;
--- v0.41.18.0 (codex finding #9): partial index for `gbrain embed --stale`
+-- v0.41.18.0 (codex finding #9): partial index for `modusbrain embed --stale`
 -- + `--priority recent`. content_chunks has no updated_at column (chunks
 -- are re-INSERTed on page change, not UPDATEd), so the "recent-first"
 -- ORDER BY happens at the JOIN site: outer ORDER BY p.updated_at DESC
@@ -468,7 +468,7 @@ CREATE TABLE IF NOT EXISTS links (
   link_type      TEXT    NOT NULL DEFAULT '',
   context        TEXT    NOT NULL DEFAULT '',
   -- v0.41.18.0: 'mentions' added for auto-linked body-text mentions
-  -- (gbrain extract links --by-mention). Filtered OUT of backlink-count
+  -- (modusbrain extract links --by-mention). Filtered OUT of backlink-count
   -- for search ranking; only counts toward orphan-ratio + graph traversal.
   -- v0.40.8.2 (#972): 'wikilink-resolved' added for opt-in global-basename
   -- wikilink resolution (bare [[name]] resolved by slug tail).
@@ -740,7 +740,7 @@ CREATE TABLE IF NOT EXISTS op_checkpoint_paths (
 );
 
 -- #2095 push-based context: feedback-loop log of volunteered pages
--- (volunteer_context op / retrieval-reflex pointers / gbrain watch).
+-- (volunteer_context op / retrieval-reflex pointers / modusbrain watch).
 -- "Used" derives from pages.last_retrieved_at > volunteered_at; rationale is
 -- a deterministic template string, never raw conversation text. 90-day prune
 -- in the dream cycle's purge phase. Mirrors migration v117.
@@ -956,9 +956,9 @@ ALTER TABLE minion_attachments ALTER COLUMN content SET STORAGE EXTERNAL;
 -- ============================================================
 -- migration_impact_log: before/after metric stats per onboard remediation
 -- ============================================================
--- v0.41.18.0 (gbrain onboard wave). Every completion captured by the
+-- v0.41.18.0 (modusbrain onboard wave). Every completion captured by the
 -- onboard remediation pipeline records before/after metric stats so
--- `gbrain onboard --history --json` can show "you reduced orphans 47%".
+-- `modusbrain onboard --history --json` can show "you reduced orphans 47%".
 -- delta computed at read time (NOT a stored GENERATED column —
 -- zero PGLite parity risk per eng-review D2).
 --
@@ -1042,14 +1042,14 @@ CREATE TABLE IF NOT EXISTS subagent_tool_executions (
   error               TEXT,
   schema_version      INTEGER     NOT NULL DEFAULT 1,
   provider_id         TEXT,
-  -- v0.38 D11: gbrain-owned stable IDs (ordinal assigned at first
-  -- observation of a tool call; gbrain_tool_use_id is uuid v7). Reconciliation
+  -- v0.38 D11: modusbrain-owned stable IDs (ordinal assigned at first
+  -- observation of a tool call; modusbrain_tool_use_id is uuid v7). Reconciliation
   -- on crash-replay uses (job_id, message_idx, ordinal) as the unique key.
-  -- Legacy rows (pre-v82) have ordinal=NULL + gbrain_tool_use_id=NULL and
+  -- Legacy rows (pre-v82) have ordinal=NULL + modusbrain_tool_use_id=NULL and
   -- are resolved by the read-time D5 shim that recomputes the key from
   -- (job_id, message_idx, content_blocks index, tool_name).
   ordinal             INTEGER,
-  gbrain_tool_use_id  UUID,
+  modusbrain_tool_use_id  UUID,
   started_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
   ended_at            TIMESTAMPTZ,
   CONSTRAINT uniq_subagent_tools_use_id UNIQUE (job_id, tool_use_id),
@@ -1091,24 +1091,24 @@ CREATE TABLE IF NOT EXISTS dream_verdicts (
 -- Cycle coordination lock — v0.17 runCycle primitive
 -- ============================================================
 -- One row per active cycle. Any caller (autopilot daemon, Minions
--- autopilot-cycle handler, gbrain dream CLI) tries to acquire this
+-- autopilot-cycle handler, modusbrain dream CLI) tries to acquire this
 -- row before running a DB-write phase. Holders refresh ttl_expires_at
 -- between phases; crashed holders auto-release once TTL expires.
 -- Works through PgBouncer transaction pooling, unlike session-scoped
 -- pg_try_advisory_lock.
-CREATE TABLE IF NOT EXISTS gbrain_cycle_locks (
+CREATE TABLE IF NOT EXISTS modusbrain_cycle_locks (
   id                 TEXT        PRIMARY KEY,
   holder_pid         INT         NOT NULL,
   holder_host        TEXT,
   acquired_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   ttl_expires_at     TIMESTAMPTZ NOT NULL,
   -- v0.41.13.0 (migration v97 + D-V3-4): bumped on every withRefreshingLock
-  -- refresh tick. Used by `gbrain sync --break-lock --max-age <s>` to
+  -- refresh tick. Used by `modusbrain sync --break-lock --max-age <s>` to
   -- identify wedged-but-alive holders without stealing healthy long-running
   -- holders that are actively refreshing.
   last_refreshed_at  TIMESTAMPTZ
 );
-CREATE INDEX IF NOT EXISTS idx_cycle_locks_ttl ON gbrain_cycle_locks(ttl_expires_at);
+CREATE INDEX IF NOT EXISTS idx_cycle_locks_ttl ON modusbrain_cycle_locks(ttl_expires_at);
 
 -- ============================================================
 -- Eval capture (v0.25.0 — BrainBench-Real substrate)
@@ -1117,7 +1117,7 @@ CREATE INDEX IF NOT EXISTS idx_cycle_locks_ttl ON gbrain_cycle_locks(ttl_expires
 -- in src/core/operations.ts. PII is scrubbed before insert by
 -- src/core/eval-capture-scrub.ts. query is CHECK-capped at 50KB.
 -- eval_capture_failures: cross-process audit of insert failures, surfaced
--- by `gbrain doctor` (in-process counters can't bridge MCP server + doctor
+-- by `modusbrain doctor` (in-process counters can't bridge MCP server + doctor
 -- CLI process boundaries).
 CREATE TABLE IF NOT EXISTS eval_candidates (
   id                    SERIAL PRIMARY KEY,
@@ -1146,7 +1146,7 @@ CREATE TABLE IF NOT EXISTS eval_candidates (
   salience_source       TEXT,
   recency_source        TEXT,
   -- v0.36.3.0 (D16 / CDX-10) — embedding column resolved at capture time so
-  -- `gbrain eval replay` reproduces the same column the capture ran against.
+  -- `modusbrain eval replay` reproduces the same column the capture ran against.
   -- Nullable; pre-v0.36 rows have NULL and replay falls back to current
   -- default. Migration v68 (src/core/migrate.ts) adds the same column on
   -- upgrade brains.
@@ -1348,7 +1348,7 @@ CREATE INDEX IF NOT EXISTS take_nudge_log_wave_idx
   ON take_nudge_log (wave_version, fired_at DESC);
 
 -- think_ab_results (v0.36.1.0 T18 / D19): A/B harness data for
--- `gbrain think --ab`. One row per side-by-side comparison.
+-- `modusbrain think --ab`. One row per side-by-side comparison.
 CREATE TABLE IF NOT EXISTS think_ab_results (
   id              BIGSERIAL PRIMARY KEY,
   source_id       TEXT         NOT NULL REFERENCES sources(id) ON DELETE CASCADE,
@@ -1382,7 +1382,7 @@ CREATE TRIGGER minion_job_notify AFTER INSERT OR UPDATE OF status ON minion_jobs
 -- ============================================================
 -- Row Level Security: block anon access, postgres role bypasses
 -- ============================================================
--- The postgres role (used by gbrain via pooler) has BYPASSRLS.
+-- The postgres role (used by modusbrain via pooler) has BYPASSRLS.
 -- Enabling RLS with no policies means the anon key can't read anything.
 -- Only enable if the current role actually has BYPASSRLS privilege,
 -- otherwise we'd lock ourselves out.
@@ -1414,7 +1414,7 @@ BEGIN
     ALTER TABLE subagent_messages ENABLE ROW LEVEL SECURITY;
     ALTER TABLE subagent_tool_executions ENABLE ROW LEVEL SECURITY;
     ALTER TABLE subagent_rate_leases ENABLE ROW LEVEL SECURITY;
-    ALTER TABLE gbrain_cycle_locks ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE modusbrain_cycle_locks ENABLE ROW LEVEL SECURITY;
     ALTER TABLE dream_verdicts ENABLE ROW LEVEL SECURITY;
     ALTER TABLE eval_candidates ENABLE ROW LEVEL SECURITY;
     ALTER TABLE eval_capture_failures ENABLE ROW LEVEL SECURITY;

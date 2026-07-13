@@ -321,7 +321,7 @@ export class MinionWorker extends EventEmitter {
     // Periodic RSS watchdog — closes the production-freeze regression where
     // all concurrency slots are wedged with zero job completions, so the
     // per-job check in executeJob().finally() never fires. Disabled when
-    // maxRssMb is 0 (default for bare `gbrain jobs work`; supervisor sets 2048).
+    // maxRssMb is 0 (default for bare `modusbrain jobs work`; supervisor sets 2048).
     let rssTimer: ReturnType<typeof setInterval> | null = null;
     if (this.opts.maxRssMb > 0) {
       rssTimer = setInterval(() => {
@@ -336,7 +336,7 @@ export class MinionWorker extends EventEmitter {
     //      "MY pool is dead" and the supervisor watches a different connection
     //      (issue #1801, fix #2). Disabled only when healthCheckInterval is 0.
     //   2. Worker stall (event loop alive but not claiming/completing jobs) —
-    //      runs only when NOT supervised (GBRAIN_SUPERVISED=1); under a
+    //      runs only when NOT supervised (MODUSBRAIN_SUPERVISED=1); under a
     //      supervisor the progress watchdog owns forward-progress detection.
     //
     // On failure, emits an `'unhealthy'` event with a structured reason. The
@@ -348,7 +348,7 @@ export class MinionWorker extends EventEmitter {
     // setInterval queues callbacks even when the prior is still awaiting; on a
     // hung DB probe that piles up overlapping async checks racing on
     // `consecutiveDbFailures`. The recursive pattern guarantees one tick at a time.
-    const isSupervisedChild = process.env.GBRAIN_SUPERVISED === '1';
+    const isSupervisedChild = process.env.MODUSBRAIN_SUPERVISED === '1';
     let healthTimer: ReturnType<typeof setTimeout> | null = null;
     // issue #1801 (fix #2): the DB-liveness probe (part 1) runs EVEN under a
     // supervisor — it's the worker's own "is MY pool dead" signal, and the
@@ -425,7 +425,7 @@ export class MinionWorker extends EventEmitter {
           // Under a supervisor, the supervisor's progress watchdog (issue #1801)
           // owns forward-progress detection; running the worker's own stall
           // detector too would double-act (and both emitting 'unhealthy' +
-          // supervisor SIGTERM race). Bare `gbrain jobs work` keeps it.
+          // supervisor SIGTERM race). Bare `modusbrain jobs work` keeps it.
           if (!isSupervisedChild) {
           if (this.jobsCompleted > lastKnownCompleted) {
             lastKnownCompleted = this.jobsCompleted;
@@ -1042,7 +1042,7 @@ export class MinionWorker extends EventEmitter {
       // gate and route through `queue.releaseLeaseFullJob` which mirrors
       // `failJob` minus the `attempts_made` increment. Audit row to
       // `minion_lease_pressure_log` so operators see pressure live in
-      // `gbrain doctor` + `gbrain jobs stats lease_pressure`.
+      // `modusbrain doctor` + `modusbrain jobs stats lease_pressure`.
       const isLeaseFull = err instanceof RateLeaseUnavailableError;
       if (isLeaseFull) {
         const leaseErr = err as RateLeaseUnavailableError;
@@ -1057,7 +1057,7 @@ export class MinionWorker extends EventEmitter {
           return;
         }
         // Audit row write is best-effort — never blocks the bypass path.
-        // Denormalized columns persist past `gbrain jobs prune` so post-NULL
+        // Denormalized columns persist past `modusbrain jobs prune` so post-NULL
         // forensic queries still see context (Eng D8 / codex pass-3 #7).
         await logLeasePressure(this.engine, {
           job_id: job.id,

@@ -2,7 +2,7 @@
  * test/e2e/openclaw-reference-compat.test.ts — W1 ship-blocker gate.
  *
  * This is THE test that proves v0.17 delivers on its headline claim:
- * `gbrain check-resolvable` against an OpenClaw-reference workspace
+ * `modusbrain check-resolvable` against an OpenClaw-reference workspace
  * layout (AGENTS.md at workspace root, skills/ below, no manifest.json)
  * runs cleanly and surfaces sensible issues.
  *
@@ -25,7 +25,7 @@ import {
   applyInstall,
   planInstall,
 } from '../../src/core/skillpack/installer.ts';
-import { findGbrainRoot } from '../../src/core/skillpack/bundle.ts';
+import { findModusbrainRoot } from '../../src/core/skillpack/bundle.ts';
 
 const FIXTURE = join(import.meta.dir, '..', 'fixtures', 'openclaw-reference-minimal');
 const SKILLS_DIR = join(FIXTURE, 'skills');
@@ -50,7 +50,7 @@ describe('OpenClaw reference workspace compat (W1 + W2 + W3)', () => {
 
   it('auto-detects skills dir via $OPENCLAW_WORKSPACE (D-CX-4 priority)', () => {
     // Priority: explicit env wins over repo-root walk. Without the
-    // env var, we'd get gbrain's own repo. With it set, we should
+    // env var, we'd get modusbrain's own repo. With it set, we should
     // get the fixture's skills dir.
     const detected = autoDetectSkillsDir(process.cwd(), { OPENCLAW_WORKSPACE: FIXTURE });
     expect(detected.dir).toBe(SKILLS_DIR);
@@ -89,7 +89,7 @@ describe('OpenClaw reference workspace compat (W1 + W2 + W3)', () => {
     expect(filing).toEqual([]);
   });
 
-  it('CLI subprocess: gbrain check-resolvable --json --skills-dir FIXTURE clean', () => {
+  it('CLI subprocess: modusbrain check-resolvable --json --skills-dir FIXTURE clean', () => {
     const r = bunSpawnSync(
       [CLI, 'check-resolvable', '--json', '--skills-dir', SKILLS_DIR],
       { encoding: 'utf-8', cwd: REPO, maxBuffer: 10 * 1024 * 1024 },
@@ -126,11 +126,11 @@ describe('OpenClaw reference workspace compat (W1 + W2 + W3)', () => {
       '# AGENTS\n\n| Trigger | Skill |\n|---------|-------|\n',
     );
 
-    const gbrainRoot = findGbrainRoot();
-    expect(gbrainRoot).not.toBeNull();
+    const modusbrainRoot = findModusbrainRoot();
+    expect(modusbrainRoot).not.toBeNull();
 
     const opts = {
-      gbrainRoot: gbrainRoot!,
+      modusbrainRoot: modusbrainRoot!,
       targetWorkspace: target,
       targetSkillsDir: join(target, 'skills'),
       skillSlug: 'brain-ops',
@@ -142,7 +142,7 @@ describe('OpenClaw reference workspace compat (W1 + W2 + W3)', () => {
     expect(result.managedBlock.resolverFile).toBe(join(target, 'AGENTS.md'));
 
     const agents = readFileSync(join(target, 'AGENTS.md'), 'utf-8');
-    expect(agents).toContain('gbrain:skillpack:begin');
+    expect(agents).toContain('modusbrain:skillpack:begin');
     expect(agents).toContain('`skills/brain-ops/SKILL.md`');
     // Pre-existing resolver table preserved.
     expect(agents).toContain('| Trigger | Skill |');

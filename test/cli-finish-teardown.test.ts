@@ -5,7 +5,7 @@
  * and computeTeardownDeadlineMs (formula / floor / env override).
  *
  * Real short timers, no fake clocks. Every test that touches process.exitCode
- * or GBRAIN_TEARDOWN_DEADLINE_MS restores it in a finally so the suite stays
+ * or MODUSBRAIN_TEARDOWN_DEADLINE_MS restores it in a finally so the suite stays
  * order-independent.
  */
 
@@ -59,14 +59,14 @@ describe('computeTeardownDeadlineMs', () => {
     expect(got).toBe(TEARDOWN_DEADLINE_FLOOR_MS);
   });
 
-  test('GBRAIN_TEARDOWN_DEADLINE_MS env override wins over the formula', async () => {
-    await withEnv({ GBRAIN_TEARDOWN_DEADLINE_MS: '1234' }, async () => {
+  test('MODUSBRAIN_TEARDOWN_DEADLINE_MS env override wins over the formula', async () => {
+    await withEnv({ MODUSBRAIN_TEARDOWN_DEADLINE_MS: '1234' }, async () => {
       expect(computeTeardownDeadlineMs({ sinkCount: 4, drainTimeoutMs: 2000 })).toBe(1234);
     });
   });
 
   test('garbage env values fall back to the formula', async () => {
-    await withEnv({ GBRAIN_TEARDOWN_DEADLINE_MS: 'banana' }, async () => {
+    await withEnv({ MODUSBRAIN_TEARDOWN_DEADLINE_MS: 'banana' }, async () => {
       expect(
         computeTeardownDeadlineMs({ sinkCount: 1, drainTimeoutMs: 100 }),
       ).toBe(TEARDOWN_DEADLINE_FLOOR_MS);
@@ -74,12 +74,12 @@ describe('computeTeardownDeadlineMs', () => {
   });
 
   test('zero and negative env values fall back to the formula (not "fire immediately")', async () => {
-    await withEnv({ GBRAIN_TEARDOWN_DEADLINE_MS: '0' }, async () => {
+    await withEnv({ MODUSBRAIN_TEARDOWN_DEADLINE_MS: '0' }, async () => {
       expect(computeTeardownDeadlineMs({ sinkCount: 1, drainTimeoutMs: 100 })).toBe(
         TEARDOWN_DEADLINE_FLOOR_MS,
       );
     });
-    await withEnv({ GBRAIN_TEARDOWN_DEADLINE_MS: '-5' }, async () => {
+    await withEnv({ MODUSBRAIN_TEARDOWN_DEADLINE_MS: '-5' }, async () => {
       expect(computeTeardownDeadlineMs({ sinkCount: 1, drainTimeoutMs: 100 })).toBe(
         TEARDOWN_DEADLINE_FLOOR_MS,
       );
@@ -249,7 +249,7 @@ describe('verdict channel — immune to PGLite WASM process.exitCode writes', ()
     // at arbitrary points (99 at create, initdb status on a later tick for
     // in-memory brains, 0 at close) — pre-#2084 this clobbered an errored
     // op's exit 1 back to 0 on every PGLite error path. The verdict lives in
-    // the gbrain-owned channel and never reads the global back.
+    // the modusbrain-owned channel and never reads the global back.
     const prevCode = process.exitCode;
     try {
       setCliExitVerdict(1); // the op errored
@@ -275,7 +275,7 @@ describe('verdict channel — immune to PGLite WASM process.exitCode writes', ()
     _resetCliExitVerdictForTests();
     try {
       process.exitCode = 100; // what in-memory PGLite's initdb does mid-run
-      expect(currentExitCode()).toBe(0); // no gbrain verdict was ever set
+      expect(currentExitCode()).toBe(0); // no modusbrain verdict was ever set
       setCliExitVerdict(2);
       expect(currentExitCode()).toBe(2);
       // The mirror write exists for EXTERNAL readers of the global.
@@ -452,10 +452,10 @@ describe('flushThenExit', () => {
     }
   });
 
-  test('GBRAIN_FLUSH_GRACE_MS env override is honored (batch/incident knob)', async () => {
+  test('MODUSBRAIN_FLUSH_GRACE_MS env override is honored (batch/incident knob)', async () => {
     const prevCode = process.exitCode;
     try {
-      await withEnv({ GBRAIN_FLUSH_GRACE_MS: '0' }, async () => {
+      await withEnv({ MODUSBRAIN_FLUSH_GRACE_MS: '0' }, async () => {
         const exits: number[] = [];
         flushThenExit(0, {
           exit: (c) => void exits.push(c),

@@ -18,20 +18,20 @@ import { tmpdir } from 'os';
 
 let tmpHome: string;
 const originalHome = process.env.HOME;
-const originalThreshold = process.env.GBRAIN_SYNC_AUTOSKIP_AFTER;
+const originalThreshold = process.env.MODUSBRAIN_SYNC_AUTOSKIP_AFTER;
 
 beforeEach(async () => {
-  tmpHome = mkdtempSync(join(tmpdir(), 'gbrain-ledger-'));
+  tmpHome = mkdtempSync(join(tmpdir(), 'modusbrain-ledger-'));
   process.env.HOME = tmpHome;
-  delete process.env.GBRAIN_SYNC_AUTOSKIP_AFTER;
+  delete process.env.MODUSBRAIN_SYNC_AUTOSKIP_AFTER;
   const { syncFailuresPath } = await import('../src/core/sync-failure-ledger.ts');
   try { rmSync(syncFailuresPath(), { force: true }); } catch { /* none */ }
 });
 
 afterEach(() => {
   if (originalHome) process.env.HOME = originalHome; else delete process.env.HOME;
-  if (originalThreshold === undefined) delete process.env.GBRAIN_SYNC_AUTOSKIP_AFTER;
-  else process.env.GBRAIN_SYNC_AUTOSKIP_AFTER = originalThreshold;
+  if (originalThreshold === undefined) delete process.env.MODUSBRAIN_SYNC_AUTOSKIP_AFTER;
+  else process.env.MODUSBRAIN_SYNC_AUTOSKIP_AFTER = originalThreshold;
   try { rmSync(tmpHome, { recursive: true, force: true }); } catch { /* ignore */ }
 });
 
@@ -262,7 +262,7 @@ describe('decideGateAction — full branch table', () => {
 
 describe('#5 + #6 applySyncFailureGate orchestration', () => {
   test('advance_then_autoskip after threshold; advance runs before auto-skip mark', async () => {
-    process.env.GBRAIN_SYNC_AUTOSKIP_AFTER = '3';
+    process.env.MODUSBRAIN_SYNC_AUTOSKIP_AFTER = '3';
     const { applySyncFailureGate, loadSyncFailures } = await L();
     let advanceCalls = 0;
     const run = () => applySyncFailureGate({
@@ -283,7 +283,7 @@ describe('#5 + #6 applySyncFailureGate orchestration', () => {
   });
 
   test('a throwing advance() marks nothing auto_skipped (atomicity)', async () => {
-    process.env.GBRAIN_SYNC_AUTOSKIP_AFTER = '1';
+    process.env.MODUSBRAIN_SYNC_AUTOSKIP_AFTER = '1';
     const { applySyncFailureGate, loadSyncFailures } = await L();
     await expect(applySyncFailureGate({
       sourceId: 's', failedFiles: [{ path: 'poison.md', error: 'e' }],
@@ -365,13 +365,13 @@ describe('#8 concurrency: lock + atomic write', () => {
 describe('resolveAutoSkipThreshold', () => {
   test('default 3, env override, 0 disables, invalid → default', async () => {
     const { resolveAutoSkipThreshold } = await L();
-    delete process.env.GBRAIN_SYNC_AUTOSKIP_AFTER;
+    delete process.env.MODUSBRAIN_SYNC_AUTOSKIP_AFTER;
     expect(resolveAutoSkipThreshold()).toBe(3);
-    process.env.GBRAIN_SYNC_AUTOSKIP_AFTER = '5';
+    process.env.MODUSBRAIN_SYNC_AUTOSKIP_AFTER = '5';
     expect(resolveAutoSkipThreshold()).toBe(5);
-    process.env.GBRAIN_SYNC_AUTOSKIP_AFTER = '0';
+    process.env.MODUSBRAIN_SYNC_AUTOSKIP_AFTER = '0';
     expect(resolveAutoSkipThreshold()).toBe(0);
-    process.env.GBRAIN_SYNC_AUTOSKIP_AFTER = 'nonsense';
+    process.env.MODUSBRAIN_SYNC_AUTOSKIP_AFTER = 'nonsense';
     expect(resolveAutoSkipThreshold()).toBe(3);
   });
 });

@@ -22,7 +22,7 @@ import type { DbLockHandle, LockSnapshot } from '../src/core/db-lock.ts';
 // and ms_since_last_refresh are consulted; the rest are filled for shape.
 function snap(over: Partial<LockSnapshot>): LockSnapshot {
   return {
-    id: 'gbrain-supervisor:default',
+    id: 'modusbrain-supervisor:default',
     holder_pid: 4242,
     holder_host: 'box',
     acquired_at: new Date(),
@@ -48,13 +48,13 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-  await engine.executeRaw(`DELETE FROM gbrain_cycle_locks WHERE id LIKE 'gbrain-supervisor:%'`);
+  await engine.executeRaw(`DELETE FROM modusbrain_cycle_locks WHERE id LIKE 'modusbrain-supervisor:%'`);
 });
 
 describe('#1849 supervisorLockId', () => {
   test('keys on queue ONLY (DB scoping is physical — the lock row lives in the DB)', () => {
-    expect(supervisorLockId('default')).toBe('gbrain-supervisor:default');
-    expect(supervisorLockId('shell')).toBe('gbrain-supervisor:shell');
+    expect(supervisorLockId('default')).toBe('modusbrain-supervisor:default');
+    expect(supervisorLockId('shell')).toBe('modusbrain-supervisor:shell');
     // Different queues → different locks.
     expect(supervisorLockId('default')).not.toBe(supervisorLockId('shell'));
     // Regression (the bug this fixes): the id must NOT depend on how the same
@@ -128,7 +128,7 @@ describe('#1849 LOCK_HELD path does not strand the pidfile', () => {
     const holderA = await tryAcquireDbLock(engine, supervisorLockId('default'), 5);
     expect(holderA).not.toBeNull();
 
-    const pidFile = join(tmpdir(), `gbrain-sup-stranded-${process.pid}-${Math.random().toString(36).slice(2)}.pid`);
+    const pidFile = join(tmpdir(), `modusbrain-sup-stranded-${process.pid}-${Math.random().toString(36).slice(2)}.pid`);
     const sup = new MinionSupervisor(engine, { cliPath: '/bin/sh', healthInterval: 0, json: true, pidFile });
 
     // Capture the 'exit' listener start() registers (if any) and stop execution

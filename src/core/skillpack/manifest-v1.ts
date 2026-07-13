@@ -39,7 +39,7 @@ export interface SkillpackManifest {
   name: string;
   /** Semver-ish version string (Keep-a-Changelog compatible). */
   version: string;
-  /** One-line description, shown by `gbrain skillpack info`. */
+  /** One-line description, shown by `modusbrain skillpack info`. */
   description: string;
   /** Author name (display name optionally with email; not parsed). */
   author: string;
@@ -47,8 +47,8 @@ export interface SkillpackManifest {
   license: string;
   /** Homepage URL (canonical source repo). */
   homepage: string;
-  /** Minimum gbrain version this pack requires (semver). */
-  gbrain_min_version: string;
+  /** Minimum modusbrain version this pack requires (semver). */
+  modusbrain_min_version: string;
   /** Runbook format schema version (default 1). */
   runbook_schema_version?: number;
   /** Eval format schema version (default 1). */
@@ -84,7 +84,7 @@ export interface SkillpackManifest {
    * Drives connect-time discovery (Topology A `sources add` advisory + the
    * `list_brain_skillpack` MCP tool) and the install nag. Absent/false = a
    * legacy or registry third-party pack. Additive + forward-compatible:
-   * older gbrain ignores it; this validator tolerates it being absent.
+   * older modusbrain ignores it; this validator tolerates it being absent.
    */
   brain_resident?: boolean;
   /**
@@ -124,7 +124,7 @@ const REQUIRED_FIELDS = [
   'author',
   'license',
   'homepage',
-  'gbrain_min_version',
+  'modusbrain_min_version',
   'skills',
 ] as const;
 
@@ -182,7 +182,7 @@ export function validateSkillpackManifest(
     );
   }
 
-  for (const field of ['description', 'author', 'license', 'homepage', 'gbrain_min_version']) {
+  for (const field of ['description', 'author', 'license', 'homepage', 'modusbrain_min_version']) {
     const value = obj[field];
     if (typeof value !== 'string' || value.length === 0) {
       throw new SkillpackManifestError(
@@ -201,11 +201,11 @@ export function validateSkillpackManifest(
     );
   }
 
-  if (!SEMVER_RE.test(obj.gbrain_min_version as string)) {
+  if (!SEMVER_RE.test(obj.modusbrain_min_version as string)) {
     throw new SkillpackManifestError(
-      `gbrain_min_version must be semver shape (e.g. "0.36.0"); got ${JSON.stringify(obj.gbrain_min_version)}`,
+      `modusbrain_min_version must be semver shape (e.g. "0.36.0"); got ${JSON.stringify(obj.modusbrain_min_version)}`,
       'manifest_invalid_field',
-      { field: 'gbrain_min_version', expected: SEMVER_RE.source, actual: obj.gbrain_min_version },
+      { field: 'modusbrain_min_version', expected: SEMVER_RE.source, actual: obj.modusbrain_min_version },
     );
   }
 
@@ -303,7 +303,7 @@ export function validateSkillpackManifest(
     }
     if (v > maxRunbook) {
       throw new SkillpackManifestError(
-        `runbook_schema_version ${v} exceeds maximum supported (${maxRunbook}). Run \`gbrain upgrade\``,
+        `runbook_schema_version ${v} exceeds maximum supported (${maxRunbook}). Run \`modusbrain upgrade\``,
         'manifest_unsupported_schema_version',
         { field: 'runbook_schema_version', expected: `<= ${maxRunbook}`, actual: v },
       );
@@ -320,7 +320,7 @@ export function validateSkillpackManifest(
     }
     if (v > maxEval) {
       throw new SkillpackManifestError(
-        `eval_schema_version ${v} exceeds maximum supported (${maxEval}). Run \`gbrain upgrade\``,
+        `eval_schema_version ${v} exceeds maximum supported (${maxEval}). Run \`modusbrain upgrade\``,
         'manifest_unsupported_schema_version',
         { field: 'eval_schema_version', expected: `<= ${maxEval}`, actual: v },
       );

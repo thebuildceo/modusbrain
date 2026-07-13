@@ -1,5 +1,5 @@
 {
-  "name": "gbrain",
+  "name": "modusbrain",
   "version": "0.32.3.0",
   "conformance_version": "1.0.0",
   "description": "Personal knowledge brain with hybrid RAG search \u2014 GStack mod for agent platforms",
@@ -37,7 +37,7 @@
     {
       "name": "setup",
       "path": "setup/SKILL.md",
-      "description": "Set up GBrain: auto-provision Supabase or PGLite, AGENTS.md injection, first import"
+      "description": "Set up ModusBrain: auto-provision Supabase or PGLite, AGENTS.md injection, first import"
     },
     {
       "name": "publish",
@@ -142,37 +142,37 @@
     {
       "name": "minion-orchestrator",
       "path": "minion-orchestrator/SKILL.md",
-      "description": "Unified Minions skill for deterministic shell jobs and LLM subagent orchestration. Submit, monitor, steer, pause/resume, replay. Replaces the older gbrain-jobs routing intent and sessions_spawn for durable observable background work."
+      "description": "Unified Minions skill for deterministic shell jobs and LLM subagent orchestration. Submit, monitor, steer, pause/resume, replay. Replaces the older modusbrain-jobs routing intent and sessions_spawn for durable observable background work."
     },
     {
       "name": "schema-author",
       "path": "schema-author/SKILL.md",
-      "description": "Evolve the active schema pack. Add page types, propose new types from a corpus scan, backfill page.type via sync. Wraps the 14 gbrain schema CLI verbs + 9 MCP ops shipped in v0.40.7.0."
+      "description": "Evolve the active schema pack. Add page types, propose new types from a corpus scan, backfill page.type via sync. Wraps the 14 modusbrain schema CLI verbs + 9 MCP ops shipped in v0.40.7.0."
     },
     {
       "name": "skillify",
       "path": "skillify/SKILL.md",
-      "description": "Meta skill. Turn any raw feature into a properly-skilled, tested, resolvable, evaled unit. Paired with gbrain check-resolvable gives user-controllable auto-skill-creation."
+      "description": "Meta skill. Turn any raw feature into a properly-skilled, tested, resolvable, evaled unit. Paired with modusbrain check-resolvable gives user-controllable auto-skill-creation."
     },
     {
       "name": "skillpack-check",
       "path": "skillpack-check/SKILL.md",
-      "description": "Agent-readable gbrain health report. Wraps doctor + apply-migrations --list into one JSON blob with exit codes. Cron-friendly for morning-briefing pipelines."
+      "description": "Agent-readable modusbrain health report. Wraps doctor + apply-migrations --list into one JSON blob with exit codes. Cron-friendly for morning-briefing pipelines."
     },
     {
       "name": "skillpack-harvest",
       "path": "skillpack-harvest/SKILL.md",
-      "description": "Editorial workflow for lifting a proven skill from a host repo back into gbrain. Pairs with `gbrain skillpack harvest` CLI. Drives the genericization checklist that scrubs fork-specific names + real entities before files land in gbrain core."
+      "description": "Editorial workflow for lifting a proven skill from a host repo back into modusbrain. Pairs with `modusbrain skillpack harvest` CLI. Drives the genericization checklist that scrubs fork-specific names + real entities before files land in modusbrain core."
     },
     {
       "name": "smoke-test",
       "path": "smoke-test/SKILL.md",
-      "description": "Post-restart smoke tests + auto-fix for gbrain and OpenClaw environments"
+      "description": "Post-restart smoke tests + auto-fix for modusbrain and OpenClaw environments"
     },
     {
-      "name": "gbrain-upgrade",
-      "path": "gbrain-upgrade/SKILL.md",
-      "description": "Keep gbrain current: act on the UPGRADE_AVAILABLE marker per self_upgrade.mode (notify prompt or silent auto)"
+      "name": "modusbrain-upgrade",
+      "path": "modusbrain-upgrade/SKILL.md",
+      "description": "Keep modusbrain current: act on the UPGRADE_AVAILABLE marker per self_upgrade.mode (notify prompt or silent auto)"
     },
     {
       "name": "book-mirror",
@@ -207,7 +207,7 @@
     {
       "name": "archive-crawler",
       "path": "archive-crawler/SKILL.md",
-      "description": "Universal archivist for personal file archives (Dropbox/B2/email exports). Filters for high-value content within an explicit gbrain.yml allow-list scan_paths gate."
+      "description": "Universal archivist for personal file archives (Dropbox/B2/email exports). Filters for high-value content within an explicit modusbrain.yml allow-list scan_paths gate."
     },
     {
       "name": "academic-verify",
@@ -240,14 +240,14 @@
       "description": "Compress an agent's routing file (RESOLVER.md or AGENTS.md) by replacing skill-per-row tables with functional-area dispatcher entries. Two-layer dispatch keeps every sub-skill reachable at ~50% of the file size."
     },
     {
-      "name": "gbrain-advisor",
-      "path": "gbrain-advisor/SKILL.md",
-      "description": "Proactive 'make the most of gbrain' coaching. Runs gbrain advisor on a cadence and pings the user with the top high-leverage actions for their brain. Read-only; always asks before fixing."
+      "name": "modusbrain-advisor",
+      "path": "modusbrain-advisor/SKILL.md",
+      "description": "Proactive 'make the most of modusbrain' coaching. Runs modusbrain advisor on a cadence and pings the user with the top high-leverage actions for their brain. Read-only; always asks before fixing."
     },
     {
       "name": "brain-taxonomist",
       "path": "brain-taxonomist/SKILL.md",
-      "description": "Filing gate consulted before every brain page write. Reads the active schema pack via `gbrain schema show --json`; emits a recommended filing path with reasoning."
+      "description": "Filing gate consulted before every brain page write. Reads the active schema pack via `modusbrain schema show --json`; emits a recommended filing path with reasoning."
     },
     {
       "name": "eiirp",
@@ -262,16 +262,16 @@
     {
       "name": "skill-optimizer",
       "path": "skill-optimizer/SKILL.md",
-      "description": "Self-evolving skill optimization via gbrain skillopt — SkillOpt-paper-grounded text-space optimizer with validation gating (median-of-3 + epsilon=0.05), bundled-skill safety, bootstrap review sentinel, per-skill DB lock, and atomic versioned writes."
+      "description": "Self-evolving skill optimization via modusbrain skillopt — SkillOpt-paper-grounded text-space optimizer with validation gating (median-of-3 + epsilon=0.05), bundled-skill safety, bootstrap review sentinel, per-skill DB lock, and atomic versioned writes."
     }
   ],
   "dependencies": {
     "runtime": "bun",
-    "package": "gbrain"
+    "package": "modusbrain"
   },
   "setup": {
     "skill": "setup",
-    "description": "Auto-provision Supabase or PGLite and configure GBrain (< 2 min)"
+    "description": "Auto-provision Supabase or PGLite and configure ModusBrain (< 2 min)"
   },
   "recipes_dir": "recipes/",
   "resolver": "RESOLVER.md",

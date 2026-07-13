@@ -21,13 +21,13 @@
 # CI runners under load (one CI flake observed on PR #475 hitting
 # exactly 5000.09ms in the Tags beforeAll).
 #
-# HOME isolation: E2E tests call paths that resolve to gbrain init / saveConfig
+# HOME isolation: E2E tests call paths that resolve to modusbrain init / saveConfig
 # (e.g. setupDB writing config for the test container) and would otherwise
-# write the user's real ~/.gbrain/config.json. The wrapper redirects HOME and
-# GBRAIN_HOME to a tmpdir before bun starts so config writes land in the
+# write the user's real ~/.modusbrain/config.json. The wrapper redirects HOME and
+# MODUSBRAIN_HOME to a tmpdir before bun starts so config writes land in the
 # tmpdir, then verifies the user's real config md5 didn't change after the run.
 # Both env vars are required: loadConfig/saveConfig resolve via HOME, while
-# configPath/getDbUrlSource honor GBRAIN_HOME; setting only one leaves the
+# configPath/getDbUrlSource honor MODUSBRAIN_HOME; setting only one leaves the
 # other path escaping isolation. HOME is set before bun starts because Bun's
 # os.homedir() caches at first call and in-process mutation would not take.
 # Trap cleans up the tmpdir even on test failure.
@@ -42,7 +42,7 @@ BUN_CHILD_PATH="$(resolve_bun_child_path)"
 # --- HOME isolation: snapshot real user config before switching ---
 # Tolerate unset HOME (minimal containers, exotic CI shells) without tripping set -u.
 REAL_HOME="${HOME:-/tmp}"
-USER_CONFIG="$REAL_HOME/.gbrain/config.json"
+USER_CONFIG="$REAL_HOME/.modusbrain/config.json"
 USER_CONFIG_EXISTED=0
 USER_CONFIG_MD5=""
 # `{ ... } || true` swallows non-zero exit when the file is missing or md5 isn't
@@ -62,27 +62,27 @@ fi
 
 # Portable mktemp: explicit XXXXXX is required by GNU mktemp on Linux CI.
 # `-t prefix` works on BSD but errors on GNU when the template lacks Xs.
-E2E_TMP_HOME=$(mktemp -d "${TMPDIR:-/tmp}/gbrain-e2e.XXXXXX")
+E2E_TMP_HOME=$(mktemp -d "${TMPDIR:-/tmp}/modusbrain-e2e.XXXXXX")
 trap 'rm -rf "$E2E_TMP_HOME"' EXIT
 
 export HOME="$E2E_TMP_HOME"
-export GBRAIN_HOME="$E2E_TMP_HOME"
-mkdir -p "$E2E_TMP_HOME/.gbrain"
+export MODUSBRAIN_HOME="$E2E_TMP_HOME"
+mkdir -p "$E2E_TMP_HOME/.modusbrain"
 
 # --- Hermetic env scrub: operator/agent context must not bleed into E2E ---
 # A dev shell or a Conductor workspace exports CONDUCTOR_*, MCP_*, OPENCLAW_*,
-# and GBRAIN_* config overrides (e.g. a stray GBRAIN_BRAIN_ID, GBRAIN_SOURCE,
-# GBRAIN_*_THRESHOLD, GBRAIN_SUPERVISOR_PID_FILE) that would silently change
+# and MODUSBRAIN_* config overrides (e.g. a stray MODUSBRAIN_BRAIN_ID, MODUSBRAIN_SOURCE,
+# MODUSBRAIN_*_THRESHOLD, MODUSBRAIN_SUPERVISOR_PID_FILE) that would silently change
 # test behavior — making "hermetic" E2E non-hermetic and its failures
 # unreproducible across machines. Drop them before bun starts. This is a
 # DENYLIST of operator-context prefixes (not an allowlist rebuild), so PATH,
 # HOME, TMPDIR, CI, DATABASE_URL, and bun internals survive untouched. We keep
-# GBRAIN_HOME (just set above for HOME isolation); everything else GBRAIN_* is
+# MODUSBRAIN_HOME (just set above for HOME isolation); everything else MODUSBRAIN_* is
 # an operator override the suite must not inherit. Adapts GStack's
-# buildHermeticEnv() allowlist to gbrain's shell E2E runner.
-for _e2e_var in $(env | grep -oE '^(CONDUCTOR_|MCP_|OPENCLAW_|GBRAIN_)[A-Za-z0-9_]*' | sort -u); do
+# buildHermeticEnv() allowlist to modusbrain's shell E2E runner.
+for _e2e_var in $(env | grep -oE '^(CONDUCTOR_|MCP_|OPENCLAW_|MODUSBRAIN_)[A-Za-z0-9_]*' | sort -u); do
   case "$_e2e_var" in
-    GBRAIN_HOME) ;;  # required for HOME isolation (set above) — keep
+    MODUSBRAIN_HOME) ;;  # required for HOME isolation (set above) — keep
     *) unset "$_e2e_var" || true ;;
   esac
 done

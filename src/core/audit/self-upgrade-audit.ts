@@ -1,8 +1,8 @@
 /**
  * Self-upgrade audit trail (v0.42). One JSONL line per self-upgrade decision /
- * outcome at `~/.gbrain/audit/self-upgrade-YYYY-Www.jsonl` (honors
- * GBRAIN_AUDIT_DIR). Built on the shared `audit-writer` primitive. Read back by
- * `gbrain doctor`'s `self_upgrade_health` check. Best-effort: never throws.
+ * outcome at `~/.modusbrain/audit/self-upgrade-YYYY-Www.jsonl` (honors
+ * MODUSBRAIN_AUDIT_DIR). Built on the shared `audit-writer` primitive. Read back by
+ * `modusbrain doctor`'s `self_upgrade_health` check. Best-effort: never throws.
  *
  * Privacy: records only versions + outcome + reason. No paths, no content.
  */

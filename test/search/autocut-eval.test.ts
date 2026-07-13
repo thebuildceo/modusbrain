@@ -2,7 +2,7 @@
  * v0.42.3.0 — autocut precision/recall eval gate (in-repo, hermetic).
  *
  * This is the D2 precondition for default-ON, runnable in CI without the
- * sibling gbrain-evals repo and without any API key. It measures the EXACT
+ * sibling modusbrain-evals repo and without any API key. It measures the EXACT
  * claim default-ON rests on: does cutting at the rerank-score cliff lift
  * precision WITHOUT regressing recall — especially on enumeration queries?
  *
@@ -15,7 +15,7 @@
  * the precision/recall tradeoff of the CUT DECISION on those distributions.
  * It does NOT claim that ZeroEntropy's live scores look like these fixtures
  * on a specific brain — that empirical confirmation is the optional
- * gbrain-evals PrecisionMemBench run. What this gate DOES guarantee, in CI:
+ * modusbrain-evals PrecisionMemBench run. What this gate DOES guarantee, in CI:
  *  - autocut lifts mean precision well above the no-autocut baseline,
  *  - it does NOT regress recall below a floor,
  *  - it NEVER regresses recall on enumeration/flat queries (structural:
@@ -150,9 +150,9 @@ describe('autocut eval gate (D2 — precision lift without recall regression)', 
   );
 
   // Floors are env-overridable (document the reason in the commit when you move them).
-  const LIFT_FLOOR = envFloor('GBRAIN_AUTOCUT_EVAL_PRECISION_LIFT_FLOOR', 0.15);
-  const RECALL_FLOOR = envFloor('GBRAIN_AUTOCUT_EVAL_RECALL_FLOOR', 0.9);
-  const RECALL_REGRESSION_TOLERANCE = envFloor('GBRAIN_AUTOCUT_EVAL_RECALL_TOLERANCE', 0.1);
+  const LIFT_FLOOR = envFloor('MODUSBRAIN_AUTOCUT_EVAL_PRECISION_LIFT_FLOOR', 0.15);
+  const RECALL_FLOOR = envFloor('MODUSBRAIN_AUTOCUT_EVAL_RECALL_FLOOR', 0.9);
+  const RECALL_REGRESSION_TOLERANCE = envFloor('MODUSBRAIN_AUTOCUT_EVAL_RECALL_TOLERANCE', 0.1);
 
   test('autocut lifts mean precision well above baseline', () => {
     expect(precisionOn - precisionOff).toBeGreaterThanOrEqual(LIFT_FLOOR);

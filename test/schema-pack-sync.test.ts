@@ -41,7 +41,7 @@ beforeEach(async () => {
   await resetPgliteState(engine);
   _resetPackCacheForTests();
   _resetPackLocatorForTests();
-  tmpDir = mkdtempSync(join(tmpdir(), 'gbrain-sync-test-'));
+  tmpDir = mkdtempSync(join(tmpdir(), 'modusbrain-sync-test-'));
 });
 
 function ctxOf(remote = false): OperationContext {
@@ -84,7 +84,7 @@ function seedTinyPack(types: Array<{ name: string; prefix: string }>): void {
   const dir = join(tmpDir, 'tiny');
   mkdirSync(dir, { recursive: true });
   const path = join(dir, 'pack.yaml');
-  let body = `api_version: gbrain-schema-pack-v1\nname: tiny\nversion: 1.0.0\ndescription: ""\ngbrain_min_version: 0.38.0\nextends: null\nborrow_from: []\npage_types:\n`;
+  let body = `api_version: modusbrain-schema-pack-v1\nname: tiny\nversion: 1.0.0\ndescription: ""\nmodusbrain_min_version: 0.38.0\nextends: null\nborrow_from: []\npage_types:\n`;
   for (const t of types) {
     body += `  - name: ${t.name}\n    primitive: entity\n    path_prefixes:\n      - ${t.prefix}\n    aliases: []\n    extractable: false\n    expert_routing: false\n`;
   }
@@ -95,7 +95,7 @@ function seedTinyPack(types: Array<{ name: string; prefix: string }>): void {
 
 describe('runSyncCore — dry-run', () => {
   it('returns would_apply count + sample_slugs without writing', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_SCHEMA_PACK: 'tiny' }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_SCHEMA_PACK: 'tiny' }, async () => {
       seedTinyPack([{ name: 'person', prefix: 'people/' }]);
       await seedPage('alice', 'people/alice.md');
       await seedPage('bob', 'people/bob.md');
@@ -114,7 +114,7 @@ describe('runSyncCore — dry-run', () => {
   });
 
   it('sample_slugs capped at 10', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_SCHEMA_PACK: 'tiny' }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_SCHEMA_PACK: 'tiny' }, async () => {
       seedTinyPack([{ name: 'person', prefix: 'people/' }]);
       for (let i = 0; i < 15; i++) {
         await seedPage(`p${String(i).padStart(2, '0')}`, `people/p${String(i).padStart(2, '0')}.md`);
@@ -127,7 +127,7 @@ describe('runSyncCore — dry-run', () => {
   });
 
   it('dead_prefix flag fires when no pages match', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_SCHEMA_PACK: 'tiny' }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_SCHEMA_PACK: 'tiny' }, async () => {
       seedTinyPack([
         { name: 'person', prefix: 'people/' },
         { name: 'company', prefix: 'companies/' },
@@ -143,7 +143,7 @@ describe('runSyncCore — dry-run', () => {
 
 describe('runSyncCore — apply', () => {
   it('updates page.type for matching untyped pages', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_SCHEMA_PACK: 'tiny' }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_SCHEMA_PACK: 'tiny' }, async () => {
       seedTinyPack([{ name: 'person', prefix: 'people/' }]);
       await seedPage('alice', 'people/alice.md');
       await seedPage('bob', 'people/bob.md');
@@ -155,7 +155,7 @@ describe('runSyncCore — apply', () => {
   });
 
   it('idempotent: second apply is a no-op', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_SCHEMA_PACK: 'tiny' }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_SCHEMA_PACK: 'tiny' }, async () => {
       seedTinyPack([{ name: 'person', prefix: 'people/' }]);
       await seedPage('alice', 'people/alice.md');
       const first = await runSyncCore(ctxOf(), { apply: true });
@@ -166,7 +166,7 @@ describe('runSyncCore — apply', () => {
   });
 
   it('chunked UPDATE: large set in 1000-row batches (perf-shape verification)', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_SCHEMA_PACK: 'tiny' }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_SCHEMA_PACK: 'tiny' }, async () => {
       seedTinyPack([{ name: 'person', prefix: 'people/' }]);
       // Seed 1500 untyped pages (1.5× the default batch size).
       for (let i = 0; i < 1500; i++) {
@@ -187,7 +187,7 @@ describe('runSyncCore — apply', () => {
   });
 
   it('does NOT touch pages that already have a type', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_SCHEMA_PACK: 'tiny' }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_SCHEMA_PACK: 'tiny' }, async () => {
       seedTinyPack([{ name: 'person', prefix: 'people/' }]);
       await seedPage('alice', 'people/alice.md', { type: 'old-type' });
       await seedPage('bob', 'people/bob.md');  // untyped
@@ -198,7 +198,7 @@ describe('runSyncCore — apply', () => {
   });
 
   it('excludes soft-deleted pages', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_SCHEMA_PACK: 'tiny' }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_SCHEMA_PACK: 'tiny' }, async () => {
       seedTinyPack([{ name: 'person', prefix: 'people/' }]);
       await seedPage('alice', 'people/alice.md');
       await seedPage('zombie', 'people/zombie.md', { deleted: true });
@@ -212,7 +212,7 @@ describe('runSyncCore — apply', () => {
 
 describe('runSyncCore — source scoping (codex C5 write-side)', () => {
   it('updates only the scoped source', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_SCHEMA_PACK: 'tiny' }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_SCHEMA_PACK: 'tiny' }, async () => {
       seedTinyPack([{ name: 'person', prefix: 'people/' }]);
       await seedPage('alice', 'people/alice.md', { sourceId: 'src-a' });
       await seedPage('bob', 'people/bob.md', { sourceId: 'src-b' });
@@ -226,7 +226,7 @@ describe('runSyncCore — source scoping (codex C5 write-side)', () => {
 
 describe('runSyncCore — pack-load failure', () => {
   it('returns empty result when no pack is loaded', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_SCHEMA_PACK: 'nonexistent' }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_SCHEMA_PACK: 'nonexistent' }, async () => {
       __setPackLocatorForTests(() => null);
       await seedPage('alice', 'people/alice.md');
       const result = await runSyncCore(ctxOf(), { apply: true });
@@ -241,7 +241,7 @@ describe('runSyncCore — pack-load failure', () => {
 
 describe('runSyncCore — JSON envelope shape', () => {
   it('schema_version stays 1', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_SCHEMA_PACK: 'tiny' }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_SCHEMA_PACK: 'tiny' }, async () => {
       seedTinyPack([{ name: 'person', prefix: 'people/' }]);
       const result = await runSyncCore(ctxOf());
       expect(result.schema_version).toBe(1);
@@ -249,7 +249,7 @@ describe('runSyncCore — JSON envelope shape', () => {
   });
 
   it('per_prefix entry shape is stable', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_SCHEMA_PACK: 'tiny' }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_SCHEMA_PACK: 'tiny' }, async () => {
       seedTinyPack([{ name: 'person', prefix: 'people/' }]);
       await seedPage('alice', 'people/alice.md');
       const result = await runSyncCore(ctxOf());
@@ -266,7 +266,7 @@ describe('runSyncCore — JSON envelope shape', () => {
 
 describe('runSyncCore — batch size clamping', () => {
   it('clamps batch size to >=1 and <=10000', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_SCHEMA_PACK: 'tiny' }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_SCHEMA_PACK: 'tiny' }, async () => {
       seedTinyPack([{ name: 'person', prefix: 'people/' }]);
       await seedPage('alice', 'people/alice.md');
       // batchSize:0 and batchSize:99999 both work; result is identical.

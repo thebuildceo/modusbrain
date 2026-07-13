@@ -1,10 +1,10 @@
 /**
  * Real atomic self-update for the compiled-`binary` install method
- * (v0.42 self-upgrading-gbrain wave, eng-review Finding 2 — "make the atomic
+ * (v0.42 self-upgrading-modusbrain wave, eng-review Finding 2 — "make the atomic
  * swap claim true for the one method we own").
  *
  * `bun` / `bun-link` / `clawhub` delegate their swap to those package managers.
- * The compiled standalone binary is the only method gbrain itself writes, so
+ * The compiled standalone binary is the only method modusbrain itself writes, so
  * it's the only place we can (and now do) guarantee atomicity:
  *
  *   resolve published asset → download to a temp sibling of the live binary →
@@ -16,12 +16,12 @@
  * untouched — there is no half-written-binary brick path. Windows can't rename
  * over a running .exe, and no Windows/`darwin-x64`/`linux-arm64` asset is
  * published, so those degrade to notify-only via `resolvePlatformAsset`
- * returning null. Trust model: TLS + GitHub, same as `gbrain upgrade` (no
+ * returning null. Trust model: TLS + GitHub, same as `modusbrain upgrade` (no
  * signature verification this wave — D7a TODO).
  *
  * Published asset matrix mirrors `.github/workflows/release.yml`:
- *   darwin-arm64 → gbrain-darwin-arm64
- *   linux-x64    → gbrain-linux-x64
+ *   darwin-arm64 → modusbrain-darwin-arm64
+ *   linux-x64    → modusbrain-linux-x64
  */
 
 import { chmodSync, closeSync, fsyncSync, openSync, renameSync, unlinkSync, writeFileSync } from 'node:fs';
@@ -49,11 +49,11 @@ export interface BinarySelfUpdateResult {
   asset?: string;
 }
 
-/** The release asset basename gbrain publishes for this platform/arch, or null
+/** The release asset basename modusbrain publishes for this platform/arch, or null
  * when no asset is published (degrade to notify-only). */
 export function expectedAssetName(platform: NodeJS.Platform, arch: NodeJS.Architecture): string | null {
-  if (platform === 'darwin' && arch === 'arm64') return 'gbrain-darwin-arm64';
-  if (platform === 'linux' && arch === 'x64') return 'gbrain-linux-x64';
+  if (platform === 'darwin' && arch === 'arm64') return 'modusbrain-darwin-arm64';
+  if (platform === 'linux' && arch === 'x64') return 'modusbrain-linux-x64';
   return null;
 }
 
@@ -74,7 +74,7 @@ export interface BinarySelfUpdateDeps {
   fetchRelease?: () => Promise<{ tag: string; assets: ReleaseAsset[] } | null>;
   /** Download `url` to `destPath`. Default streams the HTTP body to disk. */
   download?: (url: string, destPath: string) => Promise<void>;
-  /** Smoke-test the staged binary; returns true if `<path> --version` looks like gbrain. */
+  /** Smoke-test the staged binary; returns true if `<path> --version` looks like modusbrain. */
   smoke?: (stagedPath: string) => boolean;
   platform?: NodeJS.Platform;
   arch?: NodeJS.Architecture;
@@ -82,8 +82,8 @@ export interface BinarySelfUpdateDeps {
 
 async function defaultFetchRelease(): Promise<{ tag: string; assets: ReleaseAsset[] } | null> {
   try {
-    const res = await fetch('https://api.github.com/repos/garrytan/gbrain/releases/latest', {
-      headers: { 'User-Agent': 'gbrain-self-upgrade' },
+    const res = await fetch('https://api.github.com/repos/garrytan/modusbrain/releases/latest', {
+      headers: { 'User-Agent': 'modusbrain-self-upgrade' },
       signal: AbortSignal.timeout(5_000),
     });
     if (!res.ok) return null;
@@ -99,7 +99,7 @@ async function defaultFetchRelease(): Promise<{ tag: string; assets: ReleaseAsse
 
 async function defaultDownload(url: string, destPath: string): Promise<void> {
   const res = await fetch(url, {
-    headers: { 'User-Agent': 'gbrain-self-upgrade' },
+    headers: { 'User-Agent': 'modusbrain-self-upgrade' },
     redirect: 'follow',
     signal: AbortSignal.timeout(120_000),
   });
@@ -119,7 +119,7 @@ async function defaultDownload(url: string, destPath: string): Promise<void> {
 function defaultSmoke(stagedPath: string): boolean {
   try {
     const out = execFileSync(stagedPath, ['--version'], { encoding: 'utf-8', timeout: 10_000 });
-    return /gbrain\s/i.test(out);
+    return /modusbrain\s/i.test(out);
   } catch {
     return false;
   }

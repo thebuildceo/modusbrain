@@ -3,7 +3,7 @@
  *
  * Records every call to `db.disconnect()` and `PostgresEngine.disconnect()`
  * so we can identify the offending code path that nulls the module
- * singleton mid-cycle. The reported #1570 symptom — `gbrain dream` losing
+ * singleton mid-cycle. The reported #1570 symptom — `modusbrain dream` losing
  * ~150 rows per cycle with `'No database connection'` errors — happens
  * because some caller disconnects the shared singleton while other code
  * paths are still using it. The retry-layer reconnect callback (v0.41.25
@@ -37,8 +37,8 @@
  * Privacy: stack frames contain file paths but no SQL content, no row
  * data, no user-supplied strings. Matches the shell-audit.ts posture
  * from v0.20+. Audit file lives at
- * `~/.gbrain/audit/db-disconnect-YYYY-Www.jsonl` (honors
- * `GBRAIN_AUDIT_DIR` via the shared `resolveAuditDir()` helper).
+ * `~/.modusbrain/audit/db-disconnect-YYYY-Www.jsonl` (honors
+ * `MODUSBRAIN_AUDIT_DIR` via the shared `resolveAuditDir()` helper).
  */
 
 import { createAuditWriter } from './audit-writer.ts';
@@ -91,7 +91,7 @@ export function logDbDisconnect(
   engineKind: DbDisconnectAuditEvent['engine_kind'],
   connectionStyle: DbDisconnectAuditEvent['connection_style'],
 ): void {
-  // argv[2] is typically the gbrain subcommand (e.g. 'dream', 'capture').
+  // argv[2] is typically the modusbrain subcommand (e.g. 'dream', 'capture').
   // argv[0] is bun, argv[1] is the script path; the meaningful identity
   // is argv[2]. Defensive fallback to 'unknown' for embedded callers.
   const command = process.argv[2] ?? 'unknown';

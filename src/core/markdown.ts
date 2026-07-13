@@ -341,7 +341,7 @@ function collectValidationErrors(
  *   1. `<!-- timeline -->` — preferred, unambiguous, what serializeMarkdown emits
  *   2. `--- timeline ---` — decorated separator
  *   3. `---` ONLY when the next non-empty line is `## Timeline` or `## History`
- *      (backward-compat fallback for older gbrain-written files)
+ *      (backward-compat fallback for older modusbrain-written files)
  *
  * A plain `---` line is a markdown horizontal rule, NOT a timeline separator.
  * Treating bare `---` as a separator caused 83% content truncation on wiki corpora.
@@ -426,7 +426,7 @@ export function serializeMarkdown(
 // papers/foo.md → type 'paper' without forking the engine.
 //
 // inferType (legacy sync wrapper) → calls inferTypeWithPrefixes with
-//   the GBRAIN_BASE_PATH_PREFIXES table below, which reproduces the
+//   the MODUSBRAIN_BASE_PATH_PREFIXES table below, which reproduces the
 //   pre-v0.38 hardcoded behavior byte-for-byte (parity-pinned by
 //   test/regressions/gbrain-base-equivalence.test.ts).
 // inferTypeFromPack(filePath, manifest) → new primitive that walks
@@ -446,7 +446,7 @@ export function serializeMarkdown(
  * Order matters: wiki subtypes + writing scan first (stronger signal
  * than ancestor directories).
  */
-const GBRAIN_BASE_PATH_PREFIXES: ReadonlyArray<{ prefixes: string[]; type: PageType }> = [
+const MODUSBRAIN_BASE_PATH_PREFIXES: ReadonlyArray<{ prefixes: string[]; type: PageType }> = [
   { prefixes: ['/writing/'], type: 'writing' },
   { prefixes: ['/wiki/analysis/'], type: 'analysis' },
   { prefixes: ['/wiki/guides/', '/wiki/guide/'], type: 'guide' },
@@ -472,7 +472,7 @@ const GBRAIN_BASE_PATH_PREFIXES: ReadonlyArray<{ prefixes: string[]; type: PageT
 ];
 
 function inferType(filePath?: string): PageType {
-  return inferTypeWithPrefixes(filePath, GBRAIN_BASE_PATH_PREFIXES);
+  return inferTypeWithPrefixes(filePath, MODUSBRAIN_BASE_PATH_PREFIXES);
 }
 
 /**
@@ -497,7 +497,7 @@ export function inferTypeFromPack(
   if (!filePath) return 'concept';
   // Empty pack → fall back to gbrain-base hardcoded defaults.
   if (pack.page_types.length === 0) {
-    return inferTypeWithPrefixes(filePath, GBRAIN_BASE_PATH_PREFIXES);
+    return inferTypeWithPrefixes(filePath, MODUSBRAIN_BASE_PATH_PREFIXES);
   }
   const lower = ('/' + filePath).toLowerCase();
   for (const pt of pack.page_types) {
@@ -544,7 +544,7 @@ export function inferTypeAndSubtypeFromPack(
   if (!filePath) return { type: 'concept' };
   // Empty pack → legacy fallback; no subtype info available.
   if (pack.page_types.length === 0) {
-    return { type: inferTypeWithPrefixes(filePath, GBRAIN_BASE_PATH_PREFIXES) };
+    return { type: inferTypeWithPrefixes(filePath, MODUSBRAIN_BASE_PATH_PREFIXES) };
   }
   const lower = ('/' + filePath).toLowerCase();
   // Stage 1: prefix-match wins (same as inferTypeFromPack)

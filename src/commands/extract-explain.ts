@@ -1,7 +1,7 @@
 /**
- * v0.42 Wave D2 — `gbrain extract --explain <kind>` CLI.
+ * v0.42 Wave D2 — `modusbrain extract --explain <kind>` CLI.
  *
- *   gbrain extract --explain <kind>
+ *   modusbrain extract --explain <kind>
  *
  * Prints the active-pack's resolution chain for the requested kind:
  *   - Which pack declares it extractable
@@ -33,7 +33,7 @@ export async function runExtractExplain(
     : args.find((a, i) => i > 0 && !a.startsWith('--'));
 
   if (!kindArg || kindArg.startsWith('--')) {
-    console.error('Usage: gbrain extract --explain <kind>');
+    console.error('Usage: modusbrain extract --explain <kind>');
     process.exit(2);
   }
 
@@ -55,7 +55,7 @@ export async function runExtractExplain(
       console.log(`Kind: ${kindArg}`);
       console.log('Status: no active pack configured');
       console.log('');
-      console.log('Configure a pack with: gbrain schema use <pack-name>');
+      console.log('Configure a pack with: modusbrain schema use <pack-name>');
     }
     return;
   }
@@ -97,10 +97,10 @@ export async function runExtractExplain(
         for (const k of allExtractable) console.log(`  ${k}`);
       }
       console.log('');
-      console.log('Built-in kinds (shipped by gbrain cycle phases):');
+      console.log('Built-in kinds (shipped by modusbrain cycle phases):');
       for (const k of Array.from(cyclePhaseKinds).sort()) console.log(`  ${k}`);
       console.log('');
-      console.log(`To declare it: gbrain schema scaffold-extractable ${kindArg} --pack ${pack.manifest.name}`);
+      console.log(`To declare it: modusbrain schema scaffold-extractable ${kindArg} --pack ${pack.manifest.name}`);
     }
     return;
   }

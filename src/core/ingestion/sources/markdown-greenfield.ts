@@ -1,6 +1,6 @@
 /**
  * MarkdownGreenfieldSource — one-shot bulk importer for the v0.41
- * your OpenClaw → gbrain epistemology migration.
+ * your OpenClaw → modusbrain epistemology migration.
  *
  * @one-shot — this module is intentionally long-lived after the
  * single production migration completes. Per D10, future similar
@@ -13,7 +13,7 @@
  * trickle dedup window. mode: 'migration' on this source signals the
  * daemon's handleEmit branch to bypass DedupWindow.mark(); we own dedup
  * via the imported_from frontmatter marker + op_checkpoint (which the
- * caller wires via gbrain capture --source markdown-greenfield).
+ * caller wires via modusbrain capture --source markdown-greenfield).
  *
  * Walk:
  *   - ~/git/brain/atoms/{YYYY-MM-DD}/*.md (~13K files, atoms)
@@ -32,11 +32,11 @@
  *   5. Emit IngestionEvent
  *
  * Per-row validation failure:
- *   - Append a JSONL line to ~/.gbrain/audit/markdown-greenfield-failures-
+ *   - Append a JSONL line to ~/.modusbrain/audit/markdown-greenfield-failures-
  *     YYYY-Www.jsonl with {path, error, ts} per D12
  *   - Continue with remaining files (don't fail-fast on one bad row)
  *
- * CLI activation: gbrain capture --source markdown-greenfield
+ * CLI activation: modusbrain capture --source markdown-greenfield
  *   --repo ~/git/brain [--dry-run] [--limit N]
  *
  * The --repo path is the brain directory containing atoms/, concepts/,
@@ -47,7 +47,7 @@ import { readFileSync, readdirSync, existsSync, statSync, appendFileSync, mkdirS
 import { join, relative, dirname } from 'node:path';
 import { homedir } from 'node:os';
 import matter from 'gray-matter';
-import { gbrainPath } from '../../config.ts';
+import { modusbrainPath } from '../../config.ts';
 import { computeContentHash } from '../types.ts';
 import type {
   IngestionSource,
@@ -64,7 +64,7 @@ export interface MarkdownGreenfieldOpts {
   dryRun?: boolean;
   /** Limit total files processed (useful for staged testing). */
   limit?: number;
-  /** Audit JSONL output dir (default: ~/.gbrain/audit). */
+  /** Audit JSONL output dir (default: ~/.modusbrain/audit). */
   auditDir?: string;
   /** Test seam: alternative fs read. */
   _readFile?: (path: string) => string;
@@ -114,7 +114,7 @@ export class MarkdownGreenfieldSource implements IngestionSource {
       repoPath: opts.repoPath ?? join(homedir(), 'git', 'brain'),
       dryRun: opts.dryRun ?? false,
       limit: opts.limit,
-      auditDir: opts.auditDir ?? gbrainPath('audit'),
+      auditDir: opts.auditDir ?? modusbrainPath('audit'),
       _readFile: opts._readFile ?? ((p) => readFileSync(p, 'utf-8')),
       _existsSync: opts._existsSync ?? existsSync,
       _readdirSync: opts._readdirSync ?? ((p) => readdirSync(p)),
@@ -292,7 +292,7 @@ export class MarkdownGreenfieldSource implements IngestionSource {
   }
 
   /**
-   * Derive the gbrain page slug from the absolute file path. Strips
+   * Derive the modusbrain page slug from the absolute file path. Strips
    * the repo prefix and the .md suffix. Preserves the directory
    * hierarchy so atoms/{date}/foo.md → atoms/{date}/foo.
    */

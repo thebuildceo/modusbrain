@@ -1,20 +1,20 @@
-# Connect GBrain to Perplexity Computer
+# Connect ModusBrain to Perplexity Computer
 
-Perplexity Computer connects as a **remote** MCP client, so GBrain must be served
+Perplexity Computer connects as a **remote** MCP client, so ModusBrain must be served
 over HTTP and reachable at a public HTTPS URL. Perplexity does not run
-`gbrain serve` (stdio) the way Claude Code does — it needs a reachable endpoint:
+`modusbrain serve` (stdio) the way Claude Code does — it needs a reachable endpoint:
 
 ```
 Perplexity Computer
   → ngrok tunnel (https://YOUR-DOMAIN.ngrok.app/mcp)
-  → gbrain serve --http   (built-in OAuth 2.1 transport)
+  → modusbrain serve --http   (built-in OAuth 2.1 transport)
   → Postgres / PGLite
 ```
 
-## 1. Serve GBrain over HTTP (host side)
+## 1. Serve ModusBrain over HTTP (host side)
 
 ```bash
-gbrain serve --http --port 3131 --bind 0.0.0.0 \
+modusbrain serve --http --port 3131 --bind 0.0.0.0 \
   --public-url https://YOUR-DOMAIN.ngrok.app
 ```
 
@@ -45,15 +45,15 @@ long-lived full-access secret. Mint a client and print the connector fields in
 one step (on the brain host):
 
 ```bash
-gbrain connect https://YOUR-DOMAIN.ngrok.app/mcp --agent perplexity --oauth --register
+modusbrain connect https://YOUR-DOMAIN.ngrok.app/mcp --agent perplexity --oauth --register
 ```
 
 Or register separately and pass the creds (works anywhere, no DB needed):
 
 ```bash
-gbrain auth register-client perplexity --grant-types client_credentials --scopes "read write"
-gbrain connect https://YOUR-DOMAIN.ngrok.app/mcp --agent perplexity --oauth \
-  --client-id gbrain_cl_xxx --client-secret gbrain_cs_xxx
+modusbrain auth register-client perplexity --grant-types client_credentials --scopes "read write"
+modusbrain connect https://YOUR-DOMAIN.ngrok.app/mcp --agent perplexity --oauth \
+  --client-id modusbrain_cl_xxx --client-secret modusbrain_cs_xxx
 ```
 
 `connect --oauth` prints the **Issuer URL + Client ID + Client Secret** to paste
@@ -62,8 +62,8 @@ in step 4.
 **Legacy bearer token (simplest, best for local/personal):**
 
 ```bash
-gbrain auth create "perplexity"
-gbrain connect https://YOUR-DOMAIN.ngrok.app/mcp --token gbrain_xxx --agent perplexity
+modusbrain auth create "perplexity"
+modusbrain connect https://YOUR-DOMAIN.ngrok.app/mcp --token modusbrain_xxx --agent perplexity
 ```
 
 (Perplexity is a GUI connector, so there's no `--install` — `connect` prints the
@@ -84,7 +84,7 @@ exact values to paste in step 4.)
 In a Perplexity conversation, ask it to use your brain:
 
 ```
-Use my GBrain to search for [topic]
+Use my ModusBrain to search for [topic]
 ```
 
 Have it call `get_brain_identity` (whose brain this is), then `list_skills`
@@ -94,7 +94,7 @@ Have it call `get_brain_identity` (whose brain this is), then `list_skills`
 
 - Perplexity Computer is available to Pro subscribers; both the Mac app and web
   version support remote MCP connectors.
-- The Mac app can also use a local MCP server (`gbrain serve` stdio) if you'd
+- The Mac app can also use a local MCP server (`modusbrain serve` stdio) if you'd
   rather not expose an HTTP endpoint.
-- A `gbrain auth create` token is a long-lived, full-access secret. Keep it
+- A `modusbrain auth create` token is a long-lived, full-access secret. Keep it
   private and prefer a scoped token where possible.

@@ -1,6 +1,6 @@
 # DESIGN.md
 
-The design system source of truth for gbrain. Born from the de facto tokens
+The design system source of truth for modusbrain. Born from the de facto tokens
 that landed in `admin/src/index.css` during the v0.26.0 admin SPA work and
 formalized during the v0.36.1.0 Hindsight calibration wave's design review.
 
@@ -9,7 +9,7 @@ When a question is "does this UI fit the system?", the answer is here.
 
 ## Voice
 
-GBrain talks like a smart friend who knows your past, not a clinical scoring
+ModusBrain talks like a smart friend who knows your past, not a clinical scoring
 system. Every user-facing string passes through this filter:
 
 - Second person, contractions allowed.
@@ -134,7 +134,7 @@ Four chart renderers in v0.36.1.0:
 
 ## How to use this document
 
-When adding a new UI surface to gbrain:
+When adding a new UI surface to modusbrain:
 
 1. Pick existing tokens before introducing new ones. New tokens go through
    `/plan-design-review`.

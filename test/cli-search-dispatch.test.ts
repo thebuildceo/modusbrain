@@ -1,5 +1,5 @@
 /**
- * T5 — `gbrain search` dispatch reconcile. Subprocess test against the real
+ * T5 — `modusbrain search` dispatch reconcile. Subprocess test against the real
  * cli.ts entrypoint:
  *   - `search modes`  -> read-only config dashboard (NOT a search for "modes")
  *   - `search "<q>"`  -> cheap-hybrid free-text search (NOT "Unknown subcommand")
@@ -16,20 +16,20 @@ function run(args: string[], home: string) {
   const r = bunSpawnSync(['run', 'src/cli.ts', ...args], {
     cwd: process.cwd(),
     encoding: 'utf8',
-    env: { ...process.env, GBRAIN_HOME: home, DATABASE_URL: '', GBRAIN_DATABASE_URL: '' },
+    env: { ...process.env, MODUSBRAIN_HOME: home, DATABASE_URL: '', MODUSBRAIN_DATABASE_URL: '' },
     timeout: 45_000,
   });
   return { stdout: r.stdout ?? '', stderr: r.stderr ?? '', status: r.status ?? -1 };
 }
 
 function withHome(fn: (home: string) => void) {
-  const home = mkdtempSync(join(tmpdir(), 'gbrain-search-dispatch-'));
-  mkdirSync(join(home, '.gbrain'), { recursive: true });
-  writeFileSync(join(home, '.gbrain', 'config.json'), JSON.stringify({ engine: 'pglite' }));
+  const home = mkdtempSync(join(tmpdir(), 'modusbrain-search-dispatch-'));
+  mkdirSync(join(home, '.modusbrain'), { recursive: true });
+  writeFileSync(join(home, '.modusbrain', 'config.json'), JSON.stringify({ engine: 'pglite' }));
   try { fn(home); } finally { rmSync(home, { recursive: true, force: true }); }
 }
 
-describe('T5 — gbrain search dispatch', () => {
+describe('T5 — modusbrain search dispatch', () => {
   test('`search modes --json` routes to the dashboard (active_mode), not a query', () => {
     withHome((home) => {
       const { stdout, status } = run(['search', 'modes', '--json'], home);

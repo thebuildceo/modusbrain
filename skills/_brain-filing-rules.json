@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "companion": "_brain-filing-rules.md",
-  "description": "Canonical (machine-readable) brain filing rules. The .md companion is the human explainer; this JSON is what `gbrain check-resolvable` audits against. Keep both in sync.",
+  "description": "Canonical (machine-readable) brain filing rules. The .md companion is the human explainer; this JSON is what `modusbrain check-resolvable` audits against. Keep both in sync.",
   "rules": [
     {
       "kind": "person",

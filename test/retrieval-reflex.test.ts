@@ -13,7 +13,7 @@ import { withEnv } from './helpers/with-env.ts';
 import { normalizeAlias } from '../src/core/search/alias-normalize.ts';
 import { resolveEntitiesToPointers } from '../src/core/context/retrieval-reflex.ts';
 import { extractCandidates } from '../src/core/context/entity-salience.ts';
-import { createGBrainContextEngine } from '../src/core/context-engine.ts';
+import { createModusBrainContextEngine } from '../src/core/context-engine.ts';
 import { disposeReflex } from '../src/core/context/reflex.ts';
 import { TAKES_FENCE_BEGIN, TAKES_FENCE_END } from '../src/core/takes-fence.ts';
 
@@ -111,13 +111,13 @@ describe('resolveEntitiesToPointers', () => {
 describe('context-engine assemble() — Retrieval Reflex integration', () => {
   // Each test wraps its body in withEnv (NOT a beforeEach env mutation) so the
   // flag is restored even on throw — required by check-test-isolation rule R1.
-  const REFLEX_ON = { GBRAIN_RETRIEVAL_REFLEX: 'true' };
+  const REFLEX_ON = { MODUSBRAIN_RETRIEVAL_REFLEX: 'true' };
 
   test('regression: a named entity with a page surfaces a pointer (host resolver path)', async () => {
     await withEnv(REFLEX_ON, async () => {
       await seed('people/alice-example', 'Alice Example', 'Alice is a founder.');
       // Inject a resolver the way the OpenClaw host (ctx.brainQuery) or serve IPC would.
-      const ce = createGBrainContextEngine({
+      const ce = createModusBrainContextEngine({
         workspaceDir: '/tmp/rr-test-ws',
         resolveEntities: (candidates, opts) =>
           resolveEntitiesToPointers(engine, 'default', candidates, opts),
@@ -134,7 +134,7 @@ describe('context-engine assemble() — Retrieval Reflex integration', () => {
 
   test('no resolver available (PGLite, no serve/host) → no throw, live context still present', async () => {
     await withEnv(REFLEX_ON, async () => {
-      const ce = createGBrainContextEngine({ workspaceDir: '/tmp/rr-test-ws-2' });
+      const ce = createModusBrainContextEngine({ workspaceDir: '/tmp/rr-test-ws-2' });
       const res = await ce.assemble({
         sessionId: 's2',
         messages: [{ role: 'user', content: 'what about Alice Example?' }],
@@ -148,7 +148,7 @@ describe('context-engine assemble() — Retrieval Reflex integration', () => {
   test('zero salient candidates → no brain touch, no pointer block', async () => {
     await withEnv(REFLEX_ON, async () => {
       let called = false;
-      const ce = createGBrainContextEngine({
+      const ce = createModusBrainContextEngine({
         workspaceDir: '/tmp/rr-test-ws-3',
         resolveEntities: async () => { called = true; return null; },
       });
@@ -164,7 +164,7 @@ describe('context-engine assemble() — Retrieval Reflex integration', () => {
   test('suppression uses PRIOR turns only, not the current message', async () => {
     await withEnv(REFLEX_ON, async () => {
       await seed('people/alice-example', 'Alice Example', 'A founder.');
-      const ce = createGBrainContextEngine({
+      const ce = createModusBrainContextEngine({
         workspaceDir: '/tmp/rr-test-ws-4',
         resolveEntities: (candidates, opts) =>
           resolveEntitiesToPointers(engine, 'default', candidates, opts),
@@ -184,12 +184,12 @@ describe('context-engine assemble() — Retrieval Reflex integration', () => {
 });
 
 describe('v0.43 (#2095) — rolling window extraction through assemble()', () => {
-  const REFLEX_ON = { GBRAIN_RETRIEVAL_REFLEX: 'true' };
+  const REFLEX_ON = { MODUSBRAIN_RETRIEVAL_REFLEX: 'true' };
 
   test('entity named ONLY in a previous assistant turn yields a pointer now', async () => {
     await withEnv(REFLEX_ON, async () => {
       await seed('people/alice-example', 'Alice Example', 'Alice is a founder.');
-      const ce = createGBrainContextEngine({
+      const ce = createModusBrainContextEngine({
         workspaceDir: '/tmp/rr-test-ws-w1',
         resolveEntities: (candidates, opts) =>
           resolveEntitiesToPointers(engine, 'default', candidates, opts),
@@ -209,9 +209,9 @@ describe('v0.43 (#2095) — rolling window extraction through assemble()', () =>
   });
 
   test('window=1 reproduces the legacy current-turn-only behavior', async () => {
-    await withEnv({ ...REFLEX_ON, GBRAIN_RETRIEVAL_REFLEX_WINDOW_TURNS: '1' }, async () => {
+    await withEnv({ ...REFLEX_ON, MODUSBRAIN_RETRIEVAL_REFLEX_WINDOW_TURNS: '1' }, async () => {
       await seed('people/alice-example', 'Alice Example', 'Alice is a founder.');
-      const ce = createGBrainContextEngine({
+      const ce = createModusBrainContextEngine({
         workspaceDir: '/tmp/rr-test-ws-w2',
         resolveEntities: (candidates, opts) =>
           resolveEntitiesToPointers(engine, 'default', candidates, opts),
@@ -231,7 +231,7 @@ describe('v0.43 (#2095) — rolling window extraction through assemble()', () =>
   test('windowed suppression is slug-only: a prior-turn MENTION does not suppress (codex D7)', async () => {
     await withEnv(REFLEX_ON, async () => {
       await seed('people/alice-example', 'Alice Example', 'A founder.');
-      const ce = createGBrainContextEngine({
+      const ce = createModusBrainContextEngine({
         workspaceDir: '/tmp/rr-test-ws-w3',
         resolveEntities: (candidates, opts) =>
           resolveEntitiesToPointers(engine, 'default', candidates, opts),
@@ -254,7 +254,7 @@ describe('v0.43 (#2095) — rolling window extraction through assemble()', () =>
   test('windowed suppression still drops an already-surfaced page (slug in prior context)', async () => {
     await withEnv(REFLEX_ON, async () => {
       await seed('people/alice-example', 'Alice Example', 'A founder.');
-      const ce = createGBrainContextEngine({
+      const ce = createModusBrainContextEngine({
         workspaceDir: '/tmp/rr-test-ws-w4',
         resolveEntities: (candidates, opts) =>
           resolveEntitiesToPointers(engine, 'default', candidates, opts),
@@ -273,7 +273,7 @@ describe('v0.43 (#2095) — rolling window extraction through assemble()', () =>
   test('fail-open: a throwing resolver under windowing never breaks the turn', async () => {
     await withEnv(REFLEX_ON, async () => {
       await seed('people/alice-example', 'Alice Example', 'A founder.');
-      const ce = createGBrainContextEngine({
+      const ce = createModusBrainContextEngine({
         workspaceDir: '/tmp/rr-test-ws-w5',
         resolveEntities: async () => { throw new Error('resolver exploded'); },
       });
@@ -423,15 +423,15 @@ describe('windowTurnCount — knob edge semantics', () => {
     // read the env var directly, or the documented escape hatch is dead and
     // the window silently defaults to 4. withEnv() (not raw process.env
     // mutation) keeps the linter + isolation guard happy.
-    await withEnv({ GBRAIN_RETRIEVAL_REFLEX_WINDOW_TURNS: '1' }, async () => {
+    await withEnv({ MODUSBRAIN_RETRIEVAL_REFLEX_WINDOW_TURNS: '1' }, async () => {
       expect(windowTurnCount(null)).toBe(1);
     });
-    await withEnv({ GBRAIN_RETRIEVAL_REFLEX_WINDOW_TURNS: '7' }, async () => {
+    await withEnv({ MODUSBRAIN_RETRIEVAL_REFLEX_WINDOW_TURNS: '7' }, async () => {
       expect(windowTurnCount(null)).toBe(7);
       // Env wins over a config value too (env is the higher-precedence plane).
       expect(windowTurnCount({ retrieval_reflex_window_turns: 3 } as never)).toBe(7);
     });
-    await withEnv({ GBRAIN_RETRIEVAL_REFLEX_WINDOW_TURNS: 'not-a-number' }, async () => {
+    await withEnv({ MODUSBRAIN_RETRIEVAL_REFLEX_WINDOW_TURNS: 'not-a-number' }, async () => {
       // Garbage env falls through to config / default, not a crash.
       expect(windowTurnCount(null)).toBe(4);
     });

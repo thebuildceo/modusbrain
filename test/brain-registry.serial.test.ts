@@ -12,7 +12,7 @@ import {
   type MountsFile,
   type MountEntry,
 } from '../src/core/brain-registry.ts';
-import { GBrainError } from '../src/core/types.ts';
+import { ModusBrainError } from '../src/core/types.ts';
 
 /** Create a temp dir + write a mounts.json into it. Returns the path. */
 function tempMountsFile(contents: unknown): string {
@@ -46,10 +46,10 @@ describe('validateMountId', () => {
   });
 
   test('rejects empty / non-string', () => {
-    expect(() => validateMountId('')).toThrow(GBrainError);
-    expect(() => validateMountId(null as unknown as string)).toThrow(GBrainError);
-    expect(() => validateMountId(undefined as unknown as string)).toThrow(GBrainError);
-    expect(() => validateMountId(42 as unknown as string)).toThrow(GBrainError);
+    expect(() => validateMountId('')).toThrow(ModusBrainError);
+    expect(() => validateMountId(null as unknown as string)).toThrow(ModusBrainError);
+    expect(() => validateMountId(undefined as unknown as string)).toThrow(ModusBrainError);
+    expect(() => validateMountId(42 as unknown as string)).toThrow(ModusBrainError);
   });
 
   test('rejects reserved host id', () => {
@@ -231,7 +231,7 @@ describe('BrainRegistry — resolution', () => {
       throw new Error('expected throw');
     } catch (e) {
       expect(e).toBeInstanceOf(UnknownBrainError);
-      if (e instanceof GBrainError) {
+      if (e instanceof ModusBrainError) {
         expect(e.cause_description).toContain('yc-media');
       }
     }
@@ -271,28 +271,28 @@ describe('BrainRegistry — lazy init', () => {
     // test proves the fall-through to HOST_BRAIN_ID happens before any
     // lookup, not that host init actually succeeds.
     //
-    // Hermeticity: dev machines often have a real ~/.gbrain/config.json
-    // (the maintainer's own brain). Without GBRAIN_HOME isolation, the
+    // Hermeticity: dev machines often have a real ~/.modusbrain/config.json
+    // (the maintainer's own brain). Without MODUSBRAIN_HOME isolation, the
     // host-init path RESOLVES successfully on those machines instead of
     // rejecting, breaking the `rejects.not.toBeInstanceOf` assertion. Pin
-    // GBRAIN_HOME to a guaranteed-empty tempdir so host-init has nothing
+    // MODUSBRAIN_HOME to a guaranteed-empty tempdir so host-init has nothing
     // to find and fails loudly (which is exactly the error the assertion
     // wants — not UnknownBrainError, but ALSO not a successful resolve).
     const isolatedHome = mkdtempSync(join(tmpdir(), 'brain-registry-home-'));
     track(isolatedHome);
-    const savedHome = process.env.GBRAIN_HOME;
-    process.env.GBRAIN_HOME = isolatedHome;
+    const savedHome = process.env.MODUSBRAIN_HOME;
+    process.env.MODUSBRAIN_HOME = isolatedHome;
     try {
       const reg = new BrainRegistry([]);
       // Expect the host-init path to be attempted (it'll fail on missing
-      // <isolated>/.gbrain/config.json, but the error will come from
+      // <isolated>/.modusbrain/config.json, but the error will come from
       // initHostBrain, not UnknownBrainError — proving routing hit host).
       await expect(reg.getBrain(null)).rejects.not.toBeInstanceOf(UnknownBrainError);
       await expect(reg.getBrain(undefined)).rejects.not.toBeInstanceOf(UnknownBrainError);
       await expect(reg.getBrain('')).rejects.not.toBeInstanceOf(UnknownBrainError);
     } finally {
-      if (savedHome !== undefined) process.env.GBRAIN_HOME = savedHome;
-      else delete process.env.GBRAIN_HOME;
+      if (savedHome !== undefined) process.env.MODUSBRAIN_HOME = savedHome;
+      else delete process.env.MODUSBRAIN_HOME;
     }
   });
 });

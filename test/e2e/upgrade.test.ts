@@ -57,7 +57,7 @@ describeE2E('E2E: Check-Update', () => {
     const exitCode = await proc.exited;
 
     expect(exitCode).toBe(0);
-    expect(stdout).toContain('GBrain');
+    expect(stdout).toContain('ModusBrain');
   });
 
   test('check-update --help prints usage', async () => {

@@ -31,7 +31,7 @@ describe('computePoolReapHealthCheck', () => {
   });
 
   test('fail when reconnect failed (reconnect is throwing)', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: tmpDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: tmpDir }, async () => {
       logPoolRecovery('reap_detected');
       logPoolRecovery('reconnect_failed', new Error('EHOSTUNREACH'));
       const c = await computePoolReapHealthCheck(pg);
@@ -45,7 +45,7 @@ describe('computePoolReapHealthCheck', () => {
   // (reconnect throwing is the real, actionable problem), NOT a fabricated
   // reap→failure causal link. A reconnect_failed with zero reaps still fails.
   test('fail on reconnect failure even with zero reaps (no false causality)', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: tmpDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: tmpDir }, async () => {
       logPoolRecovery('reconnect_failed', new Error('password authentication failed'));
       const c = await computePoolReapHealthCheck(pg);
       expect(c?.status).toBe('fail');
@@ -55,7 +55,7 @@ describe('computePoolReapHealthCheck', () => {
   });
 
   test('warn on pooler thrash (>=10 reaps all recovered)', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: tmpDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: tmpDir }, async () => {
       for (let i = 0; i < 12; i++) {
         logPoolRecovery('reap_detected');
         logPoolRecovery('reconnect_succeeded');
@@ -67,7 +67,7 @@ describe('computePoolReapHealthCheck', () => {
   });
 
   test('null (quiet) when a few reaps all recovered', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: tmpDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: tmpDir }, async () => {
       logPoolRecovery('reap_detected');
       logPoolRecovery('reconnect_succeeded');
       const c = await computePoolReapHealthCheck(pg);

@@ -1,6 +1,6 @@
 /**
  * v0.38 — E2E HTTP contract tests for POST /ingest, the webhook ingestion
- * source registered inside `gbrain serve --http` per the plan-eng-review E1
+ * source registered inside `modusbrain serve --http` per the plan-eng-review E1
  * decision (webhook source lives IN serve --http, NOT in the ingestion
  * daemon; uses Minion queue as the cross-process sync primitive).
  *
@@ -9,7 +9,7 @@
  * in-process simulation; what it explicitly does NOT cover is "the real
  * HTTP route with real OAuth." This file fills that gap.
  *
- * Spawns a real `gbrain serve --http` against real Postgres, mints OAuth
+ * Spawns a real `modusbrain serve --http` against real Postgres, mints OAuth
  * tokens with various scopes, and exercises every documented
  * status-code branch of the route:
  *
@@ -19,7 +19,7 @@
  *   3. Content-type allowlist: image/png → 415 with paste-ready
  *      processor-skillpack hint
  *   4. Happy path: text/markdown → 200/202 with job_id in response
- *   5. Header overrides: X-Gbrain-Slug is forwarded; X-Gbrain-Source-Id
+ *   5. Header overrides: X-Modusbrain-Slug is forwarded; X-Modusbrain-Source-Id
  *      tags the event
  *   6. Idempotency: same content + same client → job_id returned twice
  *      should match (queue dedup on (client_id, content_hash))
@@ -27,7 +27,7 @@
  * Mirrors the spawn + mint pattern from test/e2e/serve-http-oauth.test.ts
  * exactly so future maintainers see one pattern, not two.
  *
- * Run: GBRAIN_DATABASE_URL=... bun test test/e2e/serve-http-ingest-webhook.test.ts
+ * Run: MODUSBRAIN_DATABASE_URL=... bun test test/e2e/serve-http-ingest-webhook.test.ts
  */
 
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
@@ -57,8 +57,8 @@ describeE2E('serve-http POST /ingest webhook (v0.38)', () => {
       'bun run src/cli.ts auth register-client e2e-webhook-test --grant-types client_credentials --scopes "read write"',
       { cwd: process.cwd(), encoding: 'utf8', env: { ...process.env } },
     );
-    const idMatch = regOutput.match(/Client ID:\s+(gbrain_cl_\S+)/);
-    const secretMatch = regOutput.match(/Client Secret:\s+(gbrain_cs_\S+)/);
+    const idMatch = regOutput.match(/Client ID:\s+(modusbrain_cl_\S+)/);
+    const secretMatch = regOutput.match(/Client Secret:\s+(modusbrain_cs_\S+)/);
     if (!idMatch || !secretMatch) {
       throw new Error('Failed to register webhook test client:\n' + regOutput);
     }
@@ -300,14 +300,14 @@ describeE2E('serve-http POST /ingest webhook (v0.38)', () => {
     expect([200, 202]).toContain(res.status);
   });
 
-  test('X-Gbrain-Content-Type header overrides request Content-Type', async () => {
+  test('X-Modusbrain-Content-Type header overrides request Content-Type', async () => {
     const token = await mintToken('read write');
     // Send as application/octet-stream (would 415) but override to text/markdown.
     const res = await postIngest(
       token,
       'application/octet-stream',
       '# override via header',
-      { 'X-Gbrain-Content-Type': 'text/markdown' },
+      { 'X-Modusbrain-Content-Type': 'text/markdown' },
     );
     // With override: route should accept as markdown.
     expect([200, 202]).toContain(res.status);
@@ -317,14 +317,14 @@ describeE2E('serve-http POST /ingest webhook (v0.38)', () => {
   // Header overrides
   // =========================================================================
 
-  test('X-Gbrain-Slug header is accepted (job receives the slug hint)', async () => {
+  test('X-Modusbrain-Slug header is accepted (job receives the slug hint)', async () => {
     const token = await mintToken('read write');
     const slug = `webhook/test/header-${Date.now()}`;
     const res = await postIngest(
       token,
       'text/markdown',
       '# slug header test',
-      { 'X-Gbrain-Slug': slug },
+      { 'X-Modusbrain-Slug': slug },
     );
     expect([200, 202]).toContain(res.status);
     // The route should accept the header without rejecting — actual slug
@@ -332,24 +332,24 @@ describeE2E('serve-http POST /ingest webhook (v0.38)', () => {
     // test/ingestion/ingest-capture.test.ts).
   });
 
-  test('X-Gbrain-Source-Id header is accepted', async () => {
+  test('X-Modusbrain-Source-Id header is accepted', async () => {
     const token = await mintToken('read write');
     const res = await postIngest(
       token,
       'text/markdown',
       '# source-id header test',
-      { 'X-Gbrain-Source-Id': 'zapier-webhook' },
+      { 'X-Modusbrain-Source-Id': 'zapier-webhook' },
     );
     expect([200, 202]).toContain(res.status);
   });
 
-  test('X-Gbrain-Source-Uri header is accepted', async () => {
+  test('X-Modusbrain-Source-Uri header is accepted', async () => {
     const token = await mintToken('read write');
     const res = await postIngest(
       token,
       'text/markdown',
       '# source-uri header test',
-      { 'X-Gbrain-Source-Uri': 'https://example.com/issue/123' },
+      { 'X-Modusbrain-Source-Uri': 'https://example.com/issue/123' },
     );
     expect([200, 202]).toContain(res.status);
   });

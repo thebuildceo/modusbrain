@@ -18,11 +18,11 @@ import { withEnv } from './helpers/with-env.ts';
 
 describe('loadConfig env database URL precedence', () => {
   test('DATABASE_URL switches an existing PGLite file config to Postgres', async () => {
-    const home = mkdtempSync(join(tmpdir(), 'gbrain-config-env-'));
+    const home = mkdtempSync(join(tmpdir(), 'modusbrain-config-env-'));
     try {
-      // Pre-seed: PGLite file config in this isolated GBRAIN_HOME.
+      // Pre-seed: PGLite file config in this isolated MODUSBRAIN_HOME.
       await withEnv(
-        { GBRAIN_HOME: home, GBRAIN_DATABASE_URL: undefined, DATABASE_URL: undefined },
+        { MODUSBRAIN_HOME: home, MODUSBRAIN_DATABASE_URL: undefined, DATABASE_URL: undefined },
         () => {
           saveConfig({ engine: 'pglite', database_path: '/tmp/local-brain.pglite' });
         },
@@ -33,14 +33,14 @@ describe('loadConfig env database URL precedence', () => {
       // doesn't try to use both.
       await withEnv(
         {
-          GBRAIN_HOME: home,
-          GBRAIN_DATABASE_URL: undefined,
-          DATABASE_URL: 'postgres://user:pass@example.test:5432/gbrain',
+          MODUSBRAIN_HOME: home,
+          MODUSBRAIN_DATABASE_URL: undefined,
+          DATABASE_URL: 'postgres://user:pass@example.test:5432/modusbrain',
         },
         () => {
           const cfg = loadConfig();
           expect(cfg?.engine).toBe('postgres');
-          expect(cfg?.database_url).toBe('postgres://user:pass@example.test:5432/gbrain');
+          expect(cfg?.database_url).toBe('postgres://user:pass@example.test:5432/modusbrain');
           expect(cfg?.database_path).toBeUndefined();
         },
       );
@@ -49,11 +49,11 @@ describe('loadConfig env database URL precedence', () => {
     }
   });
 
-  test('GBRAIN_DATABASE_URL beats DATABASE_URL (operator override)', async () => {
-    const home = mkdtempSync(join(tmpdir(), 'gbrain-config-env-'));
+  test('MODUSBRAIN_DATABASE_URL beats DATABASE_URL (operator override)', async () => {
+    const home = mkdtempSync(join(tmpdir(), 'modusbrain-config-env-'));
     try {
       await withEnv(
-        { GBRAIN_HOME: home, GBRAIN_DATABASE_URL: undefined, DATABASE_URL: undefined },
+        { MODUSBRAIN_HOME: home, MODUSBRAIN_DATABASE_URL: undefined, DATABASE_URL: undefined },
         () => {
           saveConfig({ engine: 'pglite', database_path: '/tmp/local-brain.pglite' });
         },
@@ -61,14 +61,14 @@ describe('loadConfig env database URL precedence', () => {
 
       await withEnv(
         {
-          GBRAIN_HOME: home,
-          GBRAIN_DATABASE_URL: 'postgres://win:win@gbrain.test:5432/db',
+          MODUSBRAIN_HOME: home,
+          MODUSBRAIN_DATABASE_URL: 'postgres://win:win@modusbrain.test:5432/db',
           DATABASE_URL: 'postgres://lose:lose@other.test:5432/db',
         },
         () => {
           const cfg = loadConfig();
           expect(cfg?.engine).toBe('postgres');
-          expect(cfg?.database_url).toBe('postgres://win:win@gbrain.test:5432/db');
+          expect(cfg?.database_url).toBe('postgres://win:win@modusbrain.test:5432/db');
         },
       );
     } finally {
@@ -77,10 +77,10 @@ describe('loadConfig env database URL precedence', () => {
   });
 
   test('No env DB URL → existing PGLite file config is honored', async () => {
-    const home = mkdtempSync(join(tmpdir(), 'gbrain-config-env-'));
+    const home = mkdtempSync(join(tmpdir(), 'modusbrain-config-env-'));
     try {
       await withEnv(
-        { GBRAIN_HOME: home, GBRAIN_DATABASE_URL: undefined, DATABASE_URL: undefined },
+        { MODUSBRAIN_HOME: home, MODUSBRAIN_DATABASE_URL: undefined, DATABASE_URL: undefined },
         () => {
           saveConfig({ engine: 'pglite', database_path: '/tmp/local-brain.pglite' });
           const cfg = loadConfig();
@@ -95,19 +95,19 @@ describe('loadConfig env database URL precedence', () => {
   });
 
   test('No file config + DATABASE_URL → infers Postgres', async () => {
-    const home = mkdtempSync(join(tmpdir(), 'gbrain-config-env-'));
+    const home = mkdtempSync(join(tmpdir(), 'modusbrain-config-env-'));
     try {
       await withEnv(
         {
-          GBRAIN_HOME: home,
-          GBRAIN_DATABASE_URL: undefined,
-          DATABASE_URL: 'postgres://only:env@gbrain.test:5432/db',
+          MODUSBRAIN_HOME: home,
+          MODUSBRAIN_DATABASE_URL: undefined,
+          DATABASE_URL: 'postgres://only:env@modusbrain.test:5432/db',
         },
         () => {
           // No saveConfig() — no file present at all.
           const cfg = loadConfig();
           expect(cfg?.engine).toBe('postgres');
-          expect(cfg?.database_url).toBe('postgres://only:env@gbrain.test:5432/db');
+          expect(cfg?.database_url).toBe('postgres://only:env@modusbrain.test:5432/db');
         },
       );
     } finally {
@@ -116,10 +116,10 @@ describe('loadConfig env database URL precedence', () => {
   });
 
   test('No file config + no env DB URL → loadConfig returns null', async () => {
-    const home = mkdtempSync(join(tmpdir(), 'gbrain-config-env-'));
+    const home = mkdtempSync(join(tmpdir(), 'modusbrain-config-env-'));
     try {
       await withEnv(
-        { GBRAIN_HOME: home, GBRAIN_DATABASE_URL: undefined, DATABASE_URL: undefined },
+        { MODUSBRAIN_HOME: home, MODUSBRAIN_DATABASE_URL: undefined, DATABASE_URL: undefined },
         () => {
           expect(loadConfig()).toBeNull();
         },

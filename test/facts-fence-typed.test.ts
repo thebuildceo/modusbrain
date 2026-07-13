@@ -24,7 +24,7 @@ import {
 } from '../src/core/facts/extract-from-fence.ts';
 
 function wrap(inner: string): string {
-  return `## Facts\n\n<!--- gbrain:facts:begin -->\n${inner}\n<!--- gbrain:facts:end -->\n`;
+  return `## Facts\n\n<!--- modusbrain:facts:begin -->\n${inner}\n<!--- modusbrain:facts:end -->\n`;
 }
 
 describe('v0.35.4 — facts fence typed-claim parser', () => {

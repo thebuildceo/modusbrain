@@ -8,12 +8,12 @@ not an oversight; each names its decision provenance.
 
 - [ ] **P1 — Eval-gated auto-emit default-flip (D5.5 fast-follow).** Auto-emission
   ships OFF (`auto_chronicle=false`) per spend/consent posture. The headline
-  fast-follow: run `gbrain eval chronicle` + a live-LLM OFF-vs-ON agent arm on a
+  fast-follow: run `modusbrain eval chronicle` + a live-LLM OFF-vs-ON agent arm on a
   real brain, and if the lift holds, flip the default ON in the next minor with
   an upgrade notice. Where: `src/core/chronicle/config.ts`, upgrade banner in
   `src/commands/upgrade.ts`.
 - [ ] **P2 — Live-LLM OFF-vs-ON eval arm + LongMemEval temporal slice.** The
-  shipped `gbrain eval chronicle` is the deterministic CI bar (6 gold tasks).
+  shipped `modusbrain eval chronicle` is the deterministic CI bar (6 gold tasks).
   The full North-Star proof adds (a) a live agent reconstructing a day with the
   chronicle ops ON vs OFF, and (b) the LongMemEval `question_type:
   temporal-reasoning` slice as secondary corroboration — verify the adapter can
@@ -34,10 +34,10 @@ not an oversight; each names its decision provenance.
   isolation (scoped-default, `--all-sources` opt-in within the host brain).
   Unifying across mounted team brains is its own epic with an access-policy
   surface.
-- [ ] **P3 — Place-as-entity (`gbrain where <venue>`).** `event.where` is
+- [ ] **P3 — Place-as-entity (`modusbrain where <venue>`).** `event.where` is
   captured as free text; resolving venues to entity pages + geo-adjacency
   queries is a follow-up.
-- [ ] **P3 — Richer meta-ontology dashboard.** `gbrain ontology-dimensions` is
+- [ ] **P3 — Richer meta-ontology dashboard.** `modusbrain ontology-dimensions` is
   the v1 surface; a full dashboard (per-dimension drill-down, quarantine review
   queue for novel dimensions) is deferred until usage shows demand.
 - [ ] **P3 — Materialized daily timeline pages / emotional-arc view.** The
@@ -60,8 +60,8 @@ ship-stage pre-landing review; neither blocks the wave.
   reaped too. Core hot path (engine-parity + downstream-client surface) — scope it
   on its own. Where: `src/core/import-file.ts`, `src/commands/sync.ts`.
 - [ ] **P3 — Centralize live-sync liveness onto `liveSyncStatus` (#1950).**
-  `gbrain sources status` now uses the shared `liveSyncStatus(engine, sourceId)`
-  helper; retrofit `gbrain doctor` (its own inline lock probe) and `gbrain status`
+  `modusbrain sources status` now uses the shared `liveSyncStatus(engine, sourceId)`
+  helper; retrofit `modusbrain doctor` (its own inline lock probe) and `modusbrain status`
   onto the same helper so there's one source of truth for "is this source
   syncing." Where: `src/core/db-lock.ts`, `src/commands/doctor.ts`,
   `src/commands/status.ts`.
@@ -77,7 +77,7 @@ job) and sync. See CLAUDE.md "Pace Mode".
   `minion_jobs` deaths with backfill windows. Where: `src/commands/doctor.ts`.
 - [ ] **P2 — `--pace=auto` autotuned thresholds (E3).** Derive `paceAtMs`/cap from
   observed baseline latency (rolling median) instead of fixed bundle values,
-  mirroring `gbrain search tune`. Needs a baseline window + cold-start default +
+  mirroring `modusbrain search tune`. Needs a baseline window + cold-start default +
   config persistence — not a small add. Where: `src/core/pace-mode.ts` +
   `src/core/db-pacer.ts`.
 - [ ] **P3 — First-class pacing in more minion job handlers (E5).** `embed-backfill`
@@ -89,7 +89,7 @@ job) and sync. See CLAUDE.md "Pace Mode".
   `embed-backfill`/`autopilot-cycle` jobs can occupy all supervisor slots
   (`:215` below). Pacing makes backfills safe; this fixes the residual death rate.
   Where: `src/core/minions/supervisor.ts` + queue slot accounting.
-- [ ] **P3 — `gbrain sync --pace` CLI flag.** Sync reads env/config pacing today;
+- [ ] **P3 — `modusbrain sync --pace` CLI flag.** Sync reads env/config pacing today;
   add a per-run `--pace[=mode]` flag for symmetry with `embed`. Where:
   `src/commands/sync.ts` arg parsing.
 - [ ] **P3 — Real-PG e2e for pacing.** Gated on `DATABASE_URL`: paced
@@ -98,10 +98,10 @@ job) and sync. See CLAUDE.md "Pace Mode".
   paced sleep (short-TTL). Unit coverage (`db-pacer`/`pace-mode`) already ships.
 ## brain-repo durability follow-ups (filed v0.42.48.0)
 
-- [ ] **P3 — gbrain write-path calls commit-push synchronously when durability is on.**
+- [ ] **P3 — modusbrain write-path calls commit-push synchronously when durability is on.**
   v0.42.48.0 ships the synchronous `brain-commit-push.sh` as the guarantee and a local
   post-commit hook as a best-effort fallback. The strongest durability (codex outside-voice
-  D13-C) is to have gbrain's own write-through path call the commit-push helper synchronously
+  D13-C) is to have modusbrain's own write-through path call the commit-push helper synchronously
   when a source is hardened — that also covers writes that never get committed by an agent.
   Deferred because it touches the write path; the hook + mandated helper cover the
   agent-driven case today.
@@ -116,7 +116,7 @@ job) and sync. See CLAUDE.md "Pace Mode".
   - **Where to start:** `src/commands/autopilot.ts` (`installLaunchd`/`installSystemd`/
     `installCrontab`/`writeWrapperScript`) + `brain-repo-durability.ts:installDurabilityCron`.
 
-## gbrain#2200 federated-read follow-ups (filed v0.42.46.0)
+## modusbrain#2200 federated-read follow-ups (filed v0.42.46.0)
 
 - [ ] **P1 — Close the federated-read scope on the remaining same-class by-slug read ops.**
   v0.42.46.0 (#2200) routed `get_page` tags + `get_tags` / `get_links` / `get_backlinks` /
@@ -165,14 +165,14 @@ Deferred from the #2139 delta-estimator wave. See plan + GSTACK REVIEW REPORT at
   filed embedding-latency-by-minutes complaint. **Start:** thread per-source estimates
   through `runOne` (`src/commands/sync.ts`); design worked out at D8A in the plan.
 
-## gbrain#2095 push-based context follow-ups (v0.43+)
+## modusbrain#2095 push-based context follow-ups (v0.43+)
 
-Filed from the #2095 wave (volunteer_context op + reflex window + `gbrain watch`).
+Filed from the #2095 wave (volunteer_context op + reflex window + `modusbrain watch`).
 Deliberately scoped OUT of v1 per the eng-review scope decision (success criteria
 are the bar). Plan + GSTACK REVIEW REPORT at
 `~/.claude/plans/system-instruction-you-are-working-cheerful-elephant.md`.
 
-- [ ] **P3 — SSE/HTTP push channel via serve-http.** The op + `gbrain watch` cover
+- [ ] **P3 — SSE/HTTP push channel via serve-http.** The op + `modusbrain watch` cover
   pull-per-turn and stdin streaming; a serve-http SSE feed would push volunteered
   pages to remote agents without a local CLI. **Why:** thin-client/remote-MCP
   deployments get push too. **Cons:** async plumbing + auth scoping; no consumer
@@ -205,10 +205,10 @@ are the bar). Plan + GSTACK REVIEW REPORT at
   make progress. If observed: id-batched chunks (`DELETE ... WHERE id IN
   (SELECT ... LIMIT 10000)` looped). **Where:**
   `src/core/context/volunteer-events.ts:purgeStaleVolunteerEvents`.
-- [ ] **P3 — route `gbrain watch` through the serve resolve-IPC on PGLite.**
+- [ ] **P3 — route `modusbrain watch` through the serve resolve-IPC on PGLite.**
   `watch` connects directly, so on a PGLite brain it monopolizes the single
   connection for its whole (potentially hours-long) session — a concurrent
-  `gbrain serve` or any write path blocks on the lock until watch exits.
+  `modusbrain serve` or any write path blocks on the lock until watch exits.
   WATCH_HELP documents the monopoly; the fix is an IPC rung in watch's
   resolver (reuse `resolveViaIpc` like the ambient reflex's ladder) so a
   running serve answers and watch never takes the lock. **Why:** watch +
@@ -225,7 +225,7 @@ are the bar). Plan + GSTACK REVIEW REPORT at
   `src/core/context/reflex.ts:ResolveEntitiesFn` + the OpenClaw plugin
   contract (red-team RT4).
 
-## gbrain triage wave follow-ups (filed v0.42.41.0)
+## modusbrain triage wave follow-ups (filed v0.42.41.0)
 
 Deferred from the v0.42.41.0 fix wave (eng-reviewed as separate scope, not hotfixes).
 See plan + GSTACK REVIEW REPORT at
@@ -251,7 +251,7 @@ See plan + GSTACK REVIEW REPORT at
   tracking by stable name rather than version integer so a renumber can't strand a
   migration as recorded-but-not-executed. **Where:** `src/core/migrate.ts` ledger.
 
-## gbrain#1981 Retrieval Reflex follow-ups (v0.43+)
+## modusbrain#1981 Retrieval Reflex follow-ups (v0.43+)
 
 Filed from the #1981 ship (v0.42.39.0). Deliberately scoped OUT — the v1 extractor
 is deterministic + precision-biased. See plan + GSTACK REVIEW REPORT at
@@ -269,7 +269,7 @@ is deterministic + precision-biased. See plan + GSTACK REVIEW REPORT at
   for precision. Revisit adding `resolveEntitySlug`'s trgm-fuzzy / prefix-expansion
   arm, gated on an unambiguous single hit, if recall telemetry comes back weak.
 
-## gbrain#1972 job-layer follow-up (v0.43+)
+## modusbrain#1972 job-layer follow-up (v0.43+)
 
 Filed from the #1972 fix (stale-lock reaper + bounded disconnect + complete
 cooperative-abort). One item was deliberately gated, not deferred blindly. See plan +
@@ -288,31 +288,31 @@ GSTACK REVIEW REPORT at `~/.claude/plans/system-instruction-you-are-working-curi
   crossing it; otherwise it's a hot-loop rewrite for a non-occurring case. **Where:**
   `src/commands/backlinks.ts`, `src/core/cycle.ts` (runPhaseBacklinks signal threading).
 
-## gbrain#1881 sync reclone ownership follow-ups (v0.43+)
+## modusbrain#1881 sync reclone ownership follow-ups (v0.43+)
 
-Filed from the #1881 fix (`gbrain sync --strategy code` deleted a user's working
-tree; `recloneIfMissing` now only re-clones a clone gbrain OWNS — `config.managed_clone`
+Filed from the #1881 fix (`modusbrain sync --strategy code` deleted a user's working
+tree; `recloneIfMissing` now only re-clones a clone modusbrain OWNS — `config.managed_clone`
 marker or exact default-location equality — via `isOwnedClone`). Deliberately scoped
 OUT of that PR. Codex outside-voice findings #5/#6. See plan + GSTACK REVIEW REPORT at
 `~/.claude/plans/system-instruction-you-are-working-golden-valiant.md`.
 
-- [ ] **P2 — `gbrain doctor` misconfigured-source check.** Flag every source row
+- [ ] **P2 — `modusbrain doctor` misconfigured-source check.** Flag every source row
   where `config.remote_url` is set but `isOwnedClone(row)` is false (the shape that
   caused #1881: a federated row whose `local_path` is a user working tree). Print a
   one-time, actionable hint per row: drop `config.remote_url` to sync it read-only,
-  or remove + re-add with `--url` so gbrain owns the clone. **Why:** the core guard
+  or remove + re-add with `--url` so modusbrain owns the clone. **Why:** the core guard
   now refuses to delete such rows, but they still exist in users' brains (created by
   the gstack orchestrator). This is the single surfacing point — it replaces the
   per-sync stderr warning that was rejected during eng-review (Codex: it would spam
   every healthy sync). **Where:** extend the doctor checks in `src/commands/doctor.ts`;
   reuse `isOwnedClone` from `src/core/sources-ops.ts`. No migration.
 
-- [ ] **P3 — Decide the `--clone-dir`-outside-root policy.** `gbrain sources add --url
-  --clone-dir <path>` lets local callers place a gbrain-owned clone anywhere. The
+- [ ] **P3 — Decide the `--clone-dir`-outside-root policy.** `modusbrain sources add --url
+  --clone-dir <path>` lets local callers place a modusbrain-owned clone anywhere. The
   ownership marker (this PR) makes those safe to reclone, but the dormant
-  `clone_dir_outside_gbrain` code in `SourceOpErrorCode` (`sources-ops.ts`) is unused —
+  `clone_dir_outside_modusbrain` code in `SourceOpErrorCode` (`sources-ops.ts`) is unused —
   it hints at a previously-intended confinement rule. Decide: either wire it up (forbid
-  `--clone-dir` outside `$GBRAIN_HOME/clones/`) or delete the dead code. Don't leave it
+  `--clone-dir` outside `$MODUSBRAIN_HOME/clones/`) or delete the dead code. Don't leave it
   half-implemented. Codex finding #5.
 
 - [ ] **P2 — Harden the `managed_clone` ownership marker against forgery.** Ownership
@@ -321,22 +321,22 @@ OUT of that PR. Codex outside-voice findings #5/#6. See plan + GSTACK REVIEW REP
   mutable field any future `set-config` / external INSERT / restored dump could set on a
   user-tree path. A forged marker on a real (non-symlink) user path would authorize
   deletion. (A realpath path-check does NOT close this — it false-positives on ubiquitous
-  system symlinks like macOS /var, and an owned clone gbrain created is legitimately
+  system symlinks like macOS /var, and an owned clone modusbrain created is legitimately
   deleted through any operator symlink anyway. Path can't prove ownership.) Two follow-ups:
   (a) a CI guard asserting NO code path other than `addSource` ever writes the
-  `managed_clone` key; (b) bind ownership to an unforgeable on-disk stamp (a `.gbrain-clone`
+  `managed_clone` key; (b) bind ownership to an unforgeable on-disk stamp (a `.modusbrain-clone`
   sentinel written into the clone at creation, verified before any destructive op) instead
   of / in addition to the DB field — with an equality-fallback for pre-stamp clones. Codex
   adversarial (High) + Claude adversarial (Finding 2) from the #1881 ship review.
 
-- [ ] **P3 — Sweep orphaned `.gbrain-reclone-*` temp dirs.** The EXDEV-safe reclone clones
-  into a sibling temp of `local_path` (`.gbrain-reclone-<leaf>-<rand>`). Every error path
+- [ ] **P3 — Sweep orphaned `.modusbrain-reclone-*` temp dirs.** The EXDEV-safe reclone clones
+  into a sibling temp of `local_path` (`.modusbrain-reclone-<leaf>-<rand>`). Every error path
   `rmSync`s it, but a hard crash (SIGKILL/power loss) between clone and swap leaves a full
-  clone orphaned next to the user's `--clone-dir` parent — outside gbrain's swept
-  `clones/.tmp`. Add a startup/doctor sweep for `.gbrain-reclone-*` / `*.old-*` older than N
+  clone orphaned next to the user's `--clone-dir` parent — outside modusbrain's swept
+  `clones/.tmp`. Add a startup/doctor sweep for `.modusbrain-reclone-*` / `*.old-*` older than N
   minutes. Codex Medium / Claude Finding 4 from the #1881 ship review.
 
-- [ ] **P3 — CLI `gbrain sources remove` leaks the managed clone dir.** `runRemove`
+- [ ] **P3 — CLI `modusbrain sources remove` leaks the managed clone dir.** `runRemove`
   (`src/commands/sources.ts:269`) runs `DELETE FROM sources` directly, bypassing
   `removeSource()` and its symlink-safe clone-cleanup guard — so removing a `--url`
   source never deletes its on-disk clone (storage leak). Route CLI remove through
@@ -366,7 +366,7 @@ timeouts. Slot reservation was deliberately deferred.
   **Shape if needed:** when all-but-one in-flight slot is held by long-lane
   handler names, restrict the next `claim()` to non-long names via the existing
   `name = ANY($4)` filter in `queue.ts:claim`. No new table/migration.
-## gbrain#1861 JSONB batch-insert follow-ups (v0.42+)
+## modusbrain#1861 JSONB batch-insert follow-ups (v0.42+)
 
 Filed from the #1861 fix (batch inserts migrated from `unnest(${arr}::text[])` to
 `jsonb_to_recordset` to stop the "malformed array literal" crash on free-text
@@ -455,7 +455,7 @@ GSTACK REVIEW REPORT at
   pool the demoted owner still uses — the original bug, in reverse. ALSO: the
   audit-import + `connectionManager.disconnect()` awaits in `PostgresEngine.disconnect()`
   and the publish-before-`SELECT 1` window in `db.connect()` let a concurrent
-  connect join a dying/unverified pool. NOT REACHABLE in current gbrain — cycle
+  connect join a dying/unverified pool. NOT REACHABLE in current modusbrain — cycle
   phases are sequential on one awaited engine, borrowers are nested within a
   phase, the parallel-sync worker pool uses INSTANCE engines (not the singleton),
   and facts/last-retrieved background writes reuse the owner engine (no second
@@ -482,14 +482,14 @@ GSTACK REVIEW REPORT at
   those exits preempt the call-site `finally`, so the background-work drain,
   bounded disconnect, and `flushThenExit` grace are all skipped on those paths
   (pre-existing class, NOT introduced by #2084; pre-fix the same exits skipped
-  the inline drains too). Consequences: `gbrain doctor --json | <slow reader>`
+  the inline drains too). Consequences: `modusbrain doctor --json | <slow reader>`
   keeps the #1959 truncation exposure; a dream path that exits mid-cycle
   discards in-flight facts/search-cache writes. Fix shape: convert in-command
   `process.exit(n)` to `setCliExitVerdict(n)` + return (the central seam
   exits), or route them through a shared `exitCommand(n)` helper that runs
   teardown first. Surfaced by the #2084 cross-model adversarial review (F2).
 
-- [ ] **P3 — opt-in whole-command wallclock cap (`GBRAIN_COMMAND_DEADLINE_MS`),
+- [ ] **P3 — opt-in whole-command wallclock cap (`MODUSBRAIN_COMMAND_DEADLINE_MS`),
   build ONLY on a real wedged-handler incident.** The #2084 fix deliberately
   removed the blanket pre-handler 10s force-exit (it killed slow-legit ops with
   exit 0 and truncated output); per-op deadlines (query-embed deadline,
@@ -498,7 +498,7 @@ GSTACK REVIEW REPORT at
   covered by the old timer anyway. If production ever shows a genuinely wedged
   handler (trigger: a non-`serve` command alive >30min with no progress
   output), add an opt-in env cap that exits NON-ZERO with a truthful banner.
-  Attach point: the `GBRAIN_TEARDOWN_DEADLINE_MS` / `computeTeardownDeadlineMs`
+  Attach point: the `MODUSBRAIN_TEARDOWN_DEADLINE_MS` / `computeTeardownDeadlineMs`
   plumbing in `src/core/cli-force-exit.ts`. Do not build speculatively —
   follow-up from the #2084 eng review (decision D2/D14).
 ## v0.42.x AI SDK v6 tool-schema fix follow-ups (#1782/#1764)
@@ -589,7 +589,7 @@ Filed from the v0.42.15.0 wave (#1784, decouple primary output from
 but were deliberately scoped OUT — neither is a #1784 regression.
 
 - [ ] **P2 — `sync.ts:2491` emits a JSON cost-refusal even without `--json`.** The
-  `gbrain sync --all` cost gate has the byte-identical pattern that
+  `modusbrain sync --all` cost gate has the byte-identical pattern that
   `reindex-code.ts:457` had before #1784: non-TTY or `--json` → JSON envelope +
   exit 2, conflating "refuse to spend" with "machine-readable output." The
   refusal should be human text unless `--json` is explicit. Out of scope for
@@ -597,7 +597,7 @@ but were deliberately scoped OUT — neither is a #1784 regression.
   deserves its own deliberate change. Fix: mirror the extracted
   `buildCostRefusal({json, ...})` helper (`reindex-code.ts`). The guardrail
   (exit 2, no spend) stays; only the FORMAT splits on `--json`.
-- [ ] **P3 — `gbrain jobs --help` has no subcommand list.** jobs.ts dispatches
+- [ ] **P3 — `modusbrain jobs --help` has no subcommand list.** jobs.ts dispatches
   on a bare subcommand string with no HELP const, so `watch` (and every other
   jobs subcommand) is undocumented in `--help`. The new `watch` `--json` /
   `--follow` flags are documented only in the file JSDoc. Add a HELP table to the
@@ -605,18 +605,18 @@ but were deliberately scoped OUT — neither is a #1784 regression.
 
 ## v0.42.12.0 self-upgrade follow-ups (v0.43+)
 
-Filed from the self-upgrading-gbrain wave. All deliberately scoped OUT (D7a/D7b
+Filed from the self-upgrading-modusbrain wave. All deliberately scoped OUT (D7a/D7b
 + eng-review notes); none is a v0.42.12.0 regression. Plan + reviews at
 `~/.claude/plans/system-instruction-you-are-working-nifty-badger.md`.
 
 - [ ] **P2 — Signature/checksum verification before applying an auto-upgrade
-  (D7a).** Auto-upgrade currently trusts TLS + GitHub, same as `gbrain upgrade`.
+  (D7a).** Auto-upgrade currently trusts TLS + GitHub, same as `modusbrain upgrade`.
   This is the prerequisite for ever making `auto` a default instead of opt-in:
   verify a release-asset checksum/signature before `atomicReplace`. Until it
   lands, `self_upgrade.mode` stays opt-in everywhere. Touches
   `src/core/binary-self-update.ts` (stage step) + the release workflow (publish
   the signature/checksum alongside the asset).
-- [ ] **P2 — `gbrain serve` host graceful request-drain on auto-upgrade (D7b).**
+- [ ] **P2 — `modusbrain serve` host graceful request-drain on auto-upgrade (D7b).**
   The silent channel currently skips while any request/stream/job/tx is in
   flight and retries next window. A true drain (stop accepting new, finish
   in-flight, swap, relaunch) is cleaner for a busy multi-tenant serve host.
@@ -624,7 +624,7 @@ Filed from the self-upgrading-gbrain wave. All deliberately scoped OUT (D7a/D7b
   no Windows release asset is published. Currently degrades to notify-only via
   `resolvePlatformAsset` returning null. Revisit if a Windows binary ships.
 - [ ] **P3 — True binary rollback.** Today a bad release is caught by the
-  post-swap `gbrain doctor` gate + recorded in `self_upgrade.failed_versions`
+  post-swap `modusbrain doctor` gate + recorded in `self_upgrade.failed_versions`
   (never retried) + a loud nudge. There is no automatic revert to the prior
   binary. A keep-N-prior-binaries rollback is a possible follow-up.
 
@@ -644,7 +644,7 @@ complete and tested; these are hardening/cleanup.
 - [ ] **P2 — Harden bundled-skill detection.** `getBundledSkillContext`
   (`src/core/skillopt/bundled-skill-gate.ts`) only sets `isBundled` when the skills dir was
   resolved via the `install_path` tier. If the same bundled `skills/` is found via
-  `cwd_walk_up` / `repo_root` / `$GBRAIN_SKILLS_DIR`, `isBundled=false` and the D16 ENFORCE
+  `cwd_walk_up` / `repo_root` / `$MODUSBRAIN_SKILLS_DIR`, `isBundled=false` and the D16 ENFORCE
   never fires (same weakness governs `--allow-mutate-bundled` itself — pre-existing, not a
   v0.42.9.0 regression). Fix: compare realpaths against the canonical bundled skills dir
   independent of detection source.
@@ -682,11 +682,11 @@ scoped OUT — neither is a #1696 regression. See plan + GSTACK REVIEW REPORT at
   together with a shared helper. Needs its own review (touches every CONCURRENTLY
   migration).
 - [ ] **P3 — Add-only extraction never deletes obsolete edges; the watermark now
-  asserts a currency it can't fully deliver.** All gbrain extraction is add-only
+  asserts a currency it can't fully deliver.** All modusbrain extraction is add-only
   (`addLinksBatch` ON CONFLICT DO NOTHING, inline sync + `extractLinksFromDB` +
   `extract --stale`). A page edit that REMOVES a link adds nothing and never
   deletes the now-absent edge, yet `links_extracted_at` marks the page current,
-  so `gbrain doctor` reports OK while the graph carries a stale edge. Pre-existing
+  so `modusbrain doctor` reports OK while the graph carries a stale edge. Pre-existing
   architectural property (not new in #1696), but the watermark makes it more
   visible. Real fix needs a link-provenance column (`link_source` / extracted-by
   marker) so a re-extract can safely DELETE extracted-but-now-absent edges for a
@@ -714,8 +714,8 @@ and tested; these are documented tradeoffs and stronger-but-bigger versions.
   refreshing lock (`cycleLockIdFor`), which is the correct lock the routine cycle
   uses on Postgres. On PGLite the routine cycle uses the global FILE lock instead,
   so the drain's DB lock doesn't contend with it. This is currently moot because
-  PGLite's exclusive single-process file lock means a separate `gbrain dream
-  --drain` process can't even open the brain while autopilot's `gbrain dream`
+  PGLite's exclusive single-process file lock means a separate `modusbrain dream
+  --drain` process can't even open the brain while autopilot's `modusbrain dream`
   holds it (one fails at connect). If PGLite ever gains multi-handle access,
   the drain must also acquire the cycle file lock. Codex-flagged; low risk today.
 - [ ] **P2 — `synthesize_concepts_backlog` doctor check.** The `extract_atoms`
@@ -746,10 +746,10 @@ and tested; these are documented tradeoffs and stronger-but-bigger versions.
   9.8GB, cap 8GB" in doctor. Add persisted tracking + a doctor check if operators
   want trend visibility rather than the point-in-time log line.
 
-## v0.42.2.0 gbrain connect follow-ups (v0.42+)
+## v0.42.2.0 modusbrain connect follow-ups (v0.42+)
 
-- [ ] **T6 (P3): `gbrain connect --env-token` form.** Ship the env-var-indirection
-  token form (`-H 'Authorization: Bearer ${GBRAIN_REMOTE_TOKEN}'`, single-quoted so
+- [ ] **T6 (P3): `modusbrain connect --env-token` form.** Ship the env-var-indirection
+  token form (`-H 'Authorization: Bearer ${MODUSBRAIN_REMOTE_TOKEN}'`, single-quoted so
   the shell doesn't pre-expand) ONLY after verifying that Claude Code actually expands
   `${VAR}` inside a stored `-H` header at runtime. v0.42.2.0 deliberately ships the
   literal-token default (matches the shipped docs, verified to work) because the
@@ -757,15 +757,15 @@ and tested; these are documented tradeoffs and stronger-but-bigger versions.
   stores it, so it would have stored the literal token anyway. Verify CC behavior
   first, then add the opt-in flag. Files: `src/commands/connect.ts` (token-form),
   `docs/mcp/CLAUDE_CODE.md`.
-- [ ] **T7 (P3): Tier 2 — local thin-client over a bearer token.** `gbrain connect`
+- [ ] **T7 (P3): Tier 2 — local thin-client over a bearer token.** `modusbrain connect`
   today only wires the MCP *connection* (Claude Code talks straight to the remote /mcp).
-  The local `gbrain` CLI (`gbrain search`, `gbrain remote ping/doctor`, routed ops) still
+  The local `modusbrain` CLI (`modusbrain search`, `modusbrain remote ping/doctor`, routed ops) still
   requires OAuth client-credentials — `remote_mcp` + `callRemoteTool`/`getAccessToken`
   in `src/core/mcp-client.ts` are OAuth-only. To let the local CLI work against the
   remote with just a bearer token, widen `remote_mcp` with a bearer path (`auth: 'bearer'`,
   `bearer_token`), short-circuit `getAccessToken` when `auth === 'bearer'` (skip discovery +
   /token mint), and teach `initRemoteMcp` (`src/commands/init.ts`) to write a bearer-shaped
-  config. Then `gbrain connect --install` can also `bun install -g` gbrain + write the config.
+  config. Then `modusbrain connect --install` can also `bun install -g` modusbrain + write the config.
   Deferred per D1 (Tier 1 only this release).
 
 ## v0.41.38.0 dream-postgres / source-pin follow-ups (v0.42+)
@@ -785,7 +785,7 @@ Documented tradeoffs, not blockers — the shipped bug fixes are complete and te
   resolve brainDir from the source's `local_path` inside the `autopilot-cycle`
   handler when `source_id` is set (mirror dream.ts's T1), so FS and DB phases agree.
   Needs its own review (touches the deferred autopilot path).
-- [ ] **P2 — `.gbrain-source` with invalid SYNTAX still falls through silently.**
+- [ ] **P2 — `.modusbrain-source` with invalid SYNTAX still falls through silently.**
   `readDotfileWalk` (source-resolver.ts:39) intentionally skips a dotfile whose
   content fails `isValidSourceId` (e.g. `repo_a` with an underscore) per the v0.31.8
   P1-F silent-fallback design, so `resolveScopedSourceOrThrow` resolves it to a
@@ -795,7 +795,7 @@ Documented tradeoffs, not blockers — the shipped bug fixes are complete and te
 - [ ] **P3 — Sibling source-scoped commands don't honor the pin.** `blast`/`flow`/
   `clusters`/`wiki` still call `resolveDefaultSource` directly. Route them through
   `resolveScopedSourceOrThrow` for consistency with code-callers/code-callees.
-- [ ] **P3 — `gbrain autopilot` CLI daemon pre-guard.** `autopilot.ts:~152`
+- [ ] **P3 — `modusbrain autopilot` CLI daemon pre-guard.** `autopilot.ts:~152`
   `if (!repoPath) exit 1` still blocks the daemon on a checkout-less postgres brain.
   Relax to the same null-brainDir contract so the daemon can run DB phases.
 
@@ -808,9 +808,9 @@ deliberately scoped out of the wave (see plan + GSTACK REVIEW REPORT at
 
 - [ ] **#1621-followup: tag_source provenance column for frontmatter-tag REMOVAL.** The wave shipped ADD-ONLY tag reconciliation (`src/core/import-file.ts`) — re-import never deletes tags, so DB-side enrichment tags survive. Trade-off: removing a tag from a page's frontmatter no longer removes it from the DB. To restore removal-on-edit without wiping enrichment tags, add a `tags.tag_source` column (migration, both engines), stamp `'frontmatter'` on import-path tags, and reconcile by deleting only `tag_source='frontmatter'` tags absent from the new frontmatter (enrichment/backfilled tags default NULL = preserved, so no enrichment-write-site enumeration needed). Priority: P3 (additive-metadata staleness is low-harm).
 
-- [ ] **#1605-followup: convert migration backfill-phase spawns to in-process.** v0.41.37.0 made the 9 schema phases (`gbrain init --migrate-only`) run in-process via `runMigrateOnlyCore`, which unblocks `schema_version` advancement on Windows+bun+Supabase. The remaining non-schema spawns (`extract links/timeline`, `repair-jsonb`) still shell out via `runGbrainSubprocess` — they now surface child stderr (so a Windows failure is diagnosable) but still fail on Windows. Convert them to in-process calls (the extract/repair command functions are callable with an engine) so Windows brains complete data backfill, not just schema. Sites: `src/commands/migrations/v0_12_0.ts` (extract), `v0_12_2.ts` (repair), `v0_13_0.ts` (extract). Priority: P2.
+- [ ] **#1605-followup: convert migration backfill-phase spawns to in-process.** v0.41.37.0 made the 9 schema phases (`modusbrain init --migrate-only`) run in-process via `runMigrateOnlyCore`, which unblocks `schema_version` advancement on Windows+bun+Supabase. The remaining non-schema spawns (`extract links/timeline`, `repair-jsonb`) still shell out via `runModusbrainSubprocess` — they now surface child stderr (so a Windows failure is diagnosable) but still fail on Windows. Convert them to in-process calls (the extract/repair command functions are callable with an engine) so Windows brains complete data backfill, not just schema. Sites: `src/commands/migrations/v0_12_0.ts` (extract), `v0_12_2.ts` (repair), `v0_13_0.ts` (extract). Priority: P2.
 
-- [ ] **#1569-followup: root-cause the 56K-file sync wedge with the reporter's repro.** v0.41.37.0 shipped ReDoS hardening (input-length cap + star-height lint + `--no-schema-pack` escape) + diagnostics (`GBRAIN_SYNC_TRACE=1` begin-heartbeat + PGLite serve/sync concurrency doc), but did NOT root-cause the deterministic wedge at ~3100 files — the reporter's redos-guard hypothesis didn't hold (it's not on the sync path). Get the reporter's sample files (`/tmp/gbrain-hang-sample.txt`, `/tmp/gbrain-prewedge-sample.txt`), reproduce, and pin the resume-mode deep-recursion pre-import phase (prime suspect: the walk/diff/checkpoint path). Priority: P1 once a repro exists; tracked on the #1569 thread.
+- [ ] **#1569-followup: root-cause the 56K-file sync wedge with the reporter's repro.** v0.41.37.0 shipped ReDoS hardening (input-length cap + star-height lint + `--no-schema-pack` escape) + diagnostics (`MODUSBRAIN_SYNC_TRACE=1` begin-heartbeat + PGLite serve/sync concurrency doc), but did NOT root-cause the deterministic wedge at ~3100 files — the reporter's redos-guard hypothesis didn't hold (it's not on the sync path). Get the reporter's sample files (`/tmp/modusbrain-hang-sample.txt`, `/tmp/modusbrain-prewedge-sample.txt`), reproduce, and pin the resume-mode deep-recursion pre-import phase (prime suspect: the walk/diff/checkpoint path). Priority: P1 once a repro exists; tracked on the #1569 thread.
 ## MCP skillpack distribution — PR2 (v0.41.37+)
 
 Filed from the v0.41.36.0 skill-catalog wave (`list_skills` / `get_skill`).
@@ -825,17 +825,17 @@ infra and reaches into third-party packs that live outside the host skills dir.
 > tenancy-correct surface). `get_skill` gained an optional `source_id` for
 > per-source fetch disambiguation. The `tools:` version-skew lint below is now
 > implemented (`src/core/skillpack/brain-pack-lint.ts`, run by
-> `gbrain skillpack init-brain-pack`). STILL DEFERRED to this PR2: thin-client
+> `modusbrain skillpack init-brain-pack`). STILL DEFERRED to this PR2: thin-client
 > BINARY install (`build_skillpack` download) — a thin client today gets the
 > pack's git scaffold spec and `resolveSource`s it on its own machine. The
 > `include_skillpacks` host-global merge below is intentionally still open
 > (separate concern from per-source brain packs).
 
-- [ ] **v0.41.37+: `build_skillpack` op + `GET /skillpack/download/:token` endpoint.** Build a deterministic `.tgz` on demand (named skillpack, ad-hoc skill subset, or whole repo) and deliver it both base64-inline (universal/stdio) and via an authenticated short-lived download URL when running under `gbrain serve --http`. **What:** new admin-or-write-scoped op + a token-store + cache-dir GC; reuse `packTarball` from `src/core/skillpack/tarball.ts` (already deterministic + symlink-rejecting + size-capped) and the magic-link nonce pattern in `serve-http.ts`. The tarball ships source CODE, so it needs its own trust decision separate from PR1's prose-only catalog. **Why:** lets a thin client install a skillpack into its own setup, not just follow one live. **Depends on:** PR1 (landed in v0.41.36.0). Priority: P2.
-- [ ] **v0.41.37+: `include_skillpacks` merge in `list_skills`.** Fold pinned third-party packs (from `~/.gbrain/skillpack-state.json`) into the catalog. Deferred from PR1 (D8) because packs live OUTSIDE the host skills dir and need (a) a per-pack trusted-root realpath confinement and (b) `{name, skillpack_name?}` disambiguation when a pack skill and a host skill share a name. Lands naturally with PR2's pack machinery. Priority: P2.
+- [ ] **v0.41.37+: `build_skillpack` op + `GET /skillpack/download/:token` endpoint.** Build a deterministic `.tgz` on demand (named skillpack, ad-hoc skill subset, or whole repo) and deliver it both base64-inline (universal/stdio) and via an authenticated short-lived download URL when running under `modusbrain serve --http`. **What:** new admin-or-write-scoped op + a token-store + cache-dir GC; reuse `packTarball` from `src/core/skillpack/tarball.ts` (already deterministic + symlink-rejecting + size-capped) and the magic-link nonce pattern in `serve-http.ts`. The tarball ships source CODE, so it needs its own trust decision separate from PR1's prose-only catalog. **Why:** lets a thin client install a skillpack into its own setup, not just follow one live. **Depends on:** PR1 (landed in v0.41.36.0). Priority: P2.
+- [ ] **v0.41.37+: `include_skillpacks` merge in `list_skills`.** Fold pinned third-party packs (from `~/.modusbrain/skillpack-state.json`) into the catalog. Deferred from PR1 (D8) because packs live OUTSIDE the host skills dir and need (a) a per-pack trusted-root realpath confinement and (b) `{name, skillpack_name?}` disambiguation when a pack skill and a host skill share a name. Lands naturally with PR2's pack machinery. Priority: P2.
 - [ ] **v0.41.37+: TTL+mtime cache for the skill-catalog walk.** PR1 reads fresh every call (cold path, ~ms). If telemetry shows repeated `list_skills` calls, add a TTL+mtime-keyed cache shared by `list_skills` + `get_skill`. Priority: P3 (do-nothing was the deliberate PR1 call).
-- [ ] **v0.41.37+: routing-eval for the `list_skills` instructional envelope + per-skill `tools:` version-skew validation.** The envelope is load-bearing prose with no eval gate yet; and a skill's declared `tools:` aren't validated against the serving gbrain's actual op set for version drift. Priority: P3.
-- [ ] **v0.41.37+: fix malformed `~/.agents/skills/gbrain/.../install/SKILL.md` (missing frontmatter).** Surfaced by codex's own startup error during the v0.41.36.0 plan review — an unrelated stray skill in the agents tree has no `---` frontmatter fence. Not gbrain-repo code; flag/clean separately. Priority: P3.
+- [ ] **v0.41.37+: routing-eval for the `list_skills` instructional envelope + per-skill `tools:` version-skew validation.** The envelope is load-bearing prose with no eval gate yet; and a skill's declared `tools:` aren't validated against the serving modusbrain's actual op set for version drift. Priority: P3.
+- [ ] **v0.41.37+: fix malformed `~/.agents/skills/modusbrain/.../install/SKILL.md` (missing frontmatter).** Surfaced by codex's own startup error during the v0.41.36.0 plan review — an unrelated stray skill in the agents tree has no `---` frontmatter fence. Not modusbrain-repo code; flag/clean separately. Priority: P3.
 ## v0.41.34.0 retrieval-cathedral follow-ups (v0.42+)
 
 Deferred from the v0.41.34.0 wave (codex adversarial P1/P2 — documented tradeoffs,
@@ -866,14 +866,14 @@ not blockers; the P0 source-isolation issues were fixed in-wave).
 ## v0.41.33.0 adaptive return-sizing follow-ups (v0.42+)
 
 Filed from the v0.41.33.0 wave (intent-aware adaptive return-sizing, born from
-the PrecisionMemBench integration in gbrain-evals). The feature shipped
+the PrecisionMemBench integration in modusbrain-evals). The feature shipped
 default-off; these are the gates and extensions before any default flip.
 
-- [ ] **v0.42+: cross-surface ablation before flipping `search.adaptive_return` default.** The gate ships default-off. Before turning it on in any `MODE_BUNDLES` tier, run the recall ablation (adaptive off vs on, recall-preserving caps) across `gbrain eval longmemeval`, `gbrain eval whoknows`, `gbrain eval suspected-contradictions`, and the BrainBench-Real replay (sibling gbrain-evals repo). Confirm recall@k / answer quality does not regress; pick the safe caps; probably flip `tokenmax` first (broadest searchLimit, most noise). On-surface evidence (the PrecisionMemBench precision/recall frontier: off 0.076/0.99, e1/o2 0.40/0.91, e1/o1 0.58/0.82) is recorded in `gbrain-evals/docs/benchmarks/2026-05-29-precisionmembench.md`. Priority: P2.
+- [ ] **v0.42+: cross-surface ablation before flipping `search.adaptive_return` default.** The gate ships default-off. Before turning it on in any `MODE_BUNDLES` tier, run the recall ablation (adaptive off vs on, recall-preserving caps) across `modusbrain eval longmemeval`, `modusbrain eval whoknows`, `modusbrain eval suspected-contradictions`, and the BrainBench-Real replay (sibling modusbrain-evals repo). Confirm recall@k / answer quality does not regress; pick the safe caps; probably flip `tokenmax` first (broadest searchLimit, most noise). On-surface evidence (the PrecisionMemBench precision/recall frontier: off 0.076/0.99, e1/o2 0.40/0.91, e1/o1 0.58/0.82) is recorded in `modusbrain-evals/docs/benchmarks/2026-05-29-precisionmembench.md`. Priority: P2.
 - [ ] **v0.42+: fold adaptive-return params into KNOBS_HASH so adaptive-on calls can cache.** v0.41.33.0 skips `hybridSearchCached` entirely when the gate is on (cache-safe but cache-cold). Fold `adaptive_return` enabled + caps + `minKeep` into `knobsHash()` (append-only, bump `KNOBS_HASH_VERSION`) so a gate-on write segregates from a gate-off row and adaptive calls cache correctly. Required before any default flip (else default-on means cache-cold everywhere). See `src/core/search/mode.ts` KNOBS_HASH parts + `return-policy.ts`. Priority: P2 (paired with the default-flip ablation above).
-- [ ] **v0.42+: gentle adaptive gate on `think`'s gather stage (A3).** The plan's A3 decision was a gentler return-gate on `runThink`'s gather candidates (cleaner context, fewer tokens per reasoning call). Deferred because the benefit is unvalidated without a longmemeval answer-quality run, and trimming the answer path (even default-off) carries regression risk. gather fuses 4 streams (page / takes-keyword / takes-vector / graph); the gate must operate on the fused output with a higher min-keep than search, validated on `gbrain eval longmemeval` answer quality (not retrieval precision). Also: `RunThinkOpts` has no `sourceId` today, so think's gather runs unscoped (codex finding) — scope-isolated think needs that plumbing first. Priority: P2.
-- [ ] **v0.42+: `--explain` human header for adaptive_return.** The decision is in `HybridSearchMeta.adaptive_return` and surfaces in `--json` today. The per-result `explain-formatter.ts` is result-scoped and can't render a per-query meta line; the human `gbrain search --explain` header needs the meta threaded through `cli.ts:formatResult` (it currently only receives `results`). Add a one-line gate-decision header (intent / cap / kept of total). Priority: P3.
-- [ ] **v0.42+: structured-alias / facts-mode fidelity for the PrecisionMemBench eval.** The gbrain-evals benchmark seeds beliefs as pages with aliases in the body (real FTS). A second fidelity that exercises gbrain's structured alias/entity-resolution layer (facts with `valid_until` + entity resolution) would measure gbrain's structured-belief path on the 23 alias cases. Lives in gbrain-evals (`eval/precisionmembench/seed.ts` throws on `fidelity:'structured'` today). Priority: P3.
+- [ ] **v0.42+: gentle adaptive gate on `think`'s gather stage (A3).** The plan's A3 decision was a gentler return-gate on `runThink`'s gather candidates (cleaner context, fewer tokens per reasoning call). Deferred because the benefit is unvalidated without a longmemeval answer-quality run, and trimming the answer path (even default-off) carries regression risk. gather fuses 4 streams (page / takes-keyword / takes-vector / graph); the gate must operate on the fused output with a higher min-keep than search, validated on `modusbrain eval longmemeval` answer quality (not retrieval precision). Also: `RunThinkOpts` has no `sourceId` today, so think's gather runs unscoped (codex finding) — scope-isolated think needs that plumbing first. Priority: P2.
+- [ ] **v0.42+: `--explain` human header for adaptive_return.** The decision is in `HybridSearchMeta.adaptive_return` and surfaces in `--json` today. The per-result `explain-formatter.ts` is result-scoped and can't render a per-query meta line; the human `modusbrain search --explain` header needs the meta threaded through `cli.ts:formatResult` (it currently only receives `results`). Add a one-line gate-decision header (intent / cap / kept of total). Priority: P3.
+- [ ] **v0.42+: structured-alias / facts-mode fidelity for the PrecisionMemBench eval.** The modusbrain-evals benchmark seeds beliefs as pages with aliases in the body (real FTS). A second fidelity that exercises modusbrain's structured alias/entity-resolution layer (facts with `valid_until` + entity resolution) would measure modusbrain's structured-belief path on the 23 alias cases. Lives in modusbrain-evals (`eval/precisionmembench/seed.ts` throws on `fidelity:'structured'` today). Priority: P3.
 
 ## v0.41.32.0 content-relative staleness follow-ups (v0.42+)
 
@@ -897,7 +897,7 @@ were deliberately scoped out (CM2 + the remote post-sync-divergence residual).
     keeps the trust boundary intact (probe runs on the trusted host, not from a
     remote caller).
   - **Cons:** a new background phase + its own tests + a cadence knob; only
-    matters for operators who rely on `gbrain remote doctor` instead of the local
+    matters for operators who rely on `modusbrain remote doctor` instead of the local
     cron doctor.
   - **Context:** the helper already exists — `newestCommitMs(localPath)` in
     `src/core/source-health.ts`. The phase just calls it per source and UPDATEs
@@ -915,7 +915,7 @@ Filed from the `--save` dual-sink hardening wave (route through the canonical
 ingestion path: `importFromContent({noEmbed:true})` + the shared
 `writePageThrough` helper extracted from `put_page`).
 
-- [ ] **v0.42+: make `gbrain brainstorm/lsd --save` source-aware.** Today the save path always writes to `source='default'` — `persistSavedIdea` (`src/commands/brainstorm.ts`) hardcodes `sourceId ?? 'default'`, and there is no `--save`-side `--source` flag. Both sinks stay consistent at default (no live bug), but on a multi-source brain a generated idea can't be filed to a non-default source. **What:** add a `--source <id>` option to brainstorm/lsd, resolve it via `resolveSourceWithTier`, and thread `sourceId` into `persistSavedIdea` → `importFromContent({sourceId})` + `writePageThrough({sourceId})`. **Why:** complete the multi-source story for generated ideas; the disk layout already handles it. **Context:** `writePageThrough` and `resolvePageFilePath` already take `sourceId` and emit `.sources/<id>/<slug>.md` for non-default sources, and `importFromContent` already accepts `sourceId` — so the only missing piece is the CLI flag + threading. `runBrainstorm` (orchestrator) already accepts `sourceId` for the close/far READ side. **Depends on:** nothing; purely additive. Priority: P3 (default-source is the common case).
+- [ ] **v0.42+: make `modusbrain brainstorm/lsd --save` source-aware.** Today the save path always writes to `source='default'` — `persistSavedIdea` (`src/commands/brainstorm.ts`) hardcodes `sourceId ?? 'default'`, and there is no `--save`-side `--source` flag. Both sinks stay consistent at default (no live bug), but on a multi-source brain a generated idea can't be filed to a non-default source. **What:** add a `--source <id>` option to brainstorm/lsd, resolve it via `resolveSourceWithTier`, and thread `sourceId` into `persistSavedIdea` → `importFromContent({sourceId})` + `writePageThrough({sourceId})`. **Why:** complete the multi-source story for generated ideas; the disk layout already handles it. **Context:** `writePageThrough` and `resolvePageFilePath` already take `sourceId` and emit `.sources/<id>/<slug>.md` for non-default sources, and `importFromContent` already accepts `sourceId` — so the only missing piece is the CLI flag + threading. `runBrainstorm` (orchestrator) already accepts `sourceId` for the close/far READ side. **Depends on:** nothing; purely additive. Priority: P3 (default-source is the common case).
 
 ## v0.41.29.0 orphan source-scoping follow-ups (v0.42+)
 
@@ -923,7 +923,7 @@ Filed from the v0.41.29.0 wave (bold-name-no-time pattern + orphan_ratio
 source scoping). The Codex outside-voice review (F8) flagged two surfaces
 the wave deliberately scoped out.
 
-- [ ] **v0.42+: thin-client `gbrain doctor --source` orphan_ratio scoping.** v0.41.29.0 scopes `orphan_ratio` to `--source` on the LOCAL doctor path (`buildChecks` in `src/commands/doctor.ts`) and closes the `find_orphans` MCP read leak via `sourceScopeOpts(ctx)`. The thin-client / remote doctor path (`src/core/doctor-remote.ts` `runRemoteDoctor`) is a separate code path that does not thread `--source`, so `gbrain doctor --source x` against a remote `gbrain serve --http` brain still reports brain-wide orphan_ratio. Thread the explicit `--source` into the remote doctor request + have the server-side check honor it. Priority: P3 (most users run doctor locally).
+- [ ] **v0.42+: thin-client `modusbrain doctor --source` orphan_ratio scoping.** v0.41.29.0 scopes `orphan_ratio` to `--source` on the LOCAL doctor path (`buildChecks` in `src/commands/doctor.ts`) and closes the `find_orphans` MCP read leak via `sourceScopeOpts(ctx)`. The thin-client / remote doctor path (`src/core/doctor-remote.ts` `runRemoteDoctor`) is a separate code path that does not thread `--source`, so `modusbrain doctor --source x` against a remote `modusbrain serve --http` brain still reports brain-wide orphan_ratio. Thread the explicit `--source` into the remote doctor request + have the server-side check honor it. Priority: P3 (most users run doctor locally).
 
 - [ ] **v0.42+: widen `check-test-real-names.sh` BANNED_NAMES to catch real-name reintroduction in tests + src.** v0.41.29.0 scrubbed pre-existing real names (`Garry Tan`, `Alex Graveley`) from `bold-paren-time`'s `test_positive` (and the new `bold-name-no-time` samples), but no automated guard caught them: `check-test-real-names.sh` only scans `test/**` and its BANNED_NAMES list doesn't include `garry tan`; `check-fixture-privacy.sh` only scans `test/fixtures/conversation-formats/`. Add `garry tan` / `garrytan` (and consider extending the scan to `src/core/conversation-parser/builtins.ts` test samples) so future reintroductions fail CI. Priority: P3 (hardening).
 
@@ -936,9 +936,9 @@ symptom fix (retry reconnect) + facts queue drain + diagnostic
 instrumentation. These follow-ups depend on the production data the
 instrumentation collects.
 
-- [ ] **v0.41.28+: Investigate disconnect-call audit data from production; fix the offending ownership boundary.** v0.41.28.0 ships `src/core/audit/db-disconnect-audit.ts` which records every `db.disconnect()` and `PostgresEngine.disconnect()` call with engine kind, connection style, caller stack, command, and pid. Doctor's `batch_retry_health` check surfaces the 24h count + most-recent caller. After the next user-reported `gbrain dream` cycle with reconnect events, read `~/.gbrain/audit/db-disconnect-YYYY-Www.jsonl` (or the doctor JSON output) and identify the specific code path firing the mid-process disconnect. The fix is then a targeted patch to that ownership boundary (per codex outside-voice finding 4 — "audit/log current callers in dream/facts paths, then change only the offending ownership boundary"). Priority: P1 once data exists; tracked by user feedback on #1570 thread.
+- [ ] **v0.41.28+: Investigate disconnect-call audit data from production; fix the offending ownership boundary.** v0.41.28.0 ships `src/core/audit/db-disconnect-audit.ts` which records every `db.disconnect()` and `PostgresEngine.disconnect()` call with engine kind, connection style, caller stack, command, and pid. Doctor's `batch_retry_health` check surfaces the 24h count + most-recent caller. After the next user-reported `modusbrain dream` cycle with reconnect events, read `~/.modusbrain/audit/db-disconnect-YYYY-Www.jsonl` (or the doctor JSON output) and identify the specific code path firing the mid-process disconnect. The fix is then a targeted patch to that ownership boundary (per codex outside-voice finding 4 — "audit/log current callers in dream/facts paths, then change only the offending ownership boundary"). Priority: P1 once data exists; tracked by user feedback on #1570 thread.
 
-- [ ] **v0.42+: Re-evaluate module-singleton removal IF the targeted v0.41.26 fix doesn't close the bug class.** The original v0.41.25 plan proposed removing nullability of `let sql: ReturnType<typeof postgres> | null = null` in `src/core/db.ts:7` and renaming `disconnect → shutdown`. Codex outside-voice review found 15 substantive problems (logical contradiction, wrong cleanup primitive, ~120-site scale estimate fantasy, BrainEngine contract asymmetry, etc.). If the targeted v0.41.26 fix closes #1570 cleanly, this refactor is genuinely unnecessary and can be closed. If new disconnect-class bugs surface in v0.41.28+, this is the design-conversation TODO that re-opens. Architecture conversation point: node-postgres explicitly deprecated the singleton pattern gbrain has — pull this in only when there's evidence we keep paying for it. Priority: P3 (speculative). Plan + findings preserved at `~/.claude/plans/system-instruction-you-are-working-cuddly-panda.md`.
+- [ ] **v0.42+: Re-evaluate module-singleton removal IF the targeted v0.41.26 fix doesn't close the bug class.** The original v0.41.25 plan proposed removing nullability of `let sql: ReturnType<typeof postgres> | null = null` in `src/core/db.ts:7` and renaming `disconnect → shutdown`. Codex outside-voice review found 15 substantive problems (logical contradiction, wrong cleanup primitive, ~120-site scale estimate fantasy, BrainEngine contract asymmetry, etc.). If the targeted v0.41.26 fix closes #1570 cleanly, this refactor is genuinely unnecessary and can be closed. If new disconnect-class bugs surface in v0.41.28+, this is the design-conversation TODO that re-opens. Architecture conversation point: node-postgres explicitly deprecated the singleton pattern modusbrain has — pull this in only when there's evidence we keep paying for it. Priority: P3 (speculative). Plan + findings preserved at `~/.claude/plans/system-instruction-you-are-working-cuddly-panda.md`.
 
 ## v0.41.26.1 lock-renewal cathedral follow-ups (v0.42+)
 
@@ -960,20 +960,20 @@ instrumentation collects.
 
 - **TODO-LR-2 (P2): doctor check `lock_renewal_health`.**
   v0.41.26.1 ships the audit JSONL primitive without a doctor read
-  surface. For now, `tail -F ~/.gbrain/audit/lock-renewal-*.jsonl` is
+  surface. For now, `tail -F ~/.modusbrain/audit/lock-renewal-*.jsonl` is
   the operator UX.
   - **What:** add `checkLockRenewalHealth` in `src/commands/doctor.ts`
     mirroring `checkBatchRetryHealth` shape. Reads
     `readRecentLockRenewalEvents(24)`. Warns at >=5 `gave_up` events
     or >=20 `failure` events in the last 24h. Wired into both
     `runDoctor` (local) and `doctorReportRemote` (thin-client).
-  - **Why:** operators on production Supabase want a single `gbrain
+  - **Why:** operators on production Supabase want a single `modusbrain
     doctor` line to know whether their pool is flapping.
   - **Pros:** structurally matches the v0.41.18 batch-retry health
     check. ~50 LOC.
 
 - **TODO-LR-3 (P3): wire `pruneOldLockRenewalAuditFiles(30)` into
-  `gbrain dream --phase purge`.**
+  `modusbrain dream --phase purge`.**
   - **What:** one-line addition at the existing purge handler where
     `pruneOldBatchRetryAuditFiles` is called today.
   - **Why:** consistency with the batch-retry audit (which prunes).
@@ -1012,7 +1012,7 @@ instrumentation collects.
 
 ## v0.41.20.x dream-source-ingest-titles follow-ups (v0.42+)
 
-- **TODO-V13-A (P2): `gbrain dream --max-pages <n>` plumbing.**
+- **TODO-V13-A (P2): `modusbrain dream --max-pages <n>` plumbing.**
   PR #1559 included a `--max-pages` flag for cost-bounded cycles on
   large brains. v0.41.20 dropped it because `CycleOpts` has no `maxPages`
   field and no cycle phase consults page-count limits — shipping the flag
@@ -1051,7 +1051,7 @@ instrumentation collects.
     `--source` over one minor.
   - **Depends on:** nothing technical.
 
-- **TODO-V13-C (P2): `gbrain pages audit-junk-titles` legacy cleanup.**
+- **TODO-V13-C (P2): `modusbrain pages audit-junk-titles` legacy cleanup.**
   v0.41.20 widened the `error_page_title` matcher to catch Cloudflare /
   WAF challenge titles ("Forbidden", "Access Denied", "Service
   Unavailable", "Robot Check", "Just a moment...") at ingest. But the
@@ -1062,7 +1062,7 @@ instrumentation collects.
   - **What:** new operator command for soft-deleting pre-existing
     scraper-junk pages whose titles match the expanded
     `BUILT_IN_JUNK_PATTERNS`. Full spec preserved:
-    - Signature: `gbrain pages audit-junk-titles [--source <id>]
+    - Signature: `modusbrain pages audit-junk-titles [--source <id>]
       [--dry-run|--apply] [--confirm-destructive] [--json]`
     - Default `--dry-run`. Prints `{pattern_name: count, sample_slugs}`.
     - `--apply` requires `--confirm-destructive` when match count
@@ -1109,7 +1109,7 @@ cleanup (Option C) to keep the brainstorm fix blast radius small.
 These three items are what was deferred. None are user-reported bugs;
 all are latent-debt cleanup.
 
-- [ ] **Config-write normalization.** Whenever a user writes `gbrain config set models.tier.deep anthropic/claude-opus-4-7` we silently store the slash form. v0.41.22.1 centralized the read-side via `splitProviderModelId`, but config writes still preserve whatever shape the user typed. Canonical form should be colon (`anthropic:claude-opus-4-7`). Fix: rewrite at config-write time in `src/core/config.ts`. Breaks existing config files that explicitly hold the slash form — defer to a v0.42+ config-migration wave that also handles the rewrite + once-per-process deprecation warn. Files: `src/core/config.ts`, `src/core/model-config.ts:saveConfig` path. Priority: P3 (latent, not user-visible).
+- [ ] **Config-write normalization.** Whenever a user writes `modusbrain config set models.tier.deep anthropic/claude-opus-4-7` we silently store the slash form. v0.41.22.1 centralized the read-side via `splitProviderModelId`, but config writes still preserve whatever shape the user typed. Canonical form should be colon (`anthropic:claude-opus-4-7`). Fix: rewrite at config-write time in `src/core/config.ts`. Breaks existing config files that explicitly hold the slash form — defer to a v0.42+ config-migration wave that also handles the rewrite + once-per-process deprecation warn. Files: `src/core/config.ts`, `src/core/model-config.ts:saveConfig` path. Priority: P3 (latent, not user-visible).
 
 - [ ] **Non-Anthropic budget-tracker pricing.** PARTIALLY ADDRESSED by v0.42.25.0: `src/core/model-pricing.ts` is now the canonical multi-provider table (OpenAI / Google / Together / DeepSeek entries exist alongside Anthropic), and cross-modal-eval + takes-quality already price non-Anthropic models from it. REMAINING: `src/core/budget/budget-tracker.ts:lookupPricing` still routes only through the bare-keyed `ANTHROPIC_PRICING` view, so brainstorm + LSD users running budget gates against OpenAI / Gemini / OpenRouter still get `BUDGET_TRACKER_NO_PRICING` warn-once + bypass-gate (without `--max-cost`) OR `no_pricing` hard-fail (with `--max-cost`). Right fix: route `lookupPricing` through `canonicalLookup`. OpenRouter stays a special case (period-vs-dash key mismatch: their `claude-sonnet-4.6` won't match our `claude-sonnet-4-6`, and it intentionally misses to avoid pricing markup as native). Files: `src/core/budget/budget-tracker.ts`, `src/core/model-pricing.ts`. Priority: P2 (real user pain when running brainstorm against non-Anthropic).
 
@@ -1127,17 +1127,17 @@ single canonical `src/core/model-pricing.ts` with `canonicalLookup`.
 
 - [ ] **No negative-path test for the takes-quality module-load throw.** `src/core/takes-quality-eval/pricing.ts` throws at import if a `SUPPORTED_MODELS` id is absent from canonical (good fail-fast), but nothing tests it (awkward to test a module-load-time throw in-process). Add a small harness/fixture test. Priority: P3 (programmer-error guard).
 
-- [ ] **Recipe display-layer pricing is stale and unconsolidated.** Each `src/core/ai/recipes/*.ts` carries coarse per-provider `cost_per_1m_input_usd`/`cost_per_1m_output_usd` baselines (e.g. `google.ts` chat = `$0.30/$1.20`, `price_last_verified: 2026-04-20`) read only by `gbrain providers` for display — NOT by any budget gate. They've drifted (google chat baseline predates the Gemini 2.0 Flash `$0.10/$0.40` reconciliation; codex flagged OpenAI baselines too). These are intentionally a separate coarse layer from the per-model `model-pricing.ts` budget tables, so consolidating is non-trivial (one-number-per-provider vs per-model). Options: (a) refresh the `price_last_verified` baselines, or (b) have `gbrain providers` show per-model rates from canonical where available and fall back to the recipe baseline. Flagged by the v0.42.25.0 ship Codex adversarial pass. Priority: P3 (display-only, no budget-gating impact).
+- [ ] **Recipe display-layer pricing is stale and unconsolidated.** Each `src/core/ai/recipes/*.ts` carries coarse per-provider `cost_per_1m_input_usd`/`cost_per_1m_output_usd` baselines (e.g. `google.ts` chat = `$0.30/$1.20`, `price_last_verified: 2026-04-20`) read only by `modusbrain providers` for display — NOT by any budget gate. They've drifted (google chat baseline predates the Gemini 2.0 Flash `$0.10/$0.40` reconciliation; codex flagged OpenAI baselines too). These are intentionally a separate coarse layer from the per-model `model-pricing.ts` budget tables, so consolidating is non-trivial (one-number-per-provider vs per-model). Options: (a) refresh the `price_last_verified` baselines, or (b) have `modusbrain providers` show per-model rates from canonical where available and fall back to the recipe baseline. Flagged by the v0.42.25.0 ship Codex adversarial pass. Priority: P3 (display-only, no budget-gating impact).
 
 ## v0.41.21.0 ops-fix-wave follow-ups (v0.41.22+)
 
-- **TODO-OPS-1 (P2)**: `gbrain sync print-cron` subcommand. Print the canonical
-  cron line based on the active source set: `gbrain sync --all --parallel N
+- **TODO-OPS-1 (P2)**: `modusbrain sync print-cron` subcommand. Print the canonical
+  cron line based on the active source set: `modusbrain sync --all --parallel N
   --workers N --skip-failed` where N defaults to `min(sourceCount, 4)`. Reads
   `sources` table for active (non-archived, `local_path IS NOT NULL`) entries.
   Ergonomic upgrade over the v0.41.19.0 `sync_consolidation` doctor message —
   operator pipes directly into `crontab -e` instead of copy-paste-massage.
-  ~80 LOC. Mirrors `gbrain sync --break-lock` argv shape.
+  ~80 LOC. Mirrors `modusbrain sync --break-lock` argv shape.
 
 - **TODO-OPS-2 (P2)**: Lock-loss detection — extend `DbLockHandle.refresh()`
   to throw `LockLostError` on 0 rows affected. Codex caught during the
@@ -1158,20 +1158,20 @@ single canonical `src/core/model-pricing.ts` with `canonicalLookup`.
   "last full cycle" by querying `minion_jobs WHERE name = 'autopilot-cycle'`
   for the most recent completed row. This works but conflates "cycle ran
   via the autopilot scheduler" with "cycle ran." A dedicated `cycle_runs`
-  table written from `runCycle` directly would let `gbrain status`
-  surface manual `gbrain dream` invocations + per-source partial cycles
+  table written from `runCycle` directly would let `modusbrain status`
+  surface manual `modusbrain dream` invocations + per-source partial cycles
   separately. Defer until the inference's accuracy limits actually bite
   someone.
 
 - **TODO-V19-B (P2)**: Surface `extract_atoms` + `synthesize_concepts`
   counts in `CycleReport.totals` top-level. Today the counts live inside
-  each phase's `details` field; the v0.41.19.0 `gbrain status` cycle
+  each phase's `details` field; the v0.41.19.0 `modusbrain status` cycle
   section can't surface them without per-phase parsing. Bump the
   `CycleReport.totals` shape additively (the existing field is
   documented as additive) and add `atoms_inserted` +
   `concepts_inserted` next to `facts_consolidated`.
 
-- **TODO-V19-C (P3)**: Check-registry refactor for `gbrain doctor`. The
+- **TODO-V19-C (P3)**: Check-registry refactor for `modusbrain doctor`. The
   v0.41.19.0 `--scope=brain` uses explicit early-skip gates inline at
   each call site (~40 LOC across resolver + skill_conformance +
   skill_brain_first + whoknows). If we want to add more scope
@@ -1189,7 +1189,7 @@ single canonical `src/core/model-pricing.ts` with `canonicalLookup`.
   plist parsing alone is ~80 LOC.
 
 - **TODO-V19-E (P2)**: Apply category-aware exit codes to
-  `gbrain doctor`. Today doctor exits 0 on all-ok, 1 on any fail.
+  `modusbrain doctor`. Today doctor exits 0 on all-ok, 1 on any fail.
   After categorization, a CI gate could opt into "fail only on
   brain-category failures" via `--scope=brain` (already shipping) or
   a `--fail-on=brain` flag. Filing this as a discoverability
@@ -1199,7 +1199,7 @@ single canonical `src/core/model-pricing.ts` with `canonicalLookup`.
 ## v0.41.18.0 onboard wave follow-ups (v0.42.1+)
 
 - **TODO-A (P2)**: Pack-aware `linkable: boolean` per-type field on schema-pack
-  manifests. Both `gbrain extract links --by-mention` and `--ner` would consult
+  manifests. Both `modusbrain extract links --by-mention` and `--ner` would consult
   it to gate which entity types participate in gazetteer construction. Currently
   uses a hardcoded `['person', 'company', 'organization', 'entity']` list.
 
@@ -1207,7 +1207,7 @@ single canonical `src/core/model-pricing.ts` with `canonicalLookup`.
   regex+gazetteer only; misses cases like "Anthropic's founders" → `Anthropic`
   link. A small Haiku post-pass would catch these.
 
-- **TODO-C (P3)**: `gbrain onboard --explain <recommendation_id>` drill-down.
+- **TODO-C (P3)**: `modusbrain onboard --explain <recommendation_id>` drill-down.
   Shows the underlying check, its measurement, and why the recommendation
   fired. Useful when an operator wants to understand what `onboard --auto` is
   about to do.
@@ -1222,7 +1222,7 @@ single canonical `src/core/model-pricing.ts` with `canonicalLookup`.
   takes-bootstrap STAYS `manual_only` until this lands. Required before any
   autopilot run of takes extraction.
 
-- **TODO-F (P3)**: Web UI surface for `gbrain onboard` recommendations in the
+- **TODO-F (P3)**: Web UI surface for `modusbrain onboard` recommendations in the
   admin SPA. Linear-style dashboard with one-click apply.
 
 - **TODO-G (P2)**: Full DATABASE_URL-gated E2E for onboard. v0.42.0 ships
@@ -1252,15 +1252,15 @@ per /plan-eng-review D-decisions.
 
 - [ ] **v0.41.18+: dream execution-concurrency knob via queue-layer
   recoupling** (D21). Today the only knob that controls how many dream
-  subagents run concurrently is `gbrain jobs work --concurrency N` —
+  subagents run concurrently is `modusbrain jobs work --concurrency N` —
   a process-wide setting, not per-invocation. A user running
-  `gbrain dream` who wants 5 concurrent synthesize subagents has no
+  `modusbrain dream` who wants 5 concurrent synthesize subagents has no
   way to express that without changing the queue daemon's global cap.
   v0.41.17.0 dropped `dream --workers` from scope (D14) because the
   obvious naming would only bound submit rate, not actual execution.
   The proper fix is a queue-side primitive ("temporarily clamp
   concurrency to N for jobs tagged with X") and a new
-  `gbrain dream --execution-concurrency N` flag that uses it.
+  `modusbrain dream --execution-concurrency N` flag that uses it.
   Multi-wave design; touches `MinionQueue.claim` semantics. File when
   someone asks.
 - [ ] **v0.41.18+: auto-tune `--workers` from observed rate-limit
@@ -1296,7 +1296,7 @@ per /plan-eng-review D-decisions.
   `extractTimelineFromDB`, `extractMentionsFromDb`) get `--workers N`.**
   T7 explicitly scoped the workers wiring to fs-walk inner loops; the
   DB-source paths use the engine's own pagination and stay serial.
-  Wire when an operator hits perf issues running `gbrain extract
+  Wire when an operator hits perf issues running `modusbrain extract
   --source db` on a large brain.
 - [ ] **v0.41.18+: deeper `resolveSymbolEdgesIncremental` intra-source
   parallelism.** T8 wired `--workers N` for the cross-source loop
@@ -1351,14 +1351,14 @@ PR bisectable.
   sequence, one commit per site for bisect, behavior parity tested
   before/after migration:
   - `src/commands/reindex.ts` (markdown chunker bump) — existing 10s
-    Ctrl-C grace + `GBRAIN_NO_REEMBED=1` env map to
-    `interactiveAbortMs` + `GBRAIN_PROGRESSIVE_BATCH_DISABLED`.
+    Ctrl-C grace + `MODUSBRAIN_NO_REEMBED=1` env map to
+    `interactiveAbortMs` + `MODUSBRAIN_PROGRESSIVE_BATCH_DISABLED`.
   - `src/commands/reindex-multimodal.ts` (Phase 3 unified column) —
     360min lock survives orthogonal; cost prompt becomes stage report.
   - `src/commands/reindex-code.ts` — sites without existing ramps
     keep jump-to-full default per D21; ramp is opt-in.
   - `src/core/post-upgrade-reembed.ts` — TTY auto-proceed maps directly
-    to `GBRAIN_PROGRESSIVE_BATCH_AUTO`.
+    to `MODUSBRAIN_PROGRESSIVE_BATCH_AUTO`.
   - `src/commands/book-mirror.ts` — cost-estimate becomes stage 0.
   - `src/core/brainstorm/orchestrator.ts` — already wraps in
     `withBudgetTracker`; primitive accepts the active tracker.
@@ -1367,7 +1367,7 @@ PR bisectable.
   - `src/core/eval-contradictions/cost-prompt.ts` — DELETE entirely;
     callers route through the primitive's Policy.maxCostUsd.
   - `src/core/minions/handlers/contextual-reindex-per-chunk.ts` —
-    `GBRAIN_PROGRESSIVE_BATCH_AUTO` defaults true for workers.
+    `MODUSBRAIN_PROGRESSIVE_BATCH_AUTO` defaults true for workers.
   Priority: P2. Rationale: future batch features inherit the discipline
   for free; the 12 existing sites stay bespoke until done.
 
@@ -1435,10 +1435,10 @@ PR bisectable.
   revisit).** v0.41.15.0 deliberately rejected `--independent` (Minion
   job-queue fan-out) in plan review and shipped the shell-level
   `timeout(1)` per-source loop instead — that gives real OS process
-  isolation with zero new gbrain code. Revisit if shell `timeout` proves
+  isolation with zero new modusbrain code. Revisit if shell `timeout` proves
   insufficient for any operator workflow (e.g. someone wants structured
   per-source JSON output that `jq | xargs` can't easily produce). If we
-  revisit, pivot to subprocess-per-source (gbrain CLI spawning gbrain
+  revisit, pivot to subprocess-per-source (modusbrain CLI spawning modusbrain
   CLI) rather than reuse the Minion handler, because codex's pass-2
   review caught that Minion is in-process worker pool — not OS-process-
   per-source — and `waitForCompletion` throws on timeout but doesn't
@@ -1462,7 +1462,7 @@ PR bisectable.
   queue can keep the CLI alive briefly after sync returns.** Documented
   as a known caveat in the v0.41.15.0 CHANGELOG. The queue uses an
   in-process microtask drain (not Minions) to fire-and-forget LLM
-  enrichment for synced pages. After `gbrain sync` returns, the CLI
+  enrichment for synced pages. After `modusbrain sync` returns, the CLI
   process may stay alive for a few seconds while queued work drains.
   Bounded by per-call timeouts inside the LLM client but operator-
   visible. A v0.42+ fix could either (a) route through Minions (more
@@ -1501,7 +1501,7 @@ PR bisectable.
   the cycle across multiple days carry duplicate atoms forever (or until
   manual cleanup): `atoms/2026-05-15/title-X` AND `atoms/2026-05-25/title-X`
   for the same content_hash. Migration writes a one-shot CLI flow:
-  `gbrain atoms consolidate [--dry-run] [--yes]` that groups atoms by
+  `modusbrain atoms consolidate [--dry-run] [--yes]` that groups atoms by
   `frontmatter.source_hash`, keeps the oldest atom row, soft-deletes
   newer copies (uses the existing `softDeletePage` path so 72h restore
   window applies). Operator opt-in via the same `--confirm-destructive`
@@ -1516,7 +1516,7 @@ PR bisectable.
 
 - [ ] **TODO-3 (P3) — MCP op `extract_links_by_mention` for remote brain-server callers.** v0.41.10.0 CLI-only because the API shape was new. Once the CLI is proven (post-ship measurement window), expose as MCP op with `scope: write`, NOT `localOnly` (remote OpenClaw agents should be able to trigger). Trust gate via `op-trust-gate.ts`. Params: optional `source_id`, optional `since`, `dry_run`. Returns `{created, pages}`. Add to `src/core/operations.ts` operation list; wire MCP definitions.
 
-- [ ] **TODO-4 (P1) — Measure actual orphan-ratio reduction on representative brain post-merge.** v0.41.10.0 CHANGELOG softens the design-doc claim from "88% → <30%" to "material reduction, exact figure TBD" per codex CK13 (strict-exact + min-length≥4 + no-aliases + no-fuzzy will under-deliver on 3-char real entities like "YC", first-name mentions like "Bob", and abbreviations). After v0.41.10.0 lands, run `gbrain extract links --by-mention` against the production OpenClaw deployment (~165K pages) and capture before/after orphan_ratio from `gbrain doctor --json`. Update `docs/designs/GBRAIN_ONBOARD.md` (in PR #1409 if still open, or as follow-up edit if merged) with the measured number. Update CHANGELOG retroactively only if the measurement is material to user expectations.
+- [ ] **TODO-4 (P1) — Measure actual orphan-ratio reduction on representative brain post-merge.** v0.41.10.0 CHANGELOG softens the design-doc claim from "88% → <30%" to "material reduction, exact figure TBD" per codex CK13 (strict-exact + min-length≥4 + no-aliases + no-fuzzy will under-deliver on 3-char real entities like "YC", first-name mentions like "Bob", and abbreviations). After v0.41.10.0 lands, run `modusbrain extract links --by-mention` against the production OpenClaw deployment (~165K pages) and capture before/after orphan_ratio from `modusbrain doctor --json`. Update `docs/designs/MODUSBRAIN_ONBOARD.md` (in PR #1409 if still open, or as follow-up edit if merged) with the measured number. Update CHANGELOG retroactively only if the measurement is material to user expectations.
 
 ## v0.41.6.0 follow-ups (v0.41.7+)
 
@@ -1640,7 +1640,7 @@ each can ship as its own wave without touching RLS.
   CC ~20min.
 
 **NOT filed:** the RLS posture rewrite from #1316. That changes the
-v0.26.7 auto-RLS event trigger that `gbrain doctor`'s
+v0.26.7 auto-RLS event trigger that `modusbrain doctor`'s
 `rls_event_trigger` check treats as load-bearing; it deserves its own
 plan-eng-review + doctor-check rewrite + breaking-change CHANGELOG
 note. Filing it as a TODO would imply it's ready to pull; it isn't.
@@ -1654,11 +1654,11 @@ note. Filing it as a TODO would imply it's ready to pull; it isn't.
   right time for this is right after `agent.use_gateway_loop=true` becomes
   the default — before that, you're solving for a configuration no one uses.
   Priority: P2. Filed via CEO D13. References: `src/core/minions/rate-leases.ts`
-  + `src/core/minions/handlers/subagent.ts:GBRAIN_ANTHROPIC_MAX_INFLIGHT`.
+  + `src/core/minions/handlers/subagent.ts:MODUSBRAIN_ANTHROPIC_MAX_INFLIGHT`.
 
 - [ ] **v0.41+: `minion_lease_pressure_log` + budget/self-fix audit retention sweep.**
   v0.41 migration v94 promoted `ON DELETE SET NULL` on audit FKs so rows
-  survive `gbrain jobs prune`. Codex pass-3 #5 caught the corollary: without
+  survive `modusbrain jobs prune`. Codex pass-3 #5 caught the corollary: without
   retention, audit tables grow unbounded. On a steady-pressure install
   (heavy daily batches), `minion_lease_pressure_log` is millions of rows by
   year 2. Add a sweep phase to the autopilot cycle's `purge` phase (the
@@ -1764,23 +1764,23 @@ follow-ups, captured here so v0.42 starts informed.
 - [ ] **v0.42 P1 — Source-repo remediation surface.** Codex r1 #7
   caught: cleanup CLI that deletes DB rows doesn't fix source of truth
   — junk file in source repo reappears on next sync. Move: add
-  `gbrain sources prune-junk <id>` that walks `local_path`, finds files
+  `modusbrain sources prune-junk <id>` that walks `local_path`, finds files
   matching the junk-pattern set, soft-deletes DB rows AND `git rm`s the
   files in the source repo (commit message: `auto: prune junk pages
-  flagged by gbrain content-sanity`). Operator pushes the commit.
+  flagged by modusbrain content-sanity`). Operator pushes the commit.
   Pairs with the v0.42 chunk-quarantine for a complete cleanup story.
   Effort: human ~1 day / CC ~2 hours.
 
 - [ ] **v0.41 + 30 days — Threshold default validation post-deploy.**
   Codex r1 #15 caught: we invented 50K warn / 500K block thresholds
-  before measuring real corpus distribution. Move: run `gbrain sources
+  before measuring real corpus distribution. Move: run `modusbrain sources
   audit <id>` on real source repos (start with Garry's own brain),
   collect distribution stats from the JSON envelope, tune defaults
   if the measured p99 disagrees with the 50K assumption. Either
   publish updated defaults in a v0.41.x patch or document the env
   override path in CHANGELOG. Effort: human ~30min / CC ~10min.
 
-- [ ] **v0.42 P2 — Pages soft-delete CLI (`gbrain pages soft-delete
+- [ ] **v0.42 P2 — Pages soft-delete CLI (`modusbrain pages soft-delete
   --where`).** Cherry-pick 3 from the original CEO review; dropped
   during eng review because Codex r1 #7 weakened it (doesn't fix
   source-of-truth). Resurface in v0.42 as a PAIRED tool alongside
@@ -1820,13 +1820,13 @@ follow-ups, captured here so v0.42 starts informed.
 - [ ] **v0.41+ — Bytes parity assertion across lint + doctor.** D2
   acceptance test included in `test/content-sanity.test.ts` as a
   unit-level parity check. Promote to an E2E that seeds a real
-  fixture page with frontmatter + body, runs `gbrain lint` AND
-  `gbrain doctor --content-audit`, asserts both surfaces report
+  fixture page with frontmatter + body, runs `modusbrain lint` AND
+  `modusbrain doctor --content-audit`, asserts both surfaces report
   the same byte count. Catches drift between
   `Buffer.byteLength` (assessor) and `octet_length` (doctor SQL)
   if either surface changes the measurement axis.
 
-- [ ] **v0.41+ — `gbrain sources audit` E2E pin test.** The CLI
+- [ ] **v0.41+ — `modusbrain sources audit` E2E pin test.** The CLI
   shipped with unit tests pinning `assessContentSanity` shape;
   the integration test (walk a fixture source dir, run the CLI
   end-to-end, assert JSON envelope shape) is deferred. Trivial to
@@ -1862,16 +1862,16 @@ analysis surfaced were approved for filing.
 ### D1 — v0.41 Eval-loop wave (LANDED v0.41.0.0, scope reshaped)
 
 **Status:** Shipped in v0.41.0.0 (2026-05-24). CEO+Eng review reshaped the
-original 3-item slice: items 1 + 3 (autopilot wiring + `gbrain eval gate`)
+original 3-item slice: items 1 + 3 (autopilot wiring + `modusbrain eval gate`)
 shipped as planned + EXPANDED with a correctness gate (qrels-based recall@K
-+ first-relevant-hit-rate) and a `gbrain bench publish` verb that closes the
++ first-relevant-hit-rate) and a `modusbrain bench publish` verb that closes the
 LOOP by giving captured data a destination. Item 2 (capture-default flip)
 deferred to v0.42 because the flip is a one-way door and shouldn't ship
 before the destination exists.
 
 The original 3 items as filed (kept for traceability):
 
-- [ ] **P0 — `gbrain eval gate <baseline.ndjson>` for CI.** The single most
+- [ ] **P0 — `modusbrain eval gate <baseline.ndjson>` for CI.** The single most
   load-bearing missing item across all 12 clusters. Fails the build on
   regression vs the last published BrainBench-Real baseline. Without it,
   every other eval surface is informational, not gating. Shape: reads
@@ -1884,12 +1884,12 @@ The original 3 items as filed (kept for traceability):
 
 - [ ] **P0 — Contributor-mode eval capture ON by default with airtight
   privacy.** Today `eval.capture` defaults OFF; only contributors who
-  set `GBRAIN_CONTRIBUTOR_MODE=1` produce `eval_candidates` rows. Without
+  set `MODUSBRAIN_CONTRIBUTOR_MODE=1` produce `eval_candidates` rows. Without
   capture flowing, replay-against-baseline gates have nothing to replay
   AGAINST in production. Move: harden the PII scrubber (verify Luhn
   card-number false-positive rate, audit JWT-shape regex, document
   every scrub class), then flip the default. Add a one-line opt-out
-  banner on first `gbrain init` post-upgrade. Cross-reference the
+  banner on first `modusbrain init` post-upgrade. Cross-reference the
   `eval_capture_failures.reason` enum cleanup from the v0.25.0 P1 surgical
   hardenings list. Effort: human ~3 days / CC ~3 hours.
 
@@ -1904,7 +1904,7 @@ The original 3 items as filed (kept for traceability):
 
 ### D2 — Code-indexing promoted to P1 (peer of Cursor/Sourcegraph)
 
-Decision: gbrain commits to being a code-brain peer of dedicated tools,
+Decision: modusbrain commits to being a code-brain peer of dedicated tools,
 not "knowledge brain that also indexes code." The five code-indexing
 TODOs below promoted from P2/P3 to P1. Plan reference: v0.21 Code
 Cathedral II was the last big push; this wave revives the trajectory.
@@ -1934,14 +1934,14 @@ Cathedral II was the last big push; this wave revives the trajectory.
   `getCallersOf("searchKeyword")` returns Layer 6 ambiguity — every
   call site in any class. Receiver-type inference lifts this. Per-language;
   TypeScript-first.
-- [ ] **P1 — gbrain code-signature retrieval (C6 from v0.21).** "Find every
+- [ ] **P1 — modusbrain code-signature retrieval (C6 from v0.21).** "Find every
   function whose signature returns `Promise<User>`" or "(string, number)
   => boolean". Type-signature retrieval via tree-sitter type captures.
   Per-language stretch; TypeScript-first.
 
 ### D3 — v0.42 Non-Latin script wave (global by design)
 
-Decision: gbrain commits to first-class non-Latin support. The five
+Decision: modusbrain commits to first-class non-Latin support. The five
 existing "defer until first user complains" entries get consolidated
 into one committed wave with a target version.
 
@@ -1977,36 +1977,36 @@ Each grep-verified absent before being claimed missing. Priority per the
 cluster the item sits in. Filed here together for traceability; future
 cleanup can move each into the relevant area section.
 
-- [ ] **P2 — `gbrain sources promote <id> <target-source>`** — write-side
+- [ ] **P2 — `modusbrain sources promote <id> <target-source>`** — write-side
   counterpart to mounting. Today federation is read-side only; promotion
   is the unfiled symmetric verb. (Federation cluster.)
-- [ ] **P2 — `--explain` auto-on during `gbrain eval replay`** — so
+- [ ] **P2 — `--explain` auto-on during `modusbrain eval replay`** — so
   regression reports show WHY a page dropped from top-3, not just THAT
   it did. (Search-quality cluster.)
-- [ ] **P2 — Extend `gbrain remote doctor` to stream brain's audit JSONL
+- [ ] **P2 — Extend `modusbrain remote doctor` to stream brain's audit JSONL
   summaries.** Closes the local/remote observability split-brain
   (T-todo-3 from v0.40.4 covers the DB-table side; this is the read-side
   surface). (Observability cluster.)
-- [ ] **P2 — `gbrain costs`** — surfaces per-command, per-source, per-week
+- [ ] **P2 — `modusbrain costs`** — surfaces per-command, per-source, per-week
   spend. Data is in audit JSONL already; nothing reads it together.
   Pairs naturally with the P5 budgets config block from the v0.37 lsd
   cost-explosion follow-up. (Observability cluster.)
-- [ ] **P2 — `gbrain jobs explain <id>`** — full job-graph trace (parent
+- [ ] **P2 — `modusbrain jobs explain <id>`** — full job-graph trace (parent
   → children → tools called → tokens spent → outcome). Today
-  `gbrain agent logs <id>` covers subagents but not the broader job
+  `modusbrain agent logs <id>` covers subagents but not the broader job
   graph. (Worker cluster.)
 - [ ] **P2 — `docs/security/threat-model.md`** — catalog every untrusted
-  boundary in gbrain (MCP, OAuth, capture, sync remote URLs, file_upload,
+  boundary in modusbrain (MCP, OAuth, capture, sync remote URLs, file_upload,
   webhook ingest, subagent tool dispatch) and link each to its defense.
   Defenses exist (v0.26.5 destructive-guard, v0.26.7 OAuth hardening,
   v0.34.1 source-isolation P0 seal, v0.36 SSRF); the catalog does not.
   Verified absent: `docs/security/` directory doesn't exist.
   (Safety cluster.)
-- [ ] **P3 — `gbrain doctor --thin-client` parity probe** — compares
+- [ ] **P3 — `modusbrain doctor --thin-client` parity probe** — compares
   the same query against local PGLite vs remote HTTP MCP and surfaces
   behavior drift. Static parity test (filed in v0.31.x follow-ups)
   catches API drift; this catches behavior drift. (Agent ergonomics cluster.)
-- [ ] **P3 — `gbrain models migrate --from openai:text-embedding-3-large
+- [ ] **P3 — `modusbrain models migrate --from openai:text-embedding-3-large
   --to voyage:voyage-3-large`** — estimates cost, schedules re-embed
   via Minion job, swaps active column atomically. Column-registry
   primitive exists (`embedding_columns` from v0.36.3); migration verb
@@ -2019,7 +2019,7 @@ These were filed when v0.41.8.0 shipped the search/query/get hang fix
 (#1247/#1269/#1290) + WASM init classifier (#1340) + sync breadcrumbs.
 Three items deferred:
 
-- [ ] **Investigate #1342 — `gbrain sync` hangs after schema v89→v92
+- [ ] **Investigate #1342 — `modusbrain sync` hangs after schema v89→v92
   migration (PGLite, single reporter).** Repro shape: ~99% CPU in pure-JS
   JIT loop per `sample <pid>`, zero stderr output, reproduces with
   `--dry-run --no-pull`. Triggered after migrations 89→92 landed (v89
@@ -2047,7 +2047,7 @@ Three items deferred:
      `src/core/import-file.ts` — the v90 column may have an unbounded
      iteration somewhere when the per-source backfill kicks in.
 
-  **Reporter's config**: PGLite, `~/.gbrain/brain.pglite`,
+  **Reporter's config**: PGLite, `~/.modusbrain/brain.pglite`,
   `ollama:nomic-embed-text` @ 768d, macOS 15.5, single 'default'
   source.
 
@@ -2106,17 +2106,17 @@ outside-voice triage on the reshaped plan.
   `eval.capture` default from OFF to ON. Harden `src/core/eval-capture-scrub.ts`
   with AWS access key (`AKIA[0-9A-Z]{16}`), GitHub PAT (`ghp_[A-Za-z0-9]{36}`),
   and generic API-key-suffix patterns. Add first-run stderr banner with
-  `gbrain eval capture off` opt-out hint and persistent
+  `modusbrain eval capture off` opt-out hint and persistent
   `eval.capture_acknowledged` config flag (banner fires once per acked-false).
-  Two new CLI verbs: `gbrain eval capture on|off|status` + `acknowledge`.
+  Two new CLI verbs: `modusbrain eval capture on|off|status` + `acknowledge`.
   Dependency: v0.41 LOOP (this wave) has shipped + been used for at least
   a month so the destination story is real. Filed during v0.41 CEO review
   per D11 after the original wave plan was reshaped by codex outside-voice
   to defer this item.
 
-- [ ] **v0.42-v0.43 P2: `gbrain bench publish --suggest-thresholds`.**
-  Reads the last 30 days of `eval gate` JSON outputs (from gbrain-evals
-  CI artifacts or `~/.gbrain/audit/bench-publish-*.jsonl`), computes p10
+- [ ] **v0.42-v0.43 P2: `modusbrain bench publish --suggest-thresholds`.**
+  Reads the last 30 days of `eval gate` JSON outputs (from modusbrain-evals
+  CI artifacts or `~/.modusbrain/audit/bench-publish-*.jsonl`), computes p10
   of each metric across passes, suggests those as thresholds. Starting-
   guess thresholds in v0.41 (regression: jaccard 0.85 / top1 0.80 /
   latency_multiplier 2.0; correctness: recall@10 0.70 /
@@ -2124,19 +2124,19 @@ outside-voice triage on the reshaped plan.
   or too loose; data informs the heuristic. Dependency: 30+ days of gate
   runs accumulating. Filed during v0.41 CEO review per D12.
 
-- [ ] **v0.42+ P3: `gbrain bench diff` + `gbrain bench list`.**
+- [ ] **v0.42+ P3: `modusbrain bench diff` + `modusbrain bench list`.**
   `bench diff <a.baseline.ndjson> <b.baseline.ndjson>` — visual diff of
   two baselines showing which queries changed top-1 retrieval, which
   lost relevant_slugs, which gained. `bench list [--dir <path>]` — lists
   baselines with metadata (label, published_at, row_count, source_hash);
-  defaults to `~/.gbrain/baselines/` + `gbrain-evals/baselines/` if both
+  defaults to `~/.modusbrain/baselines/` + `modusbrain-evals/baselines/` if both
   exist. Trivial; ship when there's >1 baseline to look at. Filed during
   v0.41 CEO review per D13.
 
-- [ ] **v0.42+: ship the coordinated `gbrain-evals/baselines/v0.41-launch.baseline.ndjson`
-  + `gbrain-evals/qrels/v0.41-launch.qrels.json` (hermetic-synthetic per D9).**
-  Generate locally via `gbrain bench publish --from <hermetic-test-corpus>` then
-  commit to the sibling gbrain-evals repo. Gives `gbrain eval gate` a canonical
+- [ ] **v0.42+: ship the coordinated `modusbrain-evals/baselines/v0.41-launch.baseline.ndjson`
+  + `modusbrain-evals/qrels/v0.41-launch.qrels.json` (hermetic-synthetic per D9).**
+  Generate locally via `modusbrain bench publish --from <hermetic-test-corpus>` then
+  commit to the sibling modusbrain-evals repo. Gives `modusbrain eval gate` a canonical
   baseline target so users don't have to bootstrap their own immediately.
 
 ## v0.40.7.0 Schema Cathedral v3 follow-ups (v0.40.7+)
@@ -2223,7 +2223,7 @@ at plan time and got carved out:
   `sync_freshness_per_source` consuming `buildSyncStatusReport`. Codex caught
   that `checkSyncFreshness` (`src/commands/doctor.ts:~1609`) is ALREADY per-source —
   iterates `WHERE local_path IS NOT NULL`, emits per-source messages with
-  paste-ready `gbrain sync --source <id>` hints, warns at 24h, fails at 72h.
+  paste-ready `modusbrain sync --source <id>` hints, warns at 24h, fails at 72h.
   The plan dropped the duplicate (D9 → A). The real follow-up is to extend
   `checkSyncFreshness`'s message to include `embedding_coverage_pct` per source
   alongside the staleness number so doctor surfaces the coverage gap inline.
@@ -2268,14 +2268,14 @@ contributor traps.
   strings). Fail-open is correct for timeouts (5000ms is a safe bundle default),
   but the user-facing UX is "config was set, nothing changed" with no signal.
   Fix: stderr-log once when `modelStr` is non-empty but the provider id doesn't
-  resolve, gated by `GBRAIN_DEBUG=1`.
+  resolve, gated by `MODUSBRAIN_DEBUG=1`.
 
 - [ ] **P3: Narrow `resolveLiveRerankerModel` catch.** `src/commands/models.ts:resolveLiveRerankerModel`
   has a blanket `try/catch` around `loadSearchModeConfig` + `resolveSearchMode`
   that falls back to `getRerankerModel()`. Real errors (schema-version mismatch,
   malformed config JSON, engine connectivity blip) get hidden behind a misleading
   "not configured" doctor verdict. Fix: narrow the catch to specific shapes OR
-  emit `GBRAIN_DEBUG=1` stderr warning before falling back.
+  emit `MODUSBRAIN_DEBUG=1` stderr warning before falling back.
 
 - [ ] **P3: Validate `modelStr` shape before allocating probe timeout.**
   `src/commands/models.ts:probeRerankerReachability` resolves the recipe + sets
@@ -2293,19 +2293,19 @@ contributor traps.
   flaws with the replay-against-captured-baseline approach: (a) `scripts/select-e2e.ts`
   is local-only — `.github/workflows/test.yml` + `e2e.yml` hit fixed file lists,
   so a diff-aware selector entry would gate nothing on GitHub PRs;
-  (b) `gbrain eval export` reads `eval_candidates` rows which only populate when
-  ops fire through the operation layer with `GBRAIN_CONTRIBUTOR_MODE=1` capture —
+  (b) `modusbrain eval export` reads `eval_candidates` rows which only populate when
+  ops fire through the operation layer with `MODUSBRAIN_CONTRIBUTOR_MODE=1` capture —
   PGLite tests seeded via direct `engine.put*()` produce zero captured rows;
-  (c) `gbrain eval replay` re-embeds query text via `gateway.embedQuery()` which
+  (c) `modusbrain eval replay` re-embeds query text via `gateway.embedQuery()` which
   needs an API key CI doesn't have. Real-query dogfooding is still valuable —
   synthetic qrels test the structural ranking, real captures test what users
   actually search for. To restore the replay-based gate properly: (1) provision
   a CI secret for an embedding key (OpenAI text-embedding-3-small is the
   cheapest); (2) build a nightly capture pipeline that runs
-  `GBRAIN_CONTRIBUTOR_MODE=1 gbrain eval export --tool query` against a seeded
+  `MODUSBRAIN_CONTRIBUTOR_MODE=1 modusbrain eval export --tool query` against a seeded
   brain corpus; (3) commit-automate the resulting NDJSON into
   `test/fixtures/eval-baselines/` with a "Why:" justification line; (4) write
-  a new gate test that calls `gbrain eval replay --against <fixture>` and asserts
+  a new gate test that calls `modusbrain eval replay --against <fixture>` and asserts
   on `mean_jaccard`, `top1_stability_rate`, drops the latency assert (CI runners
   vary too much). Estimate: ~2 weeks. Filed during v0.40.1.0 Track D
   /plan-eng-review (see `~/.claude/plans/system-instruction-you-are-working-whimsical-acorn.md`).
@@ -2338,7 +2338,7 @@ contributor traps.
 - [ ] **(P3) — Audit other gateway-mutating tests for missing afterAll cleanup.** v0.40.8.0 added `afterAll(() => resetGateway())` to `test/ai/gateway.test.ts` and quarantined `test/ai/header-transport.test.ts` as `.serial.test.ts`. Two other files mutate gateway state without an explicit cleanup hook: `test/ai/rerank.test.ts`, `test/gateway-embed-model-override.test.ts`. They haven't surfaced flakes yet (different test sequences), but they're the same risk class. Add `afterAll(() => resetGateway())` to both for defense-in-depth, or quarantine if they prove racy under future parallelism changes.
 ## v0.40.4 adversarial review LOW findings — captured for v0.41+
 
-- [ ] **Codex L1**: `gbrain search stats --days N` underreports for N > 7. audit-writer.ts reads only current + previous ISO week (~14 days). `--days 30` silently shows ~2 weeks of failure events. Fix shape: extend readRecent to walk N/7 weeks dynamically OR cap user input with a clear message.
+- [ ] **Codex L1**: `modusbrain search stats --days N` underreports for N > 7. audit-writer.ts reads only current + previous ISO week (~14 days). `--days 30` silently shows ~2 weeks of failure events. Fix shape: extend readRecent to walk N/7 weeks dynamically OR cap user input with a clear message.
 - [ ] **Claude F2**: Score compounding on repeat applyGraphSignals invocation. The boost stages aren't idempotent on `r.score`; only `base_score` has explicit pre-stamp idempotency. If a future caller invokes runPostFusionStages twice on the same SearchResult array (retry loop, cache-augmentation path), scores compound `score * ADJACENCY_BOOST * ADJACENCY_BOOST`. Same hole in applyBacklinkBoost/Salience/Recency. Document the "call once" contract OR add an `already_applied` guard.
 - [ ] **Claude F3**: NaN handling asymmetry. applyBacklinkBoost explicitly guards `if (!Number.isFinite(r.score)) continue` (hybrid.ts:82). applyGraphSignals does NOT — only the floor-threshold guard. With floor_ratio undefined (default), NaN scores get `NaN * 1.05 = NaN`. ECMAScript sort with NaN comparator is undefined behavior. Add the same `Number.isFinite(r.score)` guard.
 - [ ] **Claude F5**: Doctor's `linkedRows` coverage query overcounts via soft-deleted source pages. The JOIN filters TO page on deleted_at but not FROM page. Coverage metric overstates link density relative to what graph-signals actually fires on. Fix: add `WHERE l.from_page_id IN (SELECT id FROM pages WHERE deleted_at IS NULL)` or equivalent.
@@ -2356,26 +2356,26 @@ contributor traps.
 
 ## v0.40.4 graph signals — deferred follow-ups (v0.41+)
 
-- [ ] **T-todo-1: profile graph-signal SQL latency at scale + merge backlink + adjacency if hot.** Today `getBacklinkCounts` and `getAdjacencyBoosts` both hit the `links` table inside `runPostFusionStages` — two round-trips that share an index. If profiling on Garry's actual brain shows the two-round-trip cost dominates graph-signal stage latency (>5ms p99), merge into `getLinkAggregates(slugs, pageIds)` returning both backlink counts AND adjacency aggregates in one SQL. D8=C deferred this until real production data justifies it. Trigger: `gbrain search stats` shows graph-signal stage p99 > 5ms over a 7-day window.
+- [ ] **T-todo-1: profile graph-signal SQL latency at scale + merge backlink + adjacency if hot.** Today `getBacklinkCounts` and `getAdjacencyBoosts` both hit the `links` table inside `runPostFusionStages` — two round-trips that share an index. If profiling on Garry's actual brain shows the two-round-trip cost dominates graph-signal stage latency (>5ms p99), merge into `getLinkAggregates(slugs, pageIds)` returning both backlink counts AND adjacency aggregates in one SQL. D8=C deferred this until real production data justifies it. Trigger: `modusbrain search stats` shows graph-signal stage p99 > 5ms over a 7-day window.
 
 - [ ] **T-todo-2: magnitude calibration wave from 30 days of score-distribution probe data.** v0.40.4 ships conservative magnitudes (ADJACENCY_BOOST=1.05, CROSS_SOURCE_BOOST=1.10, SESSION_DEMOTE=0.95) under the floor-gate. The `onScoreDistribution` probe emits min/p25/p50/p75/p95/max + reorder_band_width on every query. After 30 days, read the cumulative distribution from search-stats telemetry, compute the actual reorder bands the boosts have to clear, and tune the three constants against real data. Today's values are vibes-driven (D14=B); the probe instrumentation is the cathedral, the calibration wave is the payoff.
 
-- [ ] **T-todo-3: move fail-open audit events to a DB table for cross-deploy observability.** Codex outside-voice #15 caught the split-brain observability: graph-signals failures land in `~/.gbrain/audit/graph-signals-failures-*.jsonl`, but `gbrain serve --http` deploys can't read the host JSONL. `gbrain search stats` shows error counts on local but not on remote-server brains. Right shape: add a small `event_log` table (or extend an existing one) that the shared `createAuditWriter` writes to alongside the JSONL when an engine is available. Doctor + search-stats read from DB on remote, fall back to JSONL on local. Affects all 6 audit modules (rerank, shell, supervisor, slug-fallback, phantom, graph-signals), so this is a v0.41 audit-infra wave, not a one-off.
+- [ ] **T-todo-3: move fail-open audit events to a DB table for cross-deploy observability.** Codex outside-voice #15 caught the split-brain observability: graph-signals failures land in `~/.modusbrain/audit/graph-signals-failures-*.jsonl`, but `modusbrain serve --http` deploys can't read the host JSONL. `modusbrain search stats` shows error counts on local but not on remote-server brains. Right shape: add a small `event_log` table (or extend an existing one) that the shared `createAuditWriter` writes to alongside the JSONL when an engine is available. Doctor + search-stats read from DB on remote, fall back to JSONL on local. Affects all 6 audit modules (rerank, shell, supervisor, slug-fallback, phantom, graph-signals), so this is a v0.41 audit-infra wave, not a one-off.
 
-- [ ] **T-todo-4: sync-topology-aware cross-source signal.** Codex outside-voice #11 + #15 caught: `cross_source_hits` today counts ANY page in another source as cross-team corroboration, but mirrored imports from another source look identical to genuine cross-team links. Distinguishing them likely needs a `link_source_type` enum extension (e.g. `'mirror'` flag on links created during a `gbrain sources sync`) so the SQL can filter `cross_source_hits` to genuine team-authored edges only.
+- [ ] **T-todo-4: sync-topology-aware cross-source signal.** Codex outside-voice #11 + #15 caught: `cross_source_hits` today counts ANY page in another source as cross-team corroboration, but mirrored imports from another source look identical to genuine cross-team links. Distinguishing them likely needs a `link_source_type` enum extension (e.g. `'mirror'` flag on links created during a `modusbrain sources sync`) so the SQL can filter `cross_source_hits` to genuine team-authored edges only.
 
-- [ ] **T-todo-5: replace doctor's 30% global density threshold with actual fire-rate measurement.** `checkGraphSignalsCoverage` in doctor uses % pages with ≥1 inbound link as a proxy for "graph signals fire often enough to matter." Codex outside-voice #14 caught: this is global density, not top-K subgraph density. After 30 days of `gbrain search stats` data accumulates per-query fire rates (T-todo-2 wires this), swap the doctor check to read actual fire-rate-over-window. The 30% threshold becomes "fired in ≥10% of queries in last 7 days" or similar — measured, not inferred.
+- [ ] **T-todo-5: replace doctor's 30% global density threshold with actual fire-rate measurement.** `checkGraphSignalsCoverage` in doctor uses % pages with ≥1 inbound link as a proxy for "graph signals fire often enough to matter." Codex outside-voice #14 caught: this is global density, not top-K subgraph density. After 30 days of `modusbrain search stats` data accumulates per-query fire rates (T-todo-2 wires this), swap the doctor check to read actual fire-rate-over-window. The 30% threshold becomes "fired in ≥10% of queries in last 7 days" or similar — measured, not inferred.
 ## v0.39.3.0 smoke-test wave — deferred follow-ups (v0.39.4 / v0.40)
 
 - [ ] **v0.40: SQL-shape rewrite of `listPrefixSampledPages` for PgBouncer transaction-mode compatibility.** WARN-10 root cause from the v0.38.0.0 smoke test: brainstorm + lsd consistently exceed Postgres `statement_timeout` (often PgBouncer-imposed) on the prefix-stratified domain bank query when the brain has >10K pages spread across many prefixes. v0.39.3.0 ships diagnostic surfacing only (the orchestrator wrap classifies SQLSTATE 57014 into a `StructuredAgentError` with a friendly hint). Real fix: per-prefix limit pushdown, embeddings prefetch, or breaking the single big query into a series of small ones across an explicit cursor. Plan: `~/.claude/plans/system-instruction-you-are-working-async-popcorn.md` (Phase 5, WARN-10 row). Owner: open.
 
-- [ ] **v0.40: magic-byte allowlist for `gbrain capture` binary file detection.** v0.39.3.0 (Phase 3c, CV10) ships a first-8KB NUL-byte scan that catches typical binaries (executables, archives, most image formats). Known gap per CV10-B: a PNG with no NUL byte in its first 8KB slips through. Production-grade detection needs a magic-byte allowlist (PNG/JPEG/GIF/PDF/ZIP signatures). Implement in `src/commands/capture.ts:detectBinaryNullByte` (rename to `detectBinaryInput`) with a small `BINARY_MAGIC_BYTES` table. Reuse the same `assertSourceExists`-style friendly error pattern; reject before UTF-8 decode mangles the bytes. Tests in `test/capture-binary-guard.test.ts` should add cases for the PNG-without-NUL boundary.
+- [ ] **v0.40: magic-byte allowlist for `modusbrain capture` binary file detection.** v0.39.3.0 (Phase 3c, CV10) ships a first-8KB NUL-byte scan that catches typical binaries (executables, archives, most image formats). Known gap per CV10-B: a PNG with no NUL byte in its first 8KB slips through. Production-grade detection needs a magic-byte allowlist (PNG/JPEG/GIF/PDF/ZIP signatures). Implement in `src/commands/capture.ts:detectBinaryNullByte` (rename to `detectBinaryInput`) with a small `BINARY_MAGIC_BYTES` table. Reuse the same `assertSourceExists`-style friendly error pattern; reject before UTF-8 decode mangles the bytes. Tests in `test/capture-binary-guard.test.ts` should add cases for the PNG-without-NUL boundary.
 
-- [ ] **v0.40: facts:absorb root-cause investigation.** v0.39.3.0 (Phase 4c, CV13) suppresses the per-capture `[facts:absorb] failed to log gateway_error for inbox/...: No database connection` noise AND prints a first-occurrence stack trace so the v0.40 fix knows where to look. The actual fix is one of: (a) thread the connected engine through the facts pipeline so it doesn't open its own handle; (b) no-op the absorb-log when called from a CLI context where the doctor health check isn't the consumer; (c) make the facts subsystem connection-aware and queue retries. The stack trace from `src/core/facts/absorb-log.ts:writeFactsAbsorbLog`'s first-occurrence info-log is the input. **v0.41.25.0 update:** the related #1570 wave shipped a partial fix at the queue level — CLI op-dispatch now awaits `FactsQueue.drainPending({timeout: 1000})` before `engine.disconnect()`, which closes the visible-stderr-line symptom for `gbrain capture`. The deeper "thread engine through pipeline" architectural question (option a above) stays open for v0.40+; the drain fix is a queue-lifetime patch, not a pipeline-rearchitecture.
+- [ ] **v0.40: facts:absorb root-cause investigation.** v0.39.3.0 (Phase 4c, CV13) suppresses the per-capture `[facts:absorb] failed to log gateway_error for inbox/...: No database connection` noise AND prints a first-occurrence stack trace so the v0.40 fix knows where to look. The actual fix is one of: (a) thread the connected engine through the facts pipeline so it doesn't open its own handle; (b) no-op the absorb-log when called from a CLI context where the doctor health check isn't the consumer; (c) make the facts subsystem connection-aware and queue retries. The stack trace from `src/core/facts/absorb-log.ts:writeFactsAbsorbLog`'s first-occurrence info-log is the input. **v0.41.25.0 update:** the related #1570 wave shipped a partial fix at the queue level — CLI op-dispatch now awaits `FactsQueue.drainPending({timeout: 1000})` before `engine.disconnect()`, which closes the visible-stderr-line symptom for `modusbrain capture`. The deeper "thread engine through pipeline" architectural question (option a above) stays open for v0.40+; the drain fix is a queue-lifetime patch, not a pipeline-rearchitecture.
 
-- [ ] **v0.40: `--source-kind` override flag for `gbrain capture`.** v0.39.3.0 (Phase 3c, CV3) locked source_kind to `'capture-cli'` for capture invocations (the deferred CV3-B alternative). Real use case for the override: Apple Shortcuts / Zapier-style automations that shell out to `gbrain capture` and want their pages labeled `apple-shortcut` or `zapier` in the audit trail. Implementation: add a small flag with an allowlist (similar to migration v81's closed taxonomy: `capture-cli | apple-shortcut | zapier | <skillpack-kind>`); validate at parse time; CV6 remote-spoofing guard still applies (server stamps `mcp:put_page` regardless when `ctx.remote !== false`).
+- [ ] **v0.40: `--source-kind` override flag for `modusbrain capture`.** v0.39.3.0 (Phase 3c, CV3) locked source_kind to `'capture-cli'` for capture invocations (the deferred CV3-B alternative). Real use case for the override: Apple Shortcuts / Zapier-style automations that shell out to `modusbrain capture` and want their pages labeled `apple-shortcut` or `zapier` in the audit trail. Implementation: add a small flag with an allowlist (similar to migration v81's closed taxonomy: `capture-cli | apple-shortcut | zapier | <skillpack-kind>`); validate at parse time; CV6 remote-spoofing guard still applies (server stamps `mcp:put_page` regardless when `ctx.remote !== false`).
 
-- [ ] **v0.40: route `gbrain capture` through `ingest_capture` Minion handler instead of put_page direct.** v0.39.3.0 (Phase 3a, A1) extended put_page with provenance params as the smallest diff. The cleaner architecture is the ingest_capture Minion handler shape that migration v81's comment already describes ("populated by the ingest_capture Minion handler"). This is a v0.40 architectural shift: capture submits an `ingest_capture` job → handler computes provenance + writes via put_page → result returns to capture. Adds queue latency (Minion job submit + poll) to the sync capture path; needs careful UX consideration (synchronous receipt vs async job_id). The current put_page extension stays back-compat after the migration.
+- [ ] **v0.40: route `modusbrain capture` through `ingest_capture` Minion handler instead of put_page direct.** v0.39.3.0 (Phase 3a, A1) extended put_page with provenance params as the smallest diff. The cleaner architecture is the ingest_capture Minion handler shape that migration v81's comment already describes ("populated by the ingest_capture Minion handler"). This is a v0.40 architectural shift: capture submits an `ingest_capture` job → handler computes provenance + writes via put_page → result returns to capture. Adds queue latency (Minion job submit + poll) to the sync capture path; needs careful UX consideration (synchronous receipt vs async job_id). The current put_page extension stays back-compat after the migration.
 
 - [ ] **v0.40: provenance-history table for full ingestion event log.** v0.39.3.0's CV12 `COALESCE-preserve UPDATE` keeps the FIRST ingestion source as the audit trail (first-write-wins). For deeper audit cases ("show me every time this page was re-ingested + by which channel"), a separate `pages_provenance_events` table keyed on `(page_id, ingested_at)` would preserve every event. Out of scope for v0.39.x; v0.40+ if/when the audit case grows beyond "first ingestion source."
 
@@ -2384,18 +2384,18 @@ contributor traps.
 
 ## v0.39.1+ schema-cathedral follow-ups (filed during v0.39.0.0 ship)
 
-- [ ] **T18 follow-through — DELETE `skills/_brain-filing-rules.{md,json}`.** v0.39.0.0 shipped step (a) of the 4-step deprecation sequence: `gbrain schema show --as-filing-rules` emits the JSON shape the legacy file held. v0.39.1 ships steps (b) + (c) + (d): migrate `filing-audit.ts:79`, `synthesize.ts:619`, `patterns.ts:305`, `check-resolvable.ts:196+:226` to consume `gbrain schema show --as-filing-rules` output; update 5 test files (filing-audit.test.ts, check-resolvable.test.ts, dry-fix.test.ts, resolver.test.ts, cycle-patterns.test.ts); then DELETE the two files. Codex finding #3 from /plan-eng-review made this load-bearing — premature deletion makes protected synthesize/patterns phases fail with NO_ALLOWLIST. Sequencing matters.
+- [ ] **T18 follow-through — DELETE `skills/_brain-filing-rules.{md,json}`.** v0.39.0.0 shipped step (a) of the 4-step deprecation sequence: `modusbrain schema show --as-filing-rules` emits the JSON shape the legacy file held. v0.39.1 ships steps (b) + (c) + (d): migrate `filing-audit.ts:79`, `synthesize.ts:619`, `patterns.ts:305`, `check-resolvable.ts:196+:226` to consume `modusbrain schema show --as-filing-rules` output; update 5 test files (filing-audit.test.ts, check-resolvable.test.ts, dry-fix.test.ts, resolver.test.ts, cycle-patterns.test.ts); then DELETE the two files. Codex finding #3 from /plan-eng-review made this load-bearing — premature deletion makes protected synthesize/patterns phases fail with NO_ALLOWLIST. Sequencing matters.
 - [ ] **T19 follow-through — per-source pack federation across mounts.** v0.39.0.0 ships the correct REJECTION posture (`SchemaPackTrustGateError` when sources resolve to divergent packs). v0.40 ships the true per-source closure via `buildPerSourceBindings` + `buildSourceClosureCte` (engine already provides; the read-path callers need to thread the per-source pack identity through the SQL generation step). Reference: codex finding #2 from /plan-eng-review.
 - [ ] **T16 follow-through — hermetic eval-schema-authoring CLI harness.** v0.39.0.0 ships the aggregator (`aggregateVerdict`) + scaffold; v0.39.1 wires the in-process PGLite engine + fixture brain replay (3 fixtures: 1 hand-curated `notion-refugee` + 2 synthetic via faker per D6(eng)). Pattern: mirror `src/eval/longmemeval/harness.ts`.
 - [ ] **T1.5 follow-through — wire `whoknows` / `find_experts` / `enrichment-service` / `facts/eligibility` to consume pack-aware type sets.** v0.39.0.0 added the seam (`activePack` parameter threaded through parseMarkdown/import/sync). The runtime sites that compute their type filter still use the v0.38 hardcoded constants. v0.39.1 migrates each call site to read from `loadActivePackForOp(ctx)` + use `expertTypesFromPack` / `extractableTypesFromPack` (helpers already exist in `src/core/schema-pack/`). Per the T19 closure fix, this is now safe to wire (federated_read with divergent packs throws permission_denied at the load step).
-- [ ] **D14 thesis retro — authoring vs derivation framing.** v0.39.0.0 ships the cathedral with 6 verbs marked experimental-tier + T15 schema-events audit + T23 `gbrain schema usage` for measurement. v0.40+ retro reads 60-90 days of usage telemetry and decides which experimental verbs to deprecate per codex's derivation-thesis structural argument. Pass condition: each verb gets >=5% of the cathedral's invocations. Below 5% = deprecation candidate.
+- [ ] **D14 thesis retro — authoring vs derivation framing.** v0.39.0.0 ships the cathedral with 6 verbs marked experimental-tier + T15 schema-events audit + T23 `modusbrain schema usage` for measurement. v0.40+ retro reads 60-90 days of usage telemetry and decides which experimental verbs to deprecate per codex's derivation-thesis structural argument. Pass condition: each verb gets >=5% of the cathedral's invocations. Below 5% = deprecation candidate.
 
 
 ## v0.37.x brainstorm cost-cathedral follow-ups (filed during T12)
 
-- [ ] **Explicit `--max-cost` flag on `gbrain extract`, `gbrain enrich`, `gbrain integrity auto`.** v0.37.x ships gateway-layer enforcement via `withBudgetTracker` — wrapping any of those commands at their entrypoint with `withBudgetTracker(tracker, fn)` immediately gives them the same cap semantics that brainstorm + doctor --remediate have. The CLI flag wiring (parse `--max-cost`, construct `BudgetTracker` with `maxCostUsd`, wrap the entrypoint) is the only missing piece. ~30 lines each plus smoke tests. Deferred per the plan's "NOT in scope" — gateway-layer composition was the structural goal; the per-command flag wiring is the next ergonomic win.
+- [ ] **Explicit `--max-cost` flag on `modusbrain extract`, `modusbrain enrich`, `modusbrain integrity auto`.** v0.37.x ships gateway-layer enforcement via `withBudgetTracker` — wrapping any of those commands at their entrypoint with `withBudgetTracker(tracker, fn)` immediately gives them the same cap semantics that brainstorm + doctor --remediate have. The CLI flag wiring (parse `--max-cost`, construct `BudgetTracker` with `maxCostUsd`, wrap the entrypoint) is the only missing piece. ~30 lines each plus smoke tests. Deferred per the plan's "NOT in scope" — gateway-layer composition was the structural goal; the per-command flag wiring is the next ergonomic win.
 
-- [ ] **`P5` config-schema `budgets:` block in `~/.gbrain/config.json`.** The lsd cost-explosion incident's P5 proposed declarative per-command budgets in config. v0.37.x ships the imperative `--max-cost N` surface, which covers the canonical case. Config-driven defaults (so users don't have to remember to pass `--max-cost` every time) are a v0.38+ ergonomic win. Shape:
+- [ ] **`P5` config-schema `budgets:` block in `~/.modusbrain/config.json`.** The lsd cost-explosion incident's P5 proposed declarative per-command budgets in config. v0.37.x ships the imperative `--max-cost N` surface, which covers the canonical case. Config-driven defaults (so users don't have to remember to pass `--max-cost` every time) are a v0.38+ ergonomic win. Shape:
   ```yaml
   budgets:
     default:
@@ -2411,15 +2411,15 @@ contributor traps.
 
 - [ ] **Async-batched audit writes.** Sync `appendFileSync` is fine at typical volumes (~5ms × 100 crosses = ~500ms — not noticeable inside a $1 brainstorm run). Profiling trigger criterion: when 100+ crosses on a large brain shows audit-write time dominating wall-clock cost, switch to an async write queue. Fixing prematurely costs complexity for no measurable benefit.
 
-- [ ] **`BudgetLedger` unification with `BudgetTracker`.** `src/core/enrichment/budget.ts` defines a separate `BudgetLedger` primitive for per-day, per-scope/resolverId enrichment caps. Different shape from `BudgetTracker` (daily reset windows + multi-tier scope keys). Unification is possible but requires careful schema design to preserve enrichment's existing report semantics. Deferred because: (a) BudgetTracker covers the per-command case cleanly today, (b) the existing BudgetLedger isn't a customer-facing surface — it backs `gbrain enrich`'s internal accounting, (c) merging them would require a schema migration on the enrichment budget audit JSONL. Revisit when the enrichment surface gets its next major touch.
+- [ ] **`BudgetLedger` unification with `BudgetTracker`.** `src/core/enrichment/budget.ts` defines a separate `BudgetLedger` primitive for per-day, per-scope/resolverId enrichment caps. Different shape from `BudgetTracker` (daily reset windows + multi-tier scope keys). Unification is possible but requires careful schema design to preserve enrichment's existing report semantics. Deferred because: (a) BudgetTracker covers the per-command case cleanly today, (b) the existing BudgetLedger isn't a customer-facing surface — it backs `modusbrain enrich`'s internal accounting, (c) merging them would require a schema migration on the enrichment budget audit JSONL. Revisit when the enrichment surface gets its next major touch.
 
 - [ ] **judges.ts internal chunking → payload-fitter delegation.** v0.37.x ships `src/core/diarize/payload-fitter.ts` with the batch strategy ready to consume from `src/core/brainstorm/judges.ts`'s `runJudge` chunking path. Today judges.ts keeps its own copy of the chunking loop (~30 lines) — straightforward refactor: replace the inline split with `fit({strategy:'batch', items: ideas, maxTokensPerCall, estimateTokens})` and concatenate results. The cost-guardrails test suite already pins the public contract; the refactor is mechanical. Touch one function; trivial.
 
 ## v0.37 PGLite fresh-install fix wave — deferred follow-ups (v0.37.x+ / v0.38.x)
 
-- [ ] **`gbrain embed --try-fallback` for provider quota/auth failures.** The v0.37 wave deliberately rejected auto-fallback because silently switching providers writes mixed-space vectors into one `content_chunks.embedding` column, corrupting retrieval. The right design: explicit `--try-fallback` flag that (a) detects the primary failure type (429 / 401 / 5xx), (b) confirms the fallback provider's `embedding_dimensions` matches the schema, (c) prompts the user via TTY before switching mid-corpus, (d) writes a marker chunk attribute so doctor can flag mixed-provider corpora later. Doctor currently surfaces "Detected 1 alternative embedding provider ready to use" but the embed command never acts. Owner: open. Sources: user bug report item #5; v0.37 wave plan deferred list.
+- [ ] **`modusbrain embed --try-fallback` for provider quota/auth failures.** The v0.37 wave deliberately rejected auto-fallback because silently switching providers writes mixed-space vectors into one `content_chunks.embedding` column, corrupting retrieval. The right design: explicit `--try-fallback` flag that (a) detects the primary failure type (429 / 401 / 5xx), (b) confirms the fallback provider's `embedding_dimensions` matches the schema, (c) prompts the user via TTY before switching mid-corpus, (d) writes a marker chunk attribute so doctor can flag mixed-provider corpora later. Doctor currently surfaces "Detected 1 alternative embedding provider ready to use" but the embed command never acts. Owner: open. Sources: user bug report item #5; v0.37 wave plan deferred list.
 
-- [ ] **Full plane unification for non-schema-sizing fields.** v0.37 (Lane C.2) refuses `gbrain config set` for `embedding_model` / `embedding_dimensions` because those size the schema and must stay file-plane only. But `chat_model`, `expansion_model`, `reranker_model`, `chat_fallback_chain`, `provider_base_urls` don't size the schema — they could be live-mutable via the DB plane through `loadConfigWithEngine()`. Audit each: which are read by the gateway at boot only vs at every call? Live-mutable ones should accept `gbrain config set` without the v0.37 rejection. Filed during v0.37 codex round 2 (CDX-7 audit produced this as a follow-up).
+- [ ] **Full plane unification for non-schema-sizing fields.** v0.37 (Lane C.2) refuses `modusbrain config set` for `embedding_model` / `embedding_dimensions` because those size the schema and must stay file-plane only. But `chat_model`, `expansion_model`, `reranker_model`, `chat_fallback_chain`, `provider_base_urls` don't size the schema — they could be live-mutable via the DB plane through `loadConfigWithEngine()`. Audit each: which are read by the gateway at boot only vs at every call? Live-mutable ones should accept `modusbrain config set` without the v0.37 rejection. Filed during v0.37 codex round 2 (CDX-7 audit produced this as a follow-up).
 
 - [ ] **Per-page worker-pool abort in `embedAll()` for mid-run dim drift.** v0.37 Lane D.2 added a pre-flight dim-mismatch check at the top of `runEmbedCore` (catches the headline fresh-install class). The plan's stricter D.2 (CDX2-9) called for a shared `AbortController` in `embedAll()` so a mid-run mismatch on one worker propagates to the rest of the pool. The pre-flight catches >99% of cases (mismatches surface at the column-level, not per-row, so all workers would hit the same error). Deferred as defense-in-depth: implement when a real mid-run dim-drift case is reported. File `src/commands/embed.ts:335` (worker pool entry point).
 
@@ -2427,15 +2427,15 @@ contributor traps.
 
 ## v0.37.8.0 pre-existing master test regression (noticed during ship)
 
-- [x] **P0: `test/doctor-report-remote.test.ts:65` — `full report on healthy brain` fails with `health_score: 50` (expects `>=70`).** **Completed:** v0.37.10.0 (2026-05-21). Resolved structurally by the empty-brain-100/100 fix in `src/core/pglite-engine.ts` + `src/core/postgres-engine.ts` (commit 9aa571f3): pages-empty brains now get vacuous-truth full marks on every breakdown component (35/25/15/15/10), so the freshly-initialized test brain's composite stays >=70 even when `skill_brain_first` returns non-ok. Test file renamed to `test/doctor-report-remote.serial.test.ts` and made hermetic (isolates `GBRAIN_HOME` to a tempdir via beforeAll/afterAll per `scripts/check-test-isolation.sh` R1 — env mutation requires serial quarantine).
+- [x] **P0: `test/doctor-report-remote.test.ts:65` — `full report on healthy brain` fails with `health_score: 50` (expects `>=70`).** **Completed:** v0.37.10.0 (2026-05-21). Resolved structurally by the empty-brain-100/100 fix in `src/core/pglite-engine.ts` + `src/core/postgres-engine.ts` (commit 9aa571f3): pages-empty brains now get vacuous-truth full marks on every breakdown component (35/25/15/15/10), so the freshly-initialized test brain's composite stays >=70 even when `skill_brain_first` returns non-ok. Test file renamed to `test/doctor-report-remote.serial.test.ts` and made hermetic (isolates `MODUSBRAIN_HOME` to a tempdir via beforeAll/afterAll per `scripts/check-test-isolation.sh` R1 — env mutation requires serial quarantine).
 
 ## v0.37.7.0 federated-brains + autopilot safety follow-ups (v0.37.x+)
 
 - [ ] **.sql file indexing (#1173) — dropped from v0.37.7.0 because tree-sitter-sql.wasm is not in `src/assets/wasm/grammars/`.** The grammars directory ships 35 languages but SQL is not among them. Plan deliberately verify-first-gated this (codex CF11). Re-file as a dedicated wave that: (a) ships tree-sitter-sql.wasm (vendor from upstream), (b) extends the sync walker's `.md|.markdown|.txt` extension filter to include `.sql`, (c) routes `.sql` through `importCodeFile()` with `page_kind='code'`, (d) addresses the slug-shape collision codex flagged with #1172's punted "flatten extensions" work — `slugifyCodePath('docs/auth.sql')` produces a slug shape that may collide with `docs/auth.md` if #1172 ever ships. Verify-first the slug round-trip before merging.
 
-- [ ] **#1204 deeper investigation — `gbrain extract all` reports 0 links on federated brains with cross-source duplicate slugs.** v0.37.7.0 added `--source-id <id>` to scope extraction explicitly, which gives users a workaround. But the underlying "silent 0 links" bug on unscoped federated extracts has additional facets: the resolver path in `extractLinksFromDB` builds `slugToSources` from `listAllPageRefs`, then iterates `allRefs` and resolves wikilinks. For a slug that exists in 2+ sources, the resolver may pick the wrong target. Run `/investigate` against a fixture with 2 sources × overlapping slugs × cross-source wikilinks, characterize the failure mode, file a precise fix.
+- [ ] **#1204 deeper investigation — `modusbrain extract all` reports 0 links on federated brains with cross-source duplicate slugs.** v0.37.7.0 added `--source-id <id>` to scope extraction explicitly, which gives users a workaround. But the underlying "silent 0 links" bug on unscoped federated extracts has additional facets: the resolver path in `extractLinksFromDB` builds `slugToSources` from `listAllPageRefs`, then iterates `allRefs` and resolves wikilinks. For a slug that exists in 2+ sources, the resolver may pick the wrong target. Run `/investigate` against a fixture with 2 sources × overlapping slugs × cross-source wikilinks, characterize the failure mode, file a precise fix.
 
-- [ ] **Tier 5N doctor check — `subagent_terminal_dead_letters`.** v0.37.7.0 shipped T9 (the subagent dead-letter fix) but deferred the doctor sweep that surfaces historical dead-lettered jobs whose final message is a text-only assistant turn (the #1151 fingerprint). The fix prevents new occurrences; the doctor check would help users discover existing dead-letters from before the upgrade so they can `gbrain jobs prune --status dead --queue default` cleanly. Add the check in v0.37.8+ once a clean conflict-resolved doctor.ts is available.
+- [ ] **Tier 5N doctor check — `subagent_terminal_dead_letters`.** v0.37.7.0 shipped T9 (the subagent dead-letter fix) but deferred the doctor sweep that surfaces historical dead-lettered jobs whose final message is a text-only assistant turn (the #1151 fingerprint). The fix prevents new occurrences; the doctor check would help users discover existing dead-letters from before the upgrade so they can `modusbrain jobs prune --status dead --queue default` cleanly. Add the check in v0.37.8+ once a clean conflict-resolved doctor.ts is available.
 
 ## v0.37.6.0 OpenRouter recipe follow-ups (v0.37.x+ / v0.38.x)
 
@@ -2479,7 +2479,7 @@ contributor traps.
 
 - [ ] **v0.36.x: Audit trend doctor check `skill_brain_first_trend`.** The
   v0.36.x snapshot+diff audit JSONL at
-  `~/.gbrain/audit/skill-brain-first-YYYY-Www.jsonl` records detected /
+  `~/.modusbrain/audit/skill-brain-first-YYYY-Www.jsonl` records detected /
   resolved / fixed events as transitions. The data is reachable via
   `readRecentBrainFirstEvents(7)` in `src/core/audit-skill-brain-first.ts`
   but no doctor surface consumes it yet. Add a `skill_brain_first_trend`
@@ -2507,7 +2507,7 @@ contributor traps.
 
 ## v0.35.6.0 floor-ratio gate follow-ups (v0.36.x+)
 
-- [ ] **v0.36.x: Run gbrain-side floor-ratio ablation before flipping any mode-bundle default.** v0.35.6.0 ships the gate default-off (`MODE_BUNDLES[*].floor_ratio = undefined`) because the SkyTwin labeled-retrieval ablation that surfaced the regression isn't reproducible on gbrain's own eval surfaces from outside. Before any mode-bundle default flip, run the gate at `floor_ratio: undefined`, 0.85, 0.90, 0.95 across `gbrain eval longmemeval`, `gbrain eval whoknows`, `gbrain eval suspected-contradictions`, and the BrainBench-Real replay (sibling gbrain-evals repo). Quantify per-mode P@k / R@k / nDCG@k / top-1 stability deltas. Look for: regression on queries that genuinely need the long-tail boost (specific entity lookups, low-frequency topics) vs improvement on queries where weak-overlap pages were leapfrogging. The corpus-level finding determines whether tokenmax (most exposure to the failure mode) should flip first, or whether the gate stays a per-call opt-in indefinitely. Filed during v0.35.6.0 codex outside-voice review.
+- [ ] **v0.36.x: Run modusbrain-side floor-ratio ablation before flipping any mode-bundle default.** v0.35.6.0 ships the gate default-off (`MODE_BUNDLES[*].floor_ratio = undefined`) because the SkyTwin labeled-retrieval ablation that surfaced the regression isn't reproducible on modusbrain's own eval surfaces from outside. Before any mode-bundle default flip, run the gate at `floor_ratio: undefined`, 0.85, 0.90, 0.95 across `modusbrain eval longmemeval`, `modusbrain eval whoknows`, `modusbrain eval suspected-contradictions`, and the BrainBench-Real replay (sibling modusbrain-evals repo). Quantify per-mode P@k / R@k / nDCG@k / top-1 stability deltas. Look for: regression on queries that genuinely need the long-tail boost (specific entity lookups, low-frequency topics) vs improvement on queries where weak-overlap pages were leapfrogging. The corpus-level finding determines whether tokenmax (most exposure to the failure mode) should flip first, or whether the gate stays a per-call opt-in indefinitely. Filed during v0.35.6.0 codex outside-voice review.
 
 - [ ] **v0.36.x: `MODE_BUNDLES.floor_ratio` integration shape — populate after ablation evidence.** v0.35.6.0 leaves `floor_ratio: undefined` in all three bundles deliberately. After the ablation TODO above, set per-mode defaults: probably `tokenmax: 0.85` first (high-context tier, broad searchLimit=50, expansion=on — most exposure to leapfrog), `balanced` second if signal holds, `conservative` only if the ablation shows the gate doesn't hurt on small candidate pools. Update the canonical-bundle tests in `test/search-mode.test.ts` (3 fixtures) when flipping. The KNOBS_HASH_VERSION does NOT need to bump for a default change — the per-bundle default is part of the hash input already.
 
@@ -2518,7 +2518,7 @@ contributor traps.
 
 ## dreamy-thompson wave follow-ups (v0.36.x)
 
-- [ ] **v0.36.x: runThink full rewrite — drop ThinkLLMClient indirection.** v0.36's fix(think) wave landed a gateway-backed adapter at `src/core/think/index.ts:225-251` so `gbrain config set anthropic_api_key` works over MCP stdio (closed #952). The adapter routes through `gateway.chat()` but `runThink` still carries the `ThinkLLMClient` interface as the test seam — it's the last LLM-using path that doesn't use the canonical `__setChatTransportForTests` seam v0.31.12 established for chat/embed. Cleanup: drop `ThinkLLMClient`, drop the `opts.client` injection point, migrate the 12+ existing tests (`test/think-pipeline.serial.test.ts:144,181,222`, `test/think-gateway-adapter.test.ts`, plus 9+ others that stub the interface) to `__setChatTransportForTests`. Pros: codebase consistency, one fewer test-stub pattern, easier to add provider switching for think once it routes through gateway natively. Cons: 12+ test files need migration. Blocked by: v0.36 wave landing on master (so the adapter exists to lean on while migrating tests). Plan reference: D5 + D7 in `~/.claude/plans/ok-i-spun-up-dreamy-thompson.md`.
+- [ ] **v0.36.x: runThink full rewrite — drop ThinkLLMClient indirection.** v0.36's fix(think) wave landed a gateway-backed adapter at `src/core/think/index.ts:225-251` so `modusbrain config set anthropic_api_key` works over MCP stdio (closed #952). The adapter routes through `gateway.chat()` but `runThink` still carries the `ThinkLLMClient` interface as the test seam — it's the last LLM-using path that doesn't use the canonical `__setChatTransportForTests` seam v0.31.12 established for chat/embed. Cleanup: drop `ThinkLLMClient`, drop the `opts.client` injection point, migrate the 12+ existing tests (`test/think-pipeline.serial.test.ts:144,181,222`, `test/think-gateway-adapter.test.ts`, plus 9+ others that stub the interface) to `__setChatTransportForTests`. Pros: codebase consistency, one fewer test-stub pattern, easier to add provider switching for think once it routes through gateway natively. Cons: 12+ test files need migration. Blocked by: v0.36 wave landing on master (so the adapter exists to lean on while migrating tests). Plan reference: D5 + D7 in `~/.claude/plans/ok-i-spun-up-dreamy-thompson.md`.
 
 - [ ] **v0.36.x: Supabase parity test fixture for `applyForwardReferenceBootstrap`.** v0.36 fixed the underlying bug (bootstrap now uses the DDL connection from `initSchema` so probes run inside the advisory-lock scope) per codex P1 from /ship adversarial review. What remains is the TEST FIXTURE that proves it: the new pre-v18/pre-v34/pre-v60 E2E tests run against local Docker Postgres but not against Supabase-shape pooler topology (transaction pooler + statement_timeout). Real Supabase upgrades have failed multiple times on this exact connection-topology divergence (#699, #820 lineage). Fix: a test fixture that exercises the probe path against deriveDirectUrl + transaction pooler + statement_timeout. Cons: requires Supabase fixture infra OR careful mocking of the connection-selection logic in `db.ts`'s `getDDLConnection` path.
 
@@ -2529,7 +2529,7 @@ contributor traps.
 
 - [ ] **v0.36.x: Decommission the stub-guard at `fence-write.ts:190` once the sunset criterion holds.** The guard's purpose is defense-in-depth behind the resolver's prefix-expansion fix. Sunset rule: when `stub_guard_24h` reads <5 hits/week for 3 consecutive weeks across production brains, the prefix-expansion is doing its job and the guard can be removed. The JSDoc names v0.36 as the target — re-check this against actual operator-brain data when planning v0.36.
 
-- [ ] **v0.36.x: `PREFIX_EXPANSION_DIRS` is hardcoded to `['people', 'companies']` in `src/core/entities/resolve.ts:97`.** New entity directories (funds, advisors, deals, etc.) require a code change to opt in. Consider a config-driven list (`entities.prefix_expansion_dirs: [...]` in `gbrain.yml`) so operators can extend without forking. Filed during v0.35.4.0 plan-eng-review.
+- [ ] **v0.36.x: `PREFIX_EXPANSION_DIRS` is hardcoded to `['people', 'companies']` in `src/core/entities/resolve.ts:97`.** New entity directories (funds, advisors, deals, etc.) require a code change to opt in. Consider a config-driven list (`entities.prefix_expansion_dirs: [...]` in `modusbrain.yml`) so operators can extend without forking. Filed during v0.35.4.0 plan-eng-review.
 
 - [ ] **v0.36.x: Sweep the banned private-agent-name references out of `CHANGELOG.md`.** Three pre-existing lines in `CHANGELOG.md` (around lines 2537, 2606, 3304) reference the name that `scripts/check-privacy.sh` enforces against. Pre-existing on master, not introduced by v0.35.4.0; `CHANGELOG.md` is on the script's allow-list so master CI is green, but they still violate the spirit of CLAUDE.md's privacy rule (the allow-list is a meta-documentation exception, not a license to add new references). Replace with `your OpenClaw` or `Garry's OpenClaw` per the script's own suggestion text. Trivial cleanup PR. Filed during v0.35.4.0 privacy audit.
 
@@ -2538,7 +2538,7 @@ contributor traps.
 
 - [ ] **v0.35.x: Concurrent NULL→non-NULL upsert race in `embed.ts:429-443` + `postgres-engine.ts:1231`'s `COALESCE(EXCLUDED.embedding, content_chunks.embedding)`.** Two `embed --stale` workers (or `embed --stale` racing with a sync that re-embeds the same chunk) can have the slower writer overwrite the faster one's fresher embedding. Window is small (20 workers, all from the same `listStaleChunks` snapshot) but exists. Tractable fix: a `WHERE content_chunks.embedded_at < EXCLUDED.embedded_at OR content_chunks.embedding IS NULL` predicate on the upsert. Out of scope for v0.34.4.0 because the upsert is not in the diff; pre-existing bug. Filed during v0.34.4.0 codex outside-voice review.
 
-- [ ] **v0.35.x: New stale rows inserted behind the keyset cursor.** A sync or `gbrain put_page` mid-`embed --stale` creates chunks with `embedding IS NULL` at `(page_id, chunk_index)` already passed by the cursor. Picked up on next run via the partial index; documented limitation. Possible fix: a second pass at end-of-run that does a fresh `countStaleChunks()` and re-enters the loop while count > 0 and budget allows. Filed during v0.34.4.0 codex outside-voice review.
+- [ ] **v0.35.x: New stale rows inserted behind the keyset cursor.** A sync or `modusbrain put_page` mid-`embed --stale` creates chunks with `embedding IS NULL` at `(page_id, chunk_index)` already passed by the cursor. Picked up on next run via the partial index; documented limitation. Possible fix: a second pass at end-of-run that does a fresh `countStaleChunks()` and re-enters the loop while count > 0 and budget allows. Filed during v0.34.4.0 codex outside-voice review.
 
 ## MCP fix wave follow-ups (v0.34.1)
 
@@ -2546,26 +2546,26 @@ contributor traps.
 
 - [ ] **v0.34.x: Extend `sourceScopeOpts(ctx)` to the 14 read-side ops PR #861 didn't touch.** `get_page`, `get_tags`, `get_links`, `get_backlinks`, `get_timeline`, `list_files`, `get_file`, and the four `takes_*` ops (above) still use the v0.31.8-era `const sourceOpts = ctx.sourceId ? { sourceId: ctx.sourceId } : {}` pattern. NOT a leak (scalar `ctx.sourceId` IS threaded), but federated_read (#876, `ctx.auth?.allowedSources`) is silently dropped. A "WeCare L3 dept" client gets correct federated results from `search`/`query`/`list_pages`/`traverse_graph`/`find_experts` but only sees its scalar `source_id` for `get_page`/`get_tags`/etc. Fix: route all 14 sites through `sourceScopeOpts(ctx)`.
 
-- [ ] **v0.34.x: Migration v60 idempotency guard against `--force-retry` race with v64.** `gbrain apply-migrations --force-retry 58` after v64 has already run will re-install the FK with `ON DELETE SET NULL`, silently downgrading the v64 RESTRICT posture. Probability low (operator has to explicitly force-retry 58) but failure mode is invisible. Fix: v60 should probe `pg_constraint.confdeltype` before re-adding and refuse to clobber `'r'` (RESTRICT) with `'n'` (SET NULL).
+- [ ] **v0.34.x: Migration v60 idempotency guard against `--force-retry` race with v64.** `modusbrain apply-migrations --force-retry 58` after v64 has already run will re-install the FK with `ON DELETE SET NULL`, silently downgrading the v64 RESTRICT posture. Probability low (operator has to explicitly force-retry 58) but failure mode is invisible. Fix: v60 should probe `pg_constraint.confdeltype` before re-adding and refuse to clobber `'r'` (RESTRICT) with `'n'` (SET NULL).
 
 - [ ] **v0.34.x: `embedMultimodalOpenAICompat` batching + partial-failure handling.** `src/core/ai/gateway.ts:1180-1255` sends one HTTP request per input. Multi-input callers (10 images) get 10 sequential round-trips with no parallelism; a 401 on input #5 throws and discards inputs #1-#4's already-computed embeddings (wasted spend, no surfacing of the partial array). Voyage's existing path batches. Fix: batch via the provider's `input: [...]` array shape; on partial failure, return successful embeddings + failed-index array.
 
-- [ ] **v0.34.x: Doctor check `oauth_orphan_source_id`** — surfaces OAuth clients whose source_id was nulled by the v60 D10 silent-widen path (`GBRAIN_ACCEPT_SILENT_WIDEN=1`). Closes the observability gap from v0.34.1's D4 decision. Sibling to the `rls_event_trigger` check pattern in `src/commands/doctor.ts`.
+- [ ] **v0.34.x: Doctor check `oauth_orphan_source_id`** — surfaces OAuth clients whose source_id was nulled by the v60 D10 silent-widen path (`MODUSBRAIN_ACCEPT_SILENT_WIDEN=1`). Closes the observability gap from v0.34.1's D4 decision. Sibling to the `rls_event_trigger` check pattern in `src/commands/doctor.ts`.
 
-- [ ] **v0.34.x: `gbrain sources purge` FK error UX.** Post-v0.34, deleting a source is refused if any oauth_client references it (v64 ON DELETE RESTRICT). The CLI currently surfaces the raw Postgres FK violation. Fix: pre-check via `SELECT client_id, client_name FROM oauth_clients WHERE source_id = $1`, print "N OAuth clients reference this source: ... Revoke first via `gbrain auth revoke-client <id>`." Mirrors `assessDestructiveImpact` in destructive-guard.ts (v0.26.5).
+- [ ] **v0.34.x: `modusbrain sources purge` FK error UX.** Post-v0.34, deleting a source is refused if any oauth_client references it (v64 ON DELETE RESTRICT). The CLI currently surfaces the raw Postgres FK violation. Fix: pre-check via `SELECT client_id, client_name FROM oauth_clients WHERE source_id = $1`, print "N OAuth clients reference this source: ... Revoke first via `modusbrain auth revoke-client <id>`." Mirrors `assessDestructiveImpact` in destructive-guard.ts (v0.26.5).
 
 - [ ] **v0.34.x: `hybrid.ts:223` explicit-pick refactor.** The SearchOpts rebuild manually picks fields from HybridSearchOpts. This is the bug shape that caused the original v0.34.1 P0 leak — a new SearchOpts field is silently dropped if not manually added here. The wave added `sourceId` + `sourceIds` to the pick; future fields will keep hitting this footgun. Fix: refactor to spread + TypeScript `Pick<>` helper that narrows HybridSearchOpts → SearchOpts type-safely.
 
 
 ## functional-area-resolver follow-ups (v0.32.3.0)
 
-- [ ] **v0.33.x: Dogfood `functional-area-resolver` on gbrain's own `skills/RESOLVER.md`** when it crosses ~12KB (currently 8KB). Apply the pattern to the Operational section first (largest). Filed during v0.32.3.0 CEO review.
+- [ ] **v0.33.x: Dogfood `functional-area-resolver` on modusbrain's own `skills/RESOLVER.md`** when it crosses ~12KB (currently 8KB). Apply the pattern to the Operational section first (largest). Filed during v0.32.3.0 CEO review.
 
-- [ ] **v0.33.x: Promote `evals/functional-area-resolver/harness.mjs` to a first-class CLI command** `gbrain routing-eval --ab-compare <variant-dir>`. Removes the one-off harness as maintenance debt; gives every pattern-skill a way to ship its eval. Replaces the placeholder `--llm` flag in `src/core/routing-eval.ts:17-20`. Filed during v0.32.3.0 CEO review.
+- [ ] **v0.33.x: Promote `evals/functional-area-resolver/harness.mjs` to a first-class CLI command** `modusbrain routing-eval --ab-compare <variant-dir>`. Removes the one-off harness as maintenance debt; gives every pattern-skill a way to ship its eval. Replaces the placeholder `--llm` flag in `src/core/routing-eval.ts:17-20`. Filed during v0.32.3.0 CEO review.
 
 - [ ] **v0.33.x: Expand held-out corpus to >=20 fixtures.** The current n=5 saturates at 100% across most cells and can't distinguish "100%" from "95% with one nondeterministic miss." Author independently (don't see variants while authoring). Filed during v0.32.3.0 boil-the-ocean push after codex outside-voice review.
 
-- [ ] **v0.33.x: Cross-vendor model verification.** Run the harness on Gemini 2.5 Pro and GPT-4o/5 in addition to the three Anthropic models we already covered. Compression gains may not transfer across vendor families (the `(dispatcher for: ...)` clause is interpreted differently by different prompt-tuned models). Wire through the existing gbrain gateway (recipes already exist for both vendors).
+- [ ] **v0.33.x: Cross-vendor model verification.** Run the harness on Gemini 2.5 Pro and GPT-4o/5 in addition to the three Anthropic models we already covered. Compression gains may not transfer across vendor families (the `(dispatcher for: ...)` clause is interpreted differently by different prompt-tuned models). Wire through the existing modusbrain gateway (recipes already exist for both vendors).
 
 - [ ] **v0.33.x: Per-row description length sweep.** Anthropic's Agent Skills median is ~80 tokens of frontmatter per skill ([Anthropic engineering blog](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills)). Sweep functional-areas at {20, 40, 80, 160} tokens per dispatcher row, eval each. Novel published contribution — no public data exists. ~$5 in API spend. Filed during v0.32.3.0 web research.
 
@@ -2593,13 +2593,13 @@ contributor traps.
   proposed adding Copilot's Metis embedding endpoint as a sidecar recipe.
   Codex review caught that this is not a recipe-add — it's an outbound OAuth
   product surface (login flow, browser/device flow, refresh, UX). Needs its
-  own design pass: where does the token live? `~/.gbrain/oauth/copilot.json`
-  mode 0600 was the v0.32 plan; revisit + write `gbrain auth login copilot`.
+  own design pass: where does the token live? `~/.modusbrain/oauth/copilot.json`
+  mode 0600 was the v0.32 plan; revisit + write `modusbrain auth login copilot`.
 
 - [ ] **v0.32.x: OpenAI Codex OAuth chat provider (#698 originally).** perlantir
   proposed a chat-only provider that reuses ChatGPT subscription auth instead
   of API keys. Same OAuth-product-surface argument as #691. Same shared
-  infra: `~/.gbrain/oauth/<provider>.json` + `gbrain auth login <provider>`.
+  infra: `~/.modusbrain/oauth/<provider>.json` + `modusbrain auth login <provider>`.
   Build alongside #691 in one OAuth-subsystem wave.
 
 - [x] **v0.32.7: CJK PGLite keyword fallback (#765 extracted).** Landed
@@ -2613,7 +2613,7 @@ contributor traps.
   deployments still hit empty results for CJK queries because
   `to_tsvector('english', ...)` can't segment Chinese / Japanese / Korean.
   Installing pgroonga or zhparser is an operator decision (extension
-  install permission, multi-tenant rollout), so gbrain can't default it.
+  install permission, multi-tenant rollout), so modusbrain can't default it.
   Plan: doctor advisory pointing at the relevant extension docs;
   searchKeyword / searchKeywordChunks fall through to PGLite-style ILIKE
   when the extension isn't installed. Defer until users complain.
@@ -2654,12 +2654,12 @@ contributor traps.
 - [ ] **v0.33+: embedding pricing refresh mechanism.** v0.32.7 added
   `src/core/embedding-pricing.ts` as a static lookup table sibling to
   `anthropic-pricing.ts`. Both drift when providers change rates. Plan:
-  a `gbrain prices refresh` skill that diffs against a published canonical
+  a `modusbrain prices refresh` skill that diffs against a published canonical
   source (OpenAI pricing page, Anthropic pricing page) and proposes an
   update PR. Or a release-cadence audit checklist item. Today: when the
   estimate looks off, hand-edit the constants.
 
-- [x] ~~**v0.32.x: interactive provider chooser in `gbrain init`.**~~
+- [x] ~~**v0.32.x: interactive provider chooser in `modusbrain init`.**~~
   **SUPERSEDED by v0.37 — closed by the env-detection + hybrid picker wave.**
   `src/commands/init-provider-picker.ts` mirrors this design: filters to
   env-ready recipes, prompts via readline through `readLineSafe`, surfaces
@@ -2674,20 +2674,20 @@ contributor traps.
 
 - [ ] **v0.37+: dedicated migration script for v0.36 broken installs.** v0.37
   ships D5 + step 11 of the env-detection wave, which surfaces v0.36 silent-
-  default brains in `gbrain doctor` with a paste-ready repair command. What's
+  default brains in `modusbrain doctor` with a paste-ready repair command. What's
   not yet built: a one-shot orchestrator under `src/commands/migrations/v0_37_x.ts`
   that detects the broken state (vector(1536) schema + empty
-  `config.embedding_model` + 0 embedded chunks) on `gbrain upgrade` and runs
+  `config.embedding_model` + 0 embedded chunks) on `modusbrain upgrade` and runs
   the repair automatically. Same shape as `src/commands/migrations/v0_12_2.ts`.
   Telemetry-gated: only worth writing if issues show widespread breakage.
 
-- [ ] **v0.37+: namespaced extension fields for `gbrain config set`.** v0.37
+- [ ] **v0.37+: namespaced extension fields for `modusbrain config set`.** v0.37
   D6 ships strict unknown-key rejection with a `--force` escape hatch +
   Levenshtein "did you mean" suggestion. Codex finding #8 from the eng review
-  argued for a `gbrain.ext.<key>` namespace pattern instead of `--force`
+  argued for a `modusbrain.ext.<key>` namespace pattern instead of `--force`
   accepting arbitrary top-level keys; deferred for follow-up. Revisit if
   `--force` shows misuse in practice (e.g. tooling writing dozens of unknown
-  keys, polluting `gbrain config show`).
+  keys, polluting `modusbrain config show`).
 
 - [ ] **v0.37+: runtime config-key inventory audit.** Codex finding #12 from
   the eng review: the `KNOWN_CONFIG_KEYS` allow-list in `src/core/config.ts`
@@ -2696,19 +2696,19 @@ contributor traps.
   when new code paths read a key the maintainer forgot to declare. Pre-merge
   manual grep (`grep -rE "config\.\w+" src/`) is sufficient today.
 
-- [ ] **v0.38+: env-key typo detection at `gbrain config set` time too.**
+- [ ] **v0.38+: env-key typo detection at `modusbrain config set` time too.**
   v0.37 D13 ships Levenshtein typo detection at init for env vars
   (`OPENAPI_API_KEY` → `OPENAI_API_KEY`). The same logic isn't applied at
-  `gbrain config set` for value-level provider strings (e.g.
-  `gbrain config set embedding_model openai:text-embedign-3-large` —
+  `modusbrain config set` for value-level provider strings (e.g.
+  `modusbrain config set embedding_model openai:text-embedign-3-large` —
   notice the typo'd model name). Cheap to add: parse the value as
   `provider:model`, suggest the nearest from the recipe's `models[]` list.
 
 - [ ] **v0.38+: extend init env-detection to multimodal explicitly via picker.**
   v0.37 T11 hooks `resolveSchemaMultimodalDim` preflight into
-  `gbrain reindex --multimodal`. The picker doesn't yet have a 'multimodal'
+  `modusbrain reindex --multimodal`. The picker doesn't yet have a 'multimodal'
   touchpoint mode — multimodal model selection happens via
-  `gbrain config set embedding_multimodal_model` or env detection of
+  `modusbrain config set embedding_multimodal_model` or env detection of
   multimodal-capable providers. Future polish: extend the picker with a
   fourth touchpoint case so first-time users discover the option at init.
 
@@ -2734,11 +2734,11 @@ contributor traps.
 
 ## v0.31.2 follow-ups
 
-### Investigate: `gbrain query <common-keyword>` infinite loop
+### Investigate: `modusbrain query <common-keyword>` infinite loop
 **Priority:** P1
 **Filed:** 2026-05-08 from v0.31.2 bug report (separate from the sync hang).
 
-**Evidence:** Two `bun /Users/garrytan/.bun/bin/gbrain query the` processes
+**Evidence:** Two `bun /Users/garrytan/.bun/bin/modusbrain query the` processes
 (PIDs 39429, 46624) on the user's Mac were pegged at 99% CPU for 7
 straight days before being killed manually. Each used 6+ GB resident
 memory. Originated from the `algiers-v3` worktree. Not walker-related
@@ -2757,7 +2757,7 @@ it.
   WASM allocation)
 
 **To reproduce:** create a brain with at least a few thousand pages, run
-`gbrain query the` and watch CPU + RSS. If it pegs and grows, capture
+`modusbrain query the` and watch CPU + RSS. If it pegs and grows, capture
 `process.report.getReport()` and a stack trace via `kill -SIGUSR2 <pid>`
 before killing.
 
@@ -2780,14 +2780,14 @@ PR is in flight.
 
 ## Thin-client mode follow-ups (v0.31.1, Issue #734)
 
-- [ ] **v0.31.x: routed-call timing telemetry.** `GBRAIN_TIMING=1` prints
+- [ ] **v0.31.x: routed-call timing telemetry.** `MODUSBRAIN_TIMING=1` prints
   `token_mint=Xms http=Yms server=Zms total=Wms` per routed MCP call.
-  Audit log at `~/.gbrain/audit/routed-calls-YYYY-Www.jsonl`. Cherry-pick
+  Audit log at `~/.modusbrain/audit/routed-calls-YYYY-Www.jsonl`. Cherry-pick
   C from #734 plan; deferred from v0.31.1 to keep scope tight.
 
-- [ ] **v0.31.2: job-submission routing for `gbrain dream` etc.** Route
+- [ ] **v0.31.2: job-submission routing for `modusbrain dream` etc.** Route
   long-running ops (`dream`, `embed --stale`, `extract`) via `submit_job`
-  + poll, mirroring the existing `gbrain remote ping` autopilot-cycle
+  + poll, mirroring the existing `modusbrain remote ping` autopilot-cycle
   pattern. Cherry-pick D from #734 plan. Adds a thin-client async-job
   render layer (progress events + spinner).
 
@@ -2808,15 +2808,15 @@ PR is in flight.
   Subagent-isolation reasons; blocks full thin-client parity. Policy
   decision, not a routing fix.
 
-- [ ] **v0.32.0: flip `gbrain auth register-client` default scope from
+- [ ] **v0.32.0: flip `modusbrain auth register-client` default scope from
   `read` to `read,write,admin`.** Breaking for existing read-only scrapers;
   ship deprecation warning in v0.31.x. The v0.31.1 `oauth_client_scopes_probe`
   doctor check surfaces the gap with pinpoint remediation in the meantime.
 
 - [ ] **v0.31.x: cross-process OAuth token cache at
-  `~/.gbrain/oauth-token-cache.json`.** Cuts ~200ms cold-start cost for
+  `~/.modusbrain/oauth-token-cache.json`.** Cuts ~200ms cold-start cost for
   shell-loop usage on thin-client installs. Today the in-memory cache is
-  per-process; every `gbrain` invocation pays a fresh token mint.
+  per-process; every `modusbrain` invocation pays a fresh token mint.
 
 - [ ] **v0.31.x: parity test (`test/thin-client-parity.test.ts`).** Plan
   called for ~400 LOC byte-equal stdout assertions for 12+ ops via an
@@ -2831,8 +2831,8 @@ PR is in flight.
 ### Closed: full 500-question 4-adapter run published
 
 The full 500-question, 4-adapter LongMemEval `_s` benchmark landed in
-[gbrain-evals#main:ced01f0](https://github.com/garrytan/gbrain-evals/blob/main/docs/benchmarks/2026-05-07-longmemeval-s.md).
-gbrain-hybrid: 97.60% R@5, beating MemPal raw 96.6% by 1.0pt on the same
+[modusbrain-evals#main:ced01f0](https://github.com/garrytan/gbrain-evals/blob/main/docs/benchmarks/2026-05-07-longmemeval-s.md).
+modusbrain-hybrid: 97.60% R@5, beating MemPal raw 96.6% by 1.0pt on the same
 dataset, K, and n with no LLM in the retrieval loop. Honest null result on
 query expansion (97.60% with vs without). Closing this entry; remaining
 follow-ups below.
@@ -2840,13 +2840,13 @@ follow-ups below.
 ### Timeline-aware retrieval signal for temporal-reasoning questions
 **Priority:** P2
 
-**What:** gbrain's `links` table + `gbrain extract timeline` already build a
+**What:** modusbrain's `links` table + `modusbrain extract timeline` already build a
 graph of dated events. Feed that signal into `searchKeyword` / `searchVector`
 ranking so questions like "what was the FIRST issue I had after my new
 car's first service?" get a temporal boost on session ordering.
 
 **Why:** LongMemEval temporal-reasoning is the only question type where MemPal-raw
-beats gbrain-hybrid (96.2% vs 94.7%, -1.5pt). Embeddings carry topic
+beats modusbrain-hybrid (96.2% vs 94.7%, -1.5pt). Embeddings carry topic
 similarity; "first" / "before" / "last week" need ordering signal that
 vector cosine doesn't surface. We have the data infrastructure to fix this
 (the timeline extraction code), just don't pipe it into search ranking.
@@ -2857,11 +2857,11 @@ temporal questions and most fail them. This is a structural advantage.
 
 **Cons:** Requires a new SQL ranking factor in `src/core/search/sql-ranking.ts`
 and signal-extraction work in the query-time path (parsing temporal hints
-from the question). Maybe ~200 lines + a benchmark line on the gbrain-evals
+from the question). Maybe ~200 lines + a benchmark line on the modusbrain-evals
 report once it ships.
 
 **Context:** Per-type breakdown in
-`gbrain-evals/docs/benchmarks/2026-05-07-longmemeval-s.md` shows we tie
+`modusbrain-evals/docs/benchmarks/2026-05-07-longmemeval-s.md` shows we tie
 or beat MemPal-raw on 5 of 6 types and lose temporal by 1.5pt. Also:
 `src/core/link-extraction.ts` already extracts dated timeline entries via
 `parseTimelineEntries`. They land in `timeline_entries` table but aren't
@@ -2884,12 +2884,12 @@ cold path would let CI run the benchmark daily without a fixture.
 ~10x. Faster iteration when tuning ranking parameters.
 
 **Cons:** ~80 lines of batch-consolidation code that lives in the runner, not
-gbrain core. Touches `eval/runner/longmemeval.ts:run()` per-question loop.
+modusbrain core. Touches `eval/runner/longmemeval.ts:run()` per-question loop.
 Less generalizable than the timeline-aware ranker work.
 
 **Context:** Right now the warm-cache mitigates this in practice (subsequent
 runs are sub-1-min). The optimization matters only when re-running with a
-different gbrain version that re-keys the cache.
+different modusbrain version that re-keys the cache.
 
 **Depends on:** Nothing blocking.
 
@@ -2899,10 +2899,10 @@ different gbrain version that re-keys the cache.
 **What:** Run the existing 4-adapter benchmark against the harder `_m` split
 where each haystack has ~200 distractor sessions instead of ~50.
 
-**Why:** Pushes retrieval into the regime where gbrain's pipeline either
+**Why:** Pushes retrieval into the regime where modusbrain's pipeline either
 holds up or doesn't. MemPal hasn't published `_m` numbers; we'd have a
 clean head-to-head once we run it. Also stresses the noise-rejection
-(source-boost / hard-exclude) layer of gbrain harder than `_s` does.
+(source-boost / hard-exclude) layer of modusbrain harder than `_s` does.
 
 **Pros:** Differentiated benchmark line. Forces signal-vs-noise behavior we
 can't measure on `_s`. Free with our existing runner.
@@ -2924,7 +2924,7 @@ and publish the recall-cost tradeoff curve.
 **Why:** "What's the cheapest embedding model that still wins this
 benchmark?" is a real builder question. We'd publish the answer.
 
-**Pros:** Useful tradeoff line for users picking gbrain in a cost-sensitive
+**Pros:** Useful tradeoff line for users picking modusbrain in a cost-sensitive
 deployment. Validates the v0.27 pluggable-provider work end-to-end.
 
 **Cons:** Multiple full-benchmark runs ($30+ in API spend) to chart the
@@ -2934,7 +2934,7 @@ curve.
 verify Voyage adapter integration in `src/core/ai/recipes/voyage.ts`).
 ## multimodal embedding follow-ups (v0.28.11 / PR #719)
 
-### `gbrain doctor`: warn on misconfigured multimodal model
+### `modusbrain doctor`: warn on misconfigured multimodal model
 **Priority:** P2
 
 **What:** Add two checks in `src/commands/doctor.ts`. (1) When `embedding_multimodal_model` is set, verify the recipe's required API key is present in the env. (2) When `embedding_multimodal: true` is set but no `embedding_multimodal_model` AND the primary `embedding_model` recipe doesn't declare `supports_multimodal`, surface that gap.
@@ -2958,12 +2958,12 @@ verify Voyage adapter integration in `src/core/ai/recipes/voyage.ts`).
 **Context:** Pre-existing in v0.27.1; surfaced because PR #719's new key makes the misclass more reachable. v0.28.x candidate.
 **Depends on:** None.
 
-### `gbrain config unset <key>` subcommand (Codex F6 from PR #719 review)
+### `modusbrain config unset <key>` subcommand (Codex F6 from PR #719 review)
 **Priority:** P3
 
 **What:** Add `unset` action alongside `show|get|set` in `src/commands/config.ts`. Calls `engine.setConfig(key, '')` (loadConfigWithEngine treats empty string as undefined) so a user who set a key by mistake can clear it. Empty-string write is the minimum-diff implementation; a real DELETE would be cleaner if the engine grows one.
 
-**Why:** Once a user runs `gbrain config set X val`, there's no normal CLI path to clear it. Empty string is rejected by the current `set` validator (`action === 'set' && key && value` where value is truthy). PR #719 added another DB-merge key (`embedding_multimodal_model`) and surfaces this UX gap.
+**Why:** Once a user runs `modusbrain config set X val`, there's no normal CLI path to clear it. Empty string is rejected by the current `set` validator (`action === 'set' && key && value` where value is truthy). PR #719 added another DB-merge key (`embedding_multimodal_model`) and surfaces this UX gap.
 
 **Pros:** Closes a pre-existing UX hole that applies to every DB-merge key (`embedding_multimodal`, `embedding_image_ocr*`, now `embedding_multimodal_model`). Trivial implementation, ~15 lines.
 **Cons:** Need to decide whether `unset` is a real DELETE (cleaner) or empty-string write (simpler).
@@ -2975,7 +2975,7 @@ verify Voyage adapter integration in `src/core/ai/recipes/voyage.ts`).
 ### `--budget-usd` hard cap + per-call cost telemetry (T11=B follow-up)
 **Priority:** P2
 
-**What:** `gbrain eval cross-modal` ships in v0.27.x with a partial cost guardrail: default `--cycles 1` in non-TTY plus a stderr cost-estimate printed before each run. The full `--budget-usd N` hard cap (refuse to start the next cycle if estimated spend would exceed) and per-call actual-cost telemetry written into the receipt are intentionally deferred.
+**What:** `modusbrain eval cross-modal` ships in v0.27.x with a partial cost guardrail: default `--cycles 1` in non-TTY plus a stderr cost-estimate printed before each run. The full `--budget-usd N` hard cap (refuse to start the next cycle if estimated spend would exceed) and per-call actual-cost telemetry written into the receipt are intentionally deferred.
 
 **Why:** Codex pushback on the original P2=B "defer everything" decision was right — even with `>=2/3` success required for a verdict (Q3=A), 3 cycles × 3 calls = 9 frontier calls per run, repeated across N skills if anyone scripts a bulk audit. The TTY/non-TTY cycle default catches the worst case; the hard cap catches the next class of mistakes.
 
@@ -2987,9 +2987,9 @@ verify Voyage adapter integration in `src/core/ai/recipes/voyage.ts`).
 ### Subagent integration (recovers cross-process rate-leases — T4 deferred)
 **Priority:** P2
 
-**What:** Wire `gbrain eval cross-modal` to be invokable as a `gbrain agent run` child job. Today the CLI runs synchronously and bypasses `src/core/minions/rate-leases.ts` because the lease helper requires a `minion_jobs.id` that the CLI path doesn't have (T4=A in plans/radiant-napping-lerdorf.md).
+**What:** Wire `modusbrain eval cross-modal` to be invokable as a `modusbrain agent run` child job. Today the CLI runs synchronously and bypasses `src/core/minions/rate-leases.ts` because the lease helper requires a `minion_jobs.id` that the CLI path doesn't have (T4=A in plans/radiant-napping-lerdorf.md).
 
-**Why:** Cross-process concurrency cap. A user running `gbrain eval cross-modal` in one terminal alongside `gbrain agent run` in another can hit Anthropic 429s due to combined load. As a minion job, the eval gets the rate-lease behavior for free, plus stagger / quiet-hours / retry surface from the existing Minions queue.
+**Why:** Cross-process concurrency cap. A user running `modusbrain eval cross-modal` in one terminal alongside `modusbrain agent run` in another can hit Anthropic 429s due to combined load. As a minion job, the eval gets the rate-lease behavior for free, plus stagger / quiet-hours / retry surface from the existing Minions queue.
 
 **Pros:** No new helper API; reuses what's already there. Closes the cross-process gap that today's `Promise.allSettled` design intentionally leaves open.
 **Cons:** Requires a job handler registration + receipt-path threading through job context. Probably ~150 lines plus tests. Behavior parity (verdict / receipt shape) needs to be pinned with a parametrized test.
@@ -3003,9 +3003,9 @@ verify Voyage adapter integration in `src/core/ai/recipes/voyage.ts`).
 
 **Why:** T7=C ships the gate as informational so existing audits don't regress. The forcing function is documentation alone. We don't yet know if that's enough.
 
-**Pros:** Data-driven decision instead of guessing. Lightweight: count receipt files in `gbrainPath('eval-receipts')` against the count of skills under `skills/*/SKILL.md`.
+**Pros:** Data-driven decision instead of guessing. Lightweight: count receipt files in `modusbrainPath('eval-receipts')` against the count of skills under `skills/*/SKILL.md`.
 **Cons:** "Adoption stalled" is a judgment call without a baseline. Could become a debate.
-**Context:** New check in `gbrain doctor` would surface the count. v0.28.x candidate.
+**Context:** New check in `modusbrain doctor` would surface the count. v0.28.x candidate.
 **Depends on:** None.
 
 ### `docs/cross-modal-eval.md` user guide
@@ -3046,7 +3046,7 @@ verify Voyage adapter integration in `src/core/ai/recipes/voyage.ts`).
 **Context:** PR #637 (v0.28.1) adversarial review. Pair with the AbortController follow-up above.
 ## Remote-source MCP follow-ups (v0.28.2)
 
-### Token rotation: `gbrain auth rotate <name>` + `rotate_token` MCP op
+### Token rotation: `modusbrain auth rotate <name>` + `rotate_token` MCP op
 **Priority:** P2
 
 **What:** Atomic rotate for legacy + OAuth tokens. Issue a new token in the same TX as the revocation of the old, no overlap window. Refresh-token rotation already exists for OAuth; this is the unified user-facing surface (CLI + MCP).
@@ -3055,19 +3055,19 @@ verify Voyage adapter integration in `src/core/ai/recipes/voyage.ts`).
 
 **Pros:** Single command does the right thing. Atomic cutover. Operators stop scripting around the gap.
 **Cons:** Needs careful testing of the legacy `access_tokens` UPDATE path (returns single-use new token before the row mutates) plus an MCP op that grants a new token bound to the original client_id without requiring a new authorize round trip.
-**Context:** Item 4 from the gstack /setup-gbrain v1.28.1.0 enhancement request. v0.28.x candidate.
+**Context:** Item 4 from the gstack /setup-modusbrain v1.28.1.0 enhancement request. v0.28.x candidate.
 **Depends on:** Nothing.
 
 ### Migration introspection in `get_health`
 **Priority:** P3
 
-**What:** Extend `BrainEngine.getHealth()` return shape with `migrations: { pending: [...], wedged: [...] }`. `gbrain doctor` already shows this; expose it via the MCP op so remote agents can detect partial-migration state without invoking `doctor` separately.
+**What:** Extend `BrainEngine.getHealth()` return shape with `migrations: { pending: [...], wedged: [...] }`. `modusbrain doctor` already shows this; expose it via the MCP op so remote agents can detect partial-migration state without invoking `doctor` separately.
 
-**Why:** Closes a remote-diagnostic gap. gstack /setup-gbrain Path 4 hit a wedged-migration brain mid-session; the only readback was SSH + `gbrain doctor`. With this, the same diagnostic flows through MCP.
+**Why:** Closes a remote-diagnostic gap. gstack /setup-modusbrain Path 4 hit a wedged-migration brain mid-session; the only readback was SSH + `modusbrain doctor`. With this, the same diagnostic flows through MCP.
 
 **Pros:** Pure additive change to the `get_health` op shape. No new op surface. Consumers ignore the new field if they don't care.
-**Cons:** Wedged detection logic lives in `gbrain doctor`'s code today; need to extract or duplicate. Care needed not to leak migration internals to non-admin scopes (current op is admin-only — fine).
-**Context:** Item 5 from the gstack /setup-gbrain v1.28.1.0 enhancement request.
+**Cons:** Wedged detection logic lives in `modusbrain doctor`'s code today; need to extract or duplicate. Care needed not to leak migration internals to non-admin scopes (current op is admin-only — fine).
+**Context:** Item 5 from the gstack /setup-modusbrain v1.28.1.0 enhancement request.
 **Depends on:** Nothing.
 
 ### Accept-header friendliness on `/mcp`
@@ -3079,10 +3079,10 @@ verify Voyage adapter integration in `src/core/ai/recipes/voyage.ts`).
 
 **Pros:** Operator UX improvement. Faster debugging when clients fail discovery.
 **Cons:** Tight coupling to the SDK behavior — if it later loosens, the pre-check becomes redundant.
-**Context:** Item 6 from the gstack /setup-gbrain v1.28.1.0 enhancement request.
+**Context:** Item 6 from the gstack /setup-modusbrain v1.28.1.0 enhancement request.
 **Depends on:** Nothing.
 
-### `gbrain sources rebase-clone <id>`
+### `modusbrain sources rebase-clone <id>`
 **Priority:** P3
 
 **What:** Recover from `url-drift` (config.remote_url updated but the on-disk clone still points at the old origin). Currently `sync` refuses with a structured error pointing at this command — but the command itself doesn't exist yet. Implement: prompt for confirmation (rm-rf the clone is destructive), then re-clone via the same temp-dir + rename atomicity contract as `sources add --url`.
@@ -3097,7 +3097,7 @@ verify Voyage adapter integration in `src/core/ai/recipes/voyage.ts`).
 ### `--filter=blob:none` partial-clone option for federated sources
 **Priority:** P3
 
-**What:** v0.28.2 defaults `gbrain sources add --url` to `--depth=1` (no history). For users who want commit-aware features later (page-state-at-commit-X, blame, who-edited-what), expose `--filter=blob:none` as an opt-in: keeps full graph metadata, lazy-fetches blobs.
+**What:** v0.28.2 defaults `modusbrain sources add --url` to `--depth=1` (no history). For users who want commit-aware features later (page-state-at-commit-X, blame, who-edited-what), expose `--filter=blob:none` as an opt-in: keeps full graph metadata, lazy-fetches blobs.
 
 **Why:** `--depth=1` is a one-way door — once cloned, you can't reconstruct history without re-cloning the whole repo. Partial clones preserve history while staying small.
 
@@ -3135,7 +3135,7 @@ verify Voyage adapter integration in `src/core/ai/recipes/voyage.ts`).
 ### F11 — `auth register-client --redirect-uri` flag
 **Priority:** P3
 
-**What:** `gbrain auth register-client` always passes `[]` for redirect URIs; there is no CLI flag to set them. Operators who want to register an `authorization_code` client without DCR have to hand-edit the database.
+**What:** `modusbrain auth register-client` always passes `[]` for redirect URIs; there is no CLI flag to set them. Operators who want to register an `authorization_code` client without DCR have to hand-edit the database.
 
 **Why:** Operator UX gap, not a trust-boundary issue. Codex C11 correctly flagged it as scope creep on the v0.26.7 hardening pass — kept out of that PR but worth doing.
 
@@ -3144,7 +3144,7 @@ verify Voyage adapter integration in `src/core/ai/recipes/voyage.ts`).
 **Context:** Eva-brain has the implementation under `src/commands/auth.ts:registerClient`. Lift verbatim — the `localhost`/`127.0.0.1`/`::1` exact-match validation is correct; codex spot-check confirmed it does NOT match `localhost.evil.com`. v0.27 candidate.
 **Depends on:** Nothing.
 
-### F13 — `gbrain serve --http` argv positive-int validator
+### F13 — `modusbrain serve --http` argv positive-int validator
 **Priority:** P3
 
 **What:** `parseInt(args[idx + 1])` on `--port` and `--token-ttl` accepts the next flag as the value if the argument is missing (e.g., `--port --token-ttl 100` parses port as NaN → fallback 3131). Negative integers like `--port -1` parse to -1, server fails to bind with a confusing error.
@@ -3170,10 +3170,10 @@ verify Voyage adapter integration in `src/core/ai/recipes/voyage.ts`).
 **Context:** Plan calls this out explicitly in v0.26.5 CEO review (`~/.claude/plans/take-a-look-and-gentle-pine.md` Adjacent 2). Targets: `src/core/storage.ts` for the object-storage interface, `src/core/destructive-guard.ts` `purgeExpiredSources` for the call site, plus a new sweep in the cycle's purge phase. v0.26.6 candidate.
 **Depends on:** Schema is fine (already has `files.storage_uri`). Just needs the storage delete plumbing.
 
-### Adjacent 3 — sources remove + sources purge race against gbrain sync
+### Adjacent 3 — sources remove + sources purge race against modusbrain sync
 **Priority:** P3
 
-**What:** `gbrain sources remove <id>` and the new `gbrain sources purge <id>` paths don't acquire `SYNC_LOCK_ID` (the `gbrain-sync` writer lock from PR #490). If `gbrain sync` is mid-import for the same source, the parent row can DELETE while sync is INSERTing children, surfacing as a loud FK violation.
+**What:** `modusbrain sources remove <id>` and the new `modusbrain sources purge <id>` paths don't acquire `SYNC_LOCK_ID` (the `modusbrain-sync` writer lock from PR #490). If `modusbrain sync` is mid-import for the same source, the parent row can DELETE while sync is INSERTing children, surfacing as a loud FK violation.
 
 **Why:** Failure mode is loud (FK violation, not data corruption), and the race window is narrow. Worth closing while the destructive surface is touched, not before.
 
@@ -3185,11 +3185,11 @@ verify Voyage adapter integration in `src/core/ai/recipes/voyage.ts`).
 ### Auth revoke-client gets the destructive-guard pattern
 **Priority:** P3
 
-**What:** `gbrain auth revoke-client <client_id>` (v0.26.2) lands without an impact preview or `--confirm-destructive` gate. CASCADE-purges every active token + auth code in one transaction; one stray client_id wipes a production integration.
+**What:** `modusbrain auth revoke-client <client_id>` (v0.26.2) lands without an impact preview or `--confirm-destructive` gate. CASCADE-purges every active token + auth code in one transaction; one stray client_id wipes a production integration.
 
 **Why:** Lower urgency than sources/pages because operators run this explicitly with a known client_id, not reflexively. But if the v0.26.5 posture is "every destructive surface gets the same gate," this surface should adopt it.
 
-**Pros:** Posture consistency — every destructive verb in the gbrain CLI follows one pattern. Operators get the impact preview before nuking a production OAuth client.
+**Pros:** Posture consistency — every destructive verb in the modusbrain CLI follows one pattern. Operators get the impact preview before nuking a production OAuth client.
 **Cons:** Marginal — single-row delete with cascade. The CASCADE is the blast radius, not the verb itself.
 **Context:** Plan flags this in CEO review. Targets: `src/commands/auth.ts` `runRevokeClient` (current shape: atomic DELETE...RETURNING with CASCADE on `oauth_tokens` + `oauth_codes`). Add an impact preview that counts `oauth_tokens` and `oauth_codes` for the client, then gate behind `--confirm-destructive`.
 **Depends on:** Nothing.
@@ -3248,13 +3248,13 @@ After the sweep, both should be fixable and renameable back to plain `*.test.ts`
 ### Speed up E2E via Postgres template databases
 **Priority:** P1
 
-**What:** E2E tests (`bun run test:e2e`) currently run sequentially in one shared Postgres container, each test file calling `initSchema()` from scratch (~5-20s each on cold init). Speed-up: build the schema ONCE into a template DB (`gbrain_template`), then have each test file `CREATE DATABASE foo TEMPLATE gbrain_template` (~50ms per clone). With per-shard `DATABASE_URL` overrides, E2E can fan out to N parallel shards too.
+**What:** E2E tests (`bun run test:e2e`) currently run sequentially in one shared Postgres container, each test file calling `initSchema()` from scratch (~5-20s each on cold init). Speed-up: build the schema ONCE into a template DB (`modusbrain_template`), then have each test file `CREATE DATABASE foo TEMPLATE modusbrain_template` (~50ms per clone). With per-shard `DATABASE_URL` overrides, E2E can fan out to N parallel shards too.
 
 **Why:** Current E2E wallclock is ~5-10 min in CI. Template DB clones could bring that to ~1-2 min. Critical for the inner loop on E2E-bearing PRs (currently a real friction point per `/ship` workflow).
 
 **Sketch:**
-1. Build template DB once via `initSchema()` against `gbrain_template`.
-2. Per-test-file: `CREATE DATABASE gbrain_test_clone_<n> TEMPLATE gbrain_template` (50ms vs 5-20s).
+1. Build template DB once via `initSchema()` against `modusbrain_template`.
+2. Per-test-file: `CREATE DATABASE modusbrain_test_clone_<n> TEMPLATE modusbrain_template` (50ms vs 5-20s).
 3. Per-shard isolation via `DATABASE_URL` env override.
 4. Schema-version stamp on the template so it invalidates when `migrate.ts` changes.
 5. Cleanup via `DROP DATABASE` in afterAll.
@@ -3274,7 +3274,7 @@ After the sweep, both should be fixable and renameable back to plain `*.test.ts`
 - `test/e2e/sync.test.ts` `--skip-failed` structured summary loop (v0.22.12 #500).
 - `test/e2e/dream.test.ts` (no --dry-run syncs pages) — runCycle DB write path.
 - `test/e2e/cycle.test.ts` (live cycle + chunks + lock cleanup).
-- `test/e2e/doctor.test.ts` (gbrain doctor exits 0 on healthy DB) — possibly related to v0.26.2 schema changes since CHANGELOG mentions extension of doctor checks.
+- `test/e2e/doctor.test.ts` (modusbrain doctor exits 0 on healthy DB) — possibly related to v0.26.2 schema changes since CHANGELOG mentions extension of doctor checks.
 - `test/brain-registry.test.ts` (empty/null/undefined id routes to host) — unrelated to OAuth surface.
 - `test/e2e/claw-test.test.ts` (fresh-install scripted scenario) — needs investigation; took 3.9s and reported "produces zero error/blocker friction" failure.
 
@@ -3384,7 +3384,7 @@ After the sweep, both should be fixable and renameable back to plain `*.test.ts`
 
 **What:** Add a Hermes implementation of the `AgentRunner` interface. v1 ships only OpenClaw; v1.1 lands hermes once we have real friction reports from openclaw to validate the contract against.
 
-**Why:** Cross-agent diff (`gbrain friction diff --base openclaw --compare hermes`) is the highest-leverage next signal. Friction unique to one agent vs common-to-both separates "agent contract bug" from "gbrain bug" automatically.
+**Why:** Cross-agent diff (`modusbrain friction diff --base openclaw --compare hermes`) is the highest-leverage next signal. Friction unique to one agent vs common-to-both separates "agent contract bug" from "modusbrain bug" automatically.
 
 **Effort:** S (CC ~30m). Depends on: v1 openclaw runner producing real friction reports first.
 
@@ -3393,10 +3393,10 @@ After the sweep, both should be fixable and renameable back to plain `*.test.ts`
 ### Friction analytics suite — `diff` / `trend` / `migration-stub`
 **Priority:** P2
 
-**What:** Three new `gbrain friction` subcommands deferred from v1:
-- `gbrain friction diff --base <run-or-agent> --compare <run-or-agent>` (cross-agent comparison; ~80 LOC)
-- `gbrain friction trend [--since <version-or-date>] [--phase <name>]` (time-series across runs; ~60 LOC)
-- `gbrain friction migration-stub [--threshold N]` (clusters friction by phase + tokens, emits `skills/migrations/v[N+1].md` stub; ~150 LOC)
+**What:** Three new `modusbrain friction` subcommands deferred from v1:
+- `modusbrain friction diff --base <run-or-agent> --compare <run-or-agent>` (cross-agent comparison; ~80 LOC)
+- `modusbrain friction trend [--since <version-or-date>] [--phase <name>]` (time-series across runs; ~60 LOC)
+- `modusbrain friction migration-stub [--threshold N]` (clusters friction by phase + tokens, emits `skills/migrations/v[N+1].md` stub; ~150 LOC)
 
 **Why:** Turns point-in-time reports into a slope. Pairs with the v1.1 public scoreboard.
 
@@ -3408,7 +3408,7 @@ After the sweep, both should be fixable and renameable back to plain `*.test.ts`
 **Priority:** P2
 
 **What:** Two more scenarios under `test/fixtures/claw-test-scenarios/`:
-- `supabase-migration` — `gbrain init --pglite` then `gbrain migrate --to supabase`; verifies the cross-engine migration path
+- `supabase-migration` — `modusbrain init --pglite` then `modusbrain migrate --to supabase`; verifies the cross-engine migration path
 - `supervisor-restart` — kill worker mid-job; verify supervisor recovers without data loss
 
 **Why:** These are the other highest-historical-pain regression points (per CLAUDE.md fix-wave history). v1 ships only `fresh-install` + `upgrade-from-v0.18` because Codex flagged that mixing them dilutes the fresh-install signal; v1.1 lands them as separate scenarios.
@@ -3424,14 +3424,14 @@ After the sweep, both should be fixable and renameable back to plain `*.test.ts`
 
 **Why:** Without a real seed, the scenario doesn't actually exercise the migration chain forward-walk. That's the whole point of the upgrade scenario — proves issue #239/#243/#266/#357 class regressions stay fixed.
 
-**Effort:** S (CC ~30m once a v0.18 checkout is handy). Depends on: ability to run a v0.18 gbrain build.
+**Effort:** S (CC ~30m once a v0.18 checkout is handy). Depends on: ability to run a v0.18 modusbrain build.
 
 ---
 
-### Public scoreboard — `gbrain-evals.io/friction`
+### Public scoreboard — `modusbrain-evals.io/friction`
 **Priority:** P3
 
-**What:** Sibling-repo PR in `garrytan/gbrain-evals` that renders friction JSONL into a public dashboard. Friction count per version per agent, line charts over time. v1's JSONL already includes `gbrain_version` + `agent` tags so the scoreboard is a thin layer on top.
+**What:** Sibling-repo PR in `garrytan/modusbrain-evals` that renders friction JSONL into a public dashboard. Friction count per version per agent, line charts over time. v1's JSONL already includes `modusbrain_version` + `agent` tags so the scoreboard is a thin layer on top.
 
 **Why:** Marketing surface. Proves install quality is improving release-over-release. The friction loop becomes visible to the world, not just maintainers.
 
@@ -3450,10 +3450,10 @@ After the sweep, both should be fixable and renameable back to plain `*.test.ts`
 
 ---
 
-### Read-side host-isolation (`$GBRAIN_HOST_HOME`)
+### Read-side host-isolation (`$MODUSBRAIN_HOST_HOME`)
 **Priority:** P3
 
-**What:** v0.22.16 confined every `~/.gbrain` write site to honor `$GBRAIN_HOME`. But `src/commands/init.ts:299-313` still reads real `~/.claude` / `~/.openclaw` / `~/.codex` / `~/.factory` / `~/.kiro` for module fingerprinting (host detection). Even with write-isolation, a claw-test running on a developer's box discovers their real installed mods. v1.1: add a separate `$GBRAIN_HOST_HOME` override for the read-side detection so the claw-test can run truly hermetic.
+**What:** v0.22.16 confined every `~/.modusbrain` write site to honor `$MODUSBRAIN_HOME`. But `src/commands/init.ts:299-313` still reads real `~/.claude` / `~/.openclaw` / `~/.codex` / `~/.factory` / `~/.kiro` for module fingerprinting (host detection). Even with write-isolation, a claw-test running on a developer's box discovers their real installed mods. v1.1: add a separate `$MODUSBRAIN_HOST_HOME` override for the read-side detection so the claw-test can run truly hermetic.
 
 **Why:** v1's hermeticity contract is "writes are isolated, reads are not." v1.1 closes the read-side gap.
 
@@ -3466,7 +3466,7 @@ After the sweep, both should be fixable and renameable back to plain `*.test.ts`
 
 **What:** `skills/_friction-protocol.md` is a cross-cutting convention. v1.1: sweep the 4–6 skills the claw-test actually exercises (setup, brain-ops, query, ingest, smoke-test, the migrations the test covers) and add a `> **Convention:** see [skills/_friction-protocol.md](_friction-protocol.md).` callout via the existing `src/core/dry-fix.ts` shape so DRY auto-fix doesn't fight it.
 
-**Why:** Right now agents only call `gbrain friction log` if they find the protocol skill on their own. The callouts route them there proactively from any harness-exercised skill.
+**Why:** Right now agents only call `modusbrain friction log` if they find the protocol skill on their own. The callouts route them there proactively from any harness-exercised skill.
 
 **Effort:** S (CC ~15m).
 
@@ -3484,7 +3484,7 @@ real-time) and between slugs in the per-slug loop.
 
 **Why:** Embed phase ignores `signal.aborted` between batches today. Job
 wall-clock timeout fires → handler keeps running → cycle's finally block
-unreachable → `gbrain_cycle_locks` row stays held indefinitely. Every
+unreachable → `modusbrain_cycle_locks` row stays held indefinitely. Every
 subsequent autopilot cron cycle sees `cycle_already_running` → skips. Lock
 TTL is 30 min; new cycles give up before that. Doctor reports UNHEALTHY.
 
@@ -3518,7 +3518,7 @@ duplicative.
 1. embedBatch checks signal between OpenAI calls; aborts within one batch (~2s)
 2. Per-slug loop in `embed.ts` checks signal between slugs
 3. End-to-end: cycle handler with embed phase + signal aborted mid-flight →
-   finally runs → `gbrain_cycle_locks` row deleted
+   finally runs → `modusbrain_cycle_locks` row deleted
 4. Regression: 1K+ chunks scenario — embed does NOT block lock release when
    timeout fires
 
@@ -3681,22 +3681,22 @@ call sites — and it's the correct architectural endpoint.
 ### For contributors
 
 `acknowledgeSyncFailures()` now returns `{count, summary}` instead of `number`.
-If you import this directly from `gbrain/sync`, replace `n` with `result.count`
+If you import this directly from `modusbrain/sync`, replace `n` with `result.count`
 and use `result.summary` for the new code-grouped breakdown.
 ```
 
 **Why:** The function is exported from `src/core/sync.ts:433` and reachable via
-the package exports map. External TS consumers (gbrain-evals, host agent forks)
+the package exports map. External TS consumers (modusbrain-evals, host agent forks)
 that imported it got `number` and now get an object — silent type break.
 
 **Effort:** XS (human: ~1 min). Just don't forget.
 
 **Depends on / blocked by:** PR #501 ship.
 
-### Concurrent-safe ack of `~/.gbrain/sync-failures.jsonl`
+### Concurrent-safe ack of `~/.modusbrain/sync-failures.jsonl`
 **Priority:** P3
 
-**What:** Two concurrent `gbrain sync` runs hitting `acknowledgeSyncFailures()`
+**What:** Two concurrent `modusbrain sync` runs hitting `acknowledgeSyncFailures()`
 can clobber each other. The function does a whole-file `writeFileSync` rewrite
 (`src/core/sync.ts:433-455`); `recordSyncFailures()` does independent
 `appendFileSync` (`src/core/sync.ts:395-416`). Concurrent ack + append can lose rows.
@@ -3823,7 +3823,7 @@ keeping both skills' triggers intact for chaining.
 
 **Depends on / blocked by:** Nothing. Layer 1b + Layer 6 both in place.
 
-### C6 — gbrain code-signature "(A, B) => C"
+### C6 — modusbrain code-signature "(A, B) => C"
 **Priority:** P3 (stretch)
 
 **What:** Type-signature retrieval via tree-sitter type captures per language. "Find every function whose signature returns a Promise<User>" or "(string, number) => boolean".
@@ -3875,7 +3875,7 @@ handlers + context build got their own explicit wallclock bound (180s default,
 **Completed:** v0.19.0 (2026-04-22)
 
 Both checks shipped as real implementations, not just filed issues:
-- **Check 5 (trigger routing eval):** `src/core/routing-eval.ts` + `gbrain routing-eval` CLI. Structural layer runs in `check-resolvable` by default; `--llm` opts into LLM tie-break. Fixtures live at `skills/<name>/routing-eval.jsonl`.
+- **Check 5 (trigger routing eval):** `src/core/routing-eval.ts` + `modusbrain routing-eval` CLI. Structural layer runs in `check-resolvable` by default; `--llm` opts into LLM tie-break. Fixtures live at `skills/<name>/routing-eval.jsonl`.
 - **Check 6 (brain filing):** `src/core/filing-audit.ts` + `skills/_brain-filing-rules.json`. New `writes_pages:` + `writes_to:` frontmatter. Warning-only in v0.19, error in v0.20.
 
 `DEFERRED[]` in `src/commands/check-resolvable.ts` is now empty — v0.19 shipped both deferred checks as working code paths, not as issue URLs. The export stays in place for future deferred checks.
@@ -3897,8 +3897,8 @@ structured-evidence Haiku judge contract, PublicPage/PublicQuery sealed qrels,
 6-artifact flight-recorder, 6 portable JSON schemas for v1→v2 driver swap.
 
 Scope pivot: originally planned for in-tree v1.1 delta; mid-PR pivoted to extract
-the entire eval harness so gbrain users don't download the ~5MB corpus at install
-time. BrainBench is now a public sibling benchmark; gbrain ships clean.
+the entire eval harness so modusbrain users don't download the ~5MB corpus at install
+time. BrainBench is now a public sibling benchmark; modusbrain ships clean.
 
 ### ~~v0.10.5: inferLinkType residuals (works_at, advises)~~
 **Completed:** v0.20.0 (2026-04-23)
@@ -3938,8 +3938,8 @@ company refs only). Per-type after fix: invested_in 91.7% (was 0%),
 mentions 100%, attended 100%. works_at 58% and advises 41% are next
 iteration's residuals.
 
-### v0.10.4: gbrain alias resolution feature (driven by Cat 3)
-**What:** Add an alias table to gbrain so "Sarah Chen" / "S. Chen" / "@schen" / "sarah.chen@example.com" resolve to one canonical entity. Schema: `aliases (id, slug, alias_text)` with a unique index. Search blends alias matches into hybrid scoring.
+### v0.10.4: modusbrain alias resolution feature (driven by Cat 3)
+**What:** Add an alias table to modusbrain so "Sarah Chen" / "S. Chen" / "@schen" / "sarah.chen@example.com" resolve to one canonical entity. Schema: `aliases (id, slug, alias_text)` with a unique index. Search blends alias matches into hybrid scoring.
 
 **Why:** BrainBench Cat 3 measured 31% recall on undocumented aliases — that's the v0.10.x baseline. With alias table, should jump to 80%+.
 
@@ -3951,7 +3951,7 @@ iteration's residuals.
 
 **What:** `minion_schedules` table + autopilot-cycle scanner that submits due shell jobs.
 
-**Why:** v0.13.0 moves shell scripts to Minions but still leaves scheduling in the host crontab. Your OpenClaw's `scripts/service-manager.sh` + crontab is the only piece left on the host side. A DB-driven scheduler would mean a single `gbrain autopilot --install` replaces the host crontab entirely, scheduling is visible via `gbrain jobs list --scheduled`, and downtime-on-one-machine tolerance improves (schedule is shared DB state, not per-host crontab).
+**Why:** v0.13.0 moves shell scripts to Minions but still leaves scheduling in the host crontab. Your OpenClaw's `scripts/service-manager.sh` + crontab is the only piece left on the host side. A DB-driven scheduler would mean a single `modusbrain autopilot --install` replaces the host crontab entirely, scheduling is visible via `modusbrain jobs list --scheduled`, and downtime-on-one-machine tolerance improves (schedule is shared DB state, not per-host crontab).
 
 **Pros:** Canonical host-agnostic deployment. No more host-specific crontab.
 
@@ -3959,9 +3959,9 @@ iteration's residuals.
 
 **Depends on:** v0.13.0 shell jobs shipped. ✅
 
-### `gbrain crontab-to-minions <file>` migration helper (deferred from v0.13.0)
+### `modusbrain crontab-to-minions <file>` migration helper (deferred from v0.13.0)
 
-**What:** Parse an existing crontab file, emit a proposed rewrite using `gbrain jobs submit shell ...` for each deterministic entry, keep LLM-requiring entries as-is.
+**What:** Parse an existing crontab file, emit a proposed rewrite using `modusbrain jobs submit shell ...` for each deterministic entry, keep LLM-requiring entries as-is.
 
 **Why:** Hand-rewriting ~14 OpenClaw cron entries is error-prone and one-shot. A helper would make the migration reversible and auditable (diff the before/after crontab, dry-run the first N, commit).
 
@@ -4019,7 +4019,7 @@ iteration's residuals.
 ### Fix `bun build --compile` WASM embedding for PGLite
 **What:** Submit PR to oven-sh/bun fixing WASM file embedding in `bun build --compile` (issue oven-sh/bun#15032).
 
-**Why:** PGLite's WASM files (~3MB) can't be embedded in the compiled binary. Users who install via `bun install -g gbrain` are fine (WASM resolves from node_modules), but the compiled binary can't use PGLite. Jarred Sumner (Bun founder, YC W22) would likely be receptive.
+**Why:** PGLite's WASM files (~3MB) can't be embedded in the compiled binary. Users who install via `bun install -g modusbrain` are fine (WASM resolves from node_modules), but the compiled binary can't use PGLite. Jarred Sumner (Bun founder, YC W22) would likely be receptive.
 
 **Pros:** Single-binary distribution includes PGLite. No sidecar files needed.
 
@@ -4049,11 +4049,11 @@ iteration's residuals.
 
 **What:** Six targeted hardenings on the v0.25.0 eval-capture surface, all surfaced by the /ship adversarial review and triaged out of the v0.25.0 PR to keep scope tight:
 
-1. `gbrain eval prune --dry-run`: replace the `listEvalCandidates(limit:100k) + filter` count with a real `engine.countEvalCandidatesBefore(date)` method. Today the warning at `eval-prune.ts:107-109` honestly tells the user the count may be undercounted, but a brain with > 100k rows + old data could still confuse a careful operator. New `BrainEngine` method on both engines, ~30 LOC, lifts the floor count to a true count.
+1. `modusbrain eval prune --dry-run`: replace the `listEvalCandidates(limit:100k) + filter` count with a real `engine.countEvalCandidatesBefore(date)` method. Today the warning at `eval-prune.ts:107-109` honestly tells the user the count may be undercounted, but a brain with > 100k rows + old data could still confuse a careful operator. New `BrainEngine` method on both engines, ~30 LOC, lifts the floor count to a true count.
 2. PII scrubber CC false-positive rate: 16-digit Luhn-valid order IDs / invoice numbers get redacted as `[REDACTED]`. Either require a contextual prefix (`card`, `cc`, `credit`) within N chars, or document the tradeoff explicitly in `docs/eval-capture.md`. The two approaches differ in coverage so list them as alternatives.
 3. `eval_capture_failures.reason` enum: `'scrubber_exception'` is dead telemetry — no realistic path emits it (the scrubber is regex-only and never throws). Either remove the value from the schema CHECK + enum, OR wrap `scrubPii` in a try-catch inside `buildEvalCandidateInput` so the value is actually reachable.
 4. `id DESC` tiebreaker docs: CLAUDE.md says "stable id-desc tiebreaker so `--since` windows never dupe/miss rows". This is true within a single call but doesn't prevent dupe/miss across overlapping windows when LIMIT < total. Either add a real `id`-cursor (`WHERE id < $cursor`) for export, or scope the doc claim to "within a single export call".
-5. Public-exports canaries: 6 of 17 subpaths (`gbrain` root, `/minions`, `/engine-factory`, `/transcription`, `/backoff`, `/extract`) have `canary: []` — the test only checks the import resolves, so a barrel module accidentally losing its named exports would still pass. Pin one stable canary symbol per subpath.
+5. Public-exports canaries: 6 of 17 subpaths (`modusbrain` root, `/minions`, `/engine-factory`, `/transcription`, `/backoff`, `/extract`) have `canary: []` — the test only checks the import resolves, so a barrel module accidentally losing its named exports would still pass. Pin one stable canary symbol per subpath.
 6. `EXPECTED_COUNT` duplication: `scripts/check-exports-count.sh` and `test/public-exports.test.ts` both hardcode `17`. Drift risk. Make one read the other (or both compute from `package.json`).
 
 **Why:** All 6 are real (some informational, some footgun-class) but each is small and surgical. Bundling into one v0.25.1 follow-up PR keeps the v0.25.0 ship clean and lets the fixes land with their own dedicated tests + CHANGELOG entry.
@@ -4101,7 +4101,7 @@ iteration's residuals.
 ### Minions repeat/cron scheduler
 **What:** BullMQ-style repeatable jobs. `queue.add(name, data, { repeat: { cron: '0 * * * *' } })`.
 
-**Why:** Idempotency keys (shipped in v0.11.0) are the foundation. Consumers currently use launchd/cron to fire `gbrain jobs submit`, but a native scheduler inside the worker would be cleaner and portable across deployments.
+**Why:** Idempotency keys (shipped in v0.11.0) are the foundation. Consumers currently use launchd/cron to fire `modusbrain jobs submit`, but a native scheduler inside the worker would be cleaner and portable across deployments.
 
 **Pros:** One mental model for both immediate and scheduled work. Idempotency prevents double-fire.
 
@@ -4131,7 +4131,7 @@ iteration's residuals.
 
 ### Orchestrator + runner double-write to migrations ledger (deferred from v0.18.2 codex review)
 
-**What:** `src/commands/migrations/v0_18_0.ts:200-208` appends an entry to `~/.gbrain/migrations/completed.jsonl` while `src/commands/apply-migrations.ts:374-386` also appends one for the same orchestrator run. The dedupe guard in `src/core/preferences.ts:120-131` only suppresses duplicate `complete` entries, not `partial` entries. Result: distorted wedge counting (3-consecutive-partials-triggers-wedge logic sees 6 partials when it should see 3).
+**What:** `src/commands/migrations/v0_18_0.ts:200-208` appends an entry to `~/.modusbrain/migrations/completed.jsonl` while `src/commands/apply-migrations.ts:374-386` also appends one for the same orchestrator run. The dedupe guard in `src/core/preferences.ts:120-131` only suppresses duplicate `complete` entries, not `partial` entries. Result: distorted wedge counting (3-consecutive-partials-triggers-wedge logic sees 6 partials when it should see 3).
 
 **Why:** Codex plan-review caught this during PR #356 while verifying the two-migration-systems resume boundary. Not blocking v0.18.2 shipping because it only affects the wedge detection threshold, not correctness of the migration itself.
 
@@ -4154,11 +4154,11 @@ iteration's residuals.
 
 **Depends on:** v0.18.2 shipped. ✅
 
-### Minions: `gbrain jobs stats --orphaned` (deferred from v0.13.0)
+### Minions: `modusbrain jobs stats --orphaned` (deferred from v0.13.0)
 
 **What:** New CLI flag / output column surfacing jobs that are waiting with no registered handler on any live worker.
 
-**Why:** v0.13.0 adds shell jobs that require `GBRAIN_ALLOW_SHELL_JOBS=1` on the worker. If an operator submits a shell job but no worker with the flag is running, the row sits in `waiting` silently. The CLI's starvation warning + docs help at submit time; this TODO surfaces the problem at operational-check time.
+**Why:** v0.13.0 adds shell jobs that require `MODUSBRAIN_ALLOW_SHELL_JOBS=1` on the worker. If an operator submits a shell job but no worker with the flag is running, the row sits in `waiting` silently. The CLI's starvation warning + docs help at submit time; this TODO surfaces the problem at operational-check time.
 
 **Pros:** Closes the "did my cron actually run" ambiguity for multi-machine deployments.
 
@@ -4219,10 +4219,10 @@ iteration's residuals.
 
 **Depends on:** Security wave 3 shipped. None are blockers for Runtime MCP access control, but all three security workstreams (this, that P0, and the health-check DSL) converge on the same zero-trust MCP goal.
 
-### Community recipe submission (`gbrain integrations submit`)
-**What:** Package a user's custom integration recipe as a PR to the GBrain repo. Validates frontmatter, checks constrained DSL health_checks, creates PR with template.
+### Community recipe submission (`modusbrain integrations submit`)
+**What:** Package a user's custom integration recipe as a PR to the ModusBrain repo. Validates frontmatter, checks constrained DSL health_checks, creates PR with template.
 
-**Why:** Turns GBrain from a single-author integration set into a community ecosystem. The recipe format IS the contribution format.
+**Why:** Turns ModusBrain from a single-author integration set into a community ecosystem. The recipe format IS the contribution format.
 
 **Pros:** Community-driven integration library. Users build Slack-to-brain, RSS-to-brain, Discord-to-brain.
 
@@ -4245,23 +4245,23 @@ iteration's residuals.
 
 **Depends on:** v0.7.0 recipe format (shipped).
 
-### `gbrain serve --http` + Fly.io/Railway deployment
-**What:** Add `gbrain serve --http` as a thin HTTP wrapper around the stdio MCP server. Include a Dockerfile/fly.toml for cloud deployment.
+### `modusbrain serve --http` + Fly.io/Railway deployment
+**What:** Add `modusbrain serve --http` as a thin HTTP wrapper around the stdio MCP server. Include a Dockerfile/fly.toml for cloud deployment.
 
-**Why:** The Edge Function deployment was removed in v0.8.0. Remote MCP now requires a custom HTTP wrapper around `gbrain serve`. A built-in `--http` flag would make this zero-effort. Bun runs natively, no bundling seam, no 60s timeout, no cold start.
+**Why:** The Edge Function deployment was removed in v0.8.0. Remote MCP now requires a custom HTTP wrapper around `modusbrain serve`. A built-in `--http` flag would make this zero-effort. Bun runs natively, no bundling seam, no 60s timeout, no cold start.
 
-**Pros:** Simpler remote MCP setup. Users run `gbrain serve --http` behind ngrok instead of building a custom server. Supports all 30 operations remotely (including sync_brain and file_upload).
+**Pros:** Simpler remote MCP setup. Users run `modusbrain serve --http` behind ngrok instead of building a custom server. Supports all 30 operations remotely (including sync_brain and file_upload).
 
 **Cons:** Users need ngrok ($8/mo) or a cloud host (Fly.io $5/mo, Railway $5/mo). Not zero-infra.
 
-**Context:** Production deployments use a custom Hono server wrapping `gbrain serve`. This TODO would formalize that pattern into the CLI. ChatGPT OAuth 2.1 support depends on this.
+**Context:** Production deployments use a custom Hono server wrapping `modusbrain serve`. This TODO would formalize that pattern into the CLI. ChatGPT OAuth 2.1 support depends on this.
 
 **Depends on:** v0.8.0 (Edge Function removal shipped).
 
 ## P2 (knowledge graph follow-ups)
 
 ### Auto-link skipped writes generate redundant SQL
-**What:** When `gbrain put` is called with identical content (status=skipped), runAutoLink still does a full getLinks + per-candidate addLink loop. On N identical writes of a 50-entity page that's 50N round trips.
+**What:** When `modusbrain put` is called with identical content (status=skipped), runAutoLink still does a full getLinks + per-candidate addLink loop. On N identical writes of a 50-entity page that's 50N round trips.
 
 **Why:** Defensive reconciliation catches drift between page text and links table, but on truly idempotent writes it's wasted work.
 
@@ -4276,7 +4276,7 @@ iteration's residuals.
 **Depends on:** Nothing.
 
 ### Audit `extract --source db` against auto_link config flag
-**What:** `gbrain extract links --source db` writes to the same `links` table that `auto_link=false` is supposed to opt out of. The two are conceptually distinct (extract is intentional batch op, auto_link is implicit on write), but a user who turned off auto_link expecting "no automatic link writes" might be surprised.
+**What:** `modusbrain extract links --source db` writes to the same `links` table that `auto_link=false` is supposed to opt out of. The two are conceptually distinct (extract is intentional batch op, auto_link is implicit on write), but a user who turned off auto_link expecting "no automatic link writes" might be surprised.
 
 **Why:** Either the behavior should match (extract checks auto_link too) or the docs should explicitly state extract is a superset.
 
@@ -4314,7 +4314,7 @@ iteration's residuals.
 ## Completed
 
 ### ChatGPT MCP support (OAuth 2.1)
-**Completed:** v0.26.0 (2026-04-25) — `gbrain serve --http` ships full OAuth 2.1 via MCP SDK's `mcpAuthRouter` + `OAuthServerProvider`. Authorization code flow with PKCE unblocks ChatGPT. Client credentials flow unblocks Perplexity/Claude. Dynamic Client Registration available behind `--enable-dcr` flag (off by default). See `docs/mcp/CHATGPT.md` for connector setup. Closed the P0 that had been blocking the "every AI client" promise since v0.6.
+**Completed:** v0.26.0 (2026-04-25) — `modusbrain serve --http` ships full OAuth 2.1 via MCP SDK's `mcpAuthRouter` + `OAuthServerProvider`. Authorization code flow with PKCE unblocks ChatGPT. Client credentials flow unblocks Perplexity/Claude. Dynamic Client Registration available behind `--enable-dcr` flag (off by default). See `docs/mcp/CHATGPT.md` for connector setup. Closed the P0 that had been blocking the "every AI client" promise since v0.6.
 
 ### Implement AWS Signature V4 for S3 storage backend
 **Completed:** v0.6.0 (2026-04-10) — replaced with @aws-sdk/client-s3 for proper SigV4 signing.
@@ -4353,7 +4353,7 @@ iteration's residuals.
 ### `err.code`-based connection-error matching in `postgres-engine.ts` (B1 follow-up from v0.22.1)
 **What:** The CONNECTION_ERROR_PATTERNS array (~12 strings: `ECONNREFUSED`, `connection terminated`, `password authentication failed`, etc.) matched against `err.message` and `err.code`. Replace with structured matching against `err.code` only, using postgres.js's typed error classes (`PostgresError` with structured codes).
 
-**Why:** String matching against error messages breaks on library upgrades (postgres.js could change its error message phrasing without bumping major). Code matching is durable. The Layer 1 cleanup follows: gbrain itself doesn't define connection-error codes; it should defer to postgres.js's classification.
+**Why:** String matching against error messages breaks on library upgrades (postgres.js could change its error message phrasing without bumping major). Code matching is durable. The Layer 1 cleanup follows: modusbrain itself doesn't define connection-error codes; it should defer to postgres.js's classification.
 
 **Pros:** More durable across library updates. Less code (drop the 12-string array). Follows the typed-errors pattern v0.21.0 introduced (`src/core/errors.ts`).
 
@@ -4427,7 +4427,7 @@ ParamDef shape; XL if a Zod migration is the chosen direction).
 migrate to typed schemas.
 
 ### Streaming MCP tool support (re-add SSE based on Accept header)
-**What:** v0.22.7 dropped SSE entirely from `gbrain serve --http` because no
+**What:** v0.22.7 dropped SSE entirely from `modusbrain serve --http` because no
 current MCP tool streams. When the first streaming tool ships (long-running
 agent delegation as an MCP tool, `resources/subscribe`, `sampling/createMessage`),
 re-add SSE in `/mcp` based on the `Accept` header per the Streamable HTTP
@@ -4444,7 +4444,7 @@ code lean in the meantime.
 ### `access_tokens.scopes` enforcement
 **What:** The `access_tokens` schema has had a `scopes TEXT[]` column since
 migration v4 (`src/core/migrate.ts:84`), but nothing enforces it. v0.22.7's
-`gbrain auth create` doesn't accept a `--scopes` flag, and `dispatchToolCall`
+`modusbrain auth create` doesn't accept a `--scopes` flag, and `dispatchToolCall`
 doesn't gate on scopes. Adding per-tool scope enforcement would let
 "claude-desktop-readonly" and "ingest-only" tokens exist.
 
@@ -4454,23 +4454,23 @@ doesn't gate on scopes. Adding per-tool scope enforcement would let
 
 ---
 
-### `@garrytan/gbrain` scoped-name npm publishing
-**What:** Publish gbrain to npm under the scoped name `@garrytan/gbrain`
-instead of the bare `gbrain` name. Provides structural defense against the
-unrelated `gbrain@1.x` squatter package on npm.
+### `@garrytan/modusbrain` scoped-name npm publishing
+**What:** Publish modusbrain to npm under the scoped name `@garrytan/modusbrain`
+instead of the bare `modusbrain` name. Provides structural defense against the
+unrelated `modusbrain@1.x` squatter package on npm.
 
 **Why:** `classifyBunInstall()` at `src/commands/upgrade.ts:395` does a
 best-effort fingerprint check on `repository.url` + `src/cli.ts` marker, with
 the comment explicitly accepting that signals are spoofable by a determined
 squatter. Scoped publishing is the structural answer that closes the loop:
-`bun add -g @garrytan/gbrain` cannot collide with any non-`@garrytan` package.
+`bun add -g @garrytan/modusbrain` cannot collide with any non-`@garrytan` package.
 
 **Pros:** closes the squatter vector; consistent with how high-trust npm
 packages are published; allows removing `classifyBunInstall`'s spoofable
 signals later.
 
 **Cons:** multi-week effort; needs reverse-compatible upgrade path for users
-on the bare-name install (`bun add -g gbrain` → recovery message pointing
+on the bare-name install (`bun add -g modusbrain` → recovery message pointing
 at the new scoped name); npm publishing flow changes; CI publish step needs
 scope-aware tagging.
 
@@ -4485,7 +4485,7 @@ flow + recovery messaging).
 during a transition window.
 
 
-## v0.32.6 follow-ups from PR #880 (gbrain-context post-Codex recalibration)
+## v0.32.6 follow-ups from PR #880 (modusbrain-context post-Codex recalibration)
 
 These items were demoted from the PR #880 scope because they depend on
 infrastructure (clock-injection seam, public-API design) that's not in this PR.
@@ -4533,7 +4533,7 @@ fields or rename of `**Location:**` to `**Where:**` is caught.
 creates premature public-API obligations around types, lazy SDK loading, `.ts`
 imports, and engine-version semantics. Plugin loading via
 `openclaw.extensions` doesn't need it. Revisit when external consumers
-(gbrain-evals harness, etc) actually need direct engine import.
+(modusbrain-evals harness, etc) actually need direct engine import.
 
 ### `.ts`-extension import resolution coupling (A3)
 

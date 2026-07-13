@@ -1,16 +1,16 @@
 /**
- * `gbrain agent` CLI: the user-facing entry point for the v0.15 subagent
+ * `modusbrain agent` CLI: the user-facing entry point for the v0.15 subagent
  * runtime.
  *
- *   gbrain agent run <prompt> [flags]
- *   gbrain agent logs <job_id> [--follow] [--since <spec>]
+ *   modusbrain agent run <prompt> [flags]
+ *   modusbrain agent logs <job_id> [--follow] [--since <spec>]
  *
  * `run` submits a subagent job (or fan-out of N subagents + aggregator)
  * under the trusted-submit flag so the PROTECTED_JOB_NAMES guard doesn't
  * reject. It does NOT execute the loop here — the handler runs in a
- * `gbrain jobs work` process. `--follow` tails status until terminal;
+ * `modusbrain jobs work` process. `--follow` tails status until terminal;
  * without `--follow` (or with `--detach`) the CLI prints the job id and
- * exits, leaving the user to check back with `gbrain agent logs`.
+ * exits, leaving the user to check back with `modusbrain agent logs`.
  */
 
 import * as fs from 'node:fs';
@@ -50,22 +50,22 @@ export async function runAgent(engine: BrainEngine, args: string[]): Promise<voi
       await runAgentLogsCmd(engine, args.slice(1));
       return;
     default:
-      console.error(`gbrain agent: unknown subcommand "${sub}"`);
+      console.error(`modusbrain agent: unknown subcommand "${sub}"`);
       printHelp();
       process.exit(2);
   }
 }
 
 function printHelp(): void {
-  console.log(`gbrain agent — durable LLM agent runs (v0.15)
+  console.log(`modusbrain agent — durable LLM agent runs (v0.15)
 
 USAGE
-  gbrain agent run <prompt> [flags]
-  gbrain agent logs <job_id> [--follow] [--since <spec>]
+  modusbrain agent run <prompt> [flags]
+  modusbrain agent logs <job_id> [--follow] [--since <spec>]
 
 SUBMITTING
-  gbrain agent run <prompt>
-    --subagent-def <name>        Named plugin subagent (from GBRAIN_PLUGIN_PATH)
+  modusbrain agent run <prompt>
+    --subagent-def <name>        Named plugin subagent (from MODUSBRAIN_PLUGIN_PATH)
     --model <id>                 Anthropic model id (defaults to sonnet)
     --max-turns <n>              Max assistant turns (default 20)
     --tools a,b,c                Subset of registered tool names (comma list)
@@ -76,13 +76,13 @@ SUBMITTING
 
   Flags before the prompt are parsed normally. The no-value switches
   --detach, --follow and --no-follow are ALSO recognized when they trail
-  the prompt, so \`gbrain agent run "do X" --detach\` detaches. Any other
+  the prompt, so \`modusbrain agent run "do X" --detach\` detaches. Any other
   --word is treated as prompt text (no error). Use \`--\` to end flag
   parsing and pass the rest verbatim:
-    gbrain agent run -- "literally --detach this, with --flags"
+    modusbrain agent run -- "literally --detach this, with --flags"
 
 VIEWING
-  gbrain agent logs <job_id>
+  modusbrain agent logs <job_id>
     --follow                     Keep polling until the job reaches terminal
     --since <spec>               ISO-8601 timestamp OR relative ("5m","1h","2d")
 
@@ -93,7 +93,7 @@ NOTES
 `);
 }
 
-// ── `gbrain agent run` ────────────────────────────────────
+// ── `modusbrain agent run` ────────────────────────────────────
 
 interface RunFlags {
   subagentDef?: string;
@@ -119,7 +119,7 @@ function applyBooleanFlag(flags: RunFlags, a: string): void {
 function requireFlagValue(args: string[], i: number, flag: string): string {
   const v = args[i];
   if (v === undefined || v.startsWith('--')) {
-    throw new Error(`gbrain agent run: ${flag} requires a value. Run \`gbrain agent run --help\`.`);
+    throw new Error(`modusbrain agent run: ${flag} requires a value. Run \`modusbrain agent run --help\`.`);
   }
   return v;
 }
@@ -127,7 +127,7 @@ function requireFlagValue(args: string[], i: number, flag: string): string {
 function parseIntFlagValue(v: string, flag: string): number {
   const n = parseInt(v, 10);
   if (Number.isNaN(n)) {
-    throw new Error(`gbrain agent run: ${flag} expects a number, got "${v}".`);
+    throw new Error(`modusbrain agent run: ${flag} expects a number, got "${v}".`);
   }
   return n;
 }
@@ -204,7 +204,7 @@ export async function runAgentRun(engine: BrainEngine, args: string[]): Promise<
 
   const prompt = rest.join(' ').trim();
   if (!prompt) {
-    console.error('gbrain agent run: prompt is required');
+    console.error('modusbrain agent run: prompt is required');
     process.exit(2);
   }
 
@@ -243,12 +243,12 @@ async function runFanout(engine: BrainEngine, queue: MinionQueue, flags: RunFlag
     manifest = parsed as typeof manifest;
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    console.error(`gbrain agent run: invalid --fanout-manifest ${manifestPath}: ${msg}`);
+    console.error(`modusbrain agent run: invalid --fanout-manifest ${manifestPath}: ${msg}`);
     process.exit(2);
   }
 
   if (manifest.length === 0) {
-    console.error('gbrain agent run: --fanout-manifest is empty; nothing to run');
+    console.error('modusbrain agent run: --fanout-manifest is empty; nothing to run');
     process.exit(2);
   }
 
@@ -329,7 +329,7 @@ async function runFanout(engine: BrainEngine, queue: MinionQueue, flags: RunFlag
 // ── follow ────────────────────────────────────────────────
 
 async function followJob(engine: BrainEngine, queue: MinionQueue, jobId: number, timeoutMs?: number): Promise<void> {
-  process.stderr.write(`[gbrain agent] following job ${jobId} (Ctrl-C to detach)...\n`);
+  process.stderr.write(`[modusbrain agent] following job ${jobId} (Ctrl-C to detach)...\n`);
   const ac = new AbortController();
   const onSigint = () => ac.abort();
   process.once('SIGINT', onSigint);
@@ -345,12 +345,12 @@ async function followJob(engine: BrainEngine, queue: MinionQueue, jobId: number,
       });
       ac.abort();
       await logsP.catch(() => {});
-      process.stderr.write(`[gbrain agent] job ${jobId} terminal: ${job.status}\n`);
+      process.stderr.write(`[modusbrain agent] job ${jobId} terminal: ${job.status}\n`);
       if (job.result != null) process.stdout.write(JSON.stringify(job.result, null, 2) + '\n');
       if (job.status !== 'completed') process.exit(1);
     } catch (e) {
       if (e instanceof TimeoutError) {
-        process.stderr.write(`[gbrain agent] timeout after ${e.elapsedMs}ms — job is still running. Check with: gbrain jobs get ${jobId}\n`);
+        process.stderr.write(`[modusbrain agent] timeout after ${e.elapsedMs}ms — job is still running. Check with: modusbrain jobs get ${jobId}\n`);
         process.exit(3);
       }
       throw e;
@@ -360,17 +360,17 @@ async function followJob(engine: BrainEngine, queue: MinionQueue, jobId: number,
   }
 }
 
-// ── `gbrain agent logs` ────────────────────────────────────
+// ── `modusbrain agent logs` ────────────────────────────────────
 
 async function runAgentLogsCmd(engine: BrainEngine, args: string[]): Promise<void> {
   const jobIdStr = args.find(a => !isKnownFlag(a));
   if (!jobIdStr) {
-    console.error('gbrain agent logs: <job_id> is required');
+    console.error('modusbrain agent logs: <job_id> is required');
     process.exit(2);
   }
   const jobId = parseInt(jobIdStr, 10);
   if (!Number.isFinite(jobId) || jobId <= 0) {
-    console.error(`gbrain agent logs: "${jobIdStr}" is not a valid job id`);
+    console.error(`modusbrain agent logs: "${jobIdStr}" is not a valid job id`);
     process.exit(2);
   }
   const follow = hasFlag(args, '--follow');

@@ -1,7 +1,7 @@
 /**
- * `gbrain skillopt <skill> [flags]` CLI dispatcher.
+ * `modusbrain skillopt <skill> [flags]` CLI dispatcher.
  *
- * Top-level command (not under `gbrain eval`) because it MUTATES files.
+ * Top-level command (not under `modusbrain eval`) because it MUTATES files.
  * See: src/core/skillopt/ for the implementation modules.
  */
 
@@ -62,7 +62,7 @@ export async function runSkillOptCommand(engine: BrainEngine | null, args: strin
   try {
     parsed = parseFlags(args);
   } catch (err) {
-    process.stderr.write(`gbrain skillopt: ${err instanceof Error ? err.message : String(err)}\n\n`);
+    process.stderr.write(`modusbrain skillopt: ${err instanceof Error ? err.message : String(err)}\n\n`);
     process.stderr.write(SKILLOPT_HELP_TEXT);
     process.exit(2);
   }
@@ -73,7 +73,7 @@ export async function runSkillOptCommand(engine: BrainEngine | null, args: strin
   }
 
   if (!engine) {
-    process.stderr.write('gbrain skillopt: requires a configured brain (engine connection failed)\n');
+    process.stderr.write('modusbrain skillopt: requires a configured brain (engine connection failed)\n');
     process.exit(2);
   }
 
@@ -81,7 +81,7 @@ export async function runSkillOptCommand(engine: BrainEngine | null, args: strin
   const detected = autoDetectSkillsDirReadOnly(process.cwd());
   const skillsDir = parsed.skillsDir ?? detected.dir;
   if (!skillsDir) {
-    process.stderr.write(`gbrain skillopt: cannot find skills directory. Pass --skills-dir <path> or run from a workspace with a skills/ directory.\n`);
+    process.stderr.write(`modusbrain skillopt: cannot find skills directory. Pass --skills-dir <path> or run from a workspace with a skills/ directory.\n`);
     process.exit(2);
   }
 
@@ -225,7 +225,7 @@ export async function runSkillOptCommand(engine: BrainEngine | null, args: strin
   // skillopt is in PROTECTED_JOB_NAMES, so we can't use the generic
   // maybeBackground helper (which doesn't pass allowProtectedSubmit). Inline
   // a small submit that does. Behavior mirrors maybeBackground: writes
-  // `job_id=N` to stdout, exits 0; `--follow` execs `gbrain jobs follow`.
+  // `job_id=N` to stdout, exits 0; `--follow` execs `modusbrain jobs follow`.
   if (args.includes('--background')) {
     if (engine.kind === 'pglite') {
       process.stderr.write('[--background] PGLite has no worker daemon; running inline.\n');
@@ -508,7 +508,7 @@ function handleErrorAndExit(err: unknown, json: boolean, exitCode: number): neve
     const envelope = err instanceof StructuredAgentError ? err.envelope : serializeError(err);
     process.stderr.write(JSON.stringify({ ok: false, error: envelope }) + '\n');
   } else {
-    process.stderr.write(`gbrain skillopt: ${err instanceof Error ? err.message : String(err)}\n`);
+    process.stderr.write(`modusbrain skillopt: ${err instanceof Error ? err.message : String(err)}\n`);
     if (err instanceof StructuredAgentError && err.envelope.hint) {
       process.stderr.write(`  hint: ${err.envelope.hint}\n`);
     }

@@ -1,12 +1,12 @@
 /**
  * abort-check.ts — one canonical place for cooperative-abort checks (#1737).
  *
- * gbrain has several long-running loops (embed --stale, embed --all, dream
+ * modusbrain has several long-running loops (embed --stale, embed --all, dream
  * cycle phases) that each grew their own `signal?.aborted` check. When a job
  * is killed by the Minions worker (wall-clock timeout, lock loss, SIGTERM) the
  * handler keeps running unless every loop cooperatively checks its signal — and
  * a missed loop is exactly the daily cycle-wedge in #1737: the embed phase ran
- * to completion ignoring the abort, so `gbrain_cycle_locks` stayed held and
+ * to completion ignoring the abort, so `modusbrain_cycle_locks` stayed held and
  * every later autopilot cycle skipped with `cycle_already_running`.
  *
  *   ┌── worker fires job.signal.abort() ──┐
@@ -17,7 +17,7 @@
  *                  │                              │
  *                  └─ throwIfAborted(signal) ─────┘  ← bail here, not 15 min later
  *                  ▼
- *   finally releases gbrain_cycle_locks → next cycle runs
+ *   finally releases modusbrain_cycle_locks → next cycle runs
  *
  * Two shapes, because the call sites want different control flow:
  *   - `isAborted(signal)`      — boolean; for loops that `break` cleanly and

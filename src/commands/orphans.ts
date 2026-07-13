@@ -1,15 +1,15 @@
 /**
- * gbrain orphans — Surface pages with no inbound wikilinks.
+ * modusbrain orphans — Surface pages with no inbound wikilinks.
  *
  * Deterministic: zero LLM calls. Queries the links table for pages with
  * no entries where to_page_id = pages.id. By default filters out
  * auto-generated pages and pseudo-pages where no inbound links is expected.
  *
  * Usage:
- *   gbrain orphans                  # list orphans grouped by domain
- *   gbrain orphans --json           # JSON output for agent consumption
- *   gbrain orphans --count          # just the number
- *   gbrain orphans --include-pseudo # include auto-generated/pseudo pages
+ *   modusbrain orphans                  # list orphans grouped by domain
+ *   modusbrain orphans --json           # JSON output for agent consumption
+ *   modusbrain orphans --count          # just the number
+ *   modusbrain orphans --include-pseudo # include auto-generated/pseudo pages
  */
 
 import type { BrainEngine } from '../core/engine.ts';
@@ -122,7 +122,7 @@ export async function queryOrphanPages(
  * `getOrphansData` for the doctor `orphan_ratio` check and any other
  * consumer that needs the same exclusion logic (AUTO_SUFFIX_PATTERNS,
  * PSEUDO_SLUGS, RAW_SEGMENT, DENY_PREFIXES, FIRST_SEGMENT_EXCLUSIONS).
- * Two consumers sharing one definition = doctor and `gbrain orphans`
+ * Two consumers sharing one definition = doctor and `modusbrain orphans`
  * cannot disagree on the orphan count.
  */
 export async function findOrphans(
@@ -208,7 +208,7 @@ export async function findOrphans(
 
 /**
  * v0.42.0.0 D1: canonical name for the pure data fn consumed by both
- * `gbrain orphans` CLI AND doctor's `orphan_ratio` check. Aliased to
+ * `modusbrain orphans` CLI AND doctor's `orphan_ratio` check. Aliased to
  * `findOrphans` so the existing CLI behavior + the test surface stay
  * byte-identical; new consumers should import `getOrphansData` to make
  * the data-only intent explicit at the call site.
@@ -261,7 +261,7 @@ export async function runOrphans(engine: BrainEngine, args: string[]) {
   // v0.41.29.0: explicit `--source <id>` scopes the orphan scan to one
   // source. Omitted → brain-wide (unchanged). Raw explicit-flag parse on
   // purpose — NOT resolveSourceWithTier, which would pick a default source
-  // when the flag is absent and silently scope a bare `gbrain orphans`.
+  // when the flag is absent and silently scope a bare `modusbrain orphans`.
   let sourceId: string | undefined;
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--source' && i + 1 < args.length) {
@@ -270,7 +270,7 @@ export async function runOrphans(engine: BrainEngine, args: string[]) {
   }
 
   if (args.includes('--help') || args.includes('-h')) {
-    console.log(`Usage: gbrain orphans [options]
+    console.log(`Usage: modusbrain orphans [options]
 
 Find pages with no inbound wikilinks.
 

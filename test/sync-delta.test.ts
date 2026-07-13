@@ -29,7 +29,7 @@ function commitAll(msg: string): string {
 }
 
 beforeEach(() => {
-  repo = mkdtempSync(join(tmpdir(), 'gbrain-delta-'));
+  repo = mkdtempSync(join(tmpdir(), 'modusbrain-delta-'));
   execSync('git init', { cwd: repo, stdio: 'pipe' });
   execSync('git config user.email "t@t.com"', { cwd: repo, stdio: 'pipe' });
   execSync('git config user.name "T"', { cwd: repo, stdio: 'pipe' });

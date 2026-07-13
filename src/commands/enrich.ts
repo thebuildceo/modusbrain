@@ -1,5 +1,5 @@
 /**
- * gbrain enrich — batch enrichment primitive (issue #1700).
+ * modusbrain enrich — batch enrichment primitive (issue #1700).
  *
  * 93.6% of people/company pages are stubs. There was no first-class way to
  * develop them at scale — you drove the agent-only `enrich` SKILL one page at a
@@ -15,7 +15,7 @@
  *   3. One grounded LLM call consolidates that context into a real, cited page.
  *      If the brain knows too little, SKIP rather than fabricate.
  *
- * Why brain-internal: gbrain's own LLM tooling can only see brain tools
+ * Why brain-internal: modusbrain's own LLM tooling can only see brain tools
  * (search/get_page/facts). External research (web/LinkedIn/Perplexity) is a
  * host-agent capability and stays the agent-driven `enrich` SKILL's job.
  *
@@ -356,7 +356,7 @@ async function enrichOneLocked(ctx: EnrichOneCtx, candidate: EnrichCandidate): P
   }
 
   // Write via the put_page op handler (trusted local: remote=false) so
-  // auto-link + disk write-through fire, exactly like `gbrain capture`. The
+  // auto-link + disk write-through fire, exactly like `modusbrain capture`. The
   // retrieved context was sanitized in buildEnrichPrompt; the synthesized body
   // is the model's grounded output.
   const tags = await engine.getTags(slug, { sourceId }).catch(() => [] as string[]);
@@ -374,7 +374,7 @@ async function enrichOneLocked(ctx: EnrichOneCtx, candidate: EnrichCandidate): P
   });
 
   const putPageOp = operations.find((o) => o.name === 'put_page');
-  if (!putPageOp) throw new Error('put_page operation missing (gbrain build issue)');
+  if (!putPageOp) throw new Error('put_page operation missing (modusbrain build issue)');
   const opCtx: OperationContext = {
     engine,
     config: ctx.config ?? { engine: 'pglite' as const },
@@ -659,7 +659,7 @@ export function parseArgs(args: string[]): ParsedArgs {
   return out;
 }
 
-const HELP = `Usage: gbrain enrich [options]
+const HELP = `Usage: modusbrain enrich [options]
 
 Develop thin (stub) pages into real, cited pages by consolidating what the
 brain ALREADY knows about each entity — scattered mentions, inbound-link
@@ -792,7 +792,7 @@ export async function runEnrich(engine: BrainEngine, args: string[]): Promise<vo
         ids.push(job.id);
       }
       console.log(`Submitted ${ids.length} enrich job(s) (one per source): ${ids.map((i) => `job_id=${i}`).join(' ')}`);
-      console.log('Follow with: gbrain jobs follow <id>');
+      console.log('Follow with: modusbrain jobs follow <id>');
       return;
     }
   } else if (args.includes('--background')) {
@@ -809,7 +809,7 @@ export async function runEnrich(engine: BrainEngine, args: string[]): Promise<vo
 
   // Chat gateway required for non-dry-run.
   if (!parsed.dryRun && !isAvailable('chat')) {
-    console.error('Chat gateway unavailable. Configure a chat model (e.g. `gbrain config set chat_model anthropic:claude-haiku-4-5`), or pass --dry-run to preview candidates.');
+    console.error('Chat gateway unavailable. Configure a chat model (e.g. `modusbrain config set chat_model anthropic:claude-haiku-4-5`), or pass --dry-run to preview candidates.');
     process.exit(1);
   }
 

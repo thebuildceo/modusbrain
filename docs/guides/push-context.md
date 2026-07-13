@@ -10,8 +10,8 @@ Three channels share one zero-LLM core (`src/core/context/volunteer.ts`):
 | Channel | Surface | When to use |
 |---|---|---|
 | `reflex` | automatic, inside the context engine | default-on for plugin hosts; nothing to call |
-| `op` | `gbrain volunteer-context` / MCP `volunteer_context` | agents without the plugin; one call per turn |
-| `watch` | `gbrain watch` | stream a transcript in, volunteered pages stream out |
+| `op` | `modusbrain volunteer-context` / MCP `volunteer_context` | agents without the plugin; one call per turn |
+| `watch` | `modusbrain watch` | stream a transcript in, volunteered pages stream out |
 
 ## How it decides
 
@@ -31,13 +31,13 @@ Three channels share one zero-LLM core (`src/core/context/volunteer.ts`):
 ```bash
 # one-shot: pipe recent turns (oldest → newest)
 printf 'user: ask alice-example about the deal\nassistant: noted\nuser: what did she say?\n' \
-  | gbrain volunteer-context
+  | modusbrain volunteer-context
 
 # streaming: volunteered pages print as the transcript flows
-some-transcript-feed | gbrain watch --json
+some-transcript-feed | modusbrain watch --json
 
 # the feedback loop: how often were volunteered pages actually opened?
-gbrain volunteer-context --stats
+modusbrain volunteer-context --stats
 ```
 
 Stats are **approximate** by design: "used" means `pages.last_retrieved_at >
@@ -45,8 +45,8 @@ volunteered_at` — the 5-minute last-retrieved throttle causes false negatives
 and unrelated reads of the same page cause false positives. Use the per-arm
 precision to tune `min_confidence`, not as an exact metric.
 
-**PGLite + `gbrain watch`:** PGLite is single-connection, and watch holds its
-connection for the whole session — a concurrent `gbrain serve` or any write
+**PGLite + `modusbrain watch`:** PGLite is single-connection, and watch holds its
+connection for the whole session — a concurrent `modusbrain serve` or any write
 path blocks until watch exits. On a PGLite brain, run watch in bursts (piped
 input exits at EOF) or use the ambient reflex channel instead, which routes
 through a running serve's resolve socket rather than taking the lock. Routing
@@ -57,11 +57,11 @@ brains are unaffected.
 
 | Key | Default | What it does |
 |---|---|---|
-| `retrieval_reflex_window_turns` | 4 | turns the ambient reflex extracts from; 1 = legacy current-turn-only (file/env plane: `GBRAIN_RETRIEVAL_REFLEX_WINDOW_TURNS`) |
+| `retrieval_reflex_window_turns` | 4 | turns the ambient reflex extracts from; 1 = legacy current-turn-only (file/env plane: `MODUSBRAIN_RETRIEVAL_REFLEX_WINDOW_TURNS`) |
 | `retrieval_reflex` | true | the ambient channel's master switch |
 | `retrieval_reflex_max_pointers` | 3 | pointer cap per turn |
 
-Per-call knobs: `max_pages` + `min_confidence` on both the op and `gbrain watch`
+Per-call knobs: `max_pages` + `min_confidence` on both the op and `modusbrain watch`
 (`--max-pages` / `--min-confidence`, plus `--window-turns` / `--source` on watch);
 on the op only: `prior_context` (text whose already-surfaced slugs are suppressed),
 `session_id` / `turn` attribution params (watch stamps its own per-session id and

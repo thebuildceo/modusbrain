@@ -1,18 +1,18 @@
 /**
- * v0.43 (#2095) — `gbrain watch` SIGINT lifecycle. SERIAL: spawns a real CLI
+ * v0.43 (#2095) — `modusbrain watch` SIGINT lifecycle. SERIAL: spawns a real CLI
  * subprocess with a tmpdir brain (the parallel unit shards flake on
  * concurrent subprocess spawns — same isolation rationale as
  * apply-migrations-pglite-spawn.serial.test.ts).
  */
 import { describe, test, expect } from 'bun:test';
 
-describe('gbrain watch — SIGINT lifecycle (real subprocess)', () => {
+describe('modusbrain watch — SIGINT lifecycle (real subprocess)', () => {
   test('SIGINT mid-stream closes the stream and exits cleanly (drain path, exit 0)', async () => {
     const { mkdtempSync, mkdirSync, writeFileSync, rmSync } = await import('fs');
     const { join, resolve } = await import('path');
     const { tmpdir } = await import('os');
     const REPO = resolve(import.meta.dir, '..');
-    const home = mkdtempSync(join(tmpdir(), 'gbrain-watch-sigint-'));
+    const home = mkdtempSync(join(tmpdir(), 'modusbrain-watch-sigint-'));
     try {
       mkdirSync(join(home, '.modusbrain'), { recursive: true });
       writeFileSync(
@@ -26,7 +26,7 @@ describe('gbrain watch — SIGINT lifecycle (real subprocess)', () => {
       // Piped stdin that NEVER reaches EOF — only SIGINT can end the stream.
       const proc = Bun.spawn([process.execPath, join(REPO, 'src', 'cli.ts'), 'watch'], {
         cwd: REPO,
-        env: { ...process.env, HOME: home, GBRAIN_HOME: home, MODUSBRAIN_HOME: home, GBRAIN_SKIP_STARTUP_HOOKS: '1' },
+        env: { ...process.env, HOME: home, MODUSBRAIN_HOME: home, MODUSBRAIN_SKIP_STARTUP_HOOKS: '1' },
         stdin: 'pipe',
         stdout: 'pipe',
         stderr: 'pipe',

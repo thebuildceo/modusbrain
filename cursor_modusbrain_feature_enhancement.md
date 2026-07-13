@@ -114,7 +114,7 @@ bun run src/cli.ts opskill execute refund-handling \
 bun run src/cli.ts opskill audit --slug refund-handling --json
 ```
 
-**CLI note:** Use `gbrain opskill ...` for operational skills. `gbrain skill <name>` still fetches GBrain skillpack instructions (unchanged). You can also use `gbrain skill compile|approve|execute|...` as aliases.
+**CLI note:** Use `modusbrain opskill ...` for operational skills. `modusbrain skill <name>` still fetches ModusBrain skillpack instructions (unchanged). You can also use `modusbrain skill compile|approve|execute|...` as aliases.
 
 Full docs are in the updated [`company-brain-rfs-analysis.md`](company-brain-rfs-analysis.md) — usage, industry use cases, and rebrand guide.
 
@@ -137,10 +137,10 @@ The full step-by-step is in Section 7 of `company-brain-rfs-analysis.md`. Summar
 
 1. **`package.json`** → `"name": "modusbrain"`, bin → `modusbrain`
 2. **Build** → `bun build --compile --outfile bin/modusbrain src/cli.ts`
-3. **Find/replace** user-facing strings: `GBrain` → attribution footer, `gbrain` → `modusbrain` in docs/README
-4. **Config path** → `~/.gbrain` → `~/.modusbrain` (document migration)
-5. **Env vars** → `GBRAIN_*` → `MODUSBRAIN_*` (keep old aliases one release)
-6. **Keep MIT attribution** to GBrain in README + LICENSE
+3. **Find/replace** user-facing strings: `ModusBrain` → attribution footer, `modusbrain` → `modusbrain` in docs/README
+4. **Config path** → `~/.modusbrain` → `~/.modusbrain` (document migration)
+5. **Env vars** → `MODUSBRAIN_*` → `MODUSBRAIN_*` (keep old aliases one release)
+6. **Keep MIT attribution** to ModusBrain in README + LICENSE
 7. **Verify:** `bun test test/operational-skills.test.ts` + `modusbrain doctor`
 
 Operational skills tables already use `operational_*` prefix — no DB rename needed. Schema pack is already named `modusbrain-ops`.
@@ -205,14 +205,14 @@ The ModusBrain rebrand is in place and tested. Here is what you have now:
 | What changed | Details |
 |---|---|
 | **Package** | `modusbrain` in `package.json` |
-| **CLI** | Primary command: `modusbrain` · legacy alias: `gbrain` |
-| **Config** | `~/.modusbrain` (auto-falls back to `~/.gbrain`) |
-| **Env vars** | `MODUSBRAIN_*` preferred · `GBRAIN_*` still works |
-| **Source dotfile** | `.modusbrain-source` + legacy `.gbrain-source` |
+| **CLI** | Primary command: `modusbrain` · legacy alias: `modusbrain` |
+| **Config** | `~/.modusbrain` (auto-falls back to `~/.modusbrain`) |
+| **Env vars** | `MODUSBRAIN_*` preferred · `MODUSBRAIN_*` still works |
+| **Source dotfile** | `.modusbrain-source` + legacy `.modusbrain-source` |
 | **Branding module** | `src/core/branding.ts` — single source of truth |
 | **MCP server** | Registers as `modusbrain` |
 | **README** | Replaced with ModusBrain product README |
-| **NOTICE** | GBrain MIT attribution file |
+| **NOTICE** | ModusBrain MIT attribution file |
 | **Build** | `bun run build` → `bin/modusbrain` |
 
 **Tests:** 15/15 passing (`branding` + `operational-skills`)
@@ -400,7 +400,7 @@ Mintlify failed because **`docs.json` was missing at the repo root**. That’s n
 | **`opskill-workflow.mdx`** | Compile → approve → execute |
 | **`cli-reference.mdx`** | All CLI commands |
 | **`env-vars.mdx`** | Environment variables |
-| **`attribution.mdx`** | GBrain MIT attribution |
+| **`attribution.mdx`** | ModusBrain MIT attribution |
 | **`.mintignore`** | Excludes `node_modules/`, `src/`, `test/`, etc. |
 
 ---
@@ -429,7 +429,7 @@ git push origin main
 
 ## Why it failed before
 
-Mintlify looks for **`docs.json`** (or legacy `mint.json`) at the **repository root**. Your repo only had a `/docs` folder with GBrain markdown — no Mintlify config file.
+Mintlify looks for **`docs.json`** (or legacy `mint.json`) at the **repository root**. Your repo only had a `/docs` folder with ModusBrain markdown — no Mintlify config file.
 
 ---
 
@@ -522,7 +522,7 @@ After you push, the **Engine docs** tab will show Core, Guides, Architecture, Tu
 
 **User**
 
-hey in the navbar instead of that text modusbrain use this logo like only logo proerly sized and also make sure that evrhitng is perfect no like everhtignhere is the path of the logo :-C:\Users\Shubham\Downloads\gbrain-master\gbrain-master\docs\moduslogo.svg
+hey in the navbar instead of that text modusbrain use this logo like only logo proerly sized and also make sure that evrhitng is perfect no like everhtignhere is the path of the logo :-C:\Users\Shubham\Downloads\modusbrain-master\modusbrain-master\docs\moduslogo.svg
 
 ---
 
@@ -634,7 +634,7 @@ Not done yet:
 | **DNS** (docs.modusbrain.com, etc.) | Documented, not fully wired |
 | **Pricing / cloud product** | Copy only, no product |
 | **Design partner / case study** | Placeholder |
-| Full rebrand of every internal `gbrain` string | Product layer only |
+| Full rebrand of every internal `modusbrain` string | Product layer only |
 
 So: **software works for devs who set it up themselves; it’s not a finished public launch.**
 
@@ -687,7 +687,7 @@ status: aborted
 task_id: 490619
 title: Start Mintlify dev server on port 3333
 detail: terminated_by_user
-output_path: C:\Users\Shubham\.cursor\projects\c-Users-Shubham-Downloads-gbrain-master-gbrain-master\terminals\490619.txt
+output_path: C:\Users\Shubham\.cursor\projects\c-Users-Shubham-Downloads-modusbrain-master-modusbrain-master\terminals\490619.txt
 </task>
 </system_notification>
 <user_query>Briefly inform the user about the task result and perform any follow-up actions (if needed). If there's no follow-ups needed, don't explicitly say that.</user_query>
@@ -701,7 +701,7 @@ The local Mintlify preview on **http://localhost:3333** was stopped (the dev ser
 To preview the docs and navbar logo again:
 
 ```powershell
-cd c:\Users\Shubham\Downloads\gbrain-master\gbrain-master
+cd c:\Users\Shubham\Downloads\modusbrain-master\modusbrain-master
 mint dev
 ```
 
@@ -709,7 +709,7 @@ If the logo changes aren’t on the live site yet, push `docs.json` and `logo/mo
 
 # Audit project files and tests
 
-> C:\Users\Shubham\Downloads\gbrain-master\gbrain-master\company-brain-rfs-analysis.md & C:\Users\Shubham\Downloads\gbrain-master\gbrain-master\cursor_modusbrain_feature_enhancement.md & C:\Users\Shubham\Downloads\gbrain-master\gbrain-master\MODUSBRAIN_LAUNCH.md & thats it Okay, first of all, analyze all of these files because they include everything that we have done right now in this project, G bread master. Make sure you analyze all of these files in this folder.
+> C:\Users\Shubham\Downloads\modusbrain-master\modusbrain-master\company-brain-rfs-analysis.md & C:\Users\Shubham\Downloads\modusbrain-master\modusbrain-master\cursor_modusbrain_feature_enhancement.md & C:\Users\Shubham\Downloads\modusbrain-master\modusbrain-master\MODUSBRAIN_LAUNCH.md & thats it Okay, first of all, analyze all of these files because they include everything that we have done right now in this project, G bread master. Make sure you analyze all of these files in this folder.
 >
 > After analyzing all three files that I have given you, run a full test: is this software working perfectly or not? Do not edit anything right now. Just do a full, comprehensive check, every single check, on every single file in this folder. It doesn't matter how many files are in this entire folder. Scan each of them, run every test you can run, and find if there are any errors or bugs and everything else, etc. Make sure everything is working perfectly, and just make a full report out of it in one file.
 >
@@ -880,7 +880,7 @@ Yes. We should fix it in this order:
 **Step 7 — Rebrand Cleanup**
 - Finish ModusBrain rebrand after core is stable.
 - Replace placeholders like `your-org/modusbrain`.
-- Verify `modusbrain` command, legacy `gbrain` alias, env vars, docs, package metadata.
+- Verify `modusbrain` command, legacy `modusbrain` alias, env vars, docs, package metadata.
 
 **Step 8 — Launch Readiness**
 - Final docs pass.
@@ -1085,7 +1085,7 @@ Current Step 4 status:
 - Unit run is still failing/wedging.
 - Shards `2,3,4,5,6,8` wedged after 1200s.
 - Shards `1` and `7` had test failures.
-- Serial pass has failures, many Windows/PATH-related: `uv_spawn 'bun'`, config env assumptions, `.modusbrain` vs `.gbrain`, watcher SIGINT, reranker order tests.
+- Serial pass has failures, many Windows/PATH-related: `uv_spawn 'bun'`, config env assumptions, `.modusbrain` vs `.modusbrain`, watcher SIGINT, reranker order tests.
 
 Also: there is an untracked `undefined/` directory from the open tab/migration state. I have not touched it yet.
 
@@ -1144,7 +1144,7 @@ Next work should be: isolate Step 4 into smaller targeted test groups, fix the r
 >
 > Bun can spawn `bun` when PATH is Windows-style. The direct failures come from tests passing custom env objects without PATH. I’ll inspect and patch the affected test helper pattern.
 >
-> Representative failures show two classes: tests spawning `bun` without an inherited PATH, and tests still expecting legacy `.gbrain` paths after rebrand. I’ll patch the common test spawn pattern and the worker registry expectation.
+> Representative failures show two classes: tests spawning `bun` without an inherited PATH, and tests still expecting legacy `.modusbrain` paths after rebrand. I’ll patch the common test spawn pattern and the worker registry expectation.
 >
 > There are many `Bun.spawn(['bun'])` tests, so the runner-level fix is the right approach. I’ll validate it manually by running one serial file through a Windows-style PATH environment.
 >
@@ -1209,7 +1209,7 @@ The bad cwd pattern appears in several CLI-spawn tests. I’ll patch those test 
 >
 > The representative failures are now real assertions, not spawn-path issues. I’ll patch cross-platform test expectations and the hybrid meta expectation to match current behavior.
 >
-> I’ll fix the representative real failures: update legacy `.gbrain` test expectation, add Windows PID-start fallback, correct hybrid expansion metadata expectation, then inspect the watch failure.
+> I’ll fix the representative real failures: update legacy `.modusbrain` test expectation, add Windows PID-start fallback, correct hybrid expansion metadata expectation, then inspect the watch failure.
 >
 > I’ll patch these focused assertions and add a Windows process-start fallback.
 >
@@ -1410,7 +1410,7 @@ The Git-dependent test now passes. I’m restarting the full unit gate again wit
 >
 > I’m patching the test fixtures to use `.modusbrain` homes and explicit absolute home envs.
 >
-> I found old `.gbrain` fixture paths in the failing serial tests; patching those to the active brand path.
+> I found old `.modusbrain` fixture paths in the failing serial tests; patching those to the active brand path.
 >
 > <details><summary>Edited 2 files</summary>
 >
@@ -1463,7 +1463,7 @@ The Git-dependent test now passes. I’m restarting the full unit gate again wit
 >
 > Now I’m rerunning the focused failures: tarball, capture, admin spawn, and apply-migrations.
 >
-> Only apply-migrations still fails: Windows `cmd` cannot resolve the shell-only `gbrain` shim. I’m adding a `.cmd` shim and Windows PATH delimiter.
+> Only apply-migrations still fails: Windows `cmd` cannot resolve the shell-only `modusbrain` shim. I’m adding a `.cmd` shim and Windows PATH delimiter.
 >
 > <details><summary>Edited a file</summary>
 >
@@ -1475,7 +1475,7 @@ The Git-dependent test now passes. I’m restarting the full unit gate again wit
 >
 > The main targeted failures are fixed. I’m reviewing the remaining serial failure blocks before the next full run.
 >
-> Many remaining failures are legacy `.gbrain` fixtures under `GBRAIN_HOME`; I’m restoring the intended legacy fallback when only `GBRAIN_HOME` is used.
+> Many remaining failures are legacy `.modusbrain` fixtures under `MODUSBRAIN_HOME`; I’m restoring the intended legacy fallback when only `MODUSBRAIN_HOME` is used.
 >
 > <details><summary>Edited a file</summary>
 >
@@ -1501,7 +1501,7 @@ The Git-dependent test now passes. I’m restarting the full unit gate again wit
 >
 > </details>
 >
-> The durability hook failures are caused by Git Bash receiving Windows-style `GBRAIN_HOME`; I’m making generated shell scripts normalize it with `cygpath`.
+> The durability hook failures are caused by Git Bash receiving Windows-style `MODUSBRAIN_HOME`; I’m making generated shell scripts normalize it with `cygpath`.
 >
 > I’m adding shell-side home normalization and Windows-tolerant test cleanup/mode assertions.
 >
@@ -1536,7 +1536,7 @@ I’m checking the code-callers pin failures; most are Windows cleanup locks, bu
 >
 > The lock cleanup still fails because background hook processes hold temp dirs; I’m making cleanup non-fatal on Windows and checking the hook log path next.
 >
-> `cygpath` may receive a Windows path with backslashes in shell env; I’m switching test envs to POSIX-form `GBRAIN_HOME` for Git Bash scripts while keeping HOME normal.
+> `cygpath` may receive a Windows path with backslashes in shell env; I’m switching test envs to POSIX-form `MODUSBRAIN_HOME` for Git Bash scripts while keeping HOME normal.
 >
 > I’m adding a test helper to convert the temp home to Git Bash format for shell hooks.
 >
@@ -1580,9 +1580,9 @@ I’m checking the code-callers pin failures; most are Windows cleanup locks, bu
 >
 > Since no expected log appears, I’m searching the temp area for where the hook actually wrote its output.
 >
-> I’m validating how Git Bash sees a Windows `GBRAIN_HOME`; if conversion is unreliable, I’ll harden the generated hook.
+> I’m validating how Git Bash sees a Windows `MODUSBRAIN_HOME`; if conversion is unreliable, I’ll harden the generated hook.
 >
-> I’m switching the hook test to use POSIX `GBRAIN_HOME` for Git Bash and converting it back to Windows only when Node reads the log.
+> I’m switching the hook test to use POSIX `MODUSBRAIN_HOME` for Git Bash and converting it back to Windows only when Node reads the log.
 >
 > <details><summary>Edited a file</summary>
 >
@@ -1626,7 +1626,7 @@ The full failing-subset rerun is progressing; waiting for final pass/fail.
 >
 > I found two obvious legacy-path test issues; now I’m checking source behavior for the other two.
 >
-> I’m patching the stale `.gbrain` assumptions first; these are deterministic from the current branding helper.
+> I’m patching the stale `.modusbrain` assumptions first; these are deterministic from the current branding helper.
 >
 > I’m applying minimal test fixes for Windows and ModusBrain path resolution.
 >
@@ -1703,9 +1703,9 @@ Implemented the next fixes without running the full suite.
 >
 > I’m patching the cycle lock test isolation and then checking a hardcoded home helper in core code.
 >
-> I found older isolation tests still expecting `.gbrain`; they must match the current `.modusbrain` default before full unit can pass.
+> I found older isolation tests still expecting `.modusbrain`; they must match the current `.modusbrain` default before full unit can pass.
 >
-> Rather than patch hundreds of legacy tests, I’m fixing the compatibility rule: `GBRAIN_HOME` stays legacy `.gbrain`; `MODUSBRAIN_HOME` uses `.modusbrain`.
+> Rather than patch hundreds of legacy tests, I’m fixing the compatibility rule: `MODUSBRAIN_HOME` stays legacy `.modusbrain`; `MODUSBRAIN_HOME` uses `.modusbrain`.
 >
 > I’m applying the compatibility patch plus the isolated cycle-lock cleanup.
 >
@@ -1736,7 +1736,7 @@ Implemented the next fixes without running the full suite.
 >
 > <details><summary>Ran a command</summary>
 >
-> - Ran `$env:PATH = "$env:USERPROFILE\.bun\bin;C:\Program Files\Git\bin;C:\Program Files\Git\usr\bin;$env:PATH"; rg -n "MODUSBRAIN_HOME|GBRAIN_HOME|\.modusbrain|\.gbrain|brandConfigDir|brandHomeOverride|capturesDir|gbrainPath\(" src/core/branding.ts src/core/config.ts test/branding.test.ts test/gbrain-home-isolation.test.ts test/config.test.ts test/skillopt/held-out.test.ts test/core/cycle.serial.test.ts`
+> - Ran `$env:PATH = "$env:USERPROFILE\.bun\bin;C:\Program Files\Git\bin;C:\Program Files\Git\usr\bin;$env:PATH"; rg -n "MODUSBRAIN_HOME|MODUSBRAIN_HOME|\.modusbrain|\.modusbrain|brandConfigDir|brandHomeOverride|capturesDir|modusbrainPath\(" src/core/branding.ts src/core/config.ts test/branding.test.ts test/modusbrain-home-isolation.test.ts test/config.test.ts test/skillopt/held-out.test.ts test/core/cycle.serial.test.ts`
 >
 > </details>
 >
@@ -1744,7 +1744,7 @@ Implemented the next fixes without running the full suite.
 >
 > <details><summary>Ran a command</summary>
 >
-> - Ran `$env:PATH = "$env:USERPROFILE\.bun\bin;C:\Program Files\Git\bin;C:\Program Files\Git\usr\bin;$env:PATH"; bun test --max-concurrency=1 --timeout=180000 test/gbrain-home-isolation.test.ts test/branding.test.ts test/skillopt/held-out.test.ts test/core/cycle.serial.test.ts test/upgrade-checkpoint.serial.test.ts test/sync-inline-extract-stamps.serial.test.ts test/pglite-engine-disconnect.serial.test.ts`
+> - Ran `$env:PATH = "$env:USERPROFILE\.bun\bin;C:\Program Files\Git\bin;C:\Program Files\Git\usr\bin;$env:PATH"; bun test --max-concurrency=1 --timeout=180000 test/modusbrain-home-isolation.test.ts test/branding.test.ts test/skillopt/held-out.test.ts test/core/cycle.serial.test.ts test/upgrade-checkpoint.serial.test.ts test/sync-inline-extract-stamps.serial.test.ts test/pglite-engine-disconnect.serial.test.ts`
 >
 > </details>
 >
@@ -1825,7 +1825,7 @@ Implemented the next fixes without running the full suite.
 >
 > <details><summary>Ran a command</summary>
 >
-> - Ran `$env:PATH = "$env:USERPROFILE\.bun\bin;C:\Program Files\Git\bin;C:\Program Files\Git\usr\bin;$env:PATH"; bun test --max-concurrency=1 --timeout=180000 test/gbrain-home-isolation.test.ts test/branding.test.ts test/skillopt/held-out.test.ts test/core/cycle.serial.test.ts test/upgrade-checkpoint.serial.test.ts test/sync-inline-extract-stamps.serial.test.ts test/pglite-engine-disconnect.serial.test.ts`
+> - Ran `$env:PATH = "$env:USERPROFILE\.bun\bin;C:\Program Files\Git\bin;C:\Program Files\Git\usr\bin;$env:PATH"; bun test --max-concurrency=1 --timeout=180000 test/modusbrain-home-isolation.test.ts test/branding.test.ts test/skillopt/held-out.test.ts test/core/cycle.serial.test.ts test/upgrade-checkpoint.serial.test.ts test/sync-inline-extract-stamps.serial.test.ts test/pglite-engine-disconnect.serial.test.ts`
 >
 > </details>
 >
@@ -1911,7 +1911,7 @@ No errors yet; continuing to wait on the full unit run.
 >
 > <details><summary>Ran a command</summary>
 >
-> - Ran `$workspace = (Resolve-Path -LiteralPath .).Path; $procs = Get-CimInstance Win32_Process | Where-Object { ($_.Name -in @('bun.exe','bash.exe')) -and ($_.CommandLine -match 'run-unit-parallel|run-unit-shard|bun test|gbrain-master') }; $procs | Select-Object ProcessId,Name,CommandLine | Format-List; foreach ($p in $procs) { Stop-Process -Id $p.ProcessId -Force -ErrorAction SilentlyContinue }`
+> - Ran `$workspace = (Resolve-Path -LiteralPath .).Path; $procs = Get-CimInstance Win32_Process | Where-Object { ($_.Name -in @('bun.exe','bash.exe')) -and ($_.CommandLine -match 'run-unit-parallel|run-unit-shard|bun test|modusbrain-master') }; $procs | Select-Object ProcessId,Name,CommandLine | Format-List; foreach ($p in $procs) { Stop-Process -Id $p.ProcessId -Force -ErrorAction SilentlyContinue }`
 >
 > </details>
 >
@@ -1921,11 +1921,11 @@ No errors yet; continuing to wait on the full unit run.
 >
 > <details><summary>Ran a command</summary>
 >
-> - Ran `git diff --stat; Write-Output '--- risky patterns ---'; rg -n "process\.env\.MODUSBRAIN_HOME\?\.trim\(|process\.env\.GBRAIN_HOME\?\.trim\(|join\([^\n]*homedir\(\)[^\n]*'\.gbrain'|spawnSync\('bun'|execFileSync\('bun'|Bun\.spawn\(\['bun'|/dev/null/nope|path\.join\([^\n]*'\.gbrain'" src test scripts -g "*.ts" -g "*.sh"`
+> - Ran `git diff --stat; Write-Output '--- risky patterns ---'; rg -n "process\.env\.MODUSBRAIN_HOME\?\.trim\(|process\.env\.MODUSBRAIN_HOME\?\.trim\(|join\([^\n]*homedir\(\)[^\n]*'\.modusbrain'|spawnSync\('bun'|execFileSync\('bun'|Bun\.spawn\(\['bun'|/dev/null/nope|path\.join\([^\n]*'\.modusbrain'" src test scripts -g "*.ts" -g "*.sh"`
 >
 > </details>
 >
-> I found several source files still hardcoding `~/.gbrain`. I’m converting write-side paths to the canonical helper.
+> I found several source files still hardcoding `~/.modusbrain`. I’m converting write-side paths to the canonical helper.
 >
 > <details><summary>Ran a command</summary>
 >
@@ -1937,11 +1937,11 @@ No errors yet; continuing to wait on the full unit run.
 >
 > <details><summary>Ran a command</summary>
 >
-> - Ran `rg -n "from '../core/config|from './config|from '../../config|homedir|gbrainPath|join" src\commands\doctor.ts src\commands\notability-eval.ts src\commands\mounts.ts src\core\brain-registry.ts src\core\mounts-cache.ts src\core\context\reflex.ts src\core\ingestion\sources\markdown-greenfield.ts | Select-Object -First 120`
+> - Ran `rg -n "from '../core/config|from './config|from '../../config|homedir|modusbrainPath|join" src\commands\doctor.ts src\commands\notability-eval.ts src\commands\mounts.ts src\core\brain-registry.ts src\core\mounts-cache.ts src\core\context\reflex.ts src\core\ingestion\sources\markdown-greenfield.ts | Select-Object -First 120`
 >
 > </details>
 >
-> Patching those hardcoded paths to use `gbrainPath`.
+> Patching those hardcoded paths to use `modusbrainPath`.
 >
 > <details><summary>Edited 7 files</summary>
 >
@@ -2054,7 +2054,7 @@ Steps 1–3 are green. Running the full test suite and reviewing the failure rep
 Steps 1–3 pass; full tests are running. I'll fix known issues from the report in parallel.
 
 
-Fixing known `.gbrain` vs `.modusbrain` mismatches and Windows spawn shims while tests run.
+Fixing known `.modusbrain` vs `.modusbrain` mismatches and Windows spawn shims while tests run.
 
 
 Parallel bash forking is failing on Windows. I'll fix the test runner for Windows and run the suite with a single shard.
@@ -2126,9 +2126,9 @@ You're right to call that out. I stopped the marathon test runs and fixed the ac
 ## What I fixed (in code)
 
 1. **`test/helpers/brain-isolation.ts`** — shared helper for:
-   - Isolated brain env (`GBRAIN_HOME` + `MODUSBRAIN_HOME`)
-   - Legacy `.gbrain` vs new `.modusbrain` config paths
-   - CLI shims (`gbrain` + `modusbrain`, including `.cmd` on Windows) using full `process.execPath` (fixes `uv_spawn 'bun'` failures)
+   - Isolated brain env (`MODUSBRAIN_HOME` + `MODUSBRAIN_HOME`)
+   - Legacy `.modusbrain` vs new `.modusbrain` config paths
+   - CLI shims (`modusbrain` + `modusbrain`, including `.cmd` on Windows) using full `process.execPath` (fixes `uv_spawn 'bun'` failures)
 
 2. **Windows test runner** — `scripts/run-unit-parallel.sh` defaults to **1 shard** on Git Bash (avoids cygheap fork crashes)
 
@@ -2136,13 +2136,13 @@ You're right to call that out. I stopped the marathon test runs and fixed the ac
 
 4. **Serial spawn tests** — `apply-migrations-pglite-spawn`, `doctor-cli-smoke`, `migration-in-process` updated to use the shared helper
 
-5. **Rebrand test drift** — `worker-registry` expects `.gbrain` when only `GBRAIN_HOME` is set; isolated tests use `.modusbrain`
+5. **Rebrand test drift** — `worker-registry` expects `.modusbrain` when only `MODUSBRAIN_HOME` is set; isolated tests use `.modusbrain`
 
 6. **E2E spawn fixes** — `serve-http-oauth`, `connect-bearer`, `init-fresh-pglite` use `process.execPath` instead of bare `bun`
 
 7. **`cycle-pglite-lock-ordering`** — lock path assertions use `configDir` consistently
 
-8. **CLI version** — kept as `gbrain` until full rebrand (per your “fix first, rebrand later” plan)
+8. **CLI version** — kept as `modusbrain` until full rebrand (per your “fix first, rebrand later” plan)
 
 9. **`MODUSBRAIN_FIX_TRACKER.md`** — updated with what’s done and exact commands for you to run
 
@@ -2162,7 +2162,7 @@ You're right to call that out. I stopped the marathon test runs and fixed the ac
 **Quick smoke (~2 min):**
 ```powershell
 $env:PATH="$env:USERPROFILE\.bun\bin;C:\Program Files\Git\bin;C:\Program Files\Git\usr\bin;$env:PATH"
-cd c:\Users\Shubham\Downloads\gbrain-master\gbrain-master
+cd c:\Users\Shubham\Downloads\modusbrain-master\modusbrain-master
 bunx tsc --noEmit
 bun run verify
 bun test test/worker-registry.serial.test.ts test/migration-in-process.serial.test.ts
@@ -2181,7 +2181,7 @@ bun run ci:local:diff
 
 ## Rebrand status
 
-**Not started yet** — on purpose. Steps 4–6 need to pass first. When they do, we rebrand (`gbrain` → `modusbrain` in help/version, npm publish, etc.).
+**Not started yet** — on purpose. Steps 4–6 need to pass first. When they do, we rebrand (`modusbrain` → `modusbrain` in help/version, npm publish, etc.).
 
 Want me to commit these fixes, or move straight into the rebrand pass after you confirm `bun run test:win` passes on your machine?
 
@@ -2189,7 +2189,7 @@ Want me to commit these fixes, or move straight into the rebrand pass after you 
 
 **User**
 
-@c:\Users\Shubham\.cursor\projects\c-Users-Shubham-Downloads-gbrain-master-gbrain-master\terminals\3.txt:7-284 Hey, can you check the terminal? I have run that quick smoke. Can you tell me what percent of fixing is remaining, everything, every fucking single thing, everything to work this software flawlessly, no errors, no bugs? Tell me how much percent the work is done and how much is remaining. After the work is done, we will start quick rebrand, okay.
+@c:\Users\Shubham\.cursor\projects\c-Users-Shubham-Downloads-modusbrain-master-modusbrain-master\terminals\3.txt:7-284 Hey, can you check the terminal? I have run that quick smoke. Can you tell me what percent of fixing is remaining, everything, every fucking single thing, everything to work this software flawlessly, no errors, no bugs? Tell me how much percent the work is done and how much is remaining. After the work is done, we will start quick rebrand, okay.
 
 ---
 
@@ -2279,7 +2279,7 @@ bun run ci:local
 |--------------|--------|
 | `package.json` → `modusbrain` | ✅ Done |
 | `src/core/branding.ts` | ✅ Done |
-| CLI `--version` / help strings | ❌ Still `gbrain` (on purpose until gates pass) |
+| CLI `--version` / help strings | ❌ Still `modusbrain` (on purpose until gates pass) |
 | npm/bun publish | ❌ Not done |
 | Mintlify docs | ⚠️ Partially wired |
 | Marketing site / DNS | ❌ Not done |

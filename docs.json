@@ -71,10 +71,10 @@
               "docs/eval-bench",
               "docs/eval-capture",
               "docs/eval-takes-quality",
-              "docs/GBRAIN_RECOMMENDED_SCHEMA",
-              "docs/GBRAIN_SKILLPACK",
-              "docs/GBRAIN_V0",
-              "docs/GBRAIN_VERIFY",
+              "docs/MODUSBRAIN_RECOMMENDED_SCHEMA",
+              "docs/MODUSBRAIN_SKILLPACK",
+              "docs/MODUSBRAIN_V0",
+              "docs/MODUSBRAIN_VERIFY",
               "docs/guardrails",
               "docs/INSTALL",
               "docs/progress-events",
@@ -147,7 +147,7 @@
           {
             "group": "Guides",
             "pages": [
-              "docs/guides/agent-to-gbrain",
+              "docs/guides/agent-to-modusbrain",
               "docs/guides/brain-agent-loop",
               "docs/guides/brain-first-lookup",
               "docs/guides/brain-vs-memory",

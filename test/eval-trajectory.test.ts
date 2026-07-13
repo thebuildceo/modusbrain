@@ -1,5 +1,5 @@
 /**
- * v0.35.4 — `gbrain eval trajectory` CLI (T6) tests.
+ * v0.35.4 — `modusbrain eval trajectory` CLI (T6) tests.
  *
  * Pins:
  *   - argv parser: positional entity-slug required; --metric / --since /

@@ -11,11 +11,11 @@
  * IDs — the audit answers "is the retry path healthy?" not "what got
  * retried?". Mirrors `shell-audit.ts` privacy posture from v0.20+.
  *
- * File: `~/.gbrain/audit/batch-retry-YYYY-Www.jsonl` (ISO-week rotation,
- * honors `GBRAIN_AUDIT_DIR` via the shared `resolveAuditDir()` helper).
+ * File: `~/.modusbrain/audit/batch-retry-YYYY-Www.jsonl` (ISO-week rotation,
+ * honors `MODUSBRAIN_AUDIT_DIR` via the shared `resolveAuditDir()` helper).
  *
  * Pruning (codex H-8): `pruneOldBatchRetryAuditFiles(30)` deletes files
- * older than 30 days. Called from `gbrain dream --phase purge` (the cycle's
+ * older than 30 days. Called from `modusbrain dream --phase purge` (the cycle's
  * 9th GC phase that already prunes op_checkpoints).
  */
 

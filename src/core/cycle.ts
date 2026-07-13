@@ -3,8 +3,8 @@
  *
  * Composes lint, backlinks, sync, extract, embed, and orphans into
  * one honest unit of work. Called from:
- *   - `gbrain dream` (CLI alias; one-shot cron-triggered cycle)
- *   - `gbrain autopilot` (daemon; scheduled on an interval)
+ *   - `modusbrain dream` (CLI alias; one-shot cron-triggered cycle)
+ *   - `modusbrain autopilot` (daemon; scheduled on an interval)
  *   - Minions `autopilot-cycle` handler (durable queue; retry + observability)
  *
  * All three converge on runCycle() so there's one source of truth for
@@ -29,11 +29,11 @@
  *
  * COORDINATION:
  *
- * Postgres: a row in gbrain_cycle_locks with a TTL (30 min). Refreshed
+ * Postgres: a row in modusbrain_cycle_locks with a TTL (30 min). Refreshed
  * between phases via yieldBetweenPhases. Works through PgBouncer
  * transaction pooling (session-scoped pg_try_advisory_lock does not).
  *
- * PGLite / engine=null: a file lock at ~/.gbrain/cycle.lock holding
+ * PGLite / engine=null: a file lock at ~/.modusbrain/cycle.lock holding
  * the PID + mtime. Same 30-min TTL semantics.
  *
  * LOCK-SKIP:
@@ -45,7 +45,7 @@
 
 import { existsSync, readFileSync, writeFileSync, unlinkSync, mkdirSync, statSync } from 'fs';
 import { join } from 'path';
-import { gbrainPath } from './config.ts';
+import { modusbrainPath } from './config.ts';
 import type { BrainEngine } from './engine.ts';
 import { createProgress, type ProgressReporter } from './progress.ts';
 import { getCliOptions, cliOptsToProgressOptions } from './cli-options.ts';
@@ -60,7 +60,7 @@ export type CyclePhase =
   | 'patterns' | 'recompute_emotional_weight' | 'consolidate'
   // v0.36.1.0 Hindsight calibration wave:
   //  - propose_takes: LLM scans markdown prose, proposes gradeable claims
-  //    to a review queue. User accepts/rejects via `gbrain takes propose`.
+  //    to a review queue. User accepts/rejects via `modusbrain takes propose`.
   //  - grade_takes: walks unresolved takes, retrieves evidence, asks a
   //    judge model to verdict them. Auto-resolve OFF by default (D17).
   //  - calibration_profile: aggregates the resolved subset into 2-4
@@ -73,7 +73,7 @@ export type CyclePhase =
   // v0.41 T9 lens packs:
   //  - extract_atoms: per-source Haiku extraction of atoms from
   //    transcripts/articles/meetings into atom-typed pages. Gated on the
-  //    active pack's `phases:` declaration (gbrain-creator or gbrain-
+  //    active pack's `phases:` declaration (modusbrain-creator or modusbrain-
   //    everything declare this); other packs are no-op.
   //  - synthesize_concepts: global aggregation of atoms into tier-promoted
   //    concept pages via dedup → tier → Sonnet T1/T2 voice-gated narratives.
@@ -114,7 +114,7 @@ export const ALL_PHASES: CyclePhase[] = [
   // extract_facts so the Haiku 3-check has fresh fact context, BEFORE
   // resolve_symbol_edges so new atom pages don't interrupt the symbol
   // resolution sweep mid-flight. Pack-gate via active pack's `phases:`
-  // declaration (gbrain-creator + gbrain-everything declare; others skip).
+  // declaration (modusbrain-creator + modusbrain-everything declare; others skip).
   'extract_atoms',
   // v0.33.3 W0c — within-file two-pass symbol resolution. Runs AFTER
   // extract + extract_facts so any code edges sync emitted (still bare-token)
@@ -167,7 +167,7 @@ export const ALL_PHASES: CyclePhase[] = [
   // depends on cross-session themes gets optimized against the freshest
   // state — strictly fresher than "right after patterns" since downstream
   // phases also mutate state the optimizer reads. Default OFF; opt-in via
-  // `gbrain config set cycle.skillopt.enabled true`. Bundled-skill safety
+  // `modusbrain config set cycle.skillopt.enabled true`. Bundled-skill safety
   // (D16): never auto-mutates bundled skills. Position MUST match the
   // dispatch block in runCycle (see line ~1912) — pinned by the
   // `report.phases.map(p => p.phase)).toEqual(ALL_PHASES)` assertion in
@@ -387,13 +387,13 @@ export interface CycleReport {
      * v0.35.5: number of phantom unprefixed entity pages (e.g. `alice.md`)
      * redirected to their canonical prefixed slugs (`people/alice-example`)
      * by the phantom-redirect pre-pass inside `extract_facts`. Capped per
-     * cycle by `GBRAIN_PHANTOM_REDIRECT_LIMIT` (default 50).
+     * cycle by `MODUSBRAIN_PHANTOM_REDIRECT_LIMIT` (default 50).
      */
     phantoms_redirected: number;
     /**
      * v0.35.5: number of phantom pages skipped because their canonical
      * resolved to multiple candidates. Operator must triage manually via
-     * the `~/.gbrain/audit/phantoms-YYYY-Www.jsonl` audit log.
+     * the `~/.modusbrain/audit/phantoms-YYYY-Www.jsonl` audit log.
      */
     phantoms_ambiguous: number;
     /**
@@ -437,7 +437,7 @@ export interface CycleOpts {
   yieldDuringPhase?: () => Promise<void>;
   /**
    * Synthesize phase scope overrides (v0.23). Forwarded to runPhaseSynthesize.
-   * - `synthInputFile`: ad-hoc transcript path (`gbrain dream --input <file>`).
+   * - `synthInputFile`: ad-hoc transcript path (`modusbrain dream --input <file>`).
    * - `synthDate` / `synthFrom` / `synthTo`: date filters for corpus scan.
    * Mutually exclusive with each other in CLI parsing; runner trusts the
    * caller (CLI wrapper validates).
@@ -448,7 +448,7 @@ export interface CycleOpts {
   synthTo?: string;
   /**
    * v0.23.2: explicit opt-in to disable the synthesize self-consumption guard.
-   * Wired from `gbrain dream --unsafe-bypass-dream-guard`. Never auto-applied
+   * Wired from `modusbrain dream --unsafe-bypass-dream-guard`. Never auto-applied
    * for `--input` because that would let any caller silently re-trigger the
    * loop bug (codex finding #3).
    */
@@ -463,7 +463,7 @@ export interface CycleOpts {
   signal?: AbortSignal;
   /**
    * v0.38: source-scope the cycle lock. When set, the cycle acquires
-   * `gbrain-cycle:<source_id>` instead of the legacy global `gbrain-cycle`,
+   * `modusbrain-cycle:<source_id>` instead of the legacy global `modusbrain-cycle`,
    * so two cycles for different sources can run concurrently on Postgres.
    * When unset, the legacy global lock is used (back-compat for autopilot
    * + every existing caller).
@@ -487,9 +487,9 @@ export interface CycleOpts {
  * Default cycle lock ID, kept for back-compat: pre-v0.38 callers that
  * pass no `sourceId` continue to use this exact string. Autopilot's
  * existing dispatch + every existing minion job in flight at upgrade
- * time use this row in `gbrain_cycle_locks`.
+ * time use this row in `modusbrain_cycle_locks`.
  */
-const LEGACY_CYCLE_LOCK_ID = 'gbrain-cycle';
+const LEGACY_CYCLE_LOCK_ID = 'modusbrain-cycle';
 // v0.41.19.0 (T2 of ops-fix-wave): dropped from 30 min to 5 min so a
 // crashed cycle releases the lock within 5 min instead of holding it for
 // the full 30-min TTL. Wired with active in-phase refresh via
@@ -499,8 +499,8 @@ const LEGACY_CYCLE_LOCK_ID = 'gbrain-cycle';
 // shrinks crash recovery 6×.
 const LOCK_TTL_MS = 5 * 60 * 1000;        // 5 minutes (was 30)
 const LOCK_TTL_MINUTES = 5;               // was 30; db-lock.ts takes minutes
-// Lazy: GBRAIN_HOME may be set after module load; resolve at call time.
-const getLockFilePathDefault = () => gbrainPath('cycle.lock');
+// Lazy: MODUSBRAIN_HOME may be set after module load; resolve at call time.
+const getLockFilePathDefault = () => modusbrainPath('cycle.lock');
 
 export interface LockHandle {
   release: () => Promise<void>;
@@ -510,15 +510,15 @@ export interface LockHandle {
 /**
  * Compute the cycle lock ID for a given source.
  *
- * - `undefined` returns the legacy `'gbrain-cycle'` ID, preserving
- *   back-compat for every existing caller (autopilot, `gbrain dream`
+ * - `undefined` returns the legacy `'modusbrain-cycle'` ID, preserving
+ *   back-compat for every existing caller (autopilot, `modusbrain dream`
  *   without `--source`, the no-DB file-lock path).
  * - Any string is validated via `assertValidSourceId` first (codex r2 P1-B
  *   defense-in-depth: `CycleOpts.sourceId` is a new direct API surface
  *   that becomes part of a DB lock ID AND, on PGLite, a filesystem path
  *   component; callers cannot be trusted to pre-validate).
- * - Valid IDs return `'gbrain-cycle:<source_id>'` so per-source cycles
- *   acquire distinct rows in `gbrain_cycle_locks` and don't serialize
+ * - Valid IDs return `'modusbrain-cycle:<source_id>'` so per-source cycles
+ *   acquire distinct rows in `modusbrain_cycle_locks` and don't serialize
  *   through one global lock.
  *
  * @throws if `sourceId` is provided but invalid per `source-id.ts`.
@@ -782,7 +782,7 @@ export async function runPhaseBacklinks(brainDir: string, dryRun: boolean): Prom
     // Maintenance cycles must not rewrite tracked brain pages with generated
     // "Referenced in" timeline bullets. The graph extractor/auto-link path is
     // the canonical link store during sync/dream/autopilot; the legacy
-    // filesystem fixer remains available explicitly via `gbrain check-backlinks
+    // filesystem fixer remains available explicitly via `modusbrain check-backlinks
     // fix` for users who truly want markdown backlinks materialized.
     const { runBacklinksCore } = await import('../commands/backlinks.ts');
     const result = await runBacklinksCore({
@@ -799,7 +799,7 @@ export async function runPhaseBacklinks(brainDir: string, dryRun: boolean): Prom
       duration_ms: 0,
       summary: gaps === 0
         ? 'no missing back-links found'
-        : `${gaps} missing back-link(s) found (audit-only; run gbrain check-backlinks fix to materialize)`,
+        : `${gaps} missing back-link(s) found (audit-only; run modusbrain check-backlinks fix to materialize)`,
       details: { gaps, added, pages_affected: result.pages_affected, dryRun, mode: 'audit-only' },
     };
   } catch (e) {
@@ -850,12 +850,12 @@ async function resolveSourceForDir(
 // Phases are local to the manifest that declares them — extends chains
 // inherit page_types + link_types + filing_rules via the registry's
 // standard merge semantics, but NOT phases. Per D4-B, each pack declares
-// its own phase participation explicitly. The gbrain-everything meta-
+// its own phase participation explicitly. The modusbrain-everything meta-
 // pack therefore re-declares creator's phases verbatim in its own
 // manifest (asserted by test/lens-pack-manifests.test.ts).
 //
 // Why local-only: phases are runtime control flow, not data. A user pack
-// that extends gbrain-creator may NOT want extract_atoms to run (e.g. they
+// that extends modusbrain-creator may NOT want extract_atoms to run (e.g. they
 // derive atoms differently). Inheriting phases would force them into a
 // no-op-or-fork choice; local-only declaration lets them opt in cleanly.
 //
@@ -900,7 +900,7 @@ async function runPhaseSync(
       noPull: !pull,
       noEmbed: true,                       // embed is a separate phase
       noExtract: willRunExtractPhase,      // dedupe ONLY when cycle's extract phase will also run.
-                                           // If extract isn't scheduled (e.g. `gbrain dream --phase sync`),
+                                           // If extract isn't scheduled (e.g. `modusbrain dream --phase sync`),
                                            // sync's inline extract still runs to preserve prior behavior.
     });
     const syncedCount = result.added + result.modified;
@@ -1037,7 +1037,7 @@ async function runPhaseExtractFacts(
         summary: `extract_facts skipped: ${result.legacyRowsPending} legacy v0.31 facts pending fence backfill`,
         details: {
           legacyRowsPending: result.legacyRowsPending,
-          hint: 'gbrain apply-migrations --yes',
+          hint: 'modusbrain apply-migrations --yes',
           warnings: result.warnings,
         },
       };
@@ -1174,7 +1174,7 @@ async function runPhaseEmbed(engine: BrainEngine, dryRun: boolean, signal?: Abor
     const { runEmbedCore } = await import('../commands/embed.ts');
     // #1737: thread the cycle's abort signal so the embed phase (the long,
     // 10-15 min one) bails within a batch instead of running to completion
-    // after the job was killed — which left gbrain_cycle_locks held and
+    // after the job was killed — which left modusbrain_cycle_locks held and
     // wedged every subsequent autopilot cycle.
     const result = await runEmbedCore(engine, { stale: true, dryRun, signal });
     const embeddedCount = dryRun ? result.would_embed : result.embedded;
@@ -1219,12 +1219,12 @@ async function runPhaseEmbed(engine: BrainEngine, dryRun: boolean, signal?: Abor
  * Cascade on `pages` covers `content_chunks`, `page_links`, `chunk_relations`.
  * `dryRun` short-circuits — no DELETEs are issued.
  *
- * Mirrors the operator escape hatches: `gbrain sources purge` (no id) and
- * `gbrain pages purge-deleted` both call the same library functions, so
+ * Mirrors the operator escape hatches: `modusbrain sources purge` (no id) and
+ * `modusbrain pages purge-deleted` both call the same library functions, so
  * scripted purges and the autopilot phase converge on a single behavior.
  */
 /**
- * v0.28 P1: sweep $GBRAIN_HOME/clones/.tmp/ for entries older than the
+ * v0.28 P1: sweep $MODUSBRAIN_HOME/clones/.tmp/ for entries older than the
  * configured TTL. addSource / recloneIfMissing clone into temp first then
  * rename atomically; if the process is SIGKILL'd between clone and rename,
  * the temp dir orphans. Without this sweep, a brain server accumulates
@@ -1234,7 +1234,7 @@ async function runPhaseEmbed(engine: BrainEngine, dryRun: boolean, signal?: Abor
 async function purgeOrphanClones(staleHours: number): Promise<{ count: number; bytes: number; names: string[] }> {
   const fs = await import('fs');
   const cfg = await import('./config.ts');
-  const tmpRoot = cfg.gbrainPath('clones', '.tmp');
+  const tmpRoot = cfg.modusbrainPath('clones', '.tmp');
   if (!fs.existsSync(tmpRoot)) return { count: 0, bytes: 0, names: [] };
   const STALE_MS = staleHours * 3600 * 1000;
   const now = Date.now();
@@ -1432,7 +1432,7 @@ export async function runCycle(
   // A1: canonical per-source scope for the DB-capable per-source phases
   // (extract_facts, extract_atoms, the calibration trio). Explicit --source
   // (opts.sourceId) wins; else derive from the resolved checkout dir. Without
-  // this, `gbrain dream --source repo-a` on a checkout-less brain would scope
+  // this, `modusbrain dream --source repo-a` on a checkout-less brain would scope
   // those phases to 'default' (resolveSourceForDir(null) → undefined) while the
   // cycle still locks + stamps last_full_cycle_at for repo-a — a freshness
   // stamp that lies. resolveSourceForDir returns undefined when brainDir is
@@ -1482,7 +1482,7 @@ export async function runCycle(
       let dbLock: LockHandle | null = null;
       try {
         // v0.38: per-source lock ID when opts.sourceId is set; legacy
-        // `gbrain-cycle` otherwise (autopilot still passes nothing).
+        // `modusbrain-cycle` otherwise (autopilot still passes nothing).
         // cycleLockIdFor validates the sourceId via assertValidSourceId.
         dbLock = await acquireDbCycleLock(engine, opts.sourceId);
       } catch (e) {
@@ -1766,9 +1766,9 @@ export async function runCycle(
     // ── v0.41 T9: extract_atoms (per-source, pack-gated) ──────────
     // Orchestrator-level pack gate: consults the active pack's `phases:`
     // declaration. When the active pack does NOT declare extract_atoms
-    // (e.g. user is on gbrain-base or gbrain-investor), this phase is a
+    // (e.g. user is on gbrain-base or modusbrain-investor), this phase is a
     // no-op with reason='not_in_active_pack'. When the pack does declare
-    // it (gbrain-creator, gbrain-everything), dispatches to the
+    // it (modusbrain-creator, modusbrain-everything), dispatches to the
     // extract-atoms.ts module (real body in T5; stub for now).
     //
     // borrow_from does NOT borrow phases — each pack declares phase
@@ -1795,7 +1795,7 @@ export async function runCycle(
           phase: 'extract_atoms',
           status: 'skipped',
           duration_ms: 0,
-          summary: 'extract_atoms: active pack does not declare this phase (run `gbrain dream --phase extract_atoms --drain` to drain a backlog)',
+          summary: 'extract_atoms: active pack does not declare this phase (run `modusbrain dream --phase extract_atoms --drain` to drain a backlog)',
           details: { reason: 'not_in_active_pack', pack_gated: true },
         });
       } else {
@@ -2207,8 +2207,8 @@ export async function runCycle(
     // ── v0.39 T12: schema-suggest ───────────────────────────────
     // Passive trigger of the runSuggest() library (D3 + D4 plan-eng-review).
     // Best-effort: phase failure does not abort the cycle. Writes nothing
-    // to user data — output goes to ~/.gbrain/audit/schema-events-*.jsonl
-    // (T15) and the disk-derived candidate set surfaced by `gbrain schema
+    // to user data — output goes to ~/.modusbrain/audit/schema-events-*.jsonl
+    // (T15) and the disk-derived candidate set surfaced by `modusbrain schema
     // review-candidates`.
     if (phases.includes('schema-suggest')) {
       checkAborted(opts.signal);
@@ -2443,7 +2443,7 @@ function deriveStatus(phases: PhaseResult[], totals: CycleReport['totals']): Cyc
     totals.pages_extracted > 0 ||
     totals.pages_embedded > 0 ||
     totals.pages_emotional_weight_recomputed > 0 ||
-    // A7: a code brain runs `gbrain dream` specifically to build the call graph
+    // A7: a code brain runs `modusbrain dream` specifically to build the call graph
     // (resolve_symbol_edges). Without these, an edges-only cycle reports 'clean'
     // — indistinguishable from "nothing happened" even when N edges resolved.
     totals.edges_resolved > 0 ||

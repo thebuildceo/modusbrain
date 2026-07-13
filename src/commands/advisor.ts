@@ -1,9 +1,9 @@
 /**
- * commands/advisor.ts — `gbrain advisor` CLI surface.
+ * commands/advisor.ts — `modusbrain advisor` CLI surface.
  *
- *   gbrain advisor            # ranked, agent-readable action list (human render)
- *   gbrain advisor --json     # structured findings; exit non-zero on critical (E2)
- *   gbrain advisor --apply ID # run ONE finding's fix, local-only, after confirm (E5)
+ *   modusbrain advisor            # ranked, agent-readable action list (human render)
+ *   modusbrain advisor --json     # structured findings; exit non-zero on critical (E2)
+ *   modusbrain advisor --apply ID # run ONE finding's fix, local-only, after confirm (E5)
  *
  * The advisor itself never mutates. `--apply` is the only path that runs a fix,
  * and it: refuses over MCP (CLI is always local), only acts on allowlisted
@@ -54,7 +54,7 @@ function exitFor(report: AdvisorReport): 0 | 1 | 2 {
 export async function runAdvisorCli(engine: BrainEngine, args: string[]): Promise<AdvisorCliResult> {
   if (args.includes('--help') || args.includes('-h')) {
     console.log(
-      'gbrain advisor [--json] [--apply <finding-id>]\n\n' +
+      'modusbrain advisor [--json] [--apply <finding-id>]\n\n' +
         '  (no flags)        Ranked, agent-readable list of high-leverage actions for this brain.\n' +
         '  --json            Structured findings. Exit code: 0 clean / 1 warn / 2 critical.\n' +
         '  --apply <id>      Run ONE finding\'s fix (local-only, confirms first). Only findings\n' +

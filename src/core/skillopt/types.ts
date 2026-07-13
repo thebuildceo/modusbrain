@@ -158,7 +158,7 @@ export interface SkillOptOpts {
   json: boolean;
 
   // ─── Eval-internal ablation knobs (NOT exposed on the CLI) ───────────────
-  // These exist so the gbrain-evals ablation (cat31) can run the orchestrator
+  // These exist so the modusbrain-evals ablation (cat31) can run the orchestrator
   // in degraded modes for an apples-to-apples comparison. Defaults preserve
   // the full production pipeline. `disableValidationGate` MUST NOT be wired to
   // any user-facing flag — it disables the core safety gate.
@@ -276,7 +276,7 @@ export const BOOTSTRAP_PENDING_REVIEW = '# BOOTSTRAP_PENDING_REVIEW';
 
 /**
  * D16: a skill is "bundled" when its SKILL.md lives under the repo's
- * canonical `skills/` directory (relative to the gbrain install root).
+ * canonical `skills/` directory (relative to the modusbrain install root).
  * Bundled skills require `--allow-mutate-bundled` to overwrite.
  */
 export interface BundledSkillContext {

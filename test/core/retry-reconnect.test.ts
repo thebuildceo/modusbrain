@@ -9,7 +9,7 @@
 import { describe, expect, test } from 'bun:test';
 import { withRetry, RetryAbortError } from '../../src/core/retry.ts';
 
-class FakeGBrainError extends Error {
+class FakeModusBrainError extends Error {
   problem: string;
   detail: string;
   constructor(problem: string, detail: string) {
@@ -32,7 +32,7 @@ describe('withRetry reconnect callback (v0.41.25.0)', () => {
         attempts++;
         order.push(`fn-attempt-${attempts}`);
         if (attempts === 1) {
-          throw new FakeGBrainError('No database connection', 'connect() has not been called');
+          throw new FakeModusBrainError('No database connection', 'connect() has not been called');
         }
         return 'recovered';
       },
@@ -83,7 +83,7 @@ describe('withRetry reconnect callback (v0.41.25.0)', () => {
       withRetry(
         async () => {
           attempts++;
-          throw new FakeGBrainError('No database connection', 'connect() has not been called');
+          throw new FakeModusBrainError('No database connection', 'connect() has not been called');
         },
         {
           delayMs: 0,
@@ -110,7 +110,7 @@ describe('withRetry reconnect callback (v0.41.25.0)', () => {
         async () => {
           attempts++;
           ctrl.abort(); // fire abort right when the retryable error throws
-          throw new FakeGBrainError('No database connection', 'x');
+          throw new FakeModusBrainError('No database connection', 'x');
         },
         {
           delayMs: 30,

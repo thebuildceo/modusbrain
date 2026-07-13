@@ -1,6 +1,6 @@
 # Minions Worker Deployment Guide
 
-Keep `gbrain jobs work` running across crashes, reboots, and Postgres
+Keep `modusbrain jobs work` running across crashes, reboots, and Postgres
 connection blips. Written for agents to execute line-by-line.
 
 ## The problem
@@ -13,15 +13,15 @@ The persistent worker can die silently from:
 - Internal event-loop death (PID alive, worker loop stopped).
 
 When the worker dies, submitted jobs sit in `waiting` forever. The
-canonical answer is `gbrain jobs supervisor` — a first-class CLI that
-spawns `gbrain jobs work` as a child and auto-restarts it on crash.
+canonical answer is `modusbrain jobs supervisor` — a first-class CLI that
+spawns `modusbrain jobs work` as a child and auto-restarts it on crash.
 
 ## Worker supervision
 
 ### The canonical pattern
 
-`gbrain jobs supervisor` is an auto-restarting wrapper around
-`gbrain jobs work`. It writes a PID file, restarts the worker on crash
+`modusbrain jobs supervisor` is an auto-restarting wrapper around
+`modusbrain jobs work`. It writes a PID file, restarts the worker on crash
 with exponential backoff (1s → 60s cap), emits lifecycle events to an
 audit file, and drains gracefully on SIGTERM (35s worker-drain window
 before SIGKILL). Exit codes are documented so agents can branch on them.
@@ -30,16 +30,16 @@ before SIGKILL). Exit codes are documented so agents can branch on them.
 
 ```bash
 # Start in the foreground (blocks; Ctrl-C to stop).
-gbrain jobs supervisor --concurrency 4
+modusbrain jobs supervisor --concurrency 4
 
 # Start detached — returns {"event":"started","supervisor_pid":…} on stdout.
-gbrain jobs supervisor start --detach --json
+modusbrain jobs supervisor start --detach --json
 
 # Check liveness without reading log files.
-gbrain jobs supervisor status --json
+modusbrain jobs supervisor status --json
 
 # Graceful stop (SIGTERM + drain wait + SIGKILL fallback).
-gbrain jobs supervisor stop
+modusbrain jobs supervisor stop
 ```
 
 **Exit codes:**
@@ -66,17 +66,17 @@ isn't:
 ```bash
 # Full concurrency, low priority. Propagates to the spawned worker and its
 # children (shell jobs, subagents) via OS niceness inheritance.
-gbrain jobs supervisor --concurrency 4 --nice 10
+modusbrain jobs supervisor --concurrency 4 --nice 10
 
 # Equivalent for a bare worker, or set it durably in the environment.
-GBRAIN_NICE=10 gbrain jobs work --concurrency 4
+MODUSBRAIN_NICE=10 modusbrain jobs work --concurrency 4
 ```
 
 `--nice` takes a POSIX value from `-20` (highest priority) to `19`
 (nicest/lowest); positive values need no privilege, negative values need
-root. `GBRAIN_NICE` is the env equivalent (the flag wins). Confirm the
-effective value with `gbrain jobs stats`, `gbrain jobs supervisor status
---json`, or the `supervisor_niceness` check in `gbrain doctor` — the doctor
+root. `MODUSBRAIN_NICE` is the env equivalent (the flag wins). Confirm the
+effective value with `modusbrain jobs stats`, `modusbrain jobs supervisor status
+--json`, or the `supervisor_niceness` check in `modusbrain doctor` — the doctor
 check warns if what you asked for isn't what's actually running (e.g. a
 negative value denied without privilege, or an OS `RLIMIT_NICE` clamp). This
 is distinct from the concurrency / inflight cap and composes with it.
@@ -89,9 +89,9 @@ usually want both.
 
 | Environment | Recommendation |
 |---|---|
-| **Container (Fly / Railway / Render / Heroku)** | `gbrain jobs supervisor` runs as PID 1. The platform restarts the container on OOM / host loss; supervisor restarts the worker on crash. See [Fly.io](#flyio) / [Render / Railway / Heroku](#render--railway--heroku). |
-| **Linux VM with systemd** | Two-layer recommended: systemd supervises `gbrain jobs supervisor`, which in turn supervises `gbrain jobs work`. Buys you automatic restart on reboot (systemd) plus fast crash recovery (supervisor). See [systemd](#systemd). |
-| **Dev laptop / macOS** | `gbrain jobs supervisor` in a terminal. Ctrl-C stops it. No system-level setup needed. |
+| **Container (Fly / Railway / Render / Heroku)** | `modusbrain jobs supervisor` runs as PID 1. The platform restarts the container on OOM / host loss; supervisor restarts the worker on crash. See [Fly.io](#flyio) / [Render / Railway / Heroku](#render--railway--heroku). |
+| **Linux VM with systemd** | Two-layer recommended: systemd supervises `modusbrain jobs supervisor`, which in turn supervises `modusbrain jobs work`. Buys you automatic restart on reboot (systemd) plus fast crash recovery (supervisor). See [systemd](#systemd). |
+| **Dev laptop / macOS** | `modusbrain jobs supervisor` in a terminal. Ctrl-C stops it. No system-level setup needed. |
 
 ### Variables used in this guide
 
@@ -99,31 +99,31 @@ Substitute these once before copy-pasting any snippet.
 
 | Variable | Meaning | Typical value |
 |---|---|---|
-| `$GBRAIN_BIN` | Absolute path to the `gbrain` binary | `$(command -v gbrain)` — often `/usr/local/bin/gbrain` or `~/.bun/bin/gbrain` |
-| `$GBRAIN_WORKER_USER` | OS user that owns the worker process | the same user that ran `gbrain init`; never `root` |
-| `$GBRAIN_WORKSPACE` | `cwd` for shell jobs submitted by this deployment | absolute path, e.g. `/srv/my-brain` |
-| `$GBRAIN_ENV_FILE` | Secrets file sourced by systemd / shell | `/etc/gbrain.env` (mode 600) |
+| `$MODUSBRAIN_BIN` | Absolute path to the `modusbrain` binary | `$(command -v modusbrain)` — often `/usr/local/bin/modusbrain` or `~/.bun/bin/modusbrain` |
+| `$MODUSBRAIN_WORKER_USER` | OS user that owns the worker process | the same user that ran `modusbrain init`; never `root` |
+| `$MODUSBRAIN_WORKSPACE` | `cwd` for shell jobs submitted by this deployment | absolute path, e.g. `/srv/my-brain` |
+| `$MODUSBRAIN_ENV_FILE` | Secrets file sourced by systemd / shell | `/etc/modusbrain.env` (mode 600) |
 
 ### Preconditions
 
 Run these before any deployment step.
 
 ```bash
-# 1. gbrain is on PATH and resolves to an absolute location.
-command -v gbrain || { echo "gbrain not on PATH. Install, then retry."; exit 1; }
+# 1. modusbrain is on PATH and resolves to an absolute location.
+command -v modusbrain || { echo "modusbrain not on PATH. Install, then retry."; exit 1; }
 
 # 2. DATABASE_URL points at reachable Postgres.
 #    (Supervisor is Postgres-only. PGLite's exclusive file lock blocks the
 #    separate worker process. If `config.engine === 'pglite'` the CLI rejects
 #    with a clear error.)
-gbrain doctor --fast --json | jq '.checks[] | select(.name=="db_connectivity")'
+modusbrain doctor --fast --json | jq '.checks[] | select(.name=="db_connectivity")'
 
 # 3. Schema is up to date. If version=0 or status=="fail":
-#    gbrain apply-migrations --yes
-gbrain doctor --fast --json | jq '.checks[] | select(.name=="schema_version")'
+#    modusbrain apply-migrations --yes
+modusbrain doctor --fast --json | jq '.checks[] | select(.name=="schema_version")'
 
 # 4. If you plan to submit `shell` jobs, pass --allow-shell-jobs to the
-#    supervisor (or export GBRAIN_ALLOW_SHELL_JOBS=1 before starting).
+#    supervisor (or export MODUSBRAIN_ALLOW_SHELL_JOBS=1 before starting).
 #    Without the flag, the shell handler is disabled at worker startup.
 ```
 
@@ -133,20 +133,20 @@ Three-command pattern an agent can drive without shell archaeology:
 
 ```bash
 # Start (returns PIDs + pid_file on stdout as JSON, then detaches)
-gbrain jobs supervisor start --detach --json
-# → {"event":"started","supervisor_pid":1234,"worker_pid":1235,"pid_file":"/Users/you/.gbrain/supervisor.pid"}
+modusbrain jobs supervisor start --detach --json
+# → {"event":"started","supervisor_pid":1234,"worker_pid":1235,"pid_file":"/Users/you/.modusbrain/supervisor.pid"}
 
 # Check health (machine-parseable JSON, no log scraping)
-gbrain jobs supervisor status --json
+modusbrain jobs supervisor status --json
 # → {"running":true,"supervisor_pid":1234,"last_start":"2026-04-23T15:30:22Z","crashes_24h":0, ...}
 
 # Stop cleanly (SIGTERM + 35s drain + SIGKILL fallback)
-gbrain jobs supervisor stop
+modusbrain jobs supervisor stop
 ```
 
 Every lifecycle event (spawn, crash, backoff, health warning, max-crashes,
-shutdown) is also written to `${GBRAIN_AUDIT_DIR:-~/.gbrain/audit}/supervisor-YYYY-Www.jsonl`
-for historical inspection. `gbrain doctor` reads that file and surfaces
+shutdown) is also written to `${MODUSBRAIN_AUDIT_DIR:-~/.modusbrain/audit}/supervisor-YYYY-Www.jsonl`
+for historical inspection. `modusbrain doctor` reads that file and surfaces
 a `supervisor` check in its health report.
 
 ## Deployment: systemd
@@ -155,35 +155,35 @@ For long-running Linux VMs with shell access.
 
 ```bash
 # Create the worker user if it doesn't exist.
-sudo useradd --system --home "$GBRAIN_WORKSPACE" --shell /usr/sbin/nologin gbrain \
+sudo useradd --system --home "$MODUSBRAIN_WORKSPACE" --shell /usr/sbin/nologin modusbrain \
   2>/dev/null || true
-sudo mkdir -p "$GBRAIN_WORKSPACE" && sudo chown gbrain:gbrain "$GBRAIN_WORKSPACE"
+sudo mkdir -p "$MODUSBRAIN_WORKSPACE" && sudo chown modusbrain:modusbrain "$MODUSBRAIN_WORKSPACE"
 
 # Install the env file (secrets stay out of the unit file).
-sudo install -m 600 -o gbrain -g gbrain \
-  docs/guides/minions-deployment-snippets/gbrain.env.example /etc/gbrain.env
-sudoedit /etc/gbrain.env
-# Fill in DATABASE_URL, optional GBRAIN_ALLOW_SHELL_JOBS=1.
+sudo install -m 600 -o modusbrain -g modusbrain \
+  docs/guides/minions-deployment-snippets/modusbrain.env.example /etc/modusbrain.env
+sudoedit /etc/modusbrain.env
+# Fill in DATABASE_URL, optional MODUSBRAIN_ALLOW_SHELL_JOBS=1.
 
-# Install the unit file, substituting /srv/gbrain → your workspace path.
+# Install the unit file, substituting /srv/modusbrain → your workspace path.
 sudo install -m 644 docs/guides/minions-deployment-snippets/systemd.service \
-  /etc/systemd/system/gbrain-worker.service
-sudo sed -i "s|/srv/gbrain|$GBRAIN_WORKSPACE|g" \
-  /etc/systemd/system/gbrain-worker.service
+  /etc/systemd/system/modusbrain-worker.service
+sudo sed -i "s|/srv/modusbrain|$MODUSBRAIN_WORKSPACE|g" \
+  /etc/systemd/system/modusbrain-worker.service
 
 sudo systemctl daemon-reload
-sudo systemctl enable --now gbrain-worker
-sudo systemctl status gbrain-worker
-journalctl -u gbrain-worker -n 50
+sudo systemctl enable --now modusbrain-worker
+sudo systemctl status modusbrain-worker
+journalctl -u modusbrain-worker -n 50
 ```
 
-The shipped unit file invokes `gbrain jobs supervisor` (not `gbrain jobs work`
+The shipped unit file invokes `modusbrain jobs supervisor` (not `modusbrain jobs work`
 directly) so you get two-layer supervision: systemd restarts the supervisor
 on host reboot, supervisor restarts the worker on in-process crash.
 
 `Restart=always` + `RestartSec=10s` handle the supervisor-level recovery.
-The unit runs as unprivileged `gbrain` with `PrivateTmp`, `ProtectSystem=strict`,
-and `ReadWritePaths=$GBRAIN_WORKSPACE,$HOME/.gbrain` (for the PID file and
+The unit runs as unprivileged `modusbrain` with `PrivateTmp`, `ProtectSystem=strict`,
+and `ReadWritePaths=$MODUSBRAIN_WORKSPACE,$HOME/.modusbrain` (for the PID file and
 audit log). `LimitNOFILE=65535` covers Bun + Postgres pool + concurrent
 LLM subagent calls without hitting the default 1024 cap.
 
@@ -195,18 +195,18 @@ cat docs/guides/minions-deployment-snippets/fly.toml.partial >> fly.toml
 # Review + edit as needed.
 
 # Set secrets (Fly handles restart on crash).
-fly secrets set DATABASE_URL='postgres://…' GBRAIN_ALLOW_SHELL_JOBS=1
+fly secrets set DATABASE_URL='postgres://…' MODUSBRAIN_ALLOW_SHELL_JOBS=1
 ```
 
-The `[processes]` block runs `gbrain jobs supervisor` as PID 1. Fly
+The `[processes]` block runs `modusbrain jobs supervisor` as PID 1. Fly
 restarts the container on host failure; the supervisor restarts the
 worker on in-process crash.
 
 ## Deployment: Render / Railway / Heroku
 
 Drop [`Procfile`](./minions-deployment-snippets/Procfile) at the repo
-root. The shipped Procfile calls `gbrain jobs supervisor`. Set
-`DATABASE_URL` + optional `GBRAIN_ALLOW_SHELL_JOBS=1` via the platform's
+root. The shipped Procfile calls `modusbrain jobs supervisor`. Set
+`DATABASE_URL` + optional `MODUSBRAIN_ALLOW_SHELL_JOBS=1` via the platform's
 env UI or CLI.
 
 ## Deployment: inline `--follow` (no persistent worker)
@@ -219,14 +219,14 @@ just-submitted job reaches a terminal state (`completed` / `failed` /
 duration for scheduled work.
 
 ```bash
-GBRAIN_ALLOW_SHELL_JOBS=1 gbrain jobs submit shell \
+MODUSBRAIN_ALLOW_SHELL_JOBS=1 modusbrain jobs submit shell \
   --queue nightly-enrich \
-  --params "{\"cmd\":\"$GBRAIN_BIN embed --stale\",\"cwd\":\"$GBRAIN_WORKSPACE\"}" \
+  --params "{\"cmd\":\"$MODUSBRAIN_BIN embed --stale\",\"cwd\":\"$MODUSBRAIN_WORKSPACE\"}" \
   --follow \
   --timeout-ms 600000
 ```
 
-Replace `gbrain embed --stale` with whichever gbrain subcommand you're
+Replace `modusbrain embed --stale` with whichever modusbrain subcommand you're
 scheduling (`sync`, `extract`, `orphans`, `doctor`, `check-backlinks`,
 `lint`, `autopilot`). For strict single-job semantics on shared queues,
 use a dedicated queue name like `nightly-enrich` above.
@@ -236,7 +236,7 @@ use a dedicated queue name like `nightly-enrich` above.
 ### From `minion-watchdog.sh` (pre-v0.20)
 
 Earlier versions of this guide shipped a 68-line bash watchdog
-(`minion-watchdog.sh`). It's been replaced by `gbrain jobs supervisor`
+(`minion-watchdog.sh`). It's been replaced by `modusbrain jobs supervisor`
 which handles everything the script did, plus atomic PID locking,
 structured audit events, queue-scoped health checks, and graceful
 drain on SIGTERM.
@@ -245,37 +245,37 @@ drain on SIGTERM.
 
 ```bash
 # 1. Stop and remove the old watchdog.
-sudo kill $(head -n1 /tmp/gbrain-worker.pid) 2>/dev/null
-sudo rm -f /usr/local/bin/minion-watchdog.sh /tmp/gbrain-worker.pid \
-           /tmp/gbrain-worker.log
+sudo kill $(head -n1 /tmp/modusbrain-worker.pid) 2>/dev/null
+sudo rm -f /usr/local/bin/minion-watchdog.sh /tmp/modusbrain-worker.pid \
+           /tmp/modusbrain-worker.log
 crontab -e   # delete the "*/5 * * * * /usr/local/bin/minion-watchdog.sh" line
 
 # 2. Start the supervisor (systemd users: reinstall the unit from
 #    docs/guides/minions-deployment-snippets/systemd.service, which
-#    now calls `gbrain jobs supervisor`).
-gbrain jobs supervisor start --detach --json
-# Or: sudo systemctl restart gbrain-worker
+#    now calls `modusbrain jobs supervisor`).
+modusbrain jobs supervisor start --detach --json
+# Or: sudo systemctl restart modusbrain-worker
 
 # 3. Verify.
-gbrain jobs supervisor status --json
-gbrain doctor   # 'supervisor' check should report running=true
+modusbrain jobs supervisor status --json
+modusbrain doctor   # 'supervisor' check should report running=true
 ```
 
 ### Schema / migration hygiene
 
 Regardless of which deployment path you're upgrading from:
 
-1. **Stop the worker before upgrading.** `gbrain jobs supervisor stop`
-   (or `sudo systemctl stop gbrain-worker`). Skipping this risks an
+1. **Stop the worker before upgrading.** `modusbrain jobs supervisor stop`
+   (or `sudo systemctl stop modusbrain-worker`). Skipping this risks an
    in-flight job landing partial schema.
-2. **Run `gbrain upgrade`**. Then `gbrain apply-migrations --yes` if
-   `gbrain doctor` reports any migration as `partial` or `pending`.
+2. **Run `modusbrain upgrade`**. Then `modusbrain apply-migrations --yes` if
+   `modusbrain doctor` reports any migration as `partial` or `pending`.
 3. **If you run shell jobs:** from v0.14 onward, pass
    `--allow-shell-jobs` to the supervisor (or keep
-   `GBRAIN_ALLOW_SHELL_JOBS=1` in `/etc/gbrain.env`). Submitters don't
+   `MODUSBRAIN_ALLOW_SHELL_JOBS=1` in `/etc/modusbrain.env`). Submitters don't
    need the flag; only the worker does.
-4. **Verify.** `gbrain doctor` should report zero `pending` or `partial`
-   migrations plus a healthy `supervisor` check. `gbrain jobs stats`
+4. **Verify.** `modusbrain doctor` should report zero `pending` or `partial`
+   migrations plus a healthy `supervisor` check. `modusbrain jobs stats`
    should show no unexplained growth in `dead` between pre- and
    post-upgrade.
 
@@ -296,7 +296,7 @@ silently. The stall detector then dead-letters the job after
   `src/core/pglite-schema.ts`). Five missed heartbeats before dead-letter.
 - `stalledInterval: 30000` (30 s) — checks too aggressively.
 
-**Tune per-job today.** `gbrain jobs submit` accepts `--max-stalled N`,
+**Tune per-job today.** `modusbrain jobs submit` accepts `--max-stalled N`,
 `--backoff-type fixed|exponential`, `--backoff-delay <ms>`,
 `--backoff-jitter 0..1`, and `--timeout-ms N` as first-class flags
 (since v0.13.1). These write onto the job row at submit time — which is
@@ -306,7 +306,7 @@ what `handleStalled()` reads — so per-job tuning is the real knob today.
 
 It's a no-op. The stall detector reads the row's `max_stalled` column
 (set at submit time), not the worker opt in `src/core/minions/worker.ts:74`.
-Use `gbrain jobs submit --max-stalled N` per-job instead.
+Use `modusbrain jobs submit --max-stalled N` per-job instead.
 
 ### Zombie shell children
 
@@ -320,34 +320,34 @@ over relying on hard kills.
 
 ```bash
 # Supervisor alive?
-gbrain jobs supervisor status --json | jq .running
+modusbrain jobs supervisor status --json | jq .running
 
 # Aggregate queue health.
-gbrain jobs stats
+modusbrain jobs stats
 
 # Jobs currently stalled (still `active` with expired lock_until, pre-requeue).
-gbrain jobs list --status active --limit 10
+modusbrain jobs list --status active --limit 10
 
 # Dead-lettered jobs.
-gbrain jobs list --status dead --limit 10
+modusbrain jobs list --status dead --limit 10
 
 # Shell handler registered? (check supervisor audit log or worker stderr.)
-gbrain jobs supervisor status --json | jq '.worker_config.allow_shell_jobs'
+modusbrain jobs supervisor status --json | jq '.worker_config.allow_shell_jobs'
 ```
 
 ## Uninstall
 
-**`gbrain jobs supervisor`** (foreground or `--detach`):
+**`modusbrain jobs supervisor`** (foreground or `--detach`):
 
 ```bash
-gbrain jobs supervisor stop
+modusbrain jobs supervisor stop
 ```
 
 **systemd:**
 
 ```bash
-sudo systemctl disable --now gbrain-worker
-sudo rm /etc/systemd/system/gbrain-worker.service /etc/gbrain.env
+sudo systemctl disable --now modusbrain-worker
+sudo rm /etc/systemd/system/modusbrain-worker.service /etc/modusbrain.env
 sudo systemctl daemon-reload
 ```
 

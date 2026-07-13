@@ -1,10 +1,10 @@
-# Contributing to GBrain
+# Contributing to ModusBrain
 
 ## Setup
 
 ```bash
 git clone https://github.com/garrytan/gbrain.git
-cd gbrain
+cd modusbrain
 bun install
 bun test
 ```
@@ -69,7 +69,7 @@ bun run test:e2e                  # real-Postgres E2E (requires DATABASE_URL)
 
 # E2E setup (Postgres with pgvector)
 docker compose -f docker-compose.test.yml up -d
-DATABASE_URL=postgresql://postgres:postgres@localhost:5434/gbrain_test bun run test:e2e
+DATABASE_URL=postgresql://postgres:postgres@localhost:5434/modusbrain_test bun run test:e2e
 
 # Or use your own Postgres / Supabase
 DATABASE_URL=postgresql://... bun run test:e2e
@@ -158,7 +158,7 @@ bun run ci:select-e2e    # print which E2E files the selector would run
 tears down. Named volumes keep the install warm across runs (~16-20 min sequential
 E2E after the first cold pull). Requires Docker (Docker Desktop, OrbStack, or
 Colima) and `gitleaks` on host (`brew install gitleaks`). Override the postgres
-host port with `GBRAIN_CI_PG_PORT=5435 bun run ci:local` if 5434 collides.
+host port with `MODUSBRAIN_CI_PG_PORT=5435 bun run ci:local` if 5434 collides.
 
 Fail-closed selector: an unmapped `src/` change runs all 29 E2E files. Hand-tune
 narrower mappings via `scripts/e2e-test-map.ts`.
@@ -166,12 +166,12 @@ narrower mappings via `scripts/e2e-test-map.ts`.
 ## Building
 
 ```bash
-bun build --compile --outfile bin/gbrain src/cli.ts
+bun build --compile --outfile bin/modusbrain src/cli.ts
 ```
 
 ## Adding a new operation
 
-GBrain uses a contract-first architecture. Add your operation to one file and it
+ModusBrain uses a contract-first architecture. Add your operation to one file and it
 automatically appears in the CLI, MCP server, and tools-json:
 
 1. Add your operation to `src/core/operations.ts` (define params, handler, cliHints)
@@ -197,14 +197,14 @@ The original SQLite engine plan was superseded by PGLite (embedded Postgres 17 v
 
 ## CONTRIBUTOR_MODE — turn on the dev loop
 
-gbrain captures retrieval traffic so you can replay real queries against
+modusbrain captures retrieval traffic so you can replay real queries against
 your code changes before merging. **This is off by default** (production
 users get a quiet brain, no surprise data accumulation). Contributors turn
 it on with one shell rc line:
 
 ```bash
 # In ~/.zshrc or ~/.bashrc:
-export GBRAIN_CONTRIBUTOR_MODE=1
+export MODUSBRAIN_CONTRIBUTOR_MODE=1
 ```
 
 That's it. Every `query` / `search` you (or agents pointed at your dev
@@ -220,37 +220,37 @@ What CONTRIBUTOR_MODE actually does:
 
 Resolution order (most explicit wins):
 
-1. `eval.capture: true` in `~/.gbrain/config.json` → on
-2. `eval.capture: false` in `~/.gbrain/config.json` → off
-3. `GBRAIN_CONTRIBUTOR_MODE=1` → on
+1. `eval.capture: true` in `~/.modusbrain/config.json` → on
+2. `eval.capture: false` in `~/.modusbrain/config.json` → off
+3. `MODUSBRAIN_CONTRIBUTOR_MODE=1` → on
 4. otherwise → off
 
 Quick check that capture is actually running:
 
 ```bash
-gbrain query "anything" >/dev/null
+modusbrain query "anything" >/dev/null
 psql $DATABASE_URL -c 'SELECT count(*) FROM eval_candidates'
-# (or `gbrain doctor` — surfaces silent capture failures cross-process)
+# (or `modusbrain doctor` — surfaces silent capture failures cross-process)
 ```
 
 To disable capture even with the env var set, write
-`{"eval": {"capture": false}}` to `~/.gbrain/config.json` — explicit config
+`{"eval": {"capture": false}}` to `~/.modusbrain/config.json` — explicit config
 beats the env var both directions.
 
 ## Running real-world eval benchmarks (touching retrieval code)
 
 If your PR touches retrieval — search ranking, RRF fusion, embeddings,
 intent classification, query expansion, source boost, or the `query` /
-`search` op handlers — run `gbrain eval replay` against a snapshot of
+`search` op handlers — run `modusbrain eval replay` against a snapshot of
 real traffic before merging. Requires `CONTRIBUTOR_MODE` (above) so you
 have captured rows to replay against.
 
 Quick loop:
 
 ```bash
-gbrain eval export --since 7d > baseline.ndjson    # snapshot before your change
+modusbrain eval export --since 7d > baseline.ndjson    # snapshot before your change
 # ... make your change ...
-gbrain eval replay --against baseline.ndjson       # diff retrieval, get Jaccard@k
+modusbrain eval replay --against baseline.ndjson       # diff retrieval, get Jaccard@k
 ```
 
 Three numbers come back: mean Jaccard@k between captured and current slug
@@ -273,8 +273,8 @@ without captured data can still replay), and cost considerations. The
 NDJSON wire format is documented in
 [`docs/eval-capture.md`](./docs/eval-capture.md).
 
-For public benchmark coverage on top of replay, `gbrain eval longmemeval
-<dataset.jsonl>` (v0.28.1) runs LongMemEval against gbrain's hybrid
+For public benchmark coverage on top of replay, `modusbrain eval longmemeval
+<dataset.jsonl>` (v0.28.1) runs LongMemEval against modusbrain's hybrid
 retrieval. One in-memory PGLite per question, runtime-enumerated
 `TRUNCATE` between questions, ground-truth scoring via LongMemEval's
 published `evaluate_qa.py`. Use it alongside replay when changes affect

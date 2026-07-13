@@ -29,7 +29,7 @@ describe('frontmatter install-hook (B13)', () => {
     const hookPath = join(tmp, '.githooks', 'pre-commit');
     expect(existsSync(hookPath)).toBe(true);
     const content = readFileSync(hookPath, 'utf8');
-    expect(content).toContain('gbrain frontmatter');
+    expect(content).toContain('modusbrain frontmatter');
     expect(content).toContain('git diff --cached');
     // installHook's contract is "set core.hooksPath unless it's already set
     // elsewhere". Test BOTH branches deterministically by reading the local
@@ -93,10 +93,10 @@ describe('frontmatter install-hook (B13)', () => {
     expect(result).toBe('installed');
     expect(existsSync(hookPath + '.bak')).toBe(true);
     expect(readFileSync(hookPath + '.bak', 'utf8')).toContain('user hook');
-    expect(readFileSync(hookPath, 'utf8')).toContain('gbrain frontmatter');
+    expect(readFileSync(hookPath, 'utf8')).toContain('modusbrain frontmatter');
   });
 
-  test('installHook on existing gbrain hook refreshes silently (no .bak)', () => {
+  test('installHook on existing modusbrain hook refreshes silently (no .bak)', () => {
     installHook(tmp, false);
     const hookPath = join(tmp, '.githooks', 'pre-commit');
     expect(existsSync(hookPath + '.bak')).toBe(false);
@@ -105,7 +105,7 @@ describe('frontmatter install-hook (B13)', () => {
     expect(second).toBe('unchanged');
   });
 
-  test('uninstallHook removes the gbrain hook and restores .bak when present', () => {
+  test('uninstallHook removes the modusbrain hook and restores .bak when present', () => {
     const hooksDir = join(tmp, '.githooks');
     mkdirSync(hooksDir, { recursive: true });
     const hookPath = join(hooksDir, 'pre-commit');
@@ -120,7 +120,7 @@ describe('frontmatter install-hook (B13)', () => {
     expect(existsSync(hookPath + '.bak')).toBe(false);
   });
 
-  test('uninstallHook on a non-gbrain hook returns false (does not remove user hook)', () => {
+  test('uninstallHook on a non-modusbrain hook returns false (does not remove user hook)', () => {
     const hooksDir = join(tmp, '.githooks');
     mkdirSync(hooksDir, { recursive: true });
     const hookPath = join(hooksDir, 'pre-commit');

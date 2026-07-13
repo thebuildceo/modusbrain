@@ -1,13 +1,13 @@
 /**
  * Retrieval Reflex — resolve IPC (issue #1981, D9=C).
  *
- * PGLite is single-connection: `gbrain serve` holds the one connection for its
+ * PGLite is single-connection: `modusbrain serve` holds the one connection for its
  * lifetime, so the context engine cannot open its own and must NOT shell out to
  * a subprocess (that would force-steal the lock past the 5-min staleness window
  * and crash the brain — see plan D9 rejected option). Instead, `serve`
  * optionally listens on a local unix-domain socket and answers a NARROW request
  * — candidates in, pointers out — using the connection it already owns. Both
- * ends are gbrain code; raw SQL never crosses the wire (closes the trust hole).
+ * ends are modusbrain code; raw SQL never crosses the wire (closes the trust hole).
  *
  * Protocol: newline-delimited JSON. One request line, one response line.
  *   req:  { candidates, priorContextText?, maxPointers?, sourceId? }
@@ -23,7 +23,7 @@ import { join } from 'node:path';
 import type { EntityCandidate } from './entity-salience.ts';
 import type { PointerBlock } from './retrieval-reflex.ts';
 
-const SOCK_NAME = '.gbrain-resolve.sock';
+const SOCK_NAME = '.modusbrain-resolve.sock';
 const CLIENT_TIMEOUT_MS = 250;
 const MAX_MSG_BYTES = 256 * 1024;
 

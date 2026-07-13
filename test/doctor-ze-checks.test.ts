@@ -58,10 +58,10 @@ describe('checkZeEmbeddingHealth', () => {
       embedding_dimensions: 1280,
       env: { ...process.env, ZEROENTROPY_API_KEY: undefined as any },
     });
-    // Clear the env var AND isolate GBRAIN_HOME for the no-key path: the check
-    // reads ZEROENTROPY_API_KEY from env OR the gbrain config file, so a dev
-    // machine whose real ~/.gbrain/config.json holds the key needs both cleared.
-    await withEnv({ ZEROENTROPY_API_KEY: undefined, GBRAIN_HOME: emptyHome() }, async () => {
+    // Clear the env var AND isolate MODUSBRAIN_HOME for the no-key path: the check
+    // reads ZEROENTROPY_API_KEY from env OR the modusbrain config file, so a dev
+    // machine whose real ~/.modusbrain/config.json holds the key needs both cleared.
+    await withEnv({ ZEROENTROPY_API_KEY: undefined, MODUSBRAIN_HOME: emptyHome() }, async () => {
       const check = await checkZeEmbeddingHealth(engine);
       expect(check.status).toBe('warn');
       expect(check.message).toContain('ZEROENTROPY_API_KEY');
@@ -138,8 +138,8 @@ describe('checkEmbeddingWidthConsistency', () => {
     const check = await checkEmbeddingWidthConsistency(engine);
     expect(check.status).toBe('warn');
     expect(check.message).toContain('mismatch');
-    // v0.37 hint points at gbrain init (the path that works), not config set.
-    expect(check.message).toContain('gbrain init');
+    // v0.37 hint points at modusbrain init (the path that works), not config set.
+    expect(check.message).toContain('modusbrain init');
   });
 
   test('gateway unconfigured: skips with ok', async () => {

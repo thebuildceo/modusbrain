@@ -1,5 +1,5 @@
 /**
- * v0.41 D2 — `gbrain jobs watch` live TTY dashboard.
+ * v0.41 D2 — `modusbrain jobs watch` live TTY dashboard.
  *
  * Submit and supervise instead of submit and pray. Shows throughput,
  * current rate-lease utilization, top errors clustered by error-classify,
@@ -77,7 +77,7 @@ export function renderSnapshot(s: WatchSnapshot, opts: { useAnsi?: boolean } = {
   const a = opts.useAnsi !== false;
   const c = (color: string) => (a ? color : '');
   const lines: string[] = [];
-  lines.push(`${c(ANSI.bold)}gbrain jobs watch${c(ANSI.reset)}    ${c(ANSI.dim)}q to quit | ${new Date(s.ts_ms).toLocaleTimeString()}${c(ANSI.reset)}`);
+  lines.push(`${c(ANSI.bold)}modusbrain jobs watch${c(ANSI.reset)}    ${c(ANSI.dim)}q to quit | ${new Date(s.ts_ms).toLocaleTimeString()}${c(ANSI.reset)}`);
   lines.push('');
 
   // Queue health panel.
@@ -236,7 +236,7 @@ export function resolveWatchMode(opts: WatchOptions, isTTY: boolean): WatchMode 
 }
 
 /**
- * Main entrypoint for `gbrain jobs watch`. See the file header for the
+ * Main entrypoint for `modusbrain jobs watch`. See the file header for the
  * format (`--json`) × loop (`--follow`) matrix. The data printed never depends
  * on isTTY; only the loop cadence and the ANSI cursor management do.
  */

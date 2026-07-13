@@ -1,21 +1,21 @@
 /**
- * `gbrain connect` — one-command coding-agent onboarding from a bearer token
+ * `modusbrain connect` — one-command coding-agent onboarding from a bearer token
  * (or OAuth 2.1 client credentials).
  *
  * Turns an MCP URL + credential into a paste-ready block (or wires it up
  * directly with --install) that connects a coding agent straight to a remote
- * `gbrain serve --http` and teaches it to self-orient via `get_brain_identity`
+ * `modusbrain serve --http` and teaches it to self-orient via `get_brain_identity`
  * + `list_skills`. Direct HTTP MCP — no local install or thin-client config
  * needed for the connection.
  *
- *   gbrain connect <mcp-url> [--token <bearer>] [--name gbrain]
+ *   modusbrain connect <mcp-url> [--token <bearer>] [--name modusbrain]
  *                  [--agent claude-code|codex|perplexity|generic]
  *                  [--oauth [--register | --client-id ID --client-secret SECRET] [--scopes "read write"]]
  *                  [--install] [--yes] [--json] [--show-token] [--force]
  *                  [--timeout-ms N]
  *
  * Auth:
- *   - Bearer (default): a `gbrain auth create` token. Simple; long-lived +
+ *   - Bearer (default): a `modusbrain auth create` token. Simple; long-lived +
  *     full-access. Best for local/personal use.
  *   - OAuth 2.1 client credentials (`--oauth`, perplexity/generic only): the
  *     correct path for anything exposed to a third-party cloud — least-privilege
@@ -26,7 +26,7 @@
  *   - claude-code: `claude mcp add ... -H "Authorization: Bearer <tok>"` (bearer
  *     only; --install runs it).
  *   - codex: `codex mcp add <name> --url <url> --bearer-token-env-var
- *     GBRAIN_REMOTE_TOKEN` (bearer via env var; --install runs it).
+ *     MODUSBRAIN_REMOTE_TOKEN` (bearer via env var; --install runs it).
  *   - perplexity: GUI connector (Settings → Connectors). Supports bearer or
  *     OAuth; no --install.
  *   - generic: prints the connector fields for any other MCP client.
@@ -37,11 +37,11 @@ import type { ConnectProbeResult } from '../core/connect-probe.ts';
 import { probeBrainIdentity, DEFAULT_PROBE_TIMEOUT_MS } from '../core/connect-probe.ts';
 import { promptLine } from '../core/cli-util.ts';
 
-export const ENV_VAR = 'GBRAIN_REMOTE_TOKEN';
+export const ENV_VAR = 'MODUSBRAIN_REMOTE_TOKEN';
 export const PLACEHOLDER_TOKEN = '<paste-your-token>';
 export const PLACEHOLDER_SECRET = '<paste-your-client-secret>';
 export const REDACTED = '***';
-export const DEFAULT_NAME = 'gbrain';
+export const DEFAULT_NAME = 'modusbrain';
 export const DEFAULT_SCOPES = 'read write';
 const NAME_RE = /^[a-z0-9][a-z0-9_-]*$/;
 // Single source of truth shared with the probe (was a duplicated 15_000 literal).
@@ -74,7 +74,7 @@ export const LEARN_INSTRUCTION =
   '`list_skills` (everything it can do; if it errors, the host has not enabled skill ' +
   'publishing — these core tools still work: search, query, get_page, put_page, ' +
   'think, find_experts). Then call `list_brain_skillpack`: if this brain ships a ' +
-  'skillpack, ask the user whether to install it (gbrain skillpack scaffold <spec>). ' +
+  'skillpack, ask the user whether to install it (modusbrain skillpack scaffold <spec>). ' +
   'Always search the brain before answering or writing.';
 
 const SECRET_NOTE =
@@ -83,22 +83,22 @@ const SECRET_NOTE =
 
 const OAUTH_SECRET_NOTE =
   'Note: the client secret is sensitive — store it like a password. It mints ' +
-  'short-lived, scoped access tokens; revoke with `gbrain auth revoke-client`.';
+  'short-lived, scoped access tokens; revoke with `modusbrain auth revoke-client`.';
 
 const PERPLEXITY_REMOTE_NOTE = [
   'Perplexity connects remotely, so the brain must be reachable over HTTPS. On the',
-  'host run: gbrain serve --http --bind 0.0.0.0 --public-url <your-https-url> (the',
+  'host run: modusbrain serve --http --bind 0.0.0.0 --public-url <your-https-url> (the',
   'default 127.0.0.1 bind refuses tunneled connections). See docs/mcp/PERPLEXITY.md.',
 ].join('\n');
 
-const HELP = `gbrain connect — wire a coding agent to a remote gbrain over MCP
+const HELP = `modusbrain connect — wire a coding agent to a remote modusbrain over MCP
 
 Usage:
-  gbrain connect <mcp-url> [--token <bearer>] [flags]
+  modusbrain connect <mcp-url> [--token <bearer>] [flags]
 
 Prints a copy-paste setup block for your agent, or wires it up directly with
 --install (claude-code + codex only). The MCP URL is your remote
-'gbrain serve --http' endpoint; a bare host is rejected — pass an explicit
+'modusbrain serve --http' endpoint; a bare host is rejected — pass an explicit
 https:// URL.
 
 Auth:
@@ -108,11 +108,11 @@ Auth:
                                  anything exposed to a third-party cloud
 
 Flags:
-  --token <bearer>     Bearer token (else $${ENV_VAR}; from 'gbrain auth create')
+  --token <bearer>     Bearer token (else $${ENV_VAR}; from 'modusbrain auth create')
   --name <id>          MCP server name in the agent (default: ${DEFAULT_NAME})
   --agent <kind>       claude-code (default) | codex | perplexity | generic
   --oauth              Use OAuth client credentials instead of a bearer token
-  --register           With --oauth: mint a client on the host (gbrain auth register-client)
+  --register           With --oauth: mint a client on the host (modusbrain auth register-client)
   --client-id <id>     With --oauth: use an existing OAuth client id
   --client-secret <s>  With --oauth: use an existing OAuth client secret
   --scopes "<s>"       With --oauth --register: client scopes (default: "${DEFAULT_SCOPES}")
@@ -125,12 +125,12 @@ Flags:
   --timeout-ms <n>     Smoke-test timeout for --install (default: ${DEFAULT_TIMEOUT_MS})
 
 Examples:
-  gbrain connect https://brain.example.com/mcp --token gbrain_xxx
-  gbrain connect https://brain.example.com:3131 --install --yes
-  gbrain connect https://brain.example.com/mcp --token gbrain_xxx --agent codex
-  gbrain connect https://brain.example.com/mcp --agent perplexity --oauth --register
-  gbrain connect https://brain.example.com/mcp --agent perplexity --oauth \\
-    --client-id gbrain_cl_xxx --client-secret gbrain_cs_xxx
+  modusbrain connect https://brain.example.com/mcp --token modusbrain_xxx
+  modusbrain connect https://brain.example.com:3131 --install --yes
+  modusbrain connect https://brain.example.com/mcp --token modusbrain_xxx --agent codex
+  modusbrain connect https://brain.example.com/mcp --agent perplexity --oauth --register
+  modusbrain connect https://brain.example.com/mcp --agent perplexity --oauth \\
+    --client-id modusbrain_cl_xxx --client-secret modusbrain_cs_xxx
 `;
 
 // ---------------------------------------------------------------------------
@@ -146,7 +146,7 @@ export type UrlResult =
  * never a legitimate brain endpoint but IS a token-exfil target (e.g. the AWS/
  * GCP metadata service at 169.254.169.254). Deliberately does NOT block
  * localhost or RFC1918/LAN ranges: self-hosted brains on a private network are
- * a documented, supported topology (`gbrain serve --http --bind`).
+ * a documented, supported topology (`modusbrain serve --http --bind`).
  */
 export function isLinkLocalOrMetadata(hostname: string): boolean {
   const h = hostname.toLowerCase().replace(/^\[|\]$/g, '');
@@ -170,7 +170,7 @@ export function isLinkLocalOrMetadata(hostname: string): boolean {
 export function normalizeMcpUrl(input: string): UrlResult {
   const raw = (input ?? '').trim();
   if (!raw) {
-    return { ok: false, error: 'Missing MCP URL. Usage: gbrain connect <https://host/mcp> --token <bearer>' };
+    return { ok: false, error: 'Missing MCP URL. Usage: modusbrain connect <https://host/mcp> --token <bearer>' };
   }
   // Require an explicit scheme. A bare `host:3131` parses as scheme `host:`
   // under WHATWG URL, so reject anything without `://`.
@@ -251,7 +251,7 @@ export function resolveToken(opts: { tokenFlag?: string | null; env?: string | n
   if (opts.mode === 'print') return { kind: 'placeholder' };
   return {
     kind: 'error',
-    error: `No token. Pass --token <bearer> or set ${ENV_VAR}. Create one on the host with: gbrain auth create "<name>"`,
+    error: `No token. Pass --token <bearer> or set ${ENV_VAR}. Create one on the host with: modusbrain auth create "<name>"`,
   };
 }
 
@@ -302,7 +302,7 @@ function claudeBlock(p: { name: string; url: string; token: string | null }): st
   const headerToken = p.token ?? PLACEHOLDER_TOKEN;
   const cmd = cmdString('claude', buildClaudeMcpAddArgv({ name: p.name, url: p.url, headerToken }));
   const lines = ['# Paste into Claude Code:', '', 'Connect my knowledge brain, then learn what it can do:', '', `  ${cmd}`, ''];
-  if (!p.token) lines.push(`Replace ${PLACEHOLDER_TOKEN} with a token from \`gbrain auth create "claude-code"\` on the host.`, '');
+  if (!p.token) lines.push(`Replace ${PLACEHOLDER_TOKEN} with a token from \`modusbrain auth create "claude-code"\` on the host.`, '');
   lines.push(LEARN_INSTRUCTION, '', SECRET_NOTE);
   return lines.join('\n');
 }
@@ -319,7 +319,7 @@ function codexBlock(p: { name: string; url: string; token: string | null }): str
     `  ${cmd}`,
     '',
   ];
-  if (!p.token) lines.push(`Replace ${PLACEHOLDER_TOKEN} with a token from \`gbrain auth create "codex"\` on the host.`, '');
+  if (!p.token) lines.push(`Replace ${PLACEHOLDER_TOKEN} with a token from \`modusbrain auth create "codex"\` on the host.`, '');
   lines.push(
     `Codex reads the token from $${ENV_VAR} at runtime — keep that variable set in your shell profile so new Codex sessions can reach the brain.`,
     '',
@@ -370,7 +370,7 @@ function perplexityOAuthBlock(p: { oauth: OAuthCreds }): string {
 function genericBearerBlock(p: { url: string; token: string | null }): string {
   const headerToken = p.token ?? PLACEHOLDER_TOKEN;
   return [
-    '# Add an HTTP MCP server pointed at your gbrain:',
+    '# Add an HTTP MCP server pointed at your modusbrain:',
     `#   URL:    ${p.url}`,
     `#   Header: Authorization: Bearer ${headerToken}`,
     '',
@@ -381,7 +381,7 @@ function genericBearerBlock(p: { url: string; token: string | null }): string {
 function genericOAuthBlock(p: { oauth: OAuthCreds }): string {
   const secret = p.oauth.clientSecret ?? PLACEHOLDER_SECRET;
   return [
-    '# Add an OAuth 2.1 (client-credentials) MCP server pointed at your gbrain:',
+    '# Add an OAuth 2.1 (client-credentials) MCP server pointed at your modusbrain:',
     `#   URL:           ${p.oauth.issuer}/mcp`,
     `#   Issuer URL:    ${p.oauth.issuer}`,
     `#   Client ID:     ${p.oauth.clientId}`,
@@ -491,16 +491,16 @@ function defaultRunBinary(binary: string, argv: string[]): { code: number; stdou
   }
 }
 
-/** Mint an OAuth client by shelling to the host's `gbrain auth register-client`. */
+/** Mint an OAuth client by shelling to the host's `modusbrain auth register-client`. */
 function defaultRegisterOAuthClient(name: string, scopes: string): RegisterResult {
-  const r = defaultRunBinary('gbrain', [
+  const r = defaultRunBinary('modusbrain', [
     'auth', 'register-client', name,
     '--grant-types', 'client_credentials',
     '--scopes', scopes,
     '--token-endpoint-auth-method', 'client_secret_post',
   ]);
   if (r.code !== 0) {
-    return { ok: false, message: r.stderr || r.stdout || 'gbrain auth register-client failed' };
+    return { ok: false, message: r.stderr || r.stdout || 'modusbrain auth register-client failed' };
   }
   const clientId = r.stdout.match(/Client ID:\s+(\S+)/)?.[1];
   const clientSecret = r.stdout.match(/Client Secret:\s+(\S+)/)?.[1];
@@ -637,13 +637,13 @@ function resolveOAuthCreds(f: ParsedFlags, url: string, deps: ConnectDeps): OAut
     const r = deps.registerOAuthClient(f.name, f.scopes);
     if (!r.ok) {
       fail(`Could not register an OAuth client (run this on the brain host where the DB lives): ${r.message}\n` +
-        `Or mint one manually: gbrain auth register-client ${f.name} --grant-types client_credentials --scopes "${f.scopes}"`);
+        `Or mint one manually: modusbrain auth register-client ${f.name} --grant-types client_credentials --scopes "${f.scopes}"`);
     }
     return { issuer, clientId: r.clientId, clientSecret: r.clientSecret };
   }
   return fail(
     '--oauth needs an OAuth client. Either:\n' +
-    `  • --register  (mint one on the host: gbrain auth register-client ${f.name} --grant-types client_credentials --scopes "${f.scopes}")\n` +
+    `  • --register  (mint one on the host: modusbrain auth register-client ${f.name} --grant-types client_credentials --scopes "${f.scopes}")\n` +
     '  • --client-id <id> --client-secret <secret>  (use an existing client)',
   );
 }

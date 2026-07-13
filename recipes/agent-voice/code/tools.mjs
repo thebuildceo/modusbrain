@@ -31,7 +31,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { callGbrainOp } from './gbrain-client.mjs';
+import { callModusbrainOp } from './modusbrain-client.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -130,7 +130,7 @@ export function rejectedToolResult(opName, reason) {
 }
 
 /**
- * Dispatch a tool call from the voice persona to gbrain MCP.
+ * Dispatch a tool call from the voice persona to modusbrain MCP.
  *
  * Returns either {data: <result>} on success or {error: <envelope>} on
  * rejection or MCP failure. Never throws.
@@ -147,9 +147,9 @@ export async function dispatchTool(opName, params, { forceReload = false } = {})
     return rejectedToolResult(opName, 'not_in_allowlist');
   }
 
-  // Allow-listed — call gbrain MCP.
+  // Allow-listed — call modusbrain MCP.
   try {
-    const result = await callGbrainOp(opName, params);
+    const result = await callModusbrainOp(opName, params);
     return { data: result };
   } catch (err) {
     return {

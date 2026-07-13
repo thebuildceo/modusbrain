@@ -2,7 +2,7 @@
  * Shared write-through helper tests (src/core/write-through.ts).
  *
  * Covers the skip/error branches and the atomic-write guarantee. The helper is
- * the canonical disk sink shared by `put_page` and `gbrain brainstorm/lsd
+ * the canonical disk sink shared by `put_page` and `modusbrain brainstorm/lsd
  * --save`, extracted from the v0.38 put_page write-through and upgraded to write
  * atomically (.tmp + rename).
  */
@@ -36,7 +36,7 @@ afterAll(async () => {
 beforeEach(async () => {
   await resetPgliteState(engine);
   resetGateway();
-  tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'gbrain-wt-helper-'));
+  tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'modusbrain-wt-helper-'));
   brainDir = path.join(tmpRoot, 'brain');
   fs.mkdirSync(brainDir, { recursive: true });
 });

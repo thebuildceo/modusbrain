@@ -1,5 +1,5 @@
 /**
- * v0.42 Wave C1 — `gbrain schema scaffold-extractable` mutation primitive.
+ * v0.42 Wave C1 — `modusbrain schema scaffold-extractable` mutation primitive.
  *
  * Generates everything a pack author needs to declare a new extractable
  * page type with the pack-supplied prompt + fixture-corpus + eval-dimensions
@@ -17,7 +17,7 @@
  *
  *   3. Writes `<pack-root>/fixtures/extract/<type>.jsonl` with 5 placeholder
  *      fixtures (per CLAUDE.md privacy rule: alice-example, widget-co-example,
- *      etc.) so the pack-author can run `gbrain extract benchmark` immediately
+ *      etc.) so the pack-author can run `modusbrain extract benchmark` immediately
  *      and iterate from a working baseline rather than an empty file.
  *
  * Refuses to overwrite existing prompt / fixture files — the mutation is
@@ -134,7 +134,7 @@ Expected output:
 
 /**
  * Pure helper: build the fixture corpus body (5 placeholder fixtures).
- * Each line is one JSON-serialized fixture per the `gbrain extract
+ * Each line is one JSON-serialized fixture per the `modusbrain extract
  * benchmark` JSONL contract:
  *
  *   { fixture_id, page_body, expected_claims: [...], notes? }
@@ -266,7 +266,7 @@ export async function scaffoldExtractable(
   });
 
   // File writes — idempotent unless --force. Refuse-to-overwrite path
-  // is the canonical gbrain scaffold posture (matches schema init,
+  // is the canonical modusbrain scaffold posture (matches schema init,
   // skillpack scaffold, etc).
   const filesWritten: string[] = [];
   const filesSkipped: string[] = [];

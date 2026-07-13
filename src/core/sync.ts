@@ -80,7 +80,7 @@ const CODE_EXTENSIONS = new Set<string>([
   '.yaml', '.yml',
   '.toml',
   // v0.36.x #878: Terraform / HCL. Closes the silent-data-loss bug where
-  // Terraform repos were invisible to `gbrain sync --strategy code`.
+  // Terraform repos were invisible to `modusbrain sync --strategy code`.
   // detectCodeLanguage() returns null for these so they chunk via the
   // recursive chunker (no tree-sitter grammar), which is the correct
   // fallback — same path as toml / yaml without language-specific AST.
@@ -151,7 +151,7 @@ export function isCodeFilePath(path: string): boolean {
 
 /**
  * v0.27.1: image extensions are admitted only when the multimodal config
- * gate is on. The runtime gate flips through `process.env.GBRAIN_EMBEDDING_MULTIMODAL`
+ * gate is on. The runtime gate flips through `process.env.MODUSBRAIN_EMBEDDING_MULTIMODAL`
  * which loadConfigWithEngine populates from the DB plane after engine connect
  * (or env directly when the operator overrides). When the gate is off,
  * existing brains keep their current "markdown + code only" sync behavior.
@@ -175,7 +175,7 @@ export function isMarkdownFilePath(path: string): boolean {
 }
 
 function isMultimodalEnabled(): boolean {
-  return process.env.GBRAIN_EMBEDDING_MULTIMODAL === 'true';
+  return process.env.MODUSBRAIN_EMBEDDING_MULTIMODAL === 'true';
 }
 
 function isAllowedByStrategy(path: string, strategy: SyncStrategy): boolean {
@@ -229,7 +229,7 @@ function matchesAnyGlob(path: string, patterns?: string[]): boolean {
  * Directory names that walkers must NEVER descend into. Used at descent
  * time (before recursion) to prune entire subtrees — saves the IO cost of
  * walking thousands of vendor / generated / hidden files only to filter
- * them at file-emit time. Used by every walker in gbrain (sync, extract,
+ * them at file-emit time. Used by every walker in modusbrain (sync, extract,
  * transcript-discovery, etc.).
  *
  * Pattern: dirname matching at single path-segment granularity. Walkers
@@ -278,7 +278,7 @@ export function pruneDir(name: string, parentDir?: string): boolean {
   if (!name) return true;
   if (name.startsWith('.')) return false;
   if (PRUNE_DIR_NAMES.has(name)) return false;
-  // `.raw` is the literal directory name; `*.raw` is the gbrain sidecar
+  // `.raw` is the literal directory name; `*.raw` is the modusbrain sidecar
   // convention (e.g. `people/pedro.raw/` holds raw source for pedro.md).
   // Both forms should be skipped at descent time.
   if (name.endsWith('.raw')) return false;
@@ -307,7 +307,7 @@ export function pruneDir(name: string, parentDir?: string): boolean {
  * v0.41.13 (#1433): pre-fix, the cleanup loop in performSync treated all
  * unsyncable-modified paths the same and DELETED any pre-existing page for
  * them. That silently dropped `log.md` / `schema.md` / `README.md` pages
- * that had been indexed by older gbrain versions (or via direct put_page).
+ * that had been indexed by older modusbrain versions (or via direct put_page).
  * The fix guards that loop on `unsyncableReason(...) === 'metafile'` and
  * preserves those rows.
  */
@@ -360,7 +360,7 @@ function classifySync(path: string, opts: SyncableOptions = {}): SyncableReason 
 }
 
 /**
- * Filter a file path to determine if it should be synced to GBrain.
+ * Filter a file path to determine if it should be synced to ModusBrain.
  * Strategy-aware: 'markdown' (default) = .md/.mdx only, 'code' = code files only, 'auto' = both.
  */
 export function isSyncable(path: string, opts: SyncableOptions = {}): boolean {
@@ -444,7 +444,7 @@ export function slugifyCodePath(filePath: string): string {
 }
 
 /**
- * Convert a repo-relative file path to a GBrain page slug.
+ * Convert a repo-relative file path to a ModusBrain page slug.
  */
 export function pathToSlug(
   filePath: string,

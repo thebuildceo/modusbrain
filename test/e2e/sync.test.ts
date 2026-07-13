@@ -2,7 +2,7 @@
  * E2E Sync Tests — Tier 1 (no API keys required)
  *
  * Tests the full git-to-DB sync pipeline: create a git repo, commit
- * markdown files, run gbrain sync, verify pages appear in the database.
+ * markdown files, run modusbrain sync, verify pages appear in the database.
  * Covers first sync, incremental add/modify/delete, and the critical
  * "edit → sync → search returns corrected text" flow.
  *
@@ -27,7 +27,7 @@ if (skip) {
 
 /** Create a temp git repo with initial markdown files */
 function createTestRepo(): string {
-  const dir = mkdtempSync(join(tmpdir(), 'gbrain-sync-e2e-'));
+  const dir = mkdtempSync(join(tmpdir(), 'modusbrain-sync-e2e-'));
   execSync('git init', { cwd: dir, stdio: 'pipe' });
   execSync('git config user.email "test@test.com"', { cwd: dir, stdio: 'pipe' });
   execSync('git config user.name "Test"', { cwd: dir, stdio: 'pipe' });
@@ -406,7 +406,7 @@ describeE2E('E2E: Git-to-DB Sync Pipeline', () => {
  *
  * Owns its own repo + sync-failures.jsonl lifecycle so it can't leak state
  * into the shared describeE2E above. Saves and restores the user's real
- * ~/.gbrain/sync-failures.jsonl so running E2E on a developer machine
+ * ~/.modusbrain/sync-failures.jsonl so running E2E on a developer machine
  * doesn't trash their local sync state.
  */
 describeE2E('E2E: sync --skip-failed structured summary loop (v0.22.12, issue #500)', () => {
@@ -416,8 +416,8 @@ describeE2E('E2E: sync --skip-failed structured summary loop (v0.22.12, issue #5
 
   beforeAll(async () => {
     await setupDB();
-    const { gbrainPath, configDir } = await import('../../src/core/config.ts');
-    realFailuresPath = gbrainPath('sync-failures.jsonl');
+    const { modusbrainPath, configDir } = await import('../../src/core/config.ts');
+    realFailuresPath = modusbrainPath('sync-failures.jsonl');
 
     // Save+clear the real sync-failures.jsonl so the test starts from
     // a known-empty state. Restored in afterAll. This file is per-machine, NOT
@@ -430,7 +430,7 @@ describeE2E('E2E: sync --skip-failed structured summary loop (v0.22.12, issue #5
 
     // Fresh git repo with one valid file. Mirrors createTestRepo above but
     // scoped to this describe block.
-    repoPath = mkdtempSync(join(tmpdir(), 'gbrain-skipfailed-e2e-'));
+    repoPath = mkdtempSync(join(tmpdir(), 'modusbrain-skipfailed-e2e-'));
     execSync('git init', { cwd: repoPath, stdio: 'pipe' });
     execSync('git config user.email "test@test.com"', { cwd: repoPath, stdio: 'pipe' });
     execSync('git config user.name "Test"', { cwd: repoPath, stdio: 'pipe' });
@@ -602,8 +602,8 @@ describeE2E('E2E: sync --skip-failed structured summary loop (v0.22.12, issue #5
     const { performSync } = await import('../../src/commands/sync.ts');
     const { loadSyncFailures } = await import('../../src/core/sync.ts');
     const engine = getEngine();
-    const prevThreshold = process.env.GBRAIN_SYNC_AUTOSKIP_AFTER;
-    process.env.GBRAIN_SYNC_AUTOSKIP_AFTER = '2';
+    const prevThreshold = process.env.MODUSBRAIN_SYNC_AUTOSKIP_AFTER;
+    process.env.MODUSBRAIN_SYNC_AUTOSKIP_AFTER = '2';
     try {
       const beforeCommit = await engine.getConfig('sync.last_commit');
       // slug-mismatch = a reliable per-file import failure.
@@ -627,8 +627,8 @@ describeE2E('E2E: sync --skip-failed structured summary loop (v0.22.12, issue #5
       poison = loadSyncFailures().find(f => f.path.includes('poison'))!;
       expect(poison.state).toBe('auto_skipped');
     } finally {
-      if (prevThreshold === undefined) delete process.env.GBRAIN_SYNC_AUTOSKIP_AFTER;
-      else process.env.GBRAIN_SYNC_AUTOSKIP_AFTER = prevThreshold;
+      if (prevThreshold === undefined) delete process.env.MODUSBRAIN_SYNC_AUTOSKIP_AFTER;
+      else process.env.MODUSBRAIN_SYNC_AUTOSKIP_AFTER = prevThreshold;
     }
   });
 

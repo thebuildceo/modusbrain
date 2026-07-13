@@ -20,7 +20,7 @@
 
 import { describe, expect, test } from 'bun:test';
 import { buildGatewayConfig } from '../../src/cli.ts';
-import type { GBrainConfig } from '../../src/core/config.ts';
+import type { ModusBrainConfig } from '../../src/core/config.ts';
 import { withEnv } from '../helpers/with-env.ts';
 
 const PASSTHROUGHS: Array<{ envVar: string; recipeId: string }> = [
@@ -33,7 +33,7 @@ const PASSTHROUGHS: Array<{ envVar: string; recipeId: string }> = [
 
 const TEST_VALUE = 'http://proxy.example.test/v1';
 
-const baseConfig: GBrainConfig = {} as unknown as GBrainConfig;
+const baseConfig: ModusBrainConfig = {} as unknown as ModusBrainConfig;
 
 /**
  * Build an env-override object that clears every passthrough and sets one.
@@ -79,7 +79,7 @@ describe('buildGatewayConfig env-baseURL passthrough', () => {
       async () => {
         const cfg = buildGatewayConfig({
           provider_base_urls: { openrouter: 'http://config.example/v1' },
-        } as unknown as GBrainConfig);
+        } as unknown as ModusBrainConfig);
         expect(cfg.base_urls?.openrouter).toBe('http://config.example/v1');
       },
     );

@@ -1,6 +1,6 @@
 /**
  * Durability cron generators (v0.42.44, D2 + D12): pure-string renderers.
- * Asserts the cron is DB-free (gbrain sources pull --path, NOT `pull <id>`),
+ * Asserts the cron is DB-free (modusbrain sources pull --path, NOT `pull <id>`),
  * secret-free, self-disabling, and that the launchd plist is periodic.
  */
 import { describe, test, expect } from 'bun:test';
@@ -9,7 +9,7 @@ import { renderCronWrapper, generateBrainPullPlist } from '../src/core/brain-rep
 const TOKEN = 'ghp_SHOULD_NEVER_APPEAR';
 
 describe('renderCronWrapper (D2 DB-free)', () => {
-  const w = renderCronWrapper('wiki', '/data/clones/wiki', 'main', '/usr/local/bin/gbrain', '/home/u/.gbrain/brain-push.log');
+  const w = renderCronWrapper('wiki', '/data/clones/wiki', 'main', '/usr/local/bin/modusbrain', '/home/u/.modusbrain/brain-push.log');
 
   test('calls the DB-free path command, not the engine-opening one', () => {
     expect(w).toContain("sources pull --path '/data/clones/wiki'");
@@ -29,7 +29,7 @@ describe('renderCronWrapper (D2 DB-free)', () => {
 });
 
 describe('generateBrainPullPlist (D12 launchd)', () => {
-  const plist = generateBrainPullPlist('com.gbrain.brain-pull.wiki', '/home/u/.gbrain/brain-pull-wiki.sh', '/home/u', 1800);
+  const plist = generateBrainPullPlist('com.modusbrain.brain-pull.wiki', '/home/u/.modusbrain/brain-pull-wiki.sh', '/home/u', 1800);
 
   test('is periodic (StartInterval), not a KeepAlive daemon', () => {
     expect(plist).toContain('<key>StartInterval</key><integer>1800</integer>');
@@ -37,8 +37,8 @@ describe('generateBrainPullPlist (D12 launchd)', () => {
   });
 
   test('carries the per-source label and the wrapper path only (no secret)', () => {
-    expect(plist).toContain('<string>com.gbrain.brain-pull.wiki</string>');
-    expect(plist).toContain('/home/u/.gbrain/brain-pull-wiki.sh');
+    expect(plist).toContain('<string>com.modusbrain.brain-pull.wiki</string>');
+    expect(plist).toContain('/home/u/.modusbrain/brain-pull-wiki.sh');
     expect(plist.includes(TOKEN)).toBe(false);
   });
 });

@@ -36,7 +36,7 @@ async function makePGLite() {
 
 /** Make an empty git repo. Lint/backlinks have nothing to scan → status=clean. */
 function makeGitRepo(): string {
-  const dir = mkdtempSync(join(tmpdir(), 'gbrain-dream-repo-'));
+  const dir = mkdtempSync(join(tmpdir(), 'modusbrain-dream-repo-'));
   execSync('git init', { cwd: dir, stdio: 'pipe' });
   execSync('git config user.email t@t.co', { cwd: dir, stdio: 'pipe' });
   execSync('git config user.name t', { cwd: dir, stdio: 'pipe' });
@@ -253,7 +253,7 @@ describe('runDream — exit-code semantics', () => {
 //   - --help short-circuit ordering (C-8)
 //   - typed-error propagation (T3: TypeError must NOT be swallowed)
 //   - end-to-end dream→doctor (D5): writeback flips cycle_freshness
-//   - back-compat regression: bare `gbrain dream` writes no per-source stamp
+//   - back-compat regression: bare `modusbrain dream` writes no per-source stamp
 
 describe('runDream — --source / --source-id (v0.41.13)', () => {
   let repo: string;
@@ -364,7 +364,7 @@ describe('runDream — --source / --source-id (v0.41.13)', () => {
       throw new Error('--help with --source should NOT exit; got: ' + e.message);
     }
     expect(exitSpy).not.toHaveBeenCalled();
-    expect(logSpy.mock.calls.flat().join(' ')).toMatch(/Usage: gbrain dream/);
+    expect(logSpy.mock.calls.flat().join(' ')).toMatch(/Usage: modusbrain dream/);
     exitSpy.mockRestore();
     logSpy.mockRestore();
   });
@@ -398,7 +398,7 @@ describe('runDream — --source / --source-id (v0.41.13)', () => {
     expect(exitSpy).toHaveBeenCalledWith(1);
     const errOut = errSpy.mock.calls.flat().join(' ');
     expect(errOut).toMatch(/Source "no-such-source" not found/);
-    expect(errOut).toMatch(/gbrain sources list/);
+    expect(errOut).toMatch(/modusbrain sources list/);
     exitSpy.mockRestore();
     errSpy.mockRestore();
   });
@@ -420,7 +420,7 @@ describe('runDream — --source / --source-id (v0.41.13)', () => {
     expect(exitSpy).toHaveBeenCalledWith(1);
     const errOut = errSpy.mock.calls.flat().join(' ');
     expect(errOut).toMatch(/source archived-thing is archived/);
-    expect(errOut).toMatch(/gbrain sources restore archived-thing/);
+    expect(errOut).toMatch(/modusbrain sources restore archived-thing/);
 
     const after = await readLastFullCycleAt('archived-thing');
     expect(after).toBeNull(); // archived guard prevents writeback
@@ -447,9 +447,9 @@ describe('runDream — --source / --source-id (v0.41.13)', () => {
     expect(writtenMs).toBeLessThanOrEqual(Date.now() + 1000);
   }, 60_000);
 
-  // ─── Back-compat: bare `gbrain dream` does NOT write per-source stamp ─
+  // ─── Back-compat: bare `modusbrain dream` does NOT write per-source stamp ─
 
-  test('gbrain dream (no --source) leaves all sources untouched (back-compat regression)', async () => {
+  test('modusbrain dream (no --source) leaves all sources untouched (back-compat regression)', async () => {
     await seedSource('alpha');
     await seedSource('beta');
     const report = await runDream(engine, ['--dir', repo, '--phase', 'lint', '--json']);

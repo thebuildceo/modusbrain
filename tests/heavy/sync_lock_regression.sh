@@ -2,15 +2,15 @@
 # tests/heavy/sync_lock_regression.sh
 # Sync writer-lock concurrency regression test.
 #
-# Spawns N concurrent `gbrain sync` processes against one DB; asserts:
-#   1. Exactly one wins the writer lock (`gbrain-sync` row in `gbrain_cycle_locks`).
+# Spawns N concurrent `modusbrain sync` processes against one DB; asserts:
+#   1. Exactly one wins the writer lock (`modusbrain-sync` row in `modusbrain_cycle_locks`).
 #   2. N-1 lose with "Another sync is in progress" — they fail FAST, they don't queue.
 #      (Per src/commands/sync.ts:377 — performSync uses `tryAcquireDbLock`, no wait.)
-#   3. After all processes exit, zero leaked `gbrain_cycle_locks` rows remain.
+#   3. After all processes exit, zero leaked `modusbrain_cycle_locks` rows remain.
 #
 # Why the test matters: the eng-review-flagged v1 plan was wrong — the original
 # plan asserted the wrong semantics ("N-1 wait then complete one at a time")
-# and snapshot the wrong table (`pg_locks` instead of `gbrain_cycle_locks`).
+# and snapshot the wrong table (`pg_locks` instead of `modusbrain_cycle_locks`).
 # Both reviewers caught it; this script tests the actual contract.
 #
 # Postgres-only (no DATABASE_URL = graceful skip with hint).
@@ -21,8 +21,8 @@ cd "$(dirname "$0")/../.."
 
 if [ -z "${DATABASE_URL:-}" ]; then
   echo "[sync_lock_regression] DATABASE_URL not set; skipping (informational)." >&2
-  echo "  Local: docker run -d --name gbrain-test-pg -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=gbrain_test -p 5434:5432 pgvector/pgvector:pg16" >&2
-  echo "  Then: export DATABASE_URL=postgresql://postgres:postgres@localhost:5434/gbrain_test" >&2
+  echo "  Local: docker run -d --name modusbrain-test-pg -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=modusbrain_test -p 5434:5432 pgvector/pgvector:pg16" >&2
+  echo "  Then: export DATABASE_URL=postgresql://postgres:postgres@localhost:5434/modusbrain_test" >&2
   exit 0
 fi
 
@@ -32,16 +32,16 @@ if ! command -v psql >/dev/null 2>&1; then
 fi
 
 TS=$(date -u +%Y%m%d-%H%M%SZ)
-# Isolate from the developer's real ~/.gbrain so writing sync.repo_path doesn't
+# Isolate from the developer's real ~/.modusbrain so writing sync.repo_path doesn't
 # clobber their config. Restored on exit.
-TMP_GBRAIN_HOME=$(mktemp -d -t gbrain-sync-lock-home-XXXXXX)
-export GBRAIN_HOME="$TMP_GBRAIN_HOME"
-LOG_DIR="$GBRAIN_HOME/audit"
+TMP_MODUSBRAIN_HOME=$(mktemp -d -t modusbrain-sync-lock-home-XXXXXX)
+export MODUSBRAIN_HOME="$TMP_MODUSBRAIN_HOME"
+LOG_DIR="$MODUSBRAIN_HOME/audit"
 mkdir -p "$LOG_DIR"
 LOG="$LOG_DIR/heavy-sync_lock_regression-$TS.log"
-# Surface the log path so it survives the EXIT trap that nukes GBRAIN_HOME.
+# Surface the log path so it survives the EXIT trap that nukes MODUSBRAIN_HOME.
 SURFACE_LOG="${TMPDIR:-/tmp}/heavy-sync_lock_regression-$TS.log"
-trap 'rm -rf "$TMP_GBRAIN_HOME"; cp -f "$LOG" "$SURFACE_LOG" 2>/dev/null || true' EXIT
+trap 'rm -rf "$TMP_MODUSBRAIN_HOME"; cp -f "$LOG" "$SURFACE_LOG" 2>/dev/null || true' EXIT
 
 NUM_PARALLEL="${NUM_PARALLEL:-4}"
 echo "[sync_lock_regression] DATABASE_URL=$DATABASE_URL"
@@ -52,14 +52,14 @@ echo "[sync_lock_regression] spawning $NUM_PARALLEL parallel sync processes..."
 # non-zero when ANY check warns (e.g. missing embedding provider on a fresh
 # CI runner) so we ignore its exit status — the schema-migration side effect
 # is what we want here, and the migration runs regardless of check verdicts.
-echo "[sync_lock_regression] init schema via gbrain doctor..." | tee -a "$LOG"
+echo "[sync_lock_regression] init schema via modusbrain doctor..." | tee -a "$LOG"
 timeout 180s bun run src/cli.ts doctor --json > /dev/null 2>>"$LOG" || true
 
 # Step 2: create a tiny brain dir + register it as sync.repo_path so each sync
 # call has something legitimate to do.
-BRAIN_DIR=$(mktemp -d -t gbrain-sync-lock-XXXXXX)
-# Compose with the earlier GBRAIN_HOME-cleanup trap (NOT overwrite it).
-trap 'rm -rf "$BRAIN_DIR" "$TMP_GBRAIN_HOME"; cp -f "$LOG" "$SURFACE_LOG" 2>/dev/null || true' EXIT
+BRAIN_DIR=$(mktemp -d -t modusbrain-sync-lock-XXXXXX)
+# Compose with the earlier MODUSBRAIN_HOME-cleanup trap (NOT overwrite it).
+trap 'rm -rf "$BRAIN_DIR" "$TMP_MODUSBRAIN_HOME"; cp -f "$LOG" "$SURFACE_LOG" 2>/dev/null || true' EXIT
 
 # Seed two markdown pages so sync has real (but trivial) work
 mkdir -p "$BRAIN_DIR"
@@ -81,7 +81,7 @@ EOF
 # git-init so sync's diff-walk has something to anchor (sync expects a git repo)
 (cd "$BRAIN_DIR" && git init -q && git add . && git -c user.email=test@test -c user.name=test commit -q -m "seed" >/dev/null 2>&1) || true
 
-# Tell gbrain to use this brain dir. v0.41 introduced the source registry
+# Tell modusbrain to use this brain dir. v0.41 introduced the source registry
 # (sources table) as the canonical "where do pages come from" surface;
 # `sync.repo_path` is the legacy key and sync now reads the source row's
 # `local_path` column. Update the default source's local_path directly via
@@ -143,10 +143,10 @@ rm -f "${EXIT_FILES[@]}" "${OUT_FILES[@]}"
 
 echo "[sync_lock_regression] outcomes: winners=$WINNERS losers=$LOSERS unknown=$UNKNOWN" | tee -a "$LOG"
 
-# Step 5: assert no leaked gbrain_cycle_locks rows. The pkey column is `id`,
-# not `lock_id` (column name confirmed via \d gbrain_cycle_locks).
-LEAKED=$(psql "$DATABASE_URL" -t -A -c "SELECT COUNT(*) FROM gbrain_cycle_locks WHERE id = 'gbrain-sync';" 2>>"$LOG" | tr -d ' ')
-echo "[sync_lock_regression] post-run gbrain_cycle_locks(gbrain-sync) row count: $LEAKED" | tee -a "$LOG"
+# Step 5: assert no leaked modusbrain_cycle_locks rows. The pkey column is `id`,
+# not `lock_id` (column name confirmed via \d modusbrain_cycle_locks).
+LEAKED=$(psql "$DATABASE_URL" -t -A -c "SELECT COUNT(*) FROM modusbrain_cycle_locks WHERE id = 'modusbrain-sync';" 2>>"$LOG" | tr -d ' ')
+echo "[sync_lock_regression] post-run modusbrain_cycle_locks(modusbrain-sync) row count: $LEAKED" | tee -a "$LOG"
 
 # Step 6: verdict
 FAIL=0
@@ -169,7 +169,7 @@ fi
 
 # The lock row must be cleaned up on exit (release via try/finally).
 if [ "$LEAKED" != "0" ]; then
-  echo "[sync_lock_regression] FAIL: $LEAKED leaked gbrain_cycle_locks(gbrain-sync) row(s) after all syncs exited" >&2
+  echo "[sync_lock_regression] FAIL: $LEAKED leaked modusbrain_cycle_locks(modusbrain-sync) row(s) after all syncs exited" >&2
   FAIL=1
 fi
 

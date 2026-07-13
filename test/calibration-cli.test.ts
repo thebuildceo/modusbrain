@@ -1,5 +1,5 @@
 /**
- * v0.36.1.0 (T7) — gbrain calibration CLI + get_calibration_profile MCP op tests.
+ * v0.36.1.0 (T7) — modusbrain calibration CLI + get_calibration_profile MCP op tests.
  *
  * Hermetic. Mock engine + injected args.
  */
@@ -14,7 +14,7 @@ import {
 } from '../src/commands/calibration.ts';
 import type { OperationContext } from '../src/core/operations.ts';
 import type { BrainEngine } from '../src/core/engine.ts';
-import { GBrainError } from '../src/core/types.ts';
+import { ModusBrainError } from '../src/core/types.ts';
 
 const { parseArgs } = __testing;
 
@@ -159,7 +159,7 @@ describe('formatProfileText', () => {
   test('null profile prints helpful cold-brain message', () => {
     const out = formatProfileText(null, 'garry');
     expect(out).toContain('No calibration profile yet');
-    expect(out).toContain('gbrain dream --phase calibration_profile');
+    expect(out).toContain('modusbrain dream --phase calibration_profile');
   });
 
   test('happy profile prints Brier + accuracy + patterns + bias tags', () => {
@@ -237,8 +237,8 @@ describe('getCalibrationProfileOp (MCP)', () => {
       await getCalibrationProfileOp(ctx, { holder: '' });
       throw new Error('should have thrown');
     } catch (err) {
-      expect(err).toBeInstanceOf(GBrainError);
-      expect((err as GBrainError).problem).toBe('INVALID_HOLDER');
+      expect(err).toBeInstanceOf(ModusBrainError);
+      expect((err as ModusBrainError).problem).toBe('INVALID_HOLDER');
     }
   });
 });

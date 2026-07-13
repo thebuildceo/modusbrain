@@ -1,8 +1,8 @@
 /**
- * gbrain skillopt --help text.
+ * modusbrain skillopt --help text.
  */
 
-export const SKILLOPT_HELP_TEXT = `gbrain skillopt <skill-name> [flags]
+export const SKILLOPT_HELP_TEXT = `modusbrain skillopt <skill-name> [flags]
 
 Self-evolving skill optimization. Treats SKILL.md as the trainable parameters
 of a frozen agent. Validation-gated, budget-capped, atomic-versioned.
@@ -76,25 +76,25 @@ Exit codes:
 
 Examples:
   # Generate a starter benchmark from the skill itself (recommended):
-  gbrain skillopt meeting-prep --bootstrap-from-skill
+  modusbrain skillopt meeting-prep --bootstrap-from-skill
   # ...then review + strengthen the judges, delete the sentinel line, and run:
-  gbrain skillopt meeting-prep --bootstrap-reviewed --split 1:1:1
+  modusbrain skillopt meeting-prep --bootstrap-reviewed --split 1:1:1
 
   # Bootstrap benchmark from existing routing-eval, then review:
-  gbrain skillopt meeting-prep --bootstrap-from-routing
+  modusbrain skillopt meeting-prep --bootstrap-from-routing
 
   # After review (sentinel deleted), run the optimizer:
-  gbrain skillopt meeting-prep --bootstrap-reviewed
+  modusbrain skillopt meeting-prep --bootstrap-reviewed
 
   # Dry-run cost preview:
-  gbrain skillopt meeting-prep --dry-run
+  modusbrain skillopt meeting-prep --dry-run
 
   # Optimize a bundled skill in place (requires an independent held-out set):
-  gbrain skillopt brain-ops --allow-mutate-bundled --held-out skills/brain-ops/held-out.jsonl
+  modusbrain skillopt brain-ops --allow-mutate-bundled --held-out skills/brain-ops/held-out.jsonl
   # ...or omit --allow-mutate-bundled to get proposed.md for manual review (no held-out needed).
 
   # Resume after interruption:
-  gbrain skillopt meeting-prep --resume <run-id>
+  modusbrain skillopt meeting-prep --resume <run-id>
 
 See: docs/guides/skillopt.md
 `;

@@ -229,7 +229,7 @@ export interface SynthesizePhaseOpts {
   yieldDuringPhase?: () => Promise<void>;
   /**
    * Override the corpus directory and other tunables. Primarily for the
-   * `gbrain dream --input <file>` ad-hoc path; bypasses config reads.
+   * `modusbrain dream --input <file>` ad-hoc path; bypasses config reads.
    */
   inputFile?: string;
   date?: string;
@@ -356,7 +356,7 @@ export async function runPhaseSynthesize(
         // AIConfigError at chat time = provider auth/config went bad mid-run
         // (revoked key, recipe misconfig surfacing at first real call). Skip
         // this transcript with the gateway error message so the user sees the
-        // shape of the problem in `gbrain dream --phase synthesize --dry-run`.
+        // shape of the problem in `modusbrain dream --phase synthesize --dry-run`.
         if (e instanceof AIConfigError) {
           verdicts.push({
             filePath: t.filePath,
@@ -705,7 +705,7 @@ async function loadAllowedSlugPrefixes(): Promise<string[]> {
 // identically. Only the construction path moved from `new Anthropic()` to
 // `gateway.chat()` so any provider with a registered recipe (Anthropic,
 // DeepSeek, OpenRouter, Voyage, Ollama, llama-server, etc.) is reachable
-// via `gbrain config set models.dream.synthesize_verdict <provider>:<model>`.
+// via `modusbrain config set models.dream.synthesize_verdict <provider>:<model>`.
 //
 // This mirrors v0.35.5.0's `tryBuildGatewayClient` in src/core/think/index.ts
 // (which closed #952 for runThink). Same pattern, same trade-offs:

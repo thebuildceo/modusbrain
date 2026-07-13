@@ -35,7 +35,7 @@ If both paths fire (the tool call AND the call-end handler), the second one is i
               the full call audio (webm/opus) to /tmp/calls/<ts>-<persona>.webm.
               The browser client at /call?test=1 also captures via WebAudio-tee
               for E2E asserts; production /call uses server-side capture only.
-2. TRANSCRIBE → Whisper (via gbrain transcription) processes the audio. Output:
+2. TRANSCRIBE → Whisper (via modusbrain transcription) processes the audio. Output:
               full transcript (timestamped) + speaker labels where possible.
 3. SUMMARIZE  → A separate LLM call produces a 3-5 sentence summary covering
               key topics, decisions, and unresolved items.
@@ -129,7 +129,7 @@ This skill guarantees:
 - The post-call pipeline runs idempotently — second invocations update rather than duplicate.
 - Output written under `meetings/` or `voice-calls/` (consistent with `_brain-filing-rules.md`).
 - Conventions referenced (`quality.md`, `_brain-filing-rules.md`) are followed.
-- Privacy contract preserved: no real names in any committed sample; the operator's actual call transcripts contain whatever they say, which is the operator's data and not gbrain's concern.
+- Privacy contract preserved: no real names in any committed sample; the operator's actual call transcripts contain whatever they say, which is the operator's data and not modusbrain's concern.
 
 ## Output Format
 

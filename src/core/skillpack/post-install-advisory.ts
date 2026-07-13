@@ -1,9 +1,9 @@
 /**
  * post-install-advisory.ts (v0.25.1) — agent-readable "what to do next"
- * after `gbrain init` or `gbrain upgrade`.
+ * after `modusbrain init` or `modusbrain upgrade`.
  *
- * gbrain users typically interact through their host agent (openclaw,
- * claude-code) rather than the gbrain CLI directly. So an interactive
+ * modusbrain users typically interact through their host agent (openclaw,
+ * claude-code) rather than the modusbrain CLI directly. So an interactive
  * TTY prompt at install time misses most of the audience.
  *
  * Instead: every `init` and `post-upgrade` ends by printing an advisory
@@ -86,7 +86,7 @@ export function buildAdvisory(opts: {
   if (missing.length === 0) return null;
 
   // #8: `skillpack install` was removed — scaffold is canonical. The shared
-  // renderer emits scaffold commands so this surface and `gbrain advisor` agree.
+  // renderer emits scaffold commands so this surface and `modusbrain advisor` agree.
   return renderRecommendedSkills({
     version: opts.version,
     context: opts.context,
@@ -97,8 +97,8 @@ export function buildAdvisory(opts: {
 
 function scaffoldCommandFor(missing: RecommendedSkill[], all: RecommendedSkill[]): string {
   return missing.length === all.length
-    ? 'gbrain skillpack scaffold --all'
-    : `gbrain skillpack scaffold ${missing.map((s) => s.slug).join(' ')}`;
+    ? 'modusbrain skillpack scaffold --all'
+    : `modusbrain skillpack scaffold ${missing.map((s) => s.slug).join(' ')}`;
 }
 
 function buildAdvisoryWithoutWorkspace(
@@ -110,7 +110,7 @@ function buildAdvisoryWithoutWorkspace(
     version,
     context,
     skills: all,
-    scaffoldAllCommand: 'gbrain skillpack scaffold --all',
+    scaffoldAllCommand: 'modusbrain skillpack scaffold --all',
     workspaceNotDetected: true,
   });
 }

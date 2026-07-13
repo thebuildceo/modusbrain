@@ -414,9 +414,9 @@ describe('resolveLockRenewalKnobs', () => {
 
   test('case 12b — valid env values parse cleanly', () => {
     const knobs = resolveLockRenewalKnobs({
-      GBRAIN_LOCK_RENEWAL_MAX_FAILURES: '5',
-      GBRAIN_LOCK_RENEWAL_CALL_TIMEOUT_MS: '15000',
-      GBRAIN_LOCK_RENEWAL_SAFETY_MARGIN_MS: '8000',
+      MODUSBRAIN_LOCK_RENEWAL_MAX_FAILURES: '5',
+      MODUSBRAIN_LOCK_RENEWAL_CALL_TIMEOUT_MS: '15000',
+      MODUSBRAIN_LOCK_RENEWAL_SAFETY_MARGIN_MS: '8000',
     }, 30_000);
     expect(knobs.maxFailuresForAudit).toBe(5);
     expect(knobs.callTimeoutMs).toBe(15_000);
@@ -434,20 +434,20 @@ describe('resolveLockRenewalKnobs', () => {
       _resetKnobWarningsForTests();
 
       // Each bad value falls back.
-      let knobs = resolveLockRenewalKnobs({ GBRAIN_LOCK_RENEWAL_MAX_FAILURES: 'abc' }, 30_000);
+      let knobs = resolveLockRenewalKnobs({ MODUSBRAIN_LOCK_RENEWAL_MAX_FAILURES: 'abc' }, 30_000);
       expect(knobs.maxFailuresForAudit).toBe(3);
 
-      knobs = resolveLockRenewalKnobs({ GBRAIN_LOCK_RENEWAL_MAX_FAILURES: '-5' }, 30_000);
+      knobs = resolveLockRenewalKnobs({ MODUSBRAIN_LOCK_RENEWAL_MAX_FAILURES: '-5' }, 30_000);
       expect(knobs.maxFailuresForAudit).toBe(3);
 
-      knobs = resolveLockRenewalKnobs({ GBRAIN_LOCK_RENEWAL_MAX_FAILURES: '0' }, 30_000);
+      knobs = resolveLockRenewalKnobs({ MODUSBRAIN_LOCK_RENEWAL_MAX_FAILURES: '0' }, 30_000);
       expect(knobs.maxFailuresForAudit).toBe(3);
 
-      knobs = resolveLockRenewalKnobs({ GBRAIN_LOCK_RENEWAL_MAX_FAILURES: '1.5' }, 30_000);
+      knobs = resolveLockRenewalKnobs({ MODUSBRAIN_LOCK_RENEWAL_MAX_FAILURES: '1.5' }, 30_000);
       expect(knobs.maxFailuresForAudit).toBe(3);
 
       // Despite 4 bad invocations, only ONE stderr warn per env-name fired.
-      const warnLines = captured.filter((c) => c.includes('GBRAIN_LOCK_RENEWAL_MAX_FAILURES'));
+      const warnLines = captured.filter((c) => c.includes('MODUSBRAIN_LOCK_RENEWAL_MAX_FAILURES'));
       expect(warnLines).toHaveLength(1);
       expect(warnLines[0]).toContain('not a positive integer');
       expect(warnLines[0]).toContain('falling back to default 3');
@@ -466,9 +466,9 @@ describe('resolveLockRenewalKnobs', () => {
     try {
       _resetKnobWarningsForTests();
       resolveLockRenewalKnobs({
-        GBRAIN_LOCK_RENEWAL_MAX_FAILURES: 'bad1',
-        GBRAIN_LOCK_RENEWAL_CALL_TIMEOUT_MS: 'bad2',
-        GBRAIN_LOCK_RENEWAL_SAFETY_MARGIN_MS: 'bad3',
+        MODUSBRAIN_LOCK_RENEWAL_MAX_FAILURES: 'bad1',
+        MODUSBRAIN_LOCK_RENEWAL_CALL_TIMEOUT_MS: 'bad2',
+        MODUSBRAIN_LOCK_RENEWAL_SAFETY_MARGIN_MS: 'bad3',
       }, 30_000);
       const warnLines = captured.filter((c) => c.includes('not a positive integer'));
       expect(warnLines).toHaveLength(3);

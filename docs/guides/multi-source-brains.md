@@ -1,6 +1,6 @@
 # Multi-source brains
 
-**A single gbrain database can hold multiple knowledge repos.** Each one
+**A single modusbrain database can hold multiple knowledge repos.** Each one
 is a `source`: a logical brain-within-the-brain with its own slug
 namespace, its own sync state, and its own federation policy. The rest
 of this guide walks the three canonical scenarios.
@@ -16,15 +16,15 @@ the wiki or in a gstack plan.
 
 ```bash
 # Register the gstack source, federate so it joins cross-source search
-gbrain sources add gstack --path ~/.gstack --federated
+modusbrain sources add gstack --path ~/.gstack --federated
 
-# Pin the directory so `gbrain sync` knows which source it's walking
-cd ~/.gstack && gbrain sources attach gstack
+# Pin the directory so `modusbrain sync` knows which source it's walking
+cd ~/.gstack && modusbrain sources attach gstack
 
 # Initial sync
-gbrain sync --source gstack
+modusbrain sync --source gstack
 
-# Now `gbrain search "retry budgets"` returns hits from BOTH wiki and
+# Now `modusbrain search "retry budgets"` returns hits from BOTH wiki and
 # gstack. Each result includes source_id so the agent can cite properly.
 ```
 
@@ -40,16 +40,16 @@ portfolio content leaking into essay searches is a bug, not a feature.
 
 ```bash
 # Two sources, both isolated (federated=false)
-gbrain sources add yc-media --path ~/yc-media --no-federated
-gbrain sources add garrys-list --path ~/writing --no-federated
+modusbrain sources add yc-media --path ~/yc-media --no-federated
+modusbrain sources add garrys-list --path ~/writing --no-federated
 
 # Pin each checkout directory
-(cd ~/yc-media && gbrain sources attach yc-media)
-(cd ~/writing && gbrain sources attach garrys-list)
+(cd ~/yc-media && modusbrain sources attach yc-media)
+(cd ~/writing && modusbrain sources attach garrys-list)
 
 # Sync each independently
-gbrain sync --source yc-media
-gbrain sync --source garrys-list
+modusbrain sync --source yc-media
+modusbrain sync --source garrys-list
 ```
 
 Result: searching from neither directory returns the `default` source
@@ -60,7 +60,7 @@ Federation is opt-in, not leaked.
 To search across them explicitly on demand:
 
 ```bash
-gbrain search "tech layoffs" --source yc-media,garrys-list
+modusbrain search "tech layoffs" --source yc-media,garrys-list
 ```
 
 ### 3. Mixed (wiki federated + sessions isolated)
@@ -71,27 +71,27 @@ they don't dominate every search result.
 
 ```bash
 # Federated sources
-gbrain sources add gstack --path ~/.gstack --federated
+modusbrain sources add gstack --path ~/.gstack --federated
 
 # Isolated source (future v0.18 — sessions use this shape today for ingest)
-gbrain sources add sessions --path ~/.claude/sessions --no-federated
+modusbrain sources add sessions --path ~/.claude/sessions --no-federated
 ```
 
 ## Resolution priority
 
-When any command needs to pick a source, gbrain walks this list (highest
+When any command needs to pick a source, modusbrain walks this list (highest
 first):
 
 1. Explicit `--source <id>` flag.
-2. `GBRAIN_SOURCE` environment variable.
-3. `.gbrain-source` dotfile in CWD or any ancestor directory.
+2. `MODUSBRAIN_SOURCE` environment variable.
+3. `.modusbrain-source` dotfile in CWD or any ancestor directory.
 4. A registered source whose `local_path` contains the CWD (longest
    prefix wins for nested checkouts).
-5. The brain-level default set via `gbrain sources default <id>`.
+5. The brain-level default set via `modusbrain sources default <id>`.
 6. The seeded `default` source.
 
 So inside `~/.gstack/plans/` on a brain that pinned `gstack` to
-`~/.gstack` via `.gbrain-source`, `gbrain put-page` implicitly writes to
+`~/.gstack` via `.modusbrain-source`, `modusbrain put-page` implicitly writes to
 the `gstack` source. Outside any registered directory with no env/dotfile
 set, it writes to the default.
 
@@ -101,31 +101,31 @@ Every source row stores `config.federated: boolean` in its JSONB config.
 
 | Value | Meaning |
 |-------|---------|
-| `true` | Source participates in unqualified `gbrain search "X"` results. |
+| `true` | Source participates in unqualified `modusbrain search "X"` results. |
 | `false` (default for new sources) | Source only searched when explicitly named via `--source <id>` or qualified citation. |
 
 The seeded `default` source is `federated=true` so pre-v0.17 brains
 behave exactly as before — every page appears in search.
 
-Flip later with `gbrain sources federate <id>` / `unfederate <id>`.
+Flip later with `modusbrain sources federate <id>` / `unfederate <id>`.
 
 ## Commands
 
 Full subcommand reference:
 
 ```
-gbrain sources add <id> --path <p> [--name <n>] [--federated|--no-federated]
+modusbrain sources add <id> --path <p> [--name <n>] [--federated|--no-federated]
                                Register a source. id: [a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?
-gbrain sources list [--json]   List all sources with page counts + federation state.
-gbrain sources remove <id> [--yes] [--dry-run] [--keep-storage]
+modusbrain sources list [--json]   List all sources with page counts + federation state.
+modusbrain sources remove <id> [--yes] [--dry-run] [--keep-storage]
                                Cascade-delete a source (pages, chunks, timeline).
-gbrain sources rename <id> <new-name>
+modusbrain sources rename <id> <new-name>
                                Change display name only; id is immutable.
-gbrain sources default <id>    Set the brain-level default.
-gbrain sources attach <id>     Write .gbrain-source in CWD (like kubectl context).
-gbrain sources detach          Remove .gbrain-source from CWD.
-gbrain sources federate <id>
-gbrain sources unfederate <id>
+modusbrain sources default <id>    Set the brain-level default.
+modusbrain sources attach <id>     Write .modusbrain-source in CWD (like kubectl context).
+modusbrain sources detach          Remove .modusbrain-source from CWD.
+modusbrain sources federate <id>
+modusbrain sources unfederate <id>
 ```
 
 ## Citation format for agents
@@ -137,17 +137,17 @@ When agents receive multi-source results they MUST cite pages in
 > and [gstack:plans/multi-repo] for where this came from.
 
 The citation key is `sources.id` (immutable). Renaming a source via
-`gbrain sources rename` changes the display name only; existing
+`modusbrain sources rename` changes the display name only; existing
 citations keep working.
 
 ## Writing to a specific source
 
 ```bash
 # Pass --source explicitly
-gbrain put-page topics/ai ... --source wiki
+modusbrain put-page topics/ai ... --source wiki
 
 # Or rely on the dotfile / env / CWD match
-cd ~/.gstack && gbrain put-page plans/multi-repo ...
+cd ~/.gstack && modusbrain put-page plans/multi-repo ...
 # → source auto-resolves to gstack
 ```
 
@@ -159,26 +159,26 @@ source silently when ambiguous — it errors with a clear fix.
 
 A long-lived agent that writes to a knowledge-wiki git repo needs three
 things to never lose work: pull before it edits, push every write, and not
-go stale while it sits idle. `gbrain sources harden` installs all of that,
+go stale while it sits idle. `modusbrain sources harden` installs all of that,
 idempotently. The moment you add a brain repo with a token, it runs
 automatically:
 
 ```bash
 # Clone + register a GitHub repo, then auto-harden it for durability.
 # Use a fine-grained PAT scoped to just this repo.
-gbrain sources add wiki --url https://github.com/you/brain-wiki.git --pat-file ~/.secrets/wiki-pat
+modusbrain sources add wiki --url https://github.com/you/brain-wiki.git --pat-file ~/.secrets/wiki-pat
 #   → clones, then installs: local auto-push hook, scripts/brain-commit-push.sh,
 #     always-on durability rules in AGENTS.md/RESOLVER.md, a 30-min pull cron,
 #     and a repo-scoped credential. Verifies push works before declaring done.
 
 # Run the same audit on an existing source any time (idempotent):
-gbrain sources harden wiki --pat-file ~/.secrets/wiki-pat
+modusbrain sources harden wiki --pat-file ~/.secrets/wiki-pat
 
 # Pull on demand (the cron calls the --path form, which never opens the DB):
-gbrain sources pull wiki
+modusbrain sources pull wiki
 
 # Remove the durability scaffolding (also runs automatically on `sources remove`):
-gbrain sources unharden wiki
+modusbrain sources unharden wiki
 ```
 
 What hardening guarantees:
@@ -204,20 +204,20 @@ Security: the push automation is installed locally per machine (never
 committed into the repo), the token is wired per-repo (an existing
 credential helper is reused when present), and it never appears in the repo,
 the remote URL, logs, or the JSON report. For a self-hosted git server
-reachable only over a filesystem path, set `GBRAIN_GIT_ALLOW_FILE_TRANSPORT=1`
+reachable only over a filesystem path, set `MODUSBRAIN_GIT_ALLOW_FILE_TRANSPORT=1`
 (default is HTTPS-only).
 
 ## Upgrading an existing brain
 
-`gbrain upgrade` runs the v16 + v17 migrations automatically. Your
+`modusbrain upgrade` runs the v16 + v17 migrations automatically. Your
 existing pages all move under `source_id='default'`. Behavior is
 unchanged until you add a second source.
 
 To add one:
 
 ```bash
-gbrain sources add gstack --path ~/.gstack --federated
-cd ~/.gstack && gbrain sources attach gstack && gbrain sync
+modusbrain sources add gstack --path ~/.gstack --federated
+cd ~/.gstack && modusbrain sources attach gstack && modusbrain sync
 ```
 
 Two commands. The existing default source is untouched.
@@ -226,9 +226,9 @@ Two commands. The existing default source is untouched.
 
 - Session transcript ingest (`.jsonl`, raised size cap, session
   PageType) — v0.18.
-- Per-source retention/TTL (`gbrain sources prune`) — v0.18.
+- Per-source retention/TTL (`modusbrain sources prune`) — v0.18.
 - ACL enforcement via caller-identity — v0.17.1.
-- `gbrain sources import-from-github <url>` one-shot bootstrap — patch
+- `modusbrain sources import-from-github <url>` one-shot bootstrap — patch
   release after the core plumbing stabilizes.
 
 All of these build on the `sources` primitive shipped here.

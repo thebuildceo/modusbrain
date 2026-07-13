@@ -11,8 +11,8 @@
  * v0.28 lays the phase orchestration so the contract is stable.
  *
  * Default-disabled. Operator opts in:
- *   gbrain config set dream.drift.enabled true
- *   gbrain config set dream.drift.lookback_days 30
+ *   modusbrain config set dream.drift.enabled true
+ *   modusbrain config set dream.drift.lookback_days 30
  */
 
 import type { BrainEngine } from '../engine.ts';

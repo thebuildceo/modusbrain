@@ -1,15 +1,15 @@
 /**
- * gbrain friction — friction reporter CLI.
+ * modusbrain friction — friction reporter CLI.
  *
  * Four subcommands in v1 (analytical/clustering ones move to v1.1):
- *   gbrain friction log     Append a friction or delight entry
- *   gbrain friction render  Render a run as markdown or JSON
- *   gbrain friction list    List recent runs with counts
- *   gbrain friction summary Side-by-side friction + delight summary
+ *   modusbrain friction log     Append a friction or delight entry
+ *   modusbrain friction render  Render a run as markdown or JSON
+ *   modusbrain friction list    List recent runs with counts
+ *   modusbrain friction summary Side-by-side friction + delight summary
  *
  * Subcommands stay thin (≤ ~30 LOC each). Core logic lives in src/core/friction.ts.
  *
- * The CLI is dispatched from src/cli.ts. See `gbrain friction --help`.
+ * The CLI is dispatched from src/cli.ts. See `modusbrain friction --help`.
  */
 
 import {
@@ -49,7 +49,7 @@ function cmdLog(args: string[]): number {
   const phase = flags.string('--phase');
   const message = flags.string('--message');
   if (!phase || !message) {
-    console.error('usage: gbrain friction log --phase <name> --message <text> [--severity ...] [--hint ...] [--kind ...] [--run-id ...]');
+    console.error('usage: modusbrain friction log --phase <name> --message <text> [--severity ...] [--hint ...] [--kind ...] [--run-id ...]');
     return 2;
   }
   const kind = (flags.string('--kind') ?? 'friction') as FrictionKind;
@@ -167,7 +167,7 @@ function parseFlags(args: string[]) {
 }
 
 function printHelp() {
-  console.log(`gbrain friction — friction reporter
+  console.log(`modusbrain friction — friction reporter
 
 Subcommands:
   log     Append a friction or delight entry to the active run
@@ -176,10 +176,10 @@ Subcommands:
   summary Two-column summary of friction + delight for a run
 
 Examples:
-  gbrain friction log --severity confused --phase install --message "init didn't say which engine"
-  gbrain friction render --run-id claw-test-20260428-... --transcripts
-  gbrain friction list --json
-  gbrain friction summary
+  modusbrain friction log --severity confused --phase install --message "init didn't say which engine"
+  modusbrain friction render --run-id claw-test-20260428-... --transcripts
+  modusbrain friction list --json
+  modusbrain friction summary
 
-Run-id resolution: --run-id > $GBRAIN_FRICTION_RUN_ID > 'standalone'.`);
+Run-id resolution: --run-id > $MODUSBRAIN_FRICTION_RUN_ID > 'standalone'.`);
 }

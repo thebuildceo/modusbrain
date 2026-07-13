@@ -154,7 +154,7 @@ export async function executeSkill(
       confidence_score: 0,
       approval_required: true,
       approval_obtained: false,
-      reason: 'Draft skills cannot be auto-executed — approve first with `gbrain skill approve`',
+      reason: 'Draft skills cannot be auto-executed — approve first with `modusbrain skill approve`',
       audit_id: auditId,
       skill_version: version.version,
     };

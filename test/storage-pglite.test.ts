@@ -2,7 +2,7 @@
  * PGLite lifecycle test for storage tiering — D8 + D4 of v0.22.3.
  *
  * Per the plan: "the full PGLite lifecycle for D8's both-engines requirement.
- * gbrain.yml load → gbrain storage status → soft-warn message present →
+ * modusbrain.yml load → modusbrain storage status → soft-warn message present →
  * manageGitignore happy-path on a tmp dir. PGLite-specific path for the
  * slugPrefix filter."
  *
@@ -38,7 +38,7 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-  tmp = mkdtempSync(join(tmpdir(), 'gbrain-pglite-test-'));
+  tmp = mkdtempSync(join(tmpdir(), 'modusbrain-pglite-test-'));
   __resetMissingStorageWarning();
   __resetPGLiteWarn();
   __resetPGLiteTierWarn();
@@ -63,9 +63,9 @@ function cleanup(): void {
   rmSync(tmp, { recursive: true, force: true });
 }
 
-function writeGbrainYml(): void {
+function writeModusbrainYml(): void {
   writeFileSync(
-    join(tmp, 'gbrain.yml'),
+    join(tmp, 'modusbrain.yml'),
     `storage:
   db_tracked:
     - people/
@@ -84,9 +84,9 @@ describe('Storage tiering on PGLite — full lifecycle (D8 + D4)', () => {
     }
   });
 
-  test('getStorageStatus loads gbrain.yml and reports tier counts', async () => {
+  test('getStorageStatus loads modusbrain.yml and reports tier counts', async () => {
     try {
-      writeGbrainYml();
+      writeModusbrainYml();
       await engine.putPage('people/alice', { type: 'person', title: 'Alice', compiled_truth: '', timeline: '' });
       await engine.putPage('media/x/tweet-1', { type: 'concept', title: 'Tweet', compiled_truth: '', timeline: '' });
       await engine.putPage('media/x/tweet-2', { type: 'concept', title: 'Tweet 2', compiled_truth: '', timeline: '' });
@@ -105,7 +105,7 @@ describe('Storage tiering on PGLite — full lifecycle (D8 + D4)', () => {
 
   test('manageGitignore on PGLite emits the D4 soft-warn (once per process)', () => {
     try {
-      writeGbrainYml();
+      writeModusbrainYml();
       manageGitignore(tmp, 'pglite');
       expect(warnings.some((w) => /limited effect on PGLite/.test(w))).toBe(true);
       expect(existsSync(join(tmp, '.gitignore'))).toBe(true);
@@ -123,7 +123,7 @@ describe('Storage tiering on PGLite — full lifecycle (D8 + D4)', () => {
 
   test('manageGitignore on Postgres does NOT emit the PGLite warning', () => {
     try {
-      writeGbrainYml();
+      writeModusbrainYml();
       manageGitignore(tmp, 'postgres');
       expect(warnings.filter((w) => /limited effect on PGLite/.test(w))).toEqual([]);
     } finally {
@@ -144,9 +144,9 @@ describe('Storage tiering on PGLite — full lifecycle (D8 + D4)', () => {
     }
   });
 
-  test('end-to-end: gbrain.yml + putPage + storage status + .gitignore', async () => {
+  test('end-to-end: modusbrain.yml + putPage + storage status + .gitignore', async () => {
     try {
-      writeGbrainYml();
+      writeModusbrainYml();
       await engine.putPage('people/alice', { type: 'person', title: 'Alice', compiled_truth: '', timeline: '' });
       await engine.putPage('media/x/tweet-1', { type: 'concept', title: 'T1', compiled_truth: '', timeline: '' });
 
@@ -162,7 +162,7 @@ describe('Storage tiering on PGLite — full lifecycle (D8 + D4)', () => {
       // .gitignore management produces a managed block.
       manageGitignore(tmp, 'pglite');
       const gitignore = readFileSync(join(tmp, '.gitignore'), 'utf-8');
-      expect(gitignore).toContain('# Auto-managed by gbrain');
+      expect(gitignore).toContain('# Auto-managed by modusbrain');
       expect(gitignore).toContain('media/x/');
     } finally {
       cleanup();

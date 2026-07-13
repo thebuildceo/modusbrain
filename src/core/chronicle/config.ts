@@ -3,7 +3,7 @@ import type { BrainEngine } from '../engine.ts';
 
 /**
  * Auto-emit is OFF by default (plan D5.5: spend posture — extraction spends LLM
- * tokens per eligible write). Enable with `gbrain config set auto_chronicle true`.
+ * tokens per eligible write). Enable with `modusbrain config set auto_chronicle true`.
  * The eval-gated default-flip is the headline fast-follow (TODO T8).
  */
 export async function isAutoChronicleEnabled(engine: BrainEngine): Promise<boolean> {

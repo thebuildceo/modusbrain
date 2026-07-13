@@ -33,7 +33,7 @@ if (skip) {
 }
 
 function makeGitRepo(): string {
-  const dir = mkdtempSync(join(tmpdir(), 'gbrain-e2e-dream-'));
+  const dir = mkdtempSync(join(tmpdir(), 'modusbrain-e2e-dream-'));
   execSync('git init', { cwd: dir, stdio: 'pipe' });
   execSync('git config user.email test@test.co', { cwd: dir, stdio: 'pipe' });
   execSync('git config user.name test', { cwd: dir, stdio: 'pipe' });
@@ -62,7 +62,7 @@ function captureLog<T>(fn: () => Promise<T>): Promise<{ result: T; output: strin
   });
 }
 
-describeE2E('E2E: gbrain dream CLI against real Postgres', () => {
+describeE2E('E2E: modusbrain dream CLI against real Postgres', () => {
   let repo: string;
 
   beforeAll(async () => {
@@ -119,7 +119,7 @@ describeE2E('E2E: gbrain dream CLI against real Postgres', () => {
   test('dream --phase orphans only reports orphans + no cycle-lock footprint', async () => {
     const conn = getConn();
     const before = await conn.unsafe(
-      `SELECT COUNT(*)::int AS n FROM gbrain_cycle_locks`,
+      `SELECT COUNT(*)::int AS n FROM modusbrain_cycle_locks`,
     );
 
     const { result } = await captureLog(() =>
@@ -133,7 +133,7 @@ describeE2E('E2E: gbrain dream CLI against real Postgres', () => {
     }
 
     const after = await conn.unsafe(
-      `SELECT COUNT(*)::int AS n FROM gbrain_cycle_locks`,
+      `SELECT COUNT(*)::int AS n FROM modusbrain_cycle_locks`,
     );
     // Read-only phase selection doesn't touch the lock table.
     expect(after[0].n).toBe(before[0].n);

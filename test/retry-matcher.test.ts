@@ -87,9 +87,9 @@ describe('isRetryableConnError', () => {
     expect(isRetryableConnError(new Error('write CONNECTION_ENDED localhost:6543'))).toBe(true);
   });
 
-  // The getter self-heal throws a GBrainError whose `problem` field is
+  // The getter self-heal throws a ModusBrainError whose `problem` field is
   // 'No database connection' — the existing typed-shape match must keep firing.
-  test('matches the instance-pool-reaped GBrainError shape (problem field)', () => {
+  test('matches the instance-pool-reaped ModusBrainError shape (problem field)', () => {
     const err = { problem: 'No database connection', message: 'instance pool torn down' };
     expect(isRetryableConnError(err)).toBe(true);
   });

@@ -75,7 +75,7 @@ export async function runServe(
   // middleware. Master's simpler startHttpTransport from v0.22.7 is superseded
   // — the OAuth provider in serve-http.ts handles bearer auth via
   // verifyAccessToken with legacy access_tokens fallback (so v0.22.7 callers
-  // that used `gbrain auth create` keep working unchanged).
+  // that used `modusbrain auth create` keep working unchanged).
   const isHttp = args.includes('--http');
 
   if (isHttp) {
@@ -97,7 +97,7 @@ export async function runServe(
 
     // F8 escape hatch: --log-full-params writes raw payloads to mcp_request_log
     // and the admin SSE feed instead of redacted summaries. Off by default
-    // (privacy-first); operators running gbrain on their own laptop can flip
+    // (privacy-first); operators running modusbrain on their own laptop can flip
     // it on for debug visibility. Loud startup warning fires in serve-http.ts
     // when set so the posture change is visible in stderr.
     const logFullParams = args.includes('--log-full-params');
@@ -113,7 +113,7 @@ export async function runServe(
     const bind = bindIdx >= 0 ? args[bindIdx + 1] : undefined;
 
     // v0.36.x #1024: suppress the printed admin bootstrap token. Pair with
-    // GBRAIN_ADMIN_BOOTSTRAP_TOKEN for production deployments that don't
+    // MODUSBRAIN_ADMIN_BOOTSTRAP_TOKEN for production deployments that don't
     // want the value leaking into log aggregators on every supervisor
     // restart.
     const suppressBootstrapToken = args.includes('--suppress-bootstrap-token');
@@ -128,7 +128,7 @@ export async function runServe(
   // trigger graceful release of the PGLite write lock held by `engine`.
   // The HTTP / OAuth path above has its own lifecycle in serve-http.ts
   // and is intentionally NOT wired into this stdio plumbing.
-  console.error('Starting GBrain MCP server (stdio)...');
+  console.error('Starting ModusBrain MCP server (stdio)...');
 
   installStdioLifecycle(engine, args, opts);
 
@@ -182,7 +182,7 @@ function installStdioLifecycle(
       parentWatchdog = null;
     }
 
-    deps.log(`GBrain MCP server: graceful exit (${reason})`);
+    deps.log(`ModusBrain MCP server: graceful exit (${reason})`);
 
     // Race the cleanup against a deadline. engine.disconnect() does a
     // PGLite WASM close + a synchronous rmSync on the lock dir; both
@@ -192,7 +192,7 @@ function installStdioLifecycle(
     // (process.kill(pid, 0) → ESRCH) will reclaim it.
     const deadline = setTimeout(() => {
       deps.log(
-        `GBrain MCP server: cleanup deadline (${CLEANUP_DEADLINE_MS}ms) exceeded — forcing exit`,
+        `ModusBrain MCP server: cleanup deadline (${CLEANUP_DEADLINE_MS}ms) exceeded — forcing exit`,
       );
       deps.exit(0);
     }, CLEANUP_DEADLINE_MS);
@@ -202,7 +202,7 @@ function installStdioLifecycle(
       .then(() => engine.disconnect())
       .catch((err: unknown) => {
         const msg = err instanceof Error ? err.message : String(err);
-        deps.log(`GBrain MCP server: cleanup error: ${msg}`);
+        deps.log(`ModusBrain MCP server: cleanup error: ${msg}`);
       })
       .finally(() => {
         clearTimeout(deadline);
@@ -226,7 +226,7 @@ function installStdioLifecycle(
   // 'end' fires on a clean EOF; 'close' fires when the underlying handle
   // is destroyed (e.g. parent SIGKILL'd while pipe still open). Both
   // converge on the same idempotent shutdown.
-  // Skip when stdin is a TTY: interactive `gbrain serve` use shouldn't
+  // Skip when stdin is a TTY: interactive `modusbrain serve` use shouldn't
   // terminate just because the user hasn't typed anything. Signal /
   // watchdog paths still cover that case if needed.
   // v0.34.1 (#870): when MCP_STDIO=1, the wrapping gateway pipes the
@@ -271,7 +271,7 @@ function installStdioLifecycle(
   if (initialParentPid !== 1) {
     if (!deps.probeWatchdog()) {
       deps.log(
-        '[gbrain serve] watchdog disabled: ps unavailable, parent-death detection unavailable — child will rely on stdin EOF / signals only',
+        '[modusbrain serve] watchdog disabled: ps unavailable, parent-death detection unavailable — child will rely on stdin EOF / signals only',
       );
     } else {
       parentWatchdog = deps.setInterval(() => {
@@ -306,7 +306,7 @@ function installStdioLifecycle(
     // here, but every JSON-RPC frame causes a 'data' event on stdin, so
     // chunk-level granularity is sufficient.
     deps.stdin.on('data', armIdle);
-    deps.log(`GBrain MCP server: stdio idle timeout = ${idleTimeoutSec}s`);
+    deps.log(`ModusBrain MCP server: stdio idle timeout = ${idleTimeoutSec}s`);
   }
 }
 

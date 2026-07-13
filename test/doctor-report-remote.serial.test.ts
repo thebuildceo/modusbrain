@@ -19,13 +19,13 @@ let tmpHome: string;
 let priorHome: string | undefined;
 
 beforeAll(async () => {
-  // v0.37.10.0: doctorReportRemote reads from ~/.gbrain audit files
+  // v0.37.10.0: doctorReportRemote reads from ~/.modusbrain audit files
   // (reranker_health, sync_failures, etc.). Without isolation, host state
   // leaks into the test and makes the assertion non-deterministic. Pin
-  // GBRAIN_HOME to a tempdir so audit reads return empty.
-  tmpHome = mkdtempSync(join(tmpdir(), 'gbrain-doctor-remote-'));
-  priorHome = process.env.GBRAIN_HOME;
-  process.env.GBRAIN_HOME = tmpHome;
+  // MODUSBRAIN_HOME to a tempdir so audit reads return empty.
+  tmpHome = mkdtempSync(join(tmpdir(), 'modusbrain-doctor-remote-'));
+  priorHome = process.env.MODUSBRAIN_HOME;
+  process.env.MODUSBRAIN_HOME = tmpHome;
   engine = new PGLiteEngine();
   await engine.connect({});
   await engine.initSchema();
@@ -33,8 +33,8 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await engine.disconnect();
-  if (priorHome === undefined) delete process.env.GBRAIN_HOME;
-  else process.env.GBRAIN_HOME = priorHome;
+  if (priorHome === undefined) delete process.env.MODUSBRAIN_HOME;
+  else process.env.MODUSBRAIN_HOME = priorHome;
   rmSync(tmpHome, { recursive: true, force: true });
 });
 

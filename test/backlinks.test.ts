@@ -86,7 +86,7 @@ describe('findBacklinkGaps dedupe (v0.36.x #967 regression)', () => {
     const { join } = await import('path');
     const { findBacklinkGaps } = await import('../src/commands/backlinks.ts');
 
-    const root = mkdtempSync(join(tmpdir(), 'gbrain-backlinks-dedupe-'));
+    const root = mkdtempSync(join(tmpdir(), 'modusbrain-backlinks-dedupe-'));
     try {
       mkdirSync(join(root, 'people'));
       mkdirSync(join(root, 'meetings'));

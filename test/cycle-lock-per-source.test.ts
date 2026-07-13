@@ -2,8 +2,8 @@
  * v0.38 cycle lock primitive tests.
  *
  * Covers `cycleLockIdFor(sourceId?)` exhaustively:
- *   - back-compat for undefined sourceId (legacy 'gbrain-cycle')
- *   - per-source lock IDs (`gbrain-cycle:<id>`)
+ *   - back-compat for undefined sourceId (legacy 'modusbrain-cycle')
+ *   - per-source lock IDs (`modusbrain-cycle:<id>`)
  *   - internal validation via assertValidSourceId (codex r2 P1-B)
  *
  * Integration assertions (two cycles holding distinct locks, busy-lock
@@ -14,16 +14,16 @@ import { describe, test, expect } from 'bun:test';
 import { cycleLockIdFor } from '../src/core/cycle.ts';
 
 describe('cycleLockIdFor', () => {
-  test('returns legacy gbrain-cycle for undefined sourceId (back-compat)', () => {
-    expect(cycleLockIdFor()).toBe('gbrain-cycle');
-    expect(cycleLockIdFor(undefined)).toBe('gbrain-cycle');
+  test('returns legacy modusbrain-cycle for undefined sourceId (back-compat)', () => {
+    expect(cycleLockIdFor()).toBe('modusbrain-cycle');
+    expect(cycleLockIdFor(undefined)).toBe('modusbrain-cycle');
   });
 
-  test('returns gbrain-cycle:<source_id> for valid kebab IDs', () => {
-    expect(cycleLockIdFor('default')).toBe('gbrain-cycle:default');
-    expect(cycleLockIdFor('portfolio')).toBe('gbrain-cycle:portfolio');
-    expect(cycleLockIdFor('a')).toBe('gbrain-cycle:a');
-    expect(cycleLockIdFor('alpha-beta-gamma')).toBe('gbrain-cycle:alpha-beta-gamma');
+  test('returns modusbrain-cycle:<source_id> for valid kebab IDs', () => {
+    expect(cycleLockIdFor('default')).toBe('modusbrain-cycle:default');
+    expect(cycleLockIdFor('portfolio')).toBe('modusbrain-cycle:portfolio');
+    expect(cycleLockIdFor('a')).toBe('modusbrain-cycle:a');
+    expect(cycleLockIdFor('alpha-beta-gamma')).toBe('modusbrain-cycle:alpha-beta-gamma');
   });
 
   test('produces DISTINCT lock IDs for different sources', () => {
@@ -31,8 +31,8 @@ describe('cycleLockIdFor', () => {
     const a = cycleLockIdFor('portfolio');
     const b = cycleLockIdFor('personal');
     expect(a).not.toBe(b);
-    expect(a).not.toBe('gbrain-cycle');
-    expect(b).not.toBe('gbrain-cycle');
+    expect(a).not.toBe('modusbrain-cycle');
+    expect(b).not.toBe('modusbrain-cycle');
   });
 
   test('legacy and per-source IDs are distinct (no collision)', () => {

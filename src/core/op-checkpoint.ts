@@ -62,7 +62,7 @@ async function durableWrite(
  *      checkpoint is keyed by `(op, fingerprint)` where fingerprint is
  *      sha8 of canonical-JSON of the relevant params per op.
  *
- *   2. **Multi-worker host blindness.** File-backed `~/.gbrain/...`
+ *   2. **Multi-worker host blindness.** File-backed `~/.modusbrain/...`
  *      checkpoints don't work when the Minion worker resumes on a
  *      different container or host (codex #16). DB-backed via
  *      `op_checkpoints` table (migration v67) is the source of truth;

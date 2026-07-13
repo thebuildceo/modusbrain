@@ -30,7 +30,7 @@ export const collectStalledJobs: AdvisorCollector = {
           severity: 'warn',
           title: `${r.n} "${r.name}" job${r.n === 1 ? '' : 's'} look stalled (lock lapsed / retrying).`,
           detail: 'A wedged worker stops backfill/sync from progressing.',
-          fix: { command_argv: ['gbrain', 'jobs', 'status'] },
+          fix: { command_argv: ['modusbrain', 'jobs', 'status'] },
           collector: 'stalled-jobs',
           ask_user: true,
         });
@@ -54,7 +54,7 @@ export const collectStalledJobs: AdvisorCollector = {
           severity: 'info',
           title: `Source "${r.id}" hasn't synced in over a week.`,
           detail: 'Re-sync to pull in new content the brain has not indexed yet.',
-          fix: { command_argv: ['gbrain', 'sync', '--source', r.id] },
+          fix: { command_argv: ['modusbrain', 'sync', '--source', r.id] },
           collector: 'stalled-jobs',
           ask_user: true,
         });

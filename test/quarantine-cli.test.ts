@@ -1,5 +1,5 @@
 /**
- * gbrain quarantine CLI (issue #1699) — list / clear / scan.
+ * modusbrain quarantine CLI (issue #1699) — list / clear / scan.
  * PGLite + captured console; no API keys.
  */
 import { describe, test, expect, beforeAll, afterAll, beforeEach } from 'bun:test';
@@ -31,7 +31,7 @@ async function withHome<T>(fn: () => Promise<T>): Promise<T> {
   const home = mkdtempSync(join(tmpdir(), 'q-cli-home-'));
   const audit = mkdtempSync(join(tmpdir(), 'q-cli-audit-'));
   try {
-    return await withEnv({ GBRAIN_HOME: home, GBRAIN_AUDIT_DIR: audit }, fn);
+    return await withEnv({ MODUSBRAIN_HOME: home, MODUSBRAIN_AUDIT_DIR: audit }, fn);
   } finally {
     rmSync(home, { recursive: true, force: true });
     rmSync(audit, { recursive: true, force: true });
@@ -51,7 +51,7 @@ async function capture(fn: () => Promise<void>): Promise<string> {
   return lines.join('\n');
 }
 
-describe('gbrain quarantine list', () => {
+describe('modusbrain quarantine list', () => {
   test('lists quarantined by default; --include-flagged adds content_flag pages', async () => {
     await withHome(async () => {
       await importFromContent(engine, 'notes/junk', `---\ntitle: B\ntype: note\n---\n\nCloudflare Ray ID: x. body.`, { noEmbed: true });
@@ -72,7 +72,7 @@ describe('gbrain quarantine list', () => {
   });
 });
 
-describe('gbrain quarantine clear', () => {
+describe('modusbrain quarantine clear', () => {
   test('clear (no --force) on still-junk content re-quarantines (--json, no exit)', async () => {
     await withHome(async () => {
       await importFromContent(engine, 'notes/jstill', `---\ntitle: B\ntype: note\n---\n\nCloudflare Ray ID: w. still junk.`, { noEmbed: true });
@@ -131,7 +131,7 @@ describe('engine.getContentFlagsByPageIds', () => {
   });
 });
 
-describe('gbrain quarantine scan', () => {
+describe('modusbrain quarantine scan', () => {
   test('dry-run reports would-quarantine for pre-gate junk; --apply marks it', async () => {
     await withHome(async () => {
       // Seed junk that predates the gate by writing directly via putPage

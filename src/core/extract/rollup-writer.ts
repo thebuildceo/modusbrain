@@ -7,7 +7,7 @@
  * 100ms regardless of audit volume.
  *
  * F-OUT-19 dual-write posture:
- *   - JSONL audit (~/.gbrain/audit/...) is the SOURCE OF TRUTH
+ *   - JSONL audit (~/.modusbrain/audit/...) is the SOURCE OF TRUTH
  *     (forensic, append-only, crash-safe).
  *   - This DB rollup is BEST-EFFORT. Failures bump a counter
  *     (rollup_write_failures) inside the table itself and stderr-warn;

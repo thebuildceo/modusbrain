@@ -1,14 +1,14 @@
 # Pre-commit hook for brain repos (v0.22.4+)
 
-`gbrain frontmatter install-hook` installs a git pre-commit hook in your
-brain source's repo that runs `gbrain frontmatter validate` against staged
+`modusbrain frontmatter install-hook` installs a git pre-commit hook in your
+brain source's repo that runs `modusbrain frontmatter validate` against staged
 `.md` and `.mdx` files. Malformed frontmatter blocks the commit. Bypass with
 `git commit --no-verify`.
 
 ## What the hook catches
 
 The same eight validation classes the `frontmatter-guard` skill and
-`gbrain doctor`'s `frontmatter_integrity` subcheck report:
+`modusbrain doctor`'s `frontmatter_integrity` subcheck report:
 
 | Code              | What it catches                                                     |
 |-------------------|---------------------------------------------------------------------|
@@ -26,19 +26,19 @@ The same eight validation classes the `frontmatter-guard` skill and
 For all registered sources that are git repos:
 
 ```bash
-gbrain frontmatter install-hook
+modusbrain frontmatter install-hook
 ```
 
 For one source:
 
 ```bash
-gbrain frontmatter install-hook --source <id>
+modusbrain frontmatter install-hook --source <id>
 ```
 
 For force-overwrite of an existing pre-commit hook (writes a `.bak`):
 
 ```bash
-gbrain frontmatter install-hook --force
+modusbrain frontmatter install-hook --force
 ```
 
 The hook lands at `<source>/.githooks/pre-commit`. If `core.hooksPath` is
@@ -54,37 +54,37 @@ git commit --no-verify
 ```
 
 This skips ALL pre-commit hooks. Use sparingly — the next time the user
-runs `gbrain doctor`, the issues will surface.
+runs `modusbrain doctor`, the issues will surface.
 
 ## Uninstall
 
 ```bash
-gbrain frontmatter install-hook --uninstall
+modusbrain frontmatter install-hook --uninstall
 ```
 
 If a `.bak` was saved during install, it's restored as the active hook.
 Otherwise the hook is removed cleanly.
 
-## Behavior on machines without gbrain installed
+## Behavior on machines without modusbrain installed
 
-The hook script checks for `gbrain` on `$PATH`. When missing, it prints a
+The hook script checks for `modusbrain` on `$PATH`. When missing, it prints a
 one-line warning to stderr and exits 0 — commits aren't blocked just because
-a developer hasn't installed gbrain locally. Once gbrain is installed, the
+a developer hasn't installed modusbrain locally. Once modusbrain is installed, the
 hook resumes blocking malformed pages.
 
 ## For downstream agent forks
 
-If your OpenClaw wraps gbrain in a host repo
+If your OpenClaw wraps modusbrain in a host repo
 that's not the brain repo itself, you may want a separate hook strategy:
 
-- **Brain repo IS the host repo** (gbrain skills + brain pages in one repo):
-  install via `gbrain frontmatter install-hook` as above.
+- **Brain repo IS the host repo** (modusbrain skills + brain pages in one repo):
+  install via `modusbrain frontmatter install-hook` as above.
 - **Brain repo is a separate registered source** (e.g. `~/brain` registered
   as a source, host repo is `~/agent-fork`): install in the brain repo only;
   agent-fork code doesn't need this hook.
 - **Brain repo is auto-generated** (e.g. by a sync daemon writing to a
   bucket): skip the hook entirely; gate at the writer instead via
-  `import { writeBrainPage } from 'gbrain/brain-writer'` (planned in a
+  `import { writeBrainPage } from 'modusbrain/brain-writer'` (planned in a
   later release; currently the CLI is the surface).
 
 ## How it fits into the broader frontmatter pipeline
@@ -96,7 +96,7 @@ agent writes a page         git commit                 doctor scan
        ↓                          ↓                          ↓
   raw file on disk       blocks malformed commits     surfaces existing issues
                                                              ↓
-                                                  `gbrain frontmatter validate
+                                                  `modusbrain frontmatter validate
                                                    <source-path> --fix`
                                                    (writes .bak backups)
 ```

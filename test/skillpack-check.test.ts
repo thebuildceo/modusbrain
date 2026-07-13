@@ -1,16 +1,16 @@
 /**
- * Tests for `gbrain skillpack-check` — the agent-readable health report.
+ * Tests for `modusbrain skillpack-check` — the agent-readable health report.
  *
  * Covers:
  *   - Healthy fresh install → exit 0, healthy:true, actions:[], no DB needed.
  *   - Half-migrated (partial entry in completed.jsonl) → exit 1,
- *     healthy:false, actions includes `gbrain apply-migrations --yes`,
+ *     healthy:false, actions includes `modusbrain apply-migrations --yes`,
  *     summary mentions the action.
  *   - --quiet → no stdout, same exit code.
  *   - --help → prints usage, exits 0.
  *
  * Subprocess invocation against temp $HOME so each test sees clean fixture
- * state. DATABASE_URL / GBRAIN_DATABASE_URL stripped so the report runs
+ * state. DATABASE_URL / MODUSBRAIN_DATABASE_URL stripped so the report runs
  * filesystem-only (the checks we care about live there).
  */
 
@@ -29,7 +29,7 @@ let origHome: string | undefined;
 function run(args: string[]): { exitCode: number; stdout: string; stderr: string } {
   const env = { ...process.env, HOME: tmp } as Record<string, string | undefined>;
   delete env.DATABASE_URL;
-  delete env.GBRAIN_DATABASE_URL;
+  delete env.MODUSBRAIN_DATABASE_URL;
   try {
     const stdout = bunExecFileSync(['run', CLI, ...args], {
       env: env as Record<string, string>,
@@ -48,7 +48,7 @@ function run(args: string[]): { exitCode: number; stdout: string; stderr: string
 
 beforeEach(() => {
   origHome = process.env.HOME;
-  tmp = mkdtempSync(join(tmpdir(), 'gbrain-skillpack-check-test-'));
+  tmp = mkdtempSync(join(tmpdir(), 'modusbrain-skillpack-check-test-'));
 });
 
 afterEach(() => {
@@ -57,20 +57,20 @@ afterEach(() => {
   try { rmSync(tmp, { recursive: true, force: true }); } catch { /* best-effort */ }
 });
 
-describe('gbrain skillpack-check', () => {
+describe('modusbrain skillpack-check', () => {
   test('healthy fresh install → exit 0, healthy:true, empty actions', () => {
     const result = run(['skillpack-check']);
     expect(result.exitCode).toBe(0);
     const report = JSON.parse(result.stdout);
     expect(report.healthy).toBe(true);
     expect(report.actions).toEqual([]);
-    expect(report.summary).toBe('gbrain skillpack healthy');
+    expect(report.summary).toBe('modusbrain skillpack healthy');
     expect(report.version).toBeTruthy();
     expect(report.ts).toBeTruthy();
   });
 
   test('half-migrated (partial completed.jsonl) → exit 1, apply-migrations in actions', () => {
-    const migrationsDir = join(tmp, '.gbrain', 'migrations');
+    const migrationsDir = join(tmp, '.modusbrain', 'migrations');
     mkdirSync(migrationsDir, { recursive: true });
     writeFileSync(
       join(migrationsDir, 'completed.jsonl'),
@@ -81,8 +81,8 @@ describe('gbrain skillpack-check', () => {
     expect(result.exitCode).toBe(1);
     const report = JSON.parse(result.stdout);
     expect(report.healthy).toBe(false);
-    expect(report.actions).toContain('gbrain apply-migrations --yes');
-    expect(report.summary).toContain('gbrain apply-migrations --yes');
+    expect(report.actions).toContain('modusbrain apply-migrations --yes');
+    expect(report.summary).toContain('modusbrain apply-migrations --yes');
     expect(report.summary).toContain('needs attention');
     // Doctor check surfaced the MINIONS HALF-INSTALLED line
     const doctorChecks = (report.doctor as { checks: Array<{ name: string; status: string }> }).checks;
@@ -98,7 +98,7 @@ describe('gbrain skillpack-check', () => {
     expect(healthy.stdout).toBe('');
 
     // Broken path quiet — need new tmp with fixture
-    const migrationsDir = join(tmp, '.gbrain', 'migrations');
+    const migrationsDir = join(tmp, '.modusbrain', 'migrations');
     mkdirSync(migrationsDir, { recursive: true });
     writeFileSync(
       join(migrationsDir, 'completed.jsonl'),
@@ -120,7 +120,7 @@ describe('gbrain skillpack-check', () => {
   test('summary includes top action when multiple present', () => {
     // Partial record creates apply-migrations action + the migrations count
     // action. Summary should reference the first (highest-priority) action.
-    const migrationsDir = join(tmp, '.gbrain', 'migrations');
+    const migrationsDir = join(tmp, '.modusbrain', 'migrations');
     mkdirSync(migrationsDir, { recursive: true });
     writeFileSync(
       join(migrationsDir, 'completed.jsonl'),

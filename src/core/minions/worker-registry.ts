@@ -1,7 +1,7 @@
 /**
  * Live worker registry for niceness observability (issue #1815, Q1-C).
  *
- * Each running `gbrain jobs work` process self-registers a small JSON file
+ * Each running `modusbrain jobs work` process self-registers a small JSON file
  * recording its pid, queue, brain identity, start time, and the niceness it
  * requested + the niceness actually in effect. The read surfaces (jobs stats,
  * doctor, supervisor status) enumerate these to report the EFFECTIVE niceness of
@@ -13,8 +13,8 @@
  * the worker. A failed write just means that worker is omitted from the read
  * surfaces — it does not affect job execution.
  *
- * Location is brain-isolated via gbrainPath() (honors GBRAIN_HOME); entries are
- * additionally tagged with a brain id so a single GBRAIN_HOME hosting multiple
+ * Location is brain-isolated via modusbrainPath() (honors MODUSBRAIN_HOME); entries are
+ * additionally tagged with a brain id so a single MODUSBRAIN_HOME hosting multiple
  * databases doesn't cross-report (Codex #7).
  */
 
@@ -28,7 +28,7 @@ import {
 } from 'fs';
 import { join } from 'path';
 import { execFileSync } from 'child_process';
-import { gbrainPath, loadConfig } from '../config.ts';
+import { modusbrainPath, loadConfig } from '../config.ts';
 import { getEffectiveNiceness } from './niceness.ts';
 
 /** On-disk shape of a `worker-<pid>.json` entry. */
@@ -51,15 +51,15 @@ export interface LiveWorker extends WorkerRegistryEntry {
   nice_now: number | null;
 }
 
-/** Directory holding one file per live worker. Brain-isolated via GBRAIN_HOME. */
+/** Directory holding one file per live worker. Brain-isolated via MODUSBRAIN_HOME. */
 export function workerRegistryDir(): string {
-  return gbrainPath('workers');
+  return modusbrainPath('workers');
 }
 
 /**
  * Short, stable id for the active brain (database). Best-effort: derived from
  * the configured DB url/path. Returns 'default' when nothing is configured.
- * Used to tag + filter registry entries so multiple DBs under one GBRAIN_HOME
+ * Used to tag + filter registry entries so multiple DBs under one MODUSBRAIN_HOME
  * don't cross-report.
  */
 export function currentBrainId(): string {
@@ -222,7 +222,7 @@ export function readWorkers(
       continue;
     }
 
-    // Only this brain's workers (multi-DB under one GBRAIN_HOME).
+    // Only this brain's workers (multi-DB under one MODUSBRAIN_HOME).
     if (entry.brain_id && entry.brain_id !== brainId) continue;
 
     // PID-reuse guard: if the live pid demonstrably started well after this

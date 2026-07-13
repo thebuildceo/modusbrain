@@ -6,8 +6,8 @@
  * cache helpers back from self-upgrade). `check-update.ts` re-exports
  * `parseSemver` / `isMinorOrMajorBump` for back-compat with existing importers.
  *
- * Supports both 3-segment (`0.41.38`) and 4-segment (`0.42.3.0`) gbrain
- * version strings. The 4th `.MICRO` segment is gbrain's dot-suffix
+ * Supports both 3-segment (`0.41.38`) and 4-segment (`0.42.3.0`) modusbrain
+ * version strings. The 4th `.MICRO` segment is modusbrain's dot-suffix
  * follow-up channel; comparisons use it as a 4th ordering key.
  */
 
@@ -19,7 +19,7 @@
 export type SemverTuple = [number, number, number];
 
 /** Strict shape gate for a remote version string before it reaches the agent.
- * Accepts both 3-segment (`0.41.38`) and 4-segment (`0.42.3.0`) gbrain versions. */
+ * Accepts both 3-segment (`0.41.38`) and 4-segment (`0.42.3.0`) modusbrain versions. */
 export const VERSION_RE = /^\d+\.\d+(?:\.\d+){0,2}$/;
 
 /** True iff `v` (optionally `v`-prefixed) is a plain numeric dotted version. */
@@ -56,7 +56,7 @@ export function semverLte(a: SemverTuple, b: SemverTuple): boolean {
 
 /**
  * True when `latest` is a minor or major bump over `current` (patch / micro
- * bumps are deliberately ignored, matching `gbrain check-update`'s
+ * bumps are deliberately ignored, matching `modusbrain check-update`'s
  * established posture — patch noise should not nag every invocation).
  * Unparseable inputs are treated as "not a bump" (fail-open to up-to-date).
  */

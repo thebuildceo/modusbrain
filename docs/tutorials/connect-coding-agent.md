@@ -1,14 +1,14 @@
-# Give your coding agent a memory: GBrain + Claude Code / Codex
+# Give your coding agent a memory: ModusBrain + Claude Code / Codex
 
 Coding agents got very good at code. They're still amnesiac about everything
 else. Claude Code and Codex forget your last conversation, can't tell you what
 you decided three meetings ago, and re-derive context you already have written
-down somewhere. GBrain is the retrieval layer that fixes that: search, synthesis,
+down somewhere. ModusBrain is the retrieval layer that fixes that: search, synthesis,
 and a self-wiring knowledge graph, wired into your agent over MCP.
 
 There are two ways to do this. Pick the one that matches where you are:
 
-- **Path A — I already run a brain** (OpenClaw, Hermes, or any `gbrain serve`
+- **Path A — I already run a brain** (OpenClaw, Hermes, or any `modusbrain serve`
   host) and I want my Claude Code / Codex to reach the same brain. → [jump to Path A](#path-a-connect-an-agent-to-a-brain-you-already-have)
 - **Path B — I have nothing yet.** Spin up a local brain in 2 seconds and wire it
   into my coding agent. → [jump to Path B](#path-b-start-from-nothing-local-brain-local-agent)
@@ -18,7 +18,7 @@ and writes new knowledge back as you work. The last section,
 [Now make it actually useful](#now-make-it-actually-useful), is the same for both
 and is the part that changes how you work.
 
-Prerequisite for either path: `bun install -g github:garrytan/gbrain`.
+Prerequisite for either path: `bun install -g github:garrytan/modusbrain`.
 
 ---
 
@@ -34,14 +34,14 @@ HTTP, your laptop agents connect with a token.
 If your host isn't already serving HTTP MCP, start it:
 
 ```bash
-gbrain serve --http --bind 0.0.0.0 --public-url https://your-host.example.com
+modusbrain serve --http --bind 0.0.0.0 --public-url https://your-host.example.com
 ```
 
 Two flags matter and people skip them:
 
 - **`--bind 0.0.0.0`** — the default bind is `127.0.0.1` (loopback only), which
   silently refuses every remote connection. If your agent "can't reach the
-  brain" and you didn't pass this, that's why. `gbrain serve --http` warns you at
+  brain" and you didn't pass this, that's why. `modusbrain serve --http` warns you at
   startup when `--public-url` is set without `--bind`.
 - **`--public-url`** — the externally reachable HTTPS URL (your Render/Railway
   URL, ngrok domain, Tailscale Funnel, etc.). It's the issuer the OAuth/MCP
@@ -58,20 +58,20 @@ write but won't see your skill catalog (the OpenClaw skills that make your setup
 special). Turn it on:
 
 ```bash
-gbrain config set mcp.publish_skills true
+modusbrain config set mcp.publish_skills true
 ```
 
-(New brains from `gbrain init` default this ON. Brains upgraded from before
+(New brains from `modusbrain init` default this ON. Brains upgraded from before
 v0.41.36 stay OFF until you opt in, so this is the common gotcha for existing
 OpenClaw users.)
 
 ### A2. On the host: mint a token
 
 ```bash
-gbrain auth create "laptop-agents"
+modusbrain auth create "laptop-agents"
 ```
 
-Copy the `gbrain_…` token it prints. It's a long-lived, full-access secret. Treat
+Copy the `modusbrain_…` token it prints. It's a long-lived, full-access secret. Treat
 it like a password; prefer a scoped OAuth client for anything cloud-hosted (see
 [DEPLOY.md](../mcp/DEPLOY.md)).
 
@@ -79,10 +79,10 @@ it like a password; prefer a scoped OAuth client for anything cloud-hosted (see
 
 ```bash
 # Claude Code
-gbrain connect https://your-host.example.com/mcp --token gbrain_xxx --install
+modusbrain connect https://your-host.example.com/mcp --token modusbrain_xxx --install
 
 # Codex
-gbrain connect https://your-host.example.com/mcp --token gbrain_xxx --agent codex --install
+modusbrain connect https://your-host.example.com/mcp --token modusbrain_xxx --agent codex --install
 ```
 
 `--install` runs the agent's `mcp add` for you AND smoke-tests the token: it
@@ -90,13 +90,13 @@ actually calls `get_brain_identity` before handing off, so a wrong or expired
 token fails right now, not silently on the agent's first request. You'll see:
 
 ```
-Added MCP server 'gbrain' -> https://your-host.example.com/mcp.
+Added MCP server 'modusbrain' -> https://your-host.example.com/mcp.
 Verified: {"version":"0.42.x","engine":"postgres","page_count":146646,...}
 ```
 
 Drop `--install` to print a paste-ready block instead (useful when the host and
 the agent are different machines, or you want to read before you run). Codex
-reads the bearer from `$GBRAIN_REMOTE_TOKEN` at runtime, so the token never lands
+reads the bearer from `$MODUSBRAIN_REMOTE_TOKEN` at runtime, so the token never lands
 in Codex's config file. Keep that variable exported in your shell profile.
 
 ### A4. Verify
@@ -118,7 +118,7 @@ tunnel.
 ### B1. Create a local brain
 
 ```bash
-gbrain init --pglite      # 2 seconds; embedded Postgres via WASM, no Docker
+modusbrain init --pglite      # 2 seconds; embedded Postgres via WASM, no Docker
 ```
 
 ### B2. Put something in it
@@ -128,10 +128,10 @@ broken. Two ways to fill it:
 
 ```bash
 # Bulk-import a folder of markdown you already have:
-gbrain import ~/notes/
+modusbrain import ~/notes/
 
 # Or capture as you go (one thought at a time):
-gbrain capture "Decided to use PGLite as the default engine: zero-config beats Postgres for <1000 files."
+modusbrain capture "Decided to use PGLite as the default engine: zero-config beats Postgres for <1000 files."
 ```
 
 You don't have to import everything up front. The capture-as-you-go habit (see
@@ -142,20 +142,20 @@ generate while working, and is genuinely useful by day two.
 
 ```bash
 # Claude Code
-claude mcp add gbrain -- gbrain serve
+claude mcp add modusbrain -- modusbrain serve
 
 # Codex
-codex mcp add gbrain -- gbrain serve
+codex mcp add modusbrain -- modusbrain serve
 ```
 
 That's the whole wire-up. No token, no URL, no tunnel. The agent spawns
-`gbrain serve` as a stdio subprocess and talks to your local brain directly.
+`modusbrain serve` as a stdio subprocess and talks to your local brain directly.
 
 ### B4. Verify
 
 In the agent: *"search my brain for PGLite"* (or whatever you just captured). You
 get the page back. The same brain is now query-able from the CLI
-(`gbrain query "..."`) and from your agent.
+(`modusbrain query "..."`) and from your agent.
 
 ---
 
@@ -189,7 +189,7 @@ about people, companies, decisions, projects, or past context:
 ### The four patterns worth stealing
 
 These come straight from a production OpenClaw setup. They translate directly to
-any coding agent with GBrain connected:
+any coding agent with ModusBrain connected:
 
 **1. Brain-first lookup (never ask what you can retrieve).** The single highest-
 value habit. Before the agent asks you "which repo?" or "who owns this?", it
@@ -221,15 +221,15 @@ habits to build. Your agent stops being amnesiac.
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| Agent "can't reach the brain" (Path A) | `gbrain serve --http` bound to loopback | Restart with `--bind 0.0.0.0` |
-| `list_skills` returns nothing / errors | Skill publishing OFF on the host | `gbrain config set mcp.publish_skills true` |
-| Token rejected on first call | Wrong/expired token | Re-mint with `gbrain auth create`; `--install` smoke-tests it for you |
+| Agent "can't reach the brain" (Path A) | `modusbrain serve --http` bound to loopback | Restart with `--bind 0.0.0.0` |
+| `list_skills` returns nothing / errors | Skill publishing OFF on the host | `modusbrain config set mcp.publish_skills true` |
+| Token rejected on first call | Wrong/expired token | Re-mint with `modusbrain auth create`; `--install` smoke-tests it for you |
 | `unknown tool: capture` | `capture` is CLI-only, not an MCP tool | Use `put_page` over MCP; `capture` only on the CLI |
-| Empty results (Path B) | Brain has nothing in it yet | `gbrain import ~/notes/` or `gbrain capture "..."` |
+| Empty results (Path B) | Brain has nothing in it yet | `modusbrain import ~/notes/` or `modusbrain capture "..."` |
 
 ## Next steps
 
-- Go full autonomous: the overnight enrichment daemon ([dream cycle](../../CHANGELOG.md)) fixes citations, dedupes people, builds scorecards while you sleep. See `gbrain autopilot --install`.
+- Go full autonomous: the overnight enrichment daemon ([dream cycle](../../CHANGELOG.md)) fixes citations, dedupes people, builds scorecards while you sleep. See `modusbrain autopilot --install`.
 - Run a real agent platform on top: [personal-brain tutorial](personal-brain.md).
 - Scale to a team: [company-brain tutorial](company-brain.md).
 - Every MCP client's exact setup: [`docs/mcp/`](../mcp/).

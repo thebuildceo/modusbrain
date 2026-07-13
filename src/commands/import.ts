@@ -4,7 +4,7 @@ import { join, relative } from 'path';
 import { cpus, totalmem } from 'os';
 import type { BrainEngine } from '../core/engine.ts';
 import { importFile, importImageFile, isImageFilePath } from '../core/import-file.ts';
-import { loadConfig, gbrainPath } from '../core/config.ts';
+import { loadConfig, modusbrainPath } from '../core/config.ts';
 import { createProgress } from '../core/progress.ts';
 import { getCliOptions, cliOptsToProgressOptions } from '../core/cli-options.ts';
 import {
@@ -54,7 +54,7 @@ export async function runImport(
   // T7 (D9): refuse cleanly when init persisted the deferred-setup sentinel,
   // unless the user is explicitly skipping embedding via `--no-embed` (in
   // which case the chunks land without vectors and the user can backfill
-  // later with `gbrain embed --stale` after configuring a provider).
+  // later with `modusbrain embed --stale` after configuring a provider).
   if (!noEmbed) {
     const { assertEmbeddingEnabled } = await import('../core/embedding-dim-check.ts');
     const { loadConfig } = await import('../core/config.ts');
@@ -62,12 +62,12 @@ export async function runImport(
       assertEmbeddingEnabled(loadConfig());
     } catch (e) {
       console.error(`\n${e instanceof Error ? e.message : e}`);
-      console.error('Tip: run `gbrain import <dir> --no-embed` to import without embedding now.');
+      console.error('Tip: run `modusbrain import <dir> --no-embed` to import without embedding now.');
       process.exit(1);
     }
 
     // v0.41.6.0 D1: preflight embedding credentials. Closes the bug class
-    // where `gbrain import` per-file embed writes N identical
+    // where `modusbrain import` per-file embed writes N identical
     // "missing OPENAI_API_KEY" failures into sync-failures.jsonl.
     const { validateEmbeddingCreds, EmbeddingCredentialError } = await import('../core/embed-preflight.ts');
     try {
@@ -109,7 +109,7 @@ export async function runImport(
   // v0.37.7.0 #1167+#1222: the CLI surface now also accepts a
   // `--source-id <id>` flag (named to avoid colliding with `--source`
   // which other commands use for different axes). Pre-fix, users
-  // passing `gbrain import --source dept-x ...` silently fell back to
+  // passing `modusbrain import --source dept-x ...` silently fell back to
   // default because the parser ignored the flag. Now an explicit
   // `--source-id <id>` opt-in routes the import to that source.
   // Programmatic callers continue passing `opts.sourceId` directly;
@@ -128,7 +128,7 @@ export async function runImport(
   // brain_default → sole_non_default → seed_default. The nudge fires only
   // when the resolver returns tier='sole_non_default', so explicit users
   // see no behavior change.
-  if (!sourceId && process.env.GBRAIN_SOURCE) {
+  if (!sourceId && process.env.MODUSBRAIN_SOURCE) {
     const { resolveSourceId } = await import('../core/source-resolver.ts');
     sourceId = await resolveSourceId(engine, null);
   } else if (!sourceId) {
@@ -164,7 +164,7 @@ export async function runImport(
   const dirArg = args.find((a, i) => !a.startsWith('--') && !flagValues.has(i));
 
   if (!dirArg) {
-    console.error('Usage: gbrain import <dir> [--no-embed] [--workers N] [--fresh] [--source-id <id>] [--json]');
+    console.error('Usage: modusbrain import <dir> [--no-embed] [--workers N] [--fresh] [--source-id <id>] [--json]');
     process.exit(1);
   }
   const dir: string = dirArg;  // narrowed; survives closure capture
@@ -175,10 +175,10 @@ export async function runImport(
   // enumeration (codex C11 confirms dispatch was correct; bug was here).
   const strategy: SyncStrategy = opts.strategy ?? 'markdown';
   const _walkT0 = Date.now();
-  console.error(`[gbrain phase] import.collect_files start dir=${dir} strategy=${strategy}`);
+  console.error(`[modusbrain phase] import.collect_files start dir=${dir} strategy=${strategy}`);
   const allFiles = collectSyncableFiles(dir, { strategy });
   console.error(
-    `[gbrain phase] import.collect_files done ${Date.now() - _walkT0}ms files=${allFiles.length}`,
+    `[modusbrain phase] import.collect_files done ${Date.now() - _walkT0}ms files=${allFiles.length}`,
   );
   const fileTypeLabel = strategy === 'code' ? 'code'
     : strategy === 'auto' ? 'syncable' : 'markdown';
@@ -191,7 +191,7 @@ export async function runImport(
   // Resume from checkpoint if available. v0.33.2: path-based resume —
   // see src/core/import-checkpoint.ts for the bug-class this fixes
   // (parallel-import silent-skip and failed-file no-retry).
-  const checkpointPath = gbrainPath('import-checkpoint.json');
+  const checkpointPath = modusbrainPath('import-checkpoint.json');
   const completed = new Set<string>();
   if (!fresh) {
     const cp = loadCheckpoint(checkpointPath, dir);
@@ -235,14 +235,14 @@ export async function runImport(
     try {
       // v0.27.1 (F2): dispatch image extensions to importImageFile when
       // multimodal is enabled. The walker (collectMarkdownFiles) only picks
-      // up images when GBRAIN_EMBEDDING_MULTIMODAL=true so this branch is
+      // up images when MODUSBRAIN_EMBEDDING_MULTIMODAL=true so this branch is
       // unreachable when the gate is off; defense-in-depth check anyway.
-      const result = isImageFilePath(relativePath) && process.env.GBRAIN_EMBEDDING_MULTIMODAL === 'true'
+      const result = isImageFilePath(relativePath) && process.env.MODUSBRAIN_EMBEDDING_MULTIMODAL === 'true'
         ? await importImageFile(eng, filePath, relativePath, { noEmbed, sourceId })
         : await importFile(eng, filePath, relativePath, { noEmbed, sourceId, activePack: importActivePack });
       const _fileMs = Date.now() - _fileT0;
       if (_fileMs > 5000) {
-        console.error(`[gbrain phase] import.process_file slow ${_fileMs}ms ${relativePath}`);
+        console.error(`[modusbrain phase] import.process_file slow ${_fileMs}ms ${relativePath}`);
       }
       if (result.status === 'imported') {
         imported++;
@@ -281,7 +281,7 @@ export async function runImport(
     // Failed files never enter `completed`, so a flaky file can't push the
     // checkpoint past it — the next run will retry it.
     if (completed.size > 0 && completed.size % 100 === 0) {
-      const cpDir = gbrainPath();
+      const cpDir = modusbrainPath();
       if (!existsSync(cpDir)) {
         try { const { mkdirSync } = await import('fs'); mkdirSync(cpDir, { recursive: true }); }
         catch { /* non-fatal */ }
@@ -308,7 +308,7 @@ export async function runImport(
       const { resolvePoolSize } = await import('../core/db.ts');
       // Default per-worker pool is 2 (small, parallel import case). Users on
       // constrained poolers (e.g. Supabase port 6543) can cap below this via
-      // GBRAIN_POOL_SIZE=1.
+      // MODUSBRAIN_POOL_SIZE=1.
       const workerPoolSize = Math.min(2, resolvePoolSize(2));
       const databaseUrl = config.database_url;
 
@@ -408,8 +408,8 @@ export async function runImport(
         const pct = ((untyped / total) * 100).toFixed(1);
         console.error(
           `\n[schema] ${untyped} of ${total} pages (${pct}%) in source \`${sid}\` ` +
-          `have no \`type\` matching the active schema pack. Run \`gbrain schema detect\` ` +
-          `to propose a pack matching your content shape, or \`gbrain doctor --json\` ` +
+          `have no \`type\` matching the active schema pack. Run \`modusbrain schema detect\` ` +
+          `to propose a pack matching your content shape, or \`modusbrain doctor --json\` ` +
           `for the persistent surface (schema_pack_consistency check).`,
         );
       }
@@ -456,8 +456,8 @@ export async function runImport(
     } else {
       console.error(
         `\nImport completed with ${failures.length} failure(s). ` +
-        `sync.last_commit NOT advanced — re-run 'gbrain sync' to retry, or ` +
-        `'gbrain sync --skip-failed' to acknowledge and move past them.`,
+        `sync.last_commit NOT advanced — re-run 'modusbrain sync' to retry, or ` +
+        `'modusbrain sync --skip-failed' to acknowledge and move past them.`,
       );
     }
     await engine.setConfig('sync.last_run', new Date().toISOString());
@@ -472,10 +472,10 @@ export async function runImport(
  * any real source tree on disk; reaching it is a structural cycle the
  * lstat+inode-set defenses missed (e.g., a Linux bind-mount or btrfs
  * subvolume that returns a fresh inode for the same content). Override
- * via `GBRAIN_MAX_WALK_DEPTH`.
+ * via `MODUSBRAIN_MAX_WALK_DEPTH`.
  */
 function resolveMaxWalkDepth(): number {
-  const raw = process.env.GBRAIN_MAX_WALK_DEPTH;
+  const raw = process.env.MODUSBRAIN_MAX_WALK_DEPTH;
   if (raw) {
     const n = Number(raw);
     if (Number.isFinite(n) && n > 0) return n;
@@ -491,7 +491,7 @@ interface CollectOpts {
  * v0.27.1 + v0.31.2: walker-context image admission. `isSyncable` (the
  * incremental-diff filter at sync.ts:213) admits images only on `auto`.
  * The first-sync walker historically admitted them on markdown too when
- * `GBRAIN_EMBEDDING_MULTIMODAL=true`. Codex (C5) flagged the contradiction
+ * `MODUSBRAIN_EMBEDDING_MULTIMODAL=true`. Codex (C5) flagged the contradiction
  * — preserve the walker semantic explicitly.
  */
 function isCollectibleForWalker(
@@ -577,9 +577,9 @@ function gitListSyncableFiles(
  */
 export function collectSyncableFiles(dir: string, opts: CollectOpts = {}): string[] {
   const strategy: SyncStrategy = opts.strategy ?? 'markdown';
-  const multimodalOn = process.env.GBRAIN_EMBEDDING_MULTIMODAL === 'true';
+  const multimodalOn = process.env.MODUSBRAIN_EMBEDDING_MULTIMODAL === 'true';
 
-  // v0.42.x (#1159 --respect-gitignore / #1483 .gbrainignore): when `dir` is a
+  // v0.42.x (#1159 --respect-gitignore / #1483 .modusbrainignore): when `dir` is a
   // git work tree, enumerate via `git ls-files` so the walk honors
   // `.gitignore`. Pre-fix the recursive FS walk below descended into every
   // git-ignored tree — `vendor/` (PHP Composer), `storage/`, `public/build/`,
@@ -597,7 +597,7 @@ export function collectSyncableFiles(dir: string, opts: CollectOpts = {}): strin
 
   function walk(d: string, depth: number): void {
     if (depth >= maxDepth) {
-      console.warn(`[gbrain] walker depth limit reached at ${d}; skipping`);
+      console.warn(`[modusbrain] walker depth limit reached at ${d}; skipping`);
       return;
     }
     let entries: string[];
@@ -618,19 +618,19 @@ export function collectSyncableFiles(dir: string, opts: CollectOpts = {}): strin
       try {
         stat = lstatSync(full);
       } catch {
-        console.warn(`[gbrain import] Skipping unreadable path: ${full}`);
+        console.warn(`[modusbrain import] Skipping unreadable path: ${full}`);
         continue;
       }
 
       if (stat.isSymbolicLink()) {
-        console.warn(`[gbrain import] Skipping symlink: ${full}`);
+        console.warn(`[modusbrain import] Skipping symlink: ${full}`);
         continue;
       }
 
       if (stat.isDirectory()) {
         const inodeKey = `${stat.dev}:${stat.ino}`;
         if (visitedInodes.has(inodeKey)) {
-          console.warn(`[gbrain] walker cycle detected at ${full}; skipping`);
+          console.warn(`[modusbrain] walker cycle detected at ${full}; skipping`);
           continue;
         }
         visitedInodes.set(inodeKey, true);

@@ -1,17 +1,17 @@
 ---
 name: schema-unify
-description: Migrate a brain from gbrain-base (or any pack) to gbrain-base-v2's 14-canonical-type taxonomy via gbrain onboard --check + the unify-types Minion handler. Collapses 94 noisy types to 15 canonical with subtypes, alias rows, and link rows. Triggers when an agent notices pack_upgrade_available, type_proliferation, or asks "what is the canonical taxonomy / how do I clean up my page types".
+description: Migrate a brain from gbrain-base (or any pack) to gbrain-base-v2's 14-canonical-type taxonomy via modusbrain onboard --check + the unify-types Minion handler. Collapses 94 noisy types to 15 canonical with subtypes, alias rows, and link rows. Triggers when an agent notices pack_upgrade_available, type_proliferation, or asks "what is the canonical taxonomy / how do I clean up my page types".
 brain_first: exempt
 tools:
-  - gbrain onboard --check
-  - gbrain onboard --check --explain
-  - gbrain onboard --check --json
-  - gbrain jobs submit unify-types
-  - gbrain jobs follow
-  - gbrain schema active
-  - gbrain schema use
-  - gbrain schema stats
-  - gbrain pages restore
+  - modusbrain onboard --check
+  - modusbrain onboard --check --explain
+  - modusbrain onboard --check --json
+  - modusbrain jobs submit unify-types
+  - modusbrain jobs follow
+  - modusbrain schema active
+  - modusbrain schema use
+  - modusbrain schema stats
+  - modusbrain pages restore
   - mcp:run_onboard
 triggers:
   - "unify my types"
@@ -34,18 +34,18 @@ This skill is the playbook for that migration.
 
 ## brain_first: exempt
 
-This skill is ABOUT the brain's shape — it can't depend on the brain it's reshaping. No `gbrain search` lookup first; jump straight to onboard.
+This skill is ABOUT the brain's shape — it can't depend on the brain it's reshaping. No `modusbrain search` lookup first; jump straight to onboard.
 
 ## When this skill fires
 
-- Agent runs `gbrain onboard --check` and sees `pack_upgrade_available` or `type_proliferation` warnings
+- Agent runs `modusbrain onboard --check` and sees `pack_upgrade_available` or `type_proliferation` warnings
 - User asks "what is the canonical taxonomy / how do I clean up my page types / migrate to v2"
 - A `dangling_aliases` finding surfaces (post-unify GC)
 - An agent ingesting from a custom pack wants to consult the v2 taxonomy as a reference
 
 ## Mental model (one paragraph)
 
-A production gbrain brain accreted **94 distinct `pages.type` values** over years of ingestion: tweet / tweet-thread / tweet-bundle / tweet-single / media/x-tweet/bundle / tweet-stub all coexisting; 5.5K concept-redirect pages; atom-partner-link pages that should be links; civic / framework / insight / memo / anecdote one-offs. The cure: collapse to **15 canonical types** (person, company, media, tweet, social-digest, analysis, atom, concept, source, deal, email, slack, writing, project, note) with subtypes/format/origin pushed to frontmatter, alias-rows for redirects, real link-rows for edge-shaped pages, and a catch-all that bins long-tail unknowns to `note` with `frontmatter.legacy_type = <original>` for rollback.
+A production modusbrain brain accreted **94 distinct `pages.type` values** over years of ingestion: tweet / tweet-thread / tweet-bundle / tweet-single / media/x-tweet/bundle / tweet-stub all coexisting; 5.5K concept-redirect pages; atom-partner-link pages that should be links; civic / framework / insight / memo / anecdote one-offs. The cure: collapse to **15 canonical types** (person, company, media, tweet, social-digest, analysis, atom, concept, source, deal, email, slack, writing, project, note) with subtypes/format/origin pushed to frontmatter, alias-rows for redirects, real link-rows for edge-shaped pages, and a catch-all that bins long-tail unknowns to `note` with `frontmatter.legacy_type = <original>` for rollback.
 
 ## Workflow
 
@@ -54,7 +54,7 @@ A production gbrain brain accreted **94 distinct `pages.type` values** over year
 Confirm the brain is actually on `gbrain-base` (not already on v2).
 
 ```bash
-gbrain schema active --json | jq -r '.identity'
+modusbrain schema active --json | jq -r '.identity'
 ```
 
 Expected: `gbrain-base@1.0.0+<sha>`. If you see `gbrain-base-v2@...`, the brain is already on v2 — skip the migration.
@@ -62,7 +62,7 @@ Expected: `gbrain-base@1.0.0+<sha>`. If you see `gbrain-base-v2@...`, the brain 
 Then run onboard to see what would change:
 
 ```bash
-gbrain onboard --check
+modusbrain onboard --check
 ```
 
 Look for the `pack_upgrade_available` finding. If it's `ok`, there's no successor declared for the active pack — done.
@@ -72,7 +72,7 @@ Look for the `pack_upgrade_available` finding. If it's `ok`, there's no successo
 Run the per-cluster narrative:
 
 ```bash
-gbrain onboard --check --explain
+modusbrain onboard --check --explain
 ```
 
 This invokes the `unify-types` handler in dry-run mode and prints:
@@ -88,7 +88,7 @@ Review the output. If the proposed changes look wrong, **don't** proceed — fil
 The handler is PROTECTED (manual_only per D17) — autopilot will never auto-fire it. Submit explicitly:
 
 ```bash
-gbrain jobs submit unify-types \
+modusbrain jobs submit unify-types \
   --allow-protected \
   --params '{"target_pack":"gbrain-base-v2"}'
 ```
@@ -96,13 +96,13 @@ gbrain jobs submit unify-types \
 Watch progress per phase:
 
 ```bash
-gbrain jobs follow <job_id>
+modusbrain jobs follow <job_id>
 ```
 
 On a 186K-page brain expect ~10 minutes. The handler runs:
 1. Preflight (validate target pack has `mapping_rules:`)
 2. Stats snapshot (pre-state for celebration summary)
-3. Acquire `gbrain-unify` db-lock (60min TTL)
+3. Acquire `modusbrain-unify` db-lock (60min TTL)
 4. Apply phases:
    - Explicit retype rules (tweets, articles, companies, etc.)
    - Catch-all retype (unknown types → note with legacy_type)
@@ -115,21 +115,21 @@ On a 186K-page brain expect ~10 minutes. The handler runs:
 ### Phase 4: Verify
 
 ```bash
-gbrain onboard --check
-gbrain schema stats
+modusbrain onboard --check
+modusbrain schema stats
 ```
 
 Expected:
 - `pack_upgrade_available` → `ok` (active pack is now v2)
 - `type_proliferation` → `ok` (≤16 distinct typed values)
 - `dangling_aliases` → `ok` (slug_aliases all point at active canonicals)
-- `gbrain schema stats` shows ≤16 distinct types
+- `modusbrain schema stats` shows ≤16 distinct types
 
 ### Phase 5: Post-migration
 
 Anything that used `--type article` keeps working post-unify if your CLI calls go through the `expandTypeFilter` helper (it expands `article` to `media+subtype=article` automatically). Direct SQL against `pages.type` needs updating to the canonical types.
 
-Search queries get a small ranking signal: pages reached via `slug_aliases` (canonicals of one or more aliases) get a 1.05x boost. Visible via `gbrain search --explain`.
+Search queries get a small ranking signal: pages reached via `slug_aliases` (canonicals of one or more aliases) get a 1.05x boost. Visible via `modusbrain search --explain`.
 
 ## Rollback
 
@@ -143,13 +143,13 @@ WHERE source_id = 'default' AND frontmatter->>'legacy_type' IS NOT NULL;
 Page-to-alias and page-to-link source pages soft-delete with 72h TTL. Restore within that window:
 
 ```bash
-gbrain pages restore <slug>
+modusbrain pages restore <slug>
 ```
 
 Revert the active pack flip:
 
 ```bash
-gbrain schema use gbrain-base
+modusbrain schema use gbrain-base
 ```
 
 ## Anti-patterns
@@ -158,7 +158,7 @@ gbrain schema use gbrain-base
 - **Don't expect mapping_rules to cover every legacy type explicitly.** Use the catch-all (`*unknown*`) for the long tail. Pages get retyped to `note` with `legacy_type` preserved.
 - **Don't rewrite body-text wikilinks.** D15: the slug_aliases table IS the resolver. `[[old-redirect-slug]]` keeps working via `engine.resolveSlugWithAlias` short-circuit.
 - **Don't bypass the dry-run.** Always run `--explain` before applying. The trust delta is real.
-- **Don't run two unify jobs concurrently.** The `gbrain-unify` db-lock serializes them; the second submission rejects with "already in progress."
+- **Don't run two unify jobs concurrently.** The `modusbrain-unify` db-lock serializes them; the second submission rejects with "already in progress."
 
 ## Decision tree
 
@@ -179,7 +179,7 @@ Federated brain (multiple sources)?
     source can be migrated independently.
 
 Worried about a specific cluster's mapping?
-  → Fork gbrain-base-v2 (`gbrain schema fork gbrain-base-v2 my-pack`),
+  → Fork gbrain-base-v2 (`modusbrain schema fork gbrain-base-v2 my-pack`),
     edit mapping_rules in your fork, then target the fork.
 ```
 
@@ -197,12 +197,12 @@ Outputs:
 - Active pack flipped to `gbrain-base-v2` atomically at end of successful run.
 
 Side effects:
-- Source pages soft-deleted with 72h restore TTL (`gbrain pages restore <slug>`).
+- Source pages soft-deleted with 72h restore TTL (`modusbrain pages restore <slug>`).
 - One-time cache invalidation on KNOBS_HASH_VERSION bump (5→6); self-healing in `cache.ttl_seconds`.
 - Query-time `--type X` alias-expands via `expandTypeFilter` (D14 back-compat).
 
 Failure modes:
-- Concurrent submission rejected by the `gbrain-unify` db-lock; second call exits gracefully.
+- Concurrent submission rejected by the `modusbrain-unify` db-lock; second call exits gracefully.
 - Catch-all retype excludes `page_to_link` + `page_to_alias` source types (caught in E2E pre-merge).
 - Phase failures abort the run before `active_pack_flipped`; partial state restorable via op_checkpoint resume.
 
@@ -210,9 +210,9 @@ Failure modes:
 
 DON'T:
 - Submit `unify-types` directly via the MCP `submit_job` op without `--allow-protected`. PROTECTED handlers require trusted local callers; remote MCP rejection is the intentional trust boundary.
-- Edit `mapping_rules` in `gbrain-base-v2.yaml` to skip clusters you don't trust. Fork the pack instead (`gbrain schema fork`) so the source-of-truth migration stays consistent across brains.
+- Edit `mapping_rules` in `gbrain-base-v2.yaml` to skip clusters you don't trust. Fork the pack instead (`modusbrain schema fork`) so the source-of-truth migration stays consistent across brains.
 - Run `unify-types` from inside an autopilot tick. The check is `manual_only` per D17 — autopilot deliberately never auto-fires it because pack upgrades are one-time consenting taxonomy decisions.
-- Hard-delete soft-deleted source pages before the 72h restore window. Use `gbrain pages restore <slug>` first if rollback is needed.
+- Hard-delete soft-deleted source pages before the 72h restore window. Use `modusbrain pages restore <slug>` first if rollback is needed.
 - Assume `frontmatter.legacy_type` survives every roundtrip. The marker is canonical for the immediate post-migration window; downstream re-imports may overwrite it.
 
 ## Output Format
@@ -241,7 +241,7 @@ Final celebration summary to stderr:
 ═══════════════════════════════════════════════════════════
 ```
 
-JSON output (`gbrain jobs follow <id> --json`) returns the structured `UnifyTypesResult` shape with `per_phase`, `pack_identity_after`, `active_pack_flipped`.
+JSON output (`modusbrain jobs follow <id> --json`) returns the structured `UnifyTypesResult` shape with `per_phase`, `pack_identity_after`, `active_pack_flipped`.
 
 ## Reference
 

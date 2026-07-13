@@ -50,7 +50,7 @@ import { deriveResolutionTuple, finalizeScorecard } from './takes-resolution.ts'
 import { normalizeWeightForStorage } from './takes-fence.ts';
 import { executeRawJsonb } from './sql-query.ts';
 import { sanitizeForJsonb, buildLinkRows, buildTimelineRows, buildTakeRows } from './batch-rows.ts';
-import { GBrainError, PAGE_SORT_SQL, ENRICH_ORDER_SQL } from './types.ts';
+import { ModusBrainError, PAGE_SORT_SQL, ENRICH_ORDER_SQL } from './types.ts';
 import { finalizeLastSeen } from './chronicle/last-seen.ts';
 import { computeAnomaliesFromBuckets } from './cycle/anomaly.ts';
 import { resolveBoostMap, resolveHardExcludes } from './search/source-boost.ts';
@@ -84,7 +84,7 @@ function tryLoadSnapshot(snapshotPath: string): Blob | null {
     if (!fs.existsSync(snapshotPath)) {
       if (!_snapshotWarnLogged) {
         // eslint-disable-next-line no-console
-        console.warn(`[pglite] GBRAIN_PGLITE_SNAPSHOT set but file missing: ${snapshotPath} — using normal init.`);
+        console.warn(`[pglite] MODUSBRAIN_PGLITE_SNAPSHOT set but file missing: ${snapshotPath} — using normal init.`);
         _snapshotWarnLogged = true;
       }
       return null;
@@ -180,20 +180,20 @@ export function buildPgliteInitErrorMessage(
         '  This looks like a Bun vfs issue: `/$$bunfs/root` is read-only on\n' +
         '  your system, so PGLite cannot extract its pglite.data WASM payload.\n' +
         '  Fix: `bun upgrade` (newer Bun mounts the vfs writable). If that\n' +
-        '  does not help, run via Node: `node src/cli.ts` or install gbrain\n' +
+        '  does not help, run via Node: `node src/cli.ts` or install modusbrain\n' +
         '  using the Node-based path. See #1340 for details.';
       break;
     case 'macos-26-3':
       hint =
         '  This is most commonly the macOS 26.3 WASM bug:\n' +
-        '  https://github.com/garrytan/gbrain/issues/223';
+        '  https://github.com/thebuildceo/modusbrain/issues/223';
       break;
     case 'unknown':
     default:
       hint =
         '  Most common cause: the macOS 26.3 WASM bug\n' +
-        '  (https://github.com/garrytan/gbrain/issues/223).\n' +
-        '  Run `gbrain doctor` for a full diagnosis.';
+        '  (https://github.com/thebuildceo/modusbrain/issues/223).\n' +
+        '  Run `modusbrain doctor` for a full diagnosis.';
       break;
   }
   return `${header}\n${hint}\n  Original error: ${original}`;
@@ -232,7 +232,7 @@ export class PGLiteEngine implements BrainEngine {
   // #2034: captured at connect() so reconnect() can restore the same data dir
   // after a drop, matching PostgresEngine's _savedConfig contract.
   private _savedConfig: EngineConfig | null = null;
-  // Tier 3: when GBRAIN_PGLITE_SNAPSHOT loaded a post-initSchema state into
+  // Tier 3: when MODUSBRAIN_PGLITE_SNAPSHOT loaded a post-initSchema state into
   // PGlite.create(loadDataDir), initSchema is a no-op (schema is already
   // present + migrations already applied). Saves ~1-3s per fresh test PGLite.
   private _snapshotLoaded = false;
@@ -251,7 +251,7 @@ export class PGLiteEngine implements BrainEngine {
     this._lock = await acquireLock(dataDir);
 
     if (!this._lock.acquired) {
-      throw new Error('Could not acquire PGLite lock. Another gbrain process is using the database.');
+      throw new Error('Could not acquire PGLite lock. Another modusbrain process is using the database.');
     }
 
     // Tier 3: optional snapshot fast-restore. Only applies to in-memory
@@ -260,8 +260,8 @@ export class PGLiteEngine implements BrainEngine {
     // hash, load the dump and skip the schema replay. Mismatch or missing
     // file silently falls back to normal init.
     let loadDataDir: Blob | undefined;
-    if (!dataDir && process.env.GBRAIN_PGLITE_SNAPSHOT) {
-      const snapshotResult = tryLoadSnapshot(process.env.GBRAIN_PGLITE_SNAPSHOT);
+    if (!dataDir && process.env.MODUSBRAIN_PGLITE_SNAPSHOT) {
+      const snapshotResult = tryLoadSnapshot(process.env.MODUSBRAIN_PGLITE_SNAPSHOT);
       if (snapshotResult) {
         loadDataDir = snapshotResult;
         this._snapshotLoaded = true;
@@ -272,7 +272,7 @@ export class PGLiteEngine implements BrainEngine {
     // proc_exit status into `process.exitCode` (initdb here at create-time,
     // the postmaster at close-time), and the writes land asynchronously —
     // a snapshot/restore around these awaits does NOT contain them. That is
-    // why the CLI's exit paths read gbrain's own verdict
+    // why the CLI's exit paths read modusbrain's own verdict
     // (cli-force-exit.ts currentExitCode), never ambient process.exitCode.
     try {
       this._db = await preservingProcessExitCode(() =>
@@ -310,7 +310,7 @@ export class PGLiteEngine implements BrainEngine {
     //
     // try/finally guarantees the file lock releases even if
     // `db.close()` throws. Pre-fix, a close-throw would leak the
-    // lock and the next gbrain invocation would wedge waiting for it.
+    // lock and the next modusbrain invocation would wedge waiting for it.
     // The pre-fix code happened to work because the close branch
     // ran first and the lock branch ran second only when close
     // didn't throw — moving to the snapshot pattern made the
@@ -325,7 +325,7 @@ export class PGLiteEngine implements BrainEngine {
         // status write (0) is long-standing baseline behavior that test-runner
         // processes depend on (wrapping it flipped bun test's own exit code —
         // #2084 implementation note), and the CLI's exit verdict doesn't read
-        // process.exitCode at all — it lives in the gbrain-owned channel
+        // process.exitCode at all — it lives in the modusbrain-owned channel
         // (setCliExitVerdict/currentExitCode in cli-force-exit.ts).
         await db.close();
       }
@@ -1458,7 +1458,7 @@ export class PGLiteEngine implements BrainEngine {
     // (federated_read OAuth tier), filter via `source_id = ANY($N::text[])`.
     // When opts.sourceId is set (scalar single-source tier), filter via
     // `source_id = $N`. When neither is set, preserve the pre-fix unscoped
-    // behavior so internal CLI callers (`gbrain query --resolve` etc.)
+    // behavior so internal CLI callers (`modusbrain query --resolve` etc.)
     // continue to walk every source.
     const sources = opts?.sourceIds ?? null;
     const scalar = opts?.sourceId ?? null;
@@ -1509,7 +1509,7 @@ export class PGLiteEngine implements BrainEngine {
     const detailFilter = opts?.detail === 'low' ? `AND cc.chunk_source = 'compiled_truth'` : '';
 
     if (opts?.limit && opts.limit > MAX_SEARCH_LIMIT) {
-      console.warn(`[gbrain] Warning: search limit clamped from ${opts.limit} to ${MAX_SEARCH_LIMIT}`);
+      console.warn(`[modusbrain] Warning: search limit clamped from ${opts.limit} to ${MAX_SEARCH_LIMIT}`);
     }
 
     // Fetch 3x to give dedup headroom, then page-dedup + re-limit.
@@ -1752,7 +1752,7 @@ export class PGLiteEngine implements BrainEngine {
     const detailFilter = opts?.detail === 'low' ? `AND cc.chunk_source = 'compiled_truth'` : '';
 
     if (opts?.limit && opts.limit > MAX_SEARCH_LIMIT) {
-      console.warn(`[gbrain] Warning: search limit clamped from ${opts.limit} to ${MAX_SEARCH_LIMIT}`);
+      console.warn(`[modusbrain] Warning: search limit clamped from ${opts.limit} to ${MAX_SEARCH_LIMIT}`);
     }
 
     // Source-aware ranking applied here too — searchKeywordChunks is the
@@ -1834,7 +1834,7 @@ export class PGLiteEngine implements BrainEngine {
     const detailFilter = opts?.detail === 'low' ? `AND cc.chunk_source = 'compiled_truth'` : '';
 
     if (opts?.limit && opts.limit > MAX_SEARCH_LIMIT) {
-      console.warn(`[gbrain] Warning: search limit clamped from ${opts.limit} to ${MAX_SEARCH_LIMIT}`);
+      console.warn(`[modusbrain] Warning: search limit clamped from ${opts.limit} to ${MAX_SEARCH_LIMIT}`);
     }
 
     // Two-stage CTE (v0.22): pure-distance ORDER BY in inner CTE preserves
@@ -1904,7 +1904,7 @@ export class PGLiteEngine implements BrainEngine {
     // ($1::vector vs $1::halfvec(N)) comes from buildVectorCastFragment.
     //
     // v0.36 Phase 3: 'embedding_multimodal' is the unified column populated
-    // by `gbrain reindex --multimodal`. No modality filter — the column
+    // by `modusbrain reindex --multimodal`. No modality filter — the column
     // itself is the discriminator (only re-embedded rows have non-NULL).
     const resolvedCol = normalizeEngineColumn(opts?.embeddingColumn);
     const { col, castSql } = buildVectorCastFragment(resolvedCol);
@@ -2204,7 +2204,7 @@ export class PGLiteEngine implements BrainEngine {
   }
 
   async countStaleChunks(opts?: { sourceId?: string; signature?: string }): Promise<number> {
-    // D7: source-scoped count for `gbrain embed --stale --source X`. Always
+    // D7: source-scoped count for `modusbrain embed --stale --source X`. Always
     // JOIN pages so embed-skip + signature predicates apply. PGLite is
     // PostgreSQL 17.5 in WASM and supports the full JSONB operator set.
     const { where, params } = this.buildStaleChunkWhere(opts);
@@ -2688,7 +2688,7 @@ export class PGLiteEngine implements BrainEngine {
   async listLinkSources(
     opts?: { sourceId?: string; sourceIds?: string[] },
   ): Promise<{ link_source: string | null; count: number }[]> {
-    // v114 (#1941): distinct provenances + counts for `gbrain link-sources`.
+    // v114 (#1941): distinct provenances + counts for `modusbrain link-sources`.
     // Scope by the FROM page's source (consistent with getLinks). Federated
     // {sourceIds} takes precedence over scalar {sourceId}; neither = unscoped.
     const params: unknown[] = [];
@@ -4670,10 +4670,10 @@ export class PGLiteEngine implements BrainEngine {
       [pageId, rowNum, weight ?? null, fields.since_date ?? null, fields.source ?? null]
     );
     if (result.rows.length === 0) {
-      throw new GBrainError(
+      throw new ModusBrainError(
         'TAKE_ROW_NOT_FOUND',
         `take not found at page_id=${pageId} row=${rowNum}`,
-        'list takes for this page with `gbrain takes <slug>` to see valid row numbers',
+        'list takes for this page with `modusbrain takes <slug>` to see valid row numbers',
       );
     }
   }
@@ -4690,10 +4690,10 @@ export class PGLiteEngine implements BrainEngine {
       );
       const existing = existingRes.rows[0] as { resolved_at?: unknown } | undefined;
       if (!existing) {
-        throw new GBrainError('TAKE_ROW_NOT_FOUND', `take not found at page_id=${pageId} row=${oldRow}`, 'list takes with `gbrain takes <slug>`');
+        throw new ModusBrainError('TAKE_ROW_NOT_FOUND', `take not found at page_id=${pageId} row=${oldRow}`, 'list takes with `modusbrain takes <slug>`');
       }
       if (existing.resolved_at) {
-        throw new GBrainError('TAKE_RESOLVED_IMMUTABLE', `take ${pageId}#${oldRow} is resolved`, 'resolved bets are immutable; add a new take instead');
+        throw new ModusBrainError('TAKE_RESOLVED_IMMUTABLE', `take ${pageId}#${oldRow} is resolved`, 'resolved bets are immutable; add a new take instead');
       }
       const maxRowRes = await tx.query(
         `SELECT COALESCE(MAX(row_num), 0) + 1 AS next FROM takes WHERE page_id = $1`,
@@ -4726,10 +4726,10 @@ export class PGLiteEngine implements BrainEngine {
     );
     const existing = existingRes.rows[0] as { resolved_at?: unknown } | undefined;
     if (!existing) {
-      throw new GBrainError('TAKE_ROW_NOT_FOUND', `take not found at page_id=${pageId} row=${rowNum}`, 'list takes with `gbrain takes <slug>`');
+      throw new ModusBrainError('TAKE_ROW_NOT_FOUND', `take not found at page_id=${pageId} row=${rowNum}`, 'list takes with `modusbrain takes <slug>`');
     }
     if (existing.resolved_at) {
-      throw new GBrainError('TAKE_ALREADY_RESOLVED', `take ${pageId}#${rowNum} already resolved`, 'resolution is immutable; add a new take to record a new outcome');
+      throw new ModusBrainError('TAKE_ALREADY_RESOLVED', `take ${pageId}#${rowNum} already resolved`, 'resolution is immutable; add a new take to record a new outcome');
     }
     // v0.30.0: derive (quality, outcome) tuple. quality wins when both set.
     const { quality, outcome } = deriveResolutionTuple(resolution);
@@ -5028,7 +5028,7 @@ export class PGLiteEngine implements BrainEngine {
     // not 0. Semantically an empty brain has no coverage problem to penalize
     // — there's nothing to embed, nothing to link, nothing to orphan. The
     // pre-fix "empty = 0" caused fresh-init brains to score as critically
-    // unhealthy on `gbrain doctor`, which was a structural surprise to users
+    // unhealthy on `modusbrain doctor`, which was a structural surprise to users
     // who'd just successfully run init.
     const embedCoverageScore = pageCount === 0 ? 35 : Math.round(embedCoverage * 35);
     const linkDensityScore = pageCount === 0 ? 25 : Math.round(linkDensity * 25);

@@ -77,8 +77,8 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  delete process.env.GBRAIN_EMBED_CONCURRENCY;
-  delete process.env.GBRAIN_EMBED_TIME_BUDGET_MS;
+  delete process.env.MODUSBRAIN_EMBED_CONCURRENCY;
+  delete process.env.MODUSBRAIN_EMBED_TIME_BUDGET_MS;
 });
 
 describe('runEmbed --all (parallel)', () => {
@@ -99,7 +99,7 @@ describe('runEmbed --all (parallel)', () => {
       upsertChunks: async () => {},
     });
 
-    process.env.GBRAIN_EMBED_CONCURRENCY = '10';
+    process.env.MODUSBRAIN_EMBED_CONCURRENCY = '10';
 
     await runEmbed(engine, ['--all']);
 
@@ -135,7 +135,7 @@ describe('runEmbed --all (parallel)', () => {
 
   // #1737: cooperative abort. A pre-aborted signal must stop the embed loop
   // BEFORE any embedBatch call, so a job killed by wall-clock/lock-loss frees
-  // the worker (and lets the cycle's finally release gbrain_cycle_locks)
+  // the worker (and lets the cycle's finally release modusbrain_cycle_locks)
   // instead of grinding through the full 10-15 min embed phase.
   test('#1737 --all: pre-aborted signal embeds nothing (no embedBatch call)', async () => {
     const pages = Array.from({ length: 10 }, (_, i) => ({ slug: `page-${i}`, source_id: 'default' }));
@@ -177,7 +177,7 @@ describe('runEmbed --all (parallel)', () => {
     expect(result.embedded).toBe(0);
   });
 
-  test('respects GBRAIN_EMBED_CONCURRENCY=1 (serial)', async () => {
+  test('respects MODUSBRAIN_EMBED_CONCURRENCY=1 (serial)', async () => {
     const pages = Array.from({ length: 5 }, (_, i) => ({ slug: `page-${i}` }));
     const chunksBySlug = new Map(
       pages.map(p => [
@@ -192,7 +192,7 @@ describe('runEmbed --all (parallel)', () => {
       upsertChunks: async () => {},
     });
 
-    process.env.GBRAIN_EMBED_CONCURRENCY = '1';
+    process.env.MODUSBRAIN_EMBED_CONCURRENCY = '1';
 
     await runEmbed(engine, ['--all']);
 
@@ -218,7 +218,7 @@ describe('runEmbed --all (parallel)', () => {
       upsertChunks: async () => {},
     });
 
-    process.env.GBRAIN_EMBED_CONCURRENCY = '5';
+    process.env.MODUSBRAIN_EMBED_CONCURRENCY = '5';
 
     await runEmbed(engine, ['--stale']);
 
@@ -358,7 +358,7 @@ describe('runEmbedCore --dry-run never calls the embedding model', () => {
       upsertChunks: async () => {},
     });
 
-    process.env.GBRAIN_EMBED_CONCURRENCY = '2';
+    process.env.MODUSBRAIN_EMBED_CONCURRENCY = '2';
 
     const result = await runEmbedCore(engine, { stale: true });
 
@@ -700,13 +700,13 @@ describe('runEmbed CLI flag wiring (--stale --source)', () => {
 });
 
 describe('embedAllStale wall-clock budget end-to-end (D3 + D3a)', () => {
-  test('GBRAIN_EMBED_TIME_BUDGET_MS=N cuts the outer loop short on stuck workers', async () => {
+  test('MODUSBRAIN_EMBED_TIME_BUDGET_MS=N cuts the outer loop short on stuck workers', async () => {
     const { runEmbedCore } = await import('../src/commands/embed.ts');
     // Tiny budget: 100ms. Each embed call sleeps 50ms; with budget + multiple
     // small batches, the second listStaleChunks call should see the abort
     // signal AND the worker loop should not claim further keys.
-    process.env.GBRAIN_EMBED_TIME_BUDGET_MS = '100';
-    process.env.GBRAIN_EMBED_CONCURRENCY = '1';
+    process.env.MODUSBRAIN_EMBED_TIME_BUDGET_MS = '100';
+    process.env.MODUSBRAIN_EMBED_CONCURRENCY = '1';
 
     let listCallCount = 0;
     let totalRowsReturned = 0;

@@ -1,5 +1,5 @@
 /**
- * gbrain skill — operational skill compilation & safe execution layer.
+ * modusbrain skill — operational skill compilation & safe execution layer.
  *
  * Subcommands:
  *   compile   Draft a versioned skill from brain content
@@ -50,10 +50,10 @@ Subcommands:
   approve-token <slug>  Issue approval token for high-stakes execution
 
 Examples:
-  gbrain skill compile "refund handling" --risk-tier high_stakes
-  gbrain skill approve refund-handling --by alice@company.com
-  gbrain skill execute refund-handling --task "Process $300 refund" --context '{"amount":300}'
-  gbrain skill audit --slug refund-handling --json
+  modusbrain skill compile "refund handling" --risk-tier high_stakes
+  modusbrain skill approve refund-handling --by alice@company.com
+  modusbrain skill execute refund-handling --task "Process $300 refund" --context '{"amount":300}'
+  modusbrain skill audit --slug refund-handling --json
 `;
 
 function flagValue(args: string[], name: string): string | undefined {
@@ -88,14 +88,14 @@ export async function runSkill(engine: BrainEngine | null, args: string[]): Prom
   }
 
   if (!engine) {
-    console.error('No brain configured. Run: gbrain init');
+    console.error('No brain configured. Run: modusbrain init');
     process.exit(1);
   }
 
   if (sub === 'compile') {
     const topic = rest.find(a => !a.startsWith('--')) ?? rest[0];
     if (!topic || topic.startsWith('--')) {
-      console.error('Usage: gbrain skill compile "<topic>" [--risk-tier informational|low_stakes|high_stakes]');
+      console.error('Usage: modusbrain skill compile "<topic>" [--risk-tier informational|low_stakes|high_stakes]');
       process.exit(2);
     }
     const riskTier = (flagValue(rest, '--risk-tier') ?? 'low_stakes') as RiskTier;
@@ -119,7 +119,7 @@ export async function runSkill(engine: BrainEngine | null, args: string[]): Prom
       console.log(`Status: ${result.version.status} (requires approval before agent execution)`);
       console.log(`Matched sources: ${result.matched_sources.join(', ') || '(none)'}`);
       console.log(`Risk tier: ${result.version.risk_tier}, threshold: ${result.version.confidence_threshold}`);
-      console.log(`\nNext: gbrain skill approve ${result.skill.slug} --by ${by}`);
+      console.log(`\nNext: modusbrain skill approve ${result.skill.slug} --by ${by}`);
     }
     return;
   }
@@ -130,7 +130,7 @@ export async function runSkill(engine: BrainEngine | null, args: string[]): Prom
     const versionNum = flagValue(rest, '--version') ? parseInt(flagValue(rest, '--version')!, 10) : undefined;
 
     if (!slug) {
-      console.error('Usage: gbrain skill approve <slug> --by <approver>');
+      console.error('Usage: modusbrain skill approve <slug> --by <approver>');
       process.exit(2);
     }
 
@@ -171,7 +171,7 @@ export async function runSkill(engine: BrainEngine | null, args: string[]): Prom
       console.log(JSON.stringify(enriched, null, 2));
     } else {
       if (skills.length === 0) {
-        console.log('No operational skills yet. Run: gbrain skill compile "<topic>"');
+        console.log('No operational skills yet. Run: modusbrain skill compile "<topic>"');
         return;
       }
       for (const s of skills) {
@@ -185,7 +185,7 @@ export async function runSkill(engine: BrainEngine | null, args: string[]): Prom
   if (sub === 'show') {
     const slug = rest.find(a => !a.startsWith('--'));
     if (!slug) {
-      console.error('Usage: gbrain skill show <slug>');
+      console.error('Usage: modusbrain skill show <slug>');
       process.exit(2);
     }
     const skill = await getSkillBySlug(engine, slug, sourceId);
@@ -217,7 +217,7 @@ export async function runSkill(engine: BrainEngine | null, args: string[]): Prom
     const agentId = flagValue(rest, '--agent-id');
 
     if (!slug) {
-      console.error('Usage: gbrain skill execute <slug> --task "..." [--context JSON]');
+      console.error('Usage: modusbrain skill execute <slug> --task "..." [--context JSON]');
       process.exit(2);
     }
 
@@ -262,7 +262,7 @@ export async function runSkill(engine: BrainEngine | null, args: string[]): Prom
     const owner = flagValue(rest, '--owner');
 
     if (!slug) {
-      console.error('Usage: gbrain skill flag-conflict <slug> --description "..." [--sources a,b]');
+      console.error('Usage: modusbrain skill flag-conflict <slug> --description "..." [--sources a,b]');
       process.exit(2);
     }
 
@@ -294,7 +294,7 @@ export async function runSkill(engine: BrainEngine | null, args: string[]): Prom
     const note = flagValue(rest, '--note') ?? 'Resolved';
 
     if (!idStr) {
-      console.error('Usage: gbrain skill resolve <conflict-id> --by <user> --note "..."');
+      console.error('Usage: modusbrain skill resolve <conflict-id> --by <user> --note "..."');
       process.exit(2);
     }
 
@@ -329,7 +329,7 @@ export async function runSkill(engine: BrainEngine | null, args: string[]): Prom
     const by = flagValue(rest, '--by') ?? process.env.USER ?? 'cli';
 
     if (!slug || !original || !correction) {
-      console.error('Usage: gbrain skill correct <slug> --original "..." --correction "..."');
+      console.error('Usage: modusbrain skill correct <slug> --original "..." --correction "..."');
       process.exit(2);
     }
 
@@ -355,7 +355,7 @@ export async function runSkill(engine: BrainEngine | null, args: string[]): Prom
   if (sub === 'approve-token') {
     const slug = rest.find(a => !a.startsWith('--'));
     if (!slug) {
-      console.error('Usage: gbrain skill approve-token <slug>');
+      console.error('Usage: modusbrain skill approve-token <slug>');
       process.exit(2);
     }
     const skill = await getSkillBySlug(engine, slug, sourceId);
@@ -370,7 +370,7 @@ export async function runSkill(engine: BrainEngine | null, args: string[]): Prom
       console.log(JSON.stringify({ token, slug, version, expires_in_seconds: 3600 }));
     } else {
       console.log(`Approval token (1h TTL):\n${token}`);
-      console.log(`Use: gbrain skill execute ${slug} --approval-token ${token} ...`);
+      console.log(`Use: modusbrain skill execute ${slug} --approval-token ${token} ...`);
     }
     return;
   }

@@ -32,7 +32,7 @@ function src(over: Partial<{ last_commit: string | null; chunker_version: string
 }
 
 beforeEach(() => {
-  repo = mkdtempSync(join(tmpdir(), 'gbrain-est-'));
+  repo = mkdtempSync(join(tmpdir(), 'modusbrain-est-'));
   execSync('git init', { cwd: repo, stdio: 'pipe' });
   execSync('git config user.email "t@t.com"', { cwd: repo, stdio: 'pipe' });
   execSync('git config user.name "T"', { cwd: repo, stdio: 'pipe' });

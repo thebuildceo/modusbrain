@@ -86,27 +86,27 @@ if [ "$DIFF" = "1" ]; then
 fi
 
 # Pre-flight: postgres host ports for 4 shards. Defaults to 5434-5437 (avoid
-# 5432 manual gbrain-test-pg, 5433 commonly held by sibling projects).
-# GBRAIN_CI_PG_PORT defines BASE; shards take BASE..BASE+3.
-PG_PORT_BASE="${GBRAIN_CI_PG_PORT:-5434}"
+# 5432 manual modusbrain-test-pg, 5433 commonly held by sibling projects).
+# MODUSBRAIN_CI_PG_PORT defines BASE; shards take BASE..BASE+3.
+PG_PORT_BASE="${MODUSBRAIN_CI_PG_PORT:-5434}"
 for shard in 1 2 3 4; do
   port=$((PG_PORT_BASE + shard - 1))
   PORT_OWNER=$(docker ps --filter "publish=$port" --format "{{.Names}}" | head -1)
   if [ -n "$PORT_OWNER" ]; then
     echo "[ci-local] ERROR: host port $port (shard $shard) is already used by docker container '$PORT_OWNER'." >&2
-    echo "[ci-local] Either stop that container or run with: GBRAIN_CI_PG_PORT=NNNN bun run ci:local" >&2
+    echo "[ci-local] Either stop that container or run with: MODUSBRAIN_CI_PG_PORT=NNNN bun run ci:local" >&2
     exit 1
   fi
   if lsof -iTCP:"$port" -sTCP:LISTEN -P -n >/dev/null 2>&1; then
     echo "[ci-local] ERROR: host port $port (shard $shard) is held by a non-docker process." >&2
-    echo "[ci-local] Run with: GBRAIN_CI_PG_PORT=NNNN bun run ci:local" >&2
+    echo "[ci-local] Run with: MODUSBRAIN_CI_PG_PORT=NNNN bun run ci:local" >&2
     exit 1
   fi
 done
-export GBRAIN_CI_PG_PORT="$PG_PORT_BASE"
-export GBRAIN_CI_PG_PORT_2=$((PG_PORT_BASE + 1))
-export GBRAIN_CI_PG_PORT_3=$((PG_PORT_BASE + 2))
-export GBRAIN_CI_PG_PORT_4=$((PG_PORT_BASE + 3))
+export MODUSBRAIN_CI_PG_PORT="$PG_PORT_BASE"
+export MODUSBRAIN_CI_PG_PORT_2=$((PG_PORT_BASE + 1))
+export MODUSBRAIN_CI_PG_PORT_3=$((PG_PORT_BASE + 2))
+export MODUSBRAIN_CI_PG_PORT_4=$((PG_PORT_BASE + 3))
 
 # Step 0: gitleaks on the host (no docker, no postgres, no bun needed).
 # Mirrors test.yml's separate gitleaks job. Fail loudly if not installed.
@@ -196,9 +196,9 @@ SELECTED=$(bun run scripts/select-e2e.ts)
 if [ -z "$SELECTED" ]; then
   echo "[runner] selector emitted nothing (doc-only diff); skipping E2E."
 else
-  DATABASE_URL=postgresql://postgres:postgres@postgres-1:5432/gbrain_test \
-  GBRAIN_PGBOUNCER_URL=postgresql://postgres:postgres@pgbouncer:5432/gbrain_pgbouncer \
-  GBRAIN_PGBOUNCER_DIRECT_URL=postgresql://postgres:postgres@postgres-1:5432/gbrain_test \
+  DATABASE_URL=postgresql://postgres:postgres@postgres-1:5432/modusbrain_test \
+  MODUSBRAIN_PGBOUNCER_URL=postgresql://postgres:postgres@pgbouncer:5432/modusbrain_pgbouncer \
+  MODUSBRAIN_PGBOUNCER_DIRECT_URL=postgresql://postgres:postgres@postgres-1:5432/modusbrain_test \
   echo "$SELECTED" | xargs bash scripts/run-e2e.sh
 fi'
   else
@@ -211,9 +211,9 @@ bun run typecheck
 echo "[runner] unit (unsharded, DATABASE_URL unset)"
 env -u DATABASE_URL bash scripts/run-unit-shard.sh
 echo "[runner] e2e (unsharded)"
-DATABASE_URL=postgresql://postgres:postgres@postgres-1:5432/gbrain_test \
-GBRAIN_PGBOUNCER_URL=postgresql://postgres:postgres@pgbouncer:5432/gbrain_pgbouncer \
-GBRAIN_PGBOUNCER_DIRECT_URL=postgresql://postgres:postgres@postgres-1:5432/gbrain_test \
+DATABASE_URL=postgresql://postgres:postgres@postgres-1:5432/modusbrain_test \
+MODUSBRAIN_PGBOUNCER_URL=postgresql://postgres:postgres@pgbouncer:5432/modusbrain_pgbouncer \
+MODUSBRAIN_PGBOUNCER_DIRECT_URL=postgresql://postgres:postgres@postgres-1:5432/modusbrain_test \
 bash scripts/run-e2e.sh'
   fi
 else
@@ -242,7 +242,7 @@ if [ ! -f test/fixtures/pglite-snapshot.tar ] || [ ! -f test/fixtures/pglite-sna
 else
   echo \"[runner] snapshot fixture exists; engine will validate hash at load time\"
 fi
-export GBRAIN_PGLITE_SNAPSHOT=test/fixtures/pglite-snapshot.tar
+export MODUSBRAIN_PGLITE_SNAPSHOT=test/fixtures/pglite-snapshot.tar
 echo \"[runner] resolving E2E file selection (--diff aware)\"
 ${DIFF_E2E_PREP}
 mkdir -p /tmp/shard-logs
@@ -262,15 +262,15 @@ printf '%s\\n' 1 2 3 4 | xargs -P4 -I{} sh -c '
   echo \"[shard \${shard}] e2e phase (SHARD=\${shard}/4, DATABASE_URL=postgres-\${shard})\" >> \$log
   if [ -s /tmp/e2e-selected.txt ]; then
     SHARD=\${shard}/4 \\
-    DATABASE_URL=postgresql://postgres:postgres@postgres-\${shard}:5432/gbrain_test \\
-    GBRAIN_PGBOUNCER_URL=postgresql://postgres:postgres@pgbouncer:5432/gbrain_pgbouncer \\
-    GBRAIN_PGBOUNCER_DIRECT_URL=postgresql://postgres:postgres@postgres-1:5432/gbrain_test \\
+    DATABASE_URL=postgresql://postgres:postgres@postgres-\${shard}:5432/modusbrain_test \\
+    MODUSBRAIN_PGBOUNCER_URL=postgresql://postgres:postgres@pgbouncer:5432/modusbrain_pgbouncer \\
+    MODUSBRAIN_PGBOUNCER_DIRECT_URL=postgresql://postgres:postgres@postgres-1:5432/modusbrain_test \\
     xargs -a /tmp/e2e-selected.txt bash scripts/run-e2e.sh >> \$log 2>&1
   else
     SHARD=\${shard}/4 \\
-    DATABASE_URL=postgresql://postgres:postgres@postgres-\${shard}:5432/gbrain_test \\
-    GBRAIN_PGBOUNCER_URL=postgresql://postgres:postgres@pgbouncer:5432/gbrain_pgbouncer \\
-    GBRAIN_PGBOUNCER_DIRECT_URL=postgresql://postgres:postgres@postgres-1:5432/gbrain_test \\
+    DATABASE_URL=postgresql://postgres:postgres@postgres-\${shard}:5432/modusbrain_test \\
+    MODUSBRAIN_PGBOUNCER_URL=postgresql://postgres:postgres@pgbouncer:5432/modusbrain_pgbouncer \\
+    MODUSBRAIN_PGBOUNCER_DIRECT_URL=postgresql://postgres:postgres@postgres-1:5432/modusbrain_test \\
     bash scripts/run-e2e.sh >> \$log 2>&1
   fi
   e2e_exit=\$?

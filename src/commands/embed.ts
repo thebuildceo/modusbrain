@@ -45,7 +45,7 @@ export interface EmbedOpts {
    * Optional progress callback. Called after each page. CLI wrappers
    * supply a reporter.tick()-backed implementation; Minion handlers
    * supply a job.updateProgress()-backed one so per-job progress lives
-   * in the DB where `gbrain jobs get` can read it.
+   * in the DB where `modusbrain jobs get` can read it.
    */
   onProgress?: (done: number, total: number, embedded: number) => void;
   /**
@@ -66,7 +66,7 @@ export interface EmbedOpts {
   priority?: 'recent';
   /**
    * v0.41.18.0 (A13): catch-up mode removes the wall-clock cap and loops
-   * until countStaleChunks() returns 0. Used by `gbrain embed --stale
+   * until countStaleChunks() returns 0. Used by `modusbrain embed --stale
    * --catch-up` and by the embed-catch-up Minion handler that the onboard
    * remediation submits on big stale backlogs.
    */
@@ -75,7 +75,7 @@ export interface EmbedOpts {
    * #1737: cooperative-abort signal from the Minions worker (wall-clock
    * timeout, lock loss, SIGTERM). When it fires, the embed loops break
    * cleanly with partial progress preserved so the autopilot cycle's
-   * finally can release `gbrain_cycle_locks` instead of running for the
+   * finally can release `modusbrain_cycle_locks` instead of running for the
    * full 10-15 min embed phase after the job was already killed. Composed
    * with the internal wall-clock budget timer via `anySignal`.
    */
@@ -94,7 +94,7 @@ export interface EmbedOpts {
   /**
    * When the pace overrides were SERIALIZED from a background-job payload (not
    * typed at an interactive CLI), resolve them at the config tier so
-   * `GBRAIN_PACE_*` on the worker still overrides at execution (Codex P2). Set
+   * `MODUSBRAIN_PACE_*` on the worker still overrides at execution (Codex P2). Set
    * by the `embed` job handler; unset for interactive CLI runs.
    */
   paceFromBackground?: boolean;
@@ -318,7 +318,7 @@ export async function runEmbedCore(engine: BrainEngine, opts: EmbedOpts): Promis
         // Codex P2: an interactive CLI flag (--pace) is the most immediate
         // intent and sits at the per-call tier (beats env). But a flag
         // SERIALIZED into a background job payload must sit at the CONFIG tier
-        // so GBRAIN_PACE_* on the worker can still override it at execution
+        // so MODUSBRAIN_PACE_* on the worker can still override it at execution
         // (incident escape hatch). paceFromBackground distinguishes the two.
         const fromBg = !!opts.paceFromBackground;
         const knobs = resolvePaceMode({
@@ -471,7 +471,7 @@ export async function runEmbed(engine: BrainEngine, args: string[]): Promise<Emb
   } else {
     const slug = args.find(a => !a.startsWith('--'));
     if (!slug) {
-      serr('Usage: gbrain embed [<slug>|--all|--stale|--slugs s1 s2 ...] [--dry-run] [--batch-size N] [--priority recent] [--catch-up]');
+      serr('Usage: modusbrain embed [<slug>|--all|--stale|--slugs s1 s2 ...] [--dry-run] [--batch-size N] [--priority recent] [--catch-up]');
       process.exit(1);
     }
     opts = { slug, dryRun, sourceId, batchSize, priority, catchUp };
@@ -591,8 +591,8 @@ async function embedPage(
 
   await engine.upsertChunks(slug, updated, opts);
   // v0.41.31: stamp provenance so a later model/dims swap is detectable as
-  // stale. embedPage is the per-slug path used by `gbrain embed <slug>` AND
-  // by `gbrain sync`'s post-import embed step (runEmbedCore({slugs})).
+  // stale. embedPage is the per-slug path used by `modusbrain embed <slug>` AND
+  // by `modusbrain sync`'s post-import embed step (runEmbedCore({slugs})).
   // Guard: only stamp when EVERY chunk was (re)embedded this pass. If some
   // chunks were preserved from a prior embed (unknown/old provenance), the
   // page is mixed — don't claim it's current. `embed --all` fully re-embeds
@@ -641,7 +641,7 @@ async function embedAll(
   // chunks that already have embeddings.
   // ─────────────────────────────────────────────────────────────
   if (staleOnly) {
-    // D7: thread sourceId so `gbrain embed --stale --source X` actually scopes.
+    // D7: thread sourceId so `modusbrain embed --stale --source X` actually scopes.
     // v0.41.18.0 (A13): thread batchSize/priority/catchUp into the stale path.
     // #1737: thread the external abort signal so the cycle embed phase bails.
     return await embedAllStale(engine, sourceId, dryRun, result, onProgress, staleOpts, signature, signal);
@@ -654,7 +654,7 @@ async function embedAll(
   // v0.31.12: when sourceId is set, scope listPages to that source.
   // v0.41 (D8 + Codex r2 #11): apply embed-skip filter via the shared
   // helper so the `--all` path honors `frontmatter.embed_skip` the same
-  // way the `--stale` path does. Without this filter, `gbrain embed --all`
+  // way the `--stale` path does. Without this filter, `modusbrain embed --all`
   // (common after model swaps) re-embeds every soft-blocked page,
   // defeating the soft-block. Filtering JS-side here mirrors the SQL-side
   // filter that listStaleChunks/countStaleChunks apply on --stale.
@@ -673,11 +673,11 @@ async function embedAll(
   // Default 20: keeps us well under OpenAI's embedding RPM limit
   // (3000+/min for tier 1 = 50+/sec, 20 parallel is safely below) and
   // avoids overwhelming postgres connection pools. Users can tune via
-  // GBRAIN_EMBED_CONCURRENCY env var based on their tier/infra.
+  // MODUSBRAIN_EMBED_CONCURRENCY env var based on their tier/infra.
   // Paced runs lower this to the resolved cap (the real lever vs pooler-slot
   // starvation); unpaced keeps the env/default 20. Codex P2: only ever LOWER —
   // never raise above an operator's existing env cap.
-  const BASE_CONCURRENCY = parseInt(process.env.GBRAIN_EMBED_CONCURRENCY || '20', 10);
+  const BASE_CONCURRENCY = parseInt(process.env.MODUSBRAIN_EMBED_CONCURRENCY || '20', 10);
   const CONCURRENCY = staleOpts?.paceMaxConcurrency
     ? Math.min(BASE_CONCURRENCY, staleOpts.paceMaxConcurrency)
     : BASE_CONCURRENCY;
@@ -855,7 +855,7 @@ async function embedAllStale(
   // Paced runs lower concurrency to the resolved cap (E-1: worker count IS the
   // lever on this single pool, no separate permit). Codex P2: pacing only ever
   // LOWERS concurrency — never raise above an operator's existing env cap.
-  const BASE_CONCURRENCY = parseInt(process.env.GBRAIN_EMBED_CONCURRENCY || '20', 10);
+  const BASE_CONCURRENCY = parseInt(process.env.MODUSBRAIN_EMBED_CONCURRENCY || '20', 10);
   const CONCURRENCY = staleOpts?.paceMaxConcurrency
     ? Math.min(BASE_CONCURRENCY, staleOpts.paceMaxConcurrency)
     : BASE_CONCURRENCY;
@@ -871,7 +871,7 @@ async function embedAllStale(
   // SIGINT / worker-abort still propagate via externalSignal.
   const BUDGET_MS: number | null = staleOpts?.catchUp
     ? null
-    : parseInt(process.env.GBRAIN_EMBED_TIME_BUDGET_MS || `${30 * 60 * 1000}`, 10);
+    : parseInt(process.env.MODUSBRAIN_EMBED_TIME_BUDGET_MS || `${30 * 60 * 1000}`, 10);
   const budgetController = new AbortController();
   const budgetStart = Date.now();
   let budgetTimer = BUDGET_MS != null

@@ -95,7 +95,7 @@ describe('checkHiddenBySearchPolicy', () => {
   });
 
   test('a NON-default env exclude hiding pages → warn', async () => {
-    await withEnv({ GBRAIN_SEARCH_EXCLUDE: 'scratch/' }, async () => {
+    await withEnv({ MODUSBRAIN_SEARCH_EXCLUDE: 'scratch/' }, async () => {
       await seed('scratch/notes');
       await seed('concepts/keeper');
       const r = await checkHiddenBySearchPolicy(engine);

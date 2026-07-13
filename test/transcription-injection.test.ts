@@ -4,7 +4,7 @@
  * execFileSync with argument arrays (+ fs.rmSync for cleanup), so a path
  * containing shell metacharacters is a literal argv element, never parsed.
  *
- * transcription.ts is a dead-internally-but-PUBLISHED export (gbrain/transcription),
+ * transcription.ts is a dead-internally-but-PUBLISHED export (modusbrain/transcription),
  * so an external programmatic consumer can still call transcribe() with an
  * attacker-influenced path — hence the harden over delete.
  */
@@ -43,7 +43,7 @@ describe('transcription — command injection (#245)', () => {
     if (!ffmpegAvailable()) return; // path requires ffmpeg/ffprobe; skip otherwise
     // Sentinel must be a slash-free name so it's a legal single filename segment;
     // a shell `touch <name>` would create it in process.cwd(), so we check there.
-    const sentinelName = `gbrain-inj-sentinel-${process.pid}-${Date.now()}`;
+    const sentinelName = `modusbrain-inj-sentinel-${process.pid}-${Date.now()}`;
     const sentinelPath = join(process.cwd(), sentinelName);
     if (existsSync(sentinelPath)) rmSync(sentinelPath, { force: true });
     const dir = mkdtempSync(join(tmpdir(), 'transcribe-inj-'));

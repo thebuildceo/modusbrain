@@ -1,8 +1,8 @@
 /**
  * SkillOpt audit JSONL writer. Built on the v0.40.4.0 audit-writer cathedral.
  *
- * Events land at `~/.gbrain/audit/skillopt-YYYY-Www.jsonl` (ISO-week rotated;
- * honors `GBRAIN_AUDIT_DIR`).
+ * Events land at `~/.modusbrain/audit/skillopt-YYYY-Www.jsonl` (ISO-week rotated;
+ * honors `MODUSBRAIN_AUDIT_DIR`).
  *
  * Per codex C5 free-fix: skill_name is in clear. Skill names are public in
  * the repo (live on GitHub); hashing them is over-privacy and would make
@@ -53,7 +53,7 @@ function getWriter(): AuditWriter<SkilloptEvent> {
 }
 
 /**
- * Test seam — reset the cached writer so tests with mocked GBRAIN_AUDIT_DIR
+ * Test seam — reset the cached writer so tests with mocked MODUSBRAIN_AUDIT_DIR
  * see writes land in the right tempdir.
  */
 export function _resetAuditWriterForTests(): void {
@@ -75,7 +75,7 @@ export function sha8(s: string): string {
   return createHash('sha256').update(s).digest('hex').slice(0, 8);
 }
 
-/** Resolve audit dir (honors GBRAIN_AUDIT_DIR). */
+/** Resolve audit dir (honors MODUSBRAIN_AUDIT_DIR). */
 export function resolveAuditDir(): string {
   return getWriter().resolveDir();
 }

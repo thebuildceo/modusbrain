@@ -1,17 +1,17 @@
-# GBrain — Full Context
+# ModusBrain — Full Context
 
-> GBrain is a personal knowledge brain and GStack mod for agent platforms. Pluggable engines (PGLite default, Postgres+pgvector for scale), contract-first operations, 26 fat-markdown skills. Teaches agents brain ops, ingestion, enrichment, scheduling, identity, and access control.
+> ModusBrain is a personal knowledge brain and GStack mod for agent platforms. Pluggable engines (PGLite default, Postgres+pgvector for scale), contract-first operations, 26 fat-markdown skills. Teaches agents brain ops, ingestion, enrichment, scheduling, identity, and access control.
 
-This file concatenates core GBrain documentation for single-fetch ingestion.
+This file concatenates core ModusBrain documentation for single-fetch ingestion.
 For the link-only index, see `llms.txt`. Source of truth: https://github.com/garrytan/gbrain.
 
 # Core entry points
 
 ## AGENTS.md
 
-Source: https://raw.githubusercontent.com/garrytan/gbrain/master/AGENTS.md
+Source: https://raw.githubusercontent.com/garrytan/modusbrain/master/AGENTS.md
 
-# Agents working on GBrain
+# Agents working on ModusBrain
 
 This is your install + operating protocol. Claude Code reads `./CLAUDE.md` automatically.
 Everyone else (Codex, Cursor, OpenClaw, Aider, Continue, or an LLM fetching via URL):
@@ -19,25 +19,25 @@ start here.
 
 ## Install (5 min)
 
-1. Install gbrain via Bun (the canonical path):
+1. Install modusbrain via Bun (the canonical path):
    ```bash
    curl -fsSL https://bun.sh/install | bash
    export PATH="$HOME/.bun/bin:$PATH"
-   bun install -g github:garrytan/gbrain
+   bun install -g github:garrytan/modusbrain
    ```
-   If `bun install -g` aborts or `gbrain doctor` reports `schema_version: 0`,
+   If `bun install -g` aborts or `modusbrain doctor` reports `schema_version: 0`,
    the CLI prints a recovery hint pointing at [#218](https://github.com/garrytan/gbrain/issues/218).
-   Run `gbrain apply-migrations --yes` to recover, or fall back to the
-   deterministic install: `git clone https://github.com/garrytan/gbrain.git ~/gbrain && cd ~/gbrain && bun install && bun link`.
-2. Init the brain: `gbrain init` (defaults to PGLite, zero-config). For 1000+ files or
+   Run `modusbrain apply-migrations --yes` to recover, or fall back to the
+   deterministic install: `git clone https://github.com/garrytan/gbrain.git ~/modusbrain && cd ~/modusbrain && bun install && bun link`.
+2. Init the brain: `modusbrain init` (defaults to PGLite, zero-config). For 1000+ files or
    multi-machine sync, init suggests Postgres + pgvector via Supabase.
-3. **STOP — ask the user about search mode.** `gbrain init` auto-applied a
+3. **STOP — ask the user about search mode.** `modusbrain init` auto-applied a
    default but printed a 9-cell cost matrix (mode × downstream model)
    preceded by `[AGENT]` markers. You MUST relay the matrix to the operator
    and confirm their choice before continuing. Cost spread between corners
    is 25x — silent acceptance is the wrong default. See
    [`./INSTALL_FOR_AGENTS.md`](./INSTALL_FOR_AGENTS.md) Step 3.5 for the
-   exact ask-the-user protocol. Same banner fires on `gbrain post-upgrade`
+   exact ask-the-user protocol. Same banner fires on `modusbrain post-upgrade`
    for existing users (search modes were added in v0.32.3).
 4. Read [`./INSTALL_FOR_AGENTS.md`](./INSTALL_FOR_AGENTS.md) for the full 9-step flow
    (API keys, identity, cron, verification).
@@ -61,7 +61,7 @@ start here.
 
 ## Trust boundary (critical)
 
-GBrain distinguishes **trusted local CLI callers** (`OperationContext.remote = false`,
+ModusBrain distinguishes **trusted local CLI callers** (`OperationContext.remote = false`,
 set by `src/cli.ts`) from **untrusted agent-facing callers** (`remote = true`, set by
 `src/mcp/server.ts`). Security-sensitive operations like `file_upload` tighten filesystem
 confinement when `remote = true` and default to strict behavior when unset. If you are
@@ -72,22 +72,22 @@ writing or reviewing an operation, consult `src/core/operations.ts` for the cont
 - **Configure:** [`docs/ENGINES.md`](./docs/ENGINES.md),
   [`docs/guides/live-sync.md`](./docs/guides/live-sync.md),
   [`docs/mcp/DEPLOY.md`](./docs/mcp/DEPLOY.md).
-- **Debug:** [`docs/GBRAIN_VERIFY.md`](./docs/GBRAIN_VERIFY.md),
-  [`docs/guides/minions-fix.md`](./docs/guides/minions-fix.md), `gbrain doctor --fix`.
-- **Migrate / upgrade:** `gbrain upgrade` (binary self-update + schema migrations + post-upgrade prompts),
+- **Debug:** [`docs/MODUSBRAIN_VERIFY.md`](./docs/MODUSBRAIN_VERIFY.md),
+  [`docs/guides/minions-fix.md`](./docs/guides/minions-fix.md), `modusbrain doctor --fix`.
+- **Migrate / upgrade:** `modusbrain upgrade` (binary self-update + schema migrations + post-upgrade prompts),
   [`docs/UPGRADING_DOWNSTREAM_AGENTS.md`](./docs/UPGRADING_DOWNSTREAM_AGENTS.md),
-  [`skills/migrations/`](./skills/migrations/), `gbrain apply-migrations --yes` (manual schema-only).
+  [`skills/migrations/`](./skills/migrations/), `modusbrain apply-migrations --yes` (manual schema-only).
 - **Eval retrieval changes:** capture is off by default. To benchmark a
   retrieval change against real captured queries, set
-  `GBRAIN_CONTRIBUTOR_MODE=1`, then `gbrain eval export --since 7d > base.ndjson`
-  and `gbrain eval replay --against base.ndjson`. For public benchmark
-  coverage (LongMemEval, ground-truth scoring), `gbrain eval longmemeval
+  `MODUSBRAIN_CONTRIBUTOR_MODE=1`, then `modusbrain eval export --since 7d > base.ndjson`
+  and `modusbrain eval replay --against base.ndjson`. For public benchmark
+  coverage (LongMemEval, ground-truth scoring), `modusbrain eval longmemeval
   <dataset.jsonl>` (v0.28.8) runs against an isolated in-memory PGLite
-  per question — your `~/.gbrain` is never opened. Full guide:
+  per question — your `~/.modusbrain` is never opened. Full guide:
   [`docs/eval-bench.md`](./docs/eval-bench.md).
 - **Drive the brain to a target health score (v0.36.4.0):** the one-command
-  loop. `gbrain doctor --remediation-plan --json` previews what would be
-  fixed; `gbrain doctor --remediate --yes --target-score 90 --max-usd 5`
+  loop. `modusbrain doctor --remediation-plan --json` previews what would be
+  fixed; `modusbrain doctor --remediate --yes --target-score 90 --max-usd 5`
   walks a dependency-ordered plan (sync before extract, embed after
   consolidate), re-checking score between every step, refusing to spend
   past the cost cap. Empty brains (no entity pages) or unconfigured embedding
@@ -99,12 +99,12 @@ writing or reviewing an operation, consult `src/core/operations.ts` for the cont
 - **Track a founder/company over time (v0.35.7):** when an entity has
   typed metric claims in its `## Facts` fence (`metric: mrr`, `value: 50000`,
   `unit: USD`, `period: monthly` columns), run
-  `gbrain eval trajectory <entity-slug>` for the chronological history
-  with regressions auto-flagged, or `gbrain founder scorecard <entity-slug>`
+  `modusbrain eval trajectory <entity-slug>` for the chronological history
+  with regressions auto-flagged, or `modusbrain founder scorecard <entity-slug>`
   for a four-signal JSON rollup (claim_accuracy / consistency /
   growth_trajectory / red_flags). MCP op `find_trajectory` exposes the
   same data — read scope, visibility-filtered for remote callers. **v0.40.2.0:**
-  `gbrain think` now uses this substrate automatically on temporal /
+  `modusbrain think` now uses this substrate automatically on temporal /
   knowledge_update intent (default ON; flip `think.trajectory_enabled=false`
   to opt out). Migration v82 added `facts.event_type` so non-metric event
   rows (`meeting`, `job_change`, `location_change`) ride through the same
@@ -133,7 +133,7 @@ Ship via the `/ship` skill, not by hand. The full release + contributor process
 ## Privacy
 
 Never commit real names of people, companies, or funds into public artifacts. See the
-Privacy rule in `./CLAUDE.md`. GBrain pages reference real contacts; public docs must
+Privacy rule in `./CLAUDE.md`. ModusBrain pages reference real contacts; public docs must
 use generic placeholders (`alice-example`, `acme-example`, `fund-a`).
 
 ## Forks
@@ -145,40 +145,40 @@ publishing: `LLMS_REPO_BASE=https://raw.githubusercontent.com/your-org/your-fork
 
 ## CLAUDE.md
 
-Source: https://raw.githubusercontent.com/garrytan/gbrain/master/CLAUDE.md
+Source: https://raw.githubusercontent.com/garrytan/modusbrain/master/CLAUDE.md
 
 # CLAUDE.md
 
-GBrain is a personal knowledge brain and GStack mod for agent platforms. Pluggable
+ModusBrain is a personal knowledge brain and GStack mod for agent platforms. Pluggable
 engines: PGLite (embedded Postgres via WASM, zero-config default) or Postgres + pgvector
-+ hybrid search in a managed Supabase instance. `gbrain init` defaults to PGLite;
-suggests Supabase for 1000+ files. GStack teaches agents how to code. GBrain teaches
++ hybrid search in a managed Supabase instance. `modusbrain init` defaults to PGLite;
+suggests Supabase for 1000+ files. GStack teaches agents how to code. ModusBrain teaches
 agents everything else: brain ops, signal detection, content ingestion, enrichment,
 cron scheduling, reports, identity, and access control.
 
 ## North Star
 
-gbrain aims to be the **next Postgres for memory**: the most well-tested, widest-coverage,
+modusbrain aims to be the **next Postgres for memory**: the most well-tested, widest-coverage,
 best-for-the-most-at-the-least retrieval + agent memory system for company brains and
 personal AI, built to serve a billion people. Every feature and every eval is judged
-against this bar. "gbrain is best" is a WHOLE-SYSTEM claim — proven across the full
+against this bar. "modusbrain is best" is a WHOLE-SYSTEM claim — proven across the full
 BrainBench suite (retrieval, longmemeval, calibration, …) — not by any single feature.
-When scoping an eval, prove the FEATURE delivers value to gbrain users; do not waste it
-proving that gbrain's particular algorithm beats some other algorithm (a research
+When scoping an eval, prove the FEATURE delivers value to modusbrain users; do not waste it
+proving that modusbrain's particular algorithm beats some other algorithm (a research
 bake-off, off-mission).
 
 ## Two organizational axes (read this first)
 
-GBrain knowledge is organized along two orthogonal axes. Users AND agents must
+ModusBrain knowledge is organized along two orthogonal axes. Users AND agents must
 understand both, or queries misroute silently.
 
 - **Brain** — WHICH DATABASE. Your personal brain is `host`. You can mount
   additional brains (team-published, each with their own DB and access policy)
-  via `gbrain mounts add` (v0.19+). Routing: `--brain`, `GBRAIN_BRAIN_ID`,
-  `.gbrain-mount` dotfile.
+  via `modusbrain mounts add` (v0.19+). Routing: `--brain`, `MODUSBRAIN_BRAIN_ID`,
+  `.modusbrain-mount` dotfile.
 - **Source** — WHICH REPO INSIDE THE DATABASE. A brain can hold many sources
   (wiki, gstack, openclaw, essays). Slugs scope per source. Routing:
-  `--source`, `GBRAIN_SOURCE`, `.gbrain-source` dotfile.
+  `--source`, `MODUSBRAIN_SOURCE`, `.modusbrain-source` dotfile.
 
 Both axes follow the same 6-tier resolution pattern. Read
 `docs/architecture/brains-and-sources.md` for topology diagrams (personal, team
@@ -243,7 +243,7 @@ Per-file detail is in `docs/architecture/KEY_FILES.md`.
 
 CLAUDE.md is the always-loaded orientation + dispatcher. Detailed reference loads
 on demand — read the linked doc before working in that area. (Same two-layer
-pattern gbrain ships for its own skills: thin router in `skills/RESOLVER.md`, fat
+pattern modusbrain ships for its own skills: thin router in `skills/RESOLVER.md`, fat
 detail on demand.)
 
 | When you're working on... | Read first |
@@ -255,7 +255,7 @@ detail on demand.)
 | push-based context (volunteer/watch/reflex window) | `docs/guides/push-context.md` |
 | schema packs / page types / extraction | `docs/architecture/schema-packs.md`, `type-taxonomy.md`, `lens-packs.md` |
 | thin-client / remote MCP / cross-modal | `docs/architecture/thin-client.md` |
-| the CLI surface (commands + flags) | `gbrain --help` / `gbrain --tools-json`, plus the relevant `KEY_FILES.md` entry |
+| the CLI surface (commands + flags) | `modusbrain --help` / `modusbrain --tools-json`, plus the relevant `KEY_FILES.md` entry |
 | running or writing tests | `docs/TESTING.md` |
 | bulk-command progress wiring | `docs/progress-events.md` |
 | eval methodology / metrics | `docs/eval/` |
@@ -273,7 +273,7 @@ current-state).
 
 CLAUDE.md grew to ~592KB / ~147k tokens once the per-file index became append-only
 (one `**vX.Y.Z:**` clause per release per file). That is the exact anti-pattern
-gbrain exists to fix. The rules that keep it from recurring:
+modusbrain exists to fix. The rules that keep it from recurring:
 
 - **CLAUDE.md is orientation, not the implementation spec.** It carries the North
   Star, the two axes, architecture + cross-cutting invariants, the resolver, and
@@ -293,7 +293,7 @@ gbrain exists to fix. The rules that keep it from recurring:
 
 ## Search Mode (v0.32.3)
 
-GBrain ships three named search modes that bundle the search-lite knobs from
+ModusBrain ships three named search modes that bundle the search-lite knobs from
 PR #897 into a single config key. Pick one at install time; the rest of the
 project resolves through `src/core/search/mode.ts`.
 
@@ -308,7 +308,7 @@ project resolves through `src/core/search/mode.ts`.
 | `relationalRetrieval`         | false          | **true**   | **true**       |
 | `searchLimit` default         | 10             | 25         | 50             |
 
-**Cost anchors (downstream agent input cost — gbrain itself is rounding error).**
+**Cost anchors (downstream agent input cost — modusbrain itself is rounding error).**
 The corner-to-corner spread is 25x once you pair mode with downstream model.
 Chunks ~400 tokens avg. Per-query cost @ 10K queries/month (typical
 single-user volume), full search payload, no cache savings:
@@ -327,7 +327,7 @@ expensive one.
 
 tokenmax adds ~\$1.50 per 1K queries in Haiku expansion calls on top of
 the matrix (\$15/mo @ 10K). Cache hits cut all numbers ~50%. **The cost
-picker copy in `gbrain init` carries the same matrix verbatim** — update
+picker copy in `modusbrain init` carries the same matrix verbatim** — update
 both when refreshing.
 
 **Per-query math vs real-world spend.** The matrix above is what an
@@ -348,7 +348,7 @@ matrix dominate — mode + model choice matters more there.
 
 Mode resolution lives in **bare `hybridSearch`** (NOT just the cached wrapper)
 per `[CDX-5+6]` in `~/.claude/plans/lets-take-a-look-validated-parrot.md` — so
-`gbrain eval replay` and `gbrain eval longmemeval` test the same mode-affected
+`modusbrain eval replay` and `modusbrain eval longmemeval` test the same mode-affected
 behavior as the production `query` op.
 
 **Cache-key contamination hotfix `[CDX-4]`:** migration v56 added a
@@ -379,18 +379,18 @@ The `query` op's `relational` flag forces it on/off per call.
 
 **Three CLI surfaces:**
 
-    gbrain search modes              # what is running, with per-knob attribution
-    gbrain search modes --reset      # clear search.* overrides (mode bundle wins)
-    gbrain search stats [--days N]   # cache hit rate, intent mix, budget drops
-    gbrain search tune [--apply]     # data-driven recommendations
+    modusbrain search modes              # what is running, with per-knob attribution
+    modusbrain search modes --reset      # clear search.* overrides (mode bundle wins)
+    modusbrain search stats [--days N]   # cache hit rate, intent mix, budget drops
+    modusbrain search tune [--apply]     # data-driven recommendations
 
-The install picker fires inside `gbrain init` AFTER `engine.initSchema()`
+The install picker fires inside `modusbrain init` AFTER `engine.initSchema()`
 (non-TTY auto-selects). The upgrade banner fires once via `runPostUpgrade`
 in `src/commands/upgrade.ts`, gated by `search.mode_upgrade_notice_shown`.
 
 ## Eval discipline (v0.32.3)
 
-Every metric printed by any `gbrain eval *` or `gbrain search stats` command
+Every metric printed by any `modusbrain eval *` or `modusbrain search stats` command
 resolves through `src/core/eval/metric-glossary.ts` so industry terms
 (`P@k`, `nDCG@k`, `MRR`, `Jaccard@k`) carry a plain-English line in human
 output and a `_meta.metric_glossary` block in JSON output (one block per
@@ -402,13 +402,13 @@ discipline `[CDX-14]` — lives in `docs/eval/SEARCH_MODE_METHODOLOGY.md`.
 Auto-regenerated `docs/eval/METRIC_GLOSSARY.md` is CI-guarded against
 drift (`scripts/check-eval-glossary-fresh.sh`).
 
-Per-run records land at `<repo>/.gbrain-evals/eval-results.jsonl` per
-`[CDX-23]`. The user's personal `~/.gbrain` brain is NEVER touched —
+Per-run records land at `<repo>/.modusbrain-evals/eval-results.jsonl` per
+`[CDX-23]`. The user's personal `~/.modusbrain` brain is NEVER touched —
 audit trail lives in the source repo's git history.
 
 ## Skills
 
-Read the skill files in `skills/` before doing brain operations. GBrain ships 30 skills
+Read the skill files in `skills/` before doing brain operations. ModusBrain ships 30 skills
 organized by `skills/RESOLVER.md` (`AGENTS.md` is also accepted as of v0.19):
 
 **Original 8 (conformance-migrated):** ingest (thin router), query, maintain, enrich,
@@ -420,8 +420,8 @@ meeting-ingestion, citation-fixer, repo-architecture, skill-creator, daily-task-
 **Operational + identity:** daily-task-prep, cross-modal-review, cron-scheduler, reports,
 testing, soul-audit, webhook-transforms, data-research, minion-orchestrator. As of
 v0.20.4, `minion-orchestrator` is the single unified skill for both lanes of background
-work (shell jobs via `gbrain jobs submit shell`, LLM subagents via `gbrain agent run`) ...
-the prior `gbrain-jobs` skill was merged in, Preconditions are shared, and trigger
+work (shell jobs via `modusbrain jobs submit shell`, LLM subagents via `modusbrain agent run`) ...
+the prior `modusbrain-jobs` skill was merged in, Preconditions are shared, and trigger
 routing is narrowed to what the skill actually covers.
 
 **Skillify loop (v0.19):** skillify (the markdown orchestration), skillpack-check
@@ -429,11 +429,11 @@ routing is narrowed to what the skill actually covers.
 
 **Brain-resident skillpacks + advisor (v0.42.47.0, #2180):** A brain repo can carry its
 own publishable skillpack (`brain_resident: true` in `skillpack.json` + `schema_pack`);
-`gbrain skillpack init-brain-pack` scaffolds one with a 5-section machine-parseable README.
-Connecting harnesses discover it on `gbrain sources add` (Topology A advisory, bounded nag
+`modusbrain skillpack init-brain-pack` scaffolds one with a 5-section machine-parseable README.
+Connecting harnesses discover it on `modusbrain sources add` (Topology A advisory, bounded nag
 via `nag-state.ts`) and over MCP via the source-scoped `list_brain_skillpack` op +
-`get_skill --source_id` (gated by `mcp.publish_skills`). The bundled `gbrain-advisor` skill
-+ `gbrain advisor` op compute a ranked, read-only list of high-leverage actions from brain
+`get_skill --source_id` (gated by `mcp.publish_skills`). The bundled `modusbrain-advisor` skill
++ `modusbrain advisor` op compute a ranked, read-only list of high-leverage actions from brain
 state (8 collectors in `src/core/advisor/`); `--json`+exit codes for CI/cron, local-only
 `--apply <id>` behind confirm, exposed over MCP behind `mcp.publish_advisor` (default off,
 read-only on remote). Thin-client binary install stays deferred to PR2 `build_skillpack`.
@@ -465,7 +465,7 @@ prompt-design ablation methodology.
 
 **Operational health (v0.19.1):** smoke-test (8 post-restart health checks with auto-fix
 for Bun, CLI, DB, worker, Zod CJS, gateway, API key, brain repo; user-extensible via
-`~/.gbrain/smoke-tests.d/*.sh`).
+`~/.modusbrain/smoke-tests.d/*.sh`).
 
 **Conventions:** `skills/conventions/` has cross-cutting rules (quality, brain-first,
 model-routing, test-before-bulk, cross-modal). `skills/_brain-filing-rules.md` and
@@ -539,7 +539,7 @@ output.
 
 ## Sync resumability + lock tuning (v0.42.x, #1794)
 
-`gbrain sync` is resumable and converges under pool exhaustion + repeated kills.
+`modusbrain sync` is resumable and converges under pool exhaustion + repeated kills.
 Progress banks into the append-only `op_checkpoint_paths` table (one row per drained
 path, written via the direct session pool so it survives `EMAXCONNSESSION`); a killed
 run resumes from the checkpoint and `last_commit` only advances on true completion. The
@@ -549,16 +549,16 @@ hatches — no config-dashboard surface by design):
 
 | Env var | Default | What it does |
 |---|---|---|
-| `GBRAIN_SYNC_CHECKPOINT_EVERY` | 1000 | Flush the checkpoint every N drained files. |
-| `GBRAIN_SYNC_CHECKPOINT_SECONDS` | 10 | Also flush every N seconds (whichever comes first) — bounds worst-case loss regardless of throughput. Flush also fires after the first file. |
-| `GBRAIN_SYNC_MAX_CHECKPOINT_FAILURES` | 3 | Consecutive failed flushes (each already retried ~12s) before the run aborts with `reason: 'checkpoint_unavailable'` instead of importing work it can never bank. |
-| `GBRAIN_SYNC_YIELD_EVERY` | 64 | Yield the event loop (`setTimeout(0)`, NOT `setImmediate` — Bun starves the timers phase under a tight setImmediate loop) every N files so the lock-refresh `setInterval` heartbeat fires mid-import. |
-| `GBRAIN_LOCK_STEAL_GRACE_SECONDS` | derived (~600 at 30min TTL) | A holder that refreshed within this window is NOT stolen even if its TTL lapsed (starved-but-alive). Dead holders stop refreshing, age past the grace, and become stealable; TTL stays the backstop. |
-| `GBRAIN_SYNC_STALL_ABORT_SECONDS` | 900 | Progress-aware stall watchdog (#1950): if the import drain makes no forward progress (keyed on file-import progress, NOT the lock heartbeat) for N seconds, abort the run and release the per-source lock so the next `gbrain sync` resumes from the checkpoint. Reports `reason: 'stall_timeout'`. Observed BETWEEN files; a hang inside one file's import isn't interrupted until it returns (the wall-clock hard deadline is that backstop). 0 disables. |
+| `MODUSBRAIN_SYNC_CHECKPOINT_EVERY` | 1000 | Flush the checkpoint every N drained files. |
+| `MODUSBRAIN_SYNC_CHECKPOINT_SECONDS` | 10 | Also flush every N seconds (whichever comes first) — bounds worst-case loss regardless of throughput. Flush also fires after the first file. |
+| `MODUSBRAIN_SYNC_MAX_CHECKPOINT_FAILURES` | 3 | Consecutive failed flushes (each already retried ~12s) before the run aborts with `reason: 'checkpoint_unavailable'` instead of importing work it can never bank. |
+| `MODUSBRAIN_SYNC_YIELD_EVERY` | 64 | Yield the event loop (`setTimeout(0)`, NOT `setImmediate` — Bun starves the timers phase under a tight setImmediate loop) every N files so the lock-refresh `setInterval` heartbeat fires mid-import. |
+| `MODUSBRAIN_LOCK_STEAL_GRACE_SECONDS` | derived (~600 at 30min TTL) | A holder that refreshed within this window is NOT stolen even if its TTL lapsed (starved-but-alive). Dead holders stop refreshing, age past the grace, and become stealable; TTL stays the backstop. |
+| `MODUSBRAIN_SYNC_STALL_ABORT_SECONDS` | 900 | Progress-aware stall watchdog (#1950): if the import drain makes no forward progress (keyed on file-import progress, NOT the lock heartbeat) for N seconds, abort the run and release the per-source lock so the next `modusbrain sync` resumes from the checkpoint. Reports `reason: 'stall_timeout'`. Observed BETWEEN files; a hang inside one file's import isn't interrupted until it returns (the wall-clock hard deadline is that backstop). 0 disables. |
 
 ## Pace Mode (DB-contention-aware backfill pacing)
 
-A naive `gbrain embed --stale` / large `sync` can saturate a PgBouncer
+A naive `modusbrain embed --stale` / large `sync` can saturate a PgBouncer
 transaction-mode pooler and starve the minion supervisor's lock renewals
 (`lock-renewal-failed` → dead jobs). Pacing is the native, composable fix — it
 replaces external SIGSTOP/SIGCONT wrapper scripts. **Opt-in: default mode `off`.**
@@ -579,7 +579,7 @@ The composable primitive is `src/core/db-pacer.ts` (`createDbPacer`):
 Named bundles resolve through `src/core/pace-mode.ts` (`resolvePaceMode`), mirror
 of the search-mode pattern but with **env ABOVE config** (incident escape hatch):
 
-    per-call flag → GBRAIN_PACE_* env → config (pace.*) → PACE_BUNDLES[mode] → off
+    per-call flag → MODUSBRAIN_PACE_* env → config (pace.*) → PACE_BUNDLES[mode] → off
 
 | Knob | off | gentle | balanced | aggressive |
 |---|---|---|---|---|
@@ -587,10 +587,10 @@ of the search-mode pattern but with **env ABOVE config** (incident escape hatch)
 | `paceAtMs` (EWMA → sleep) | — | 250 | 500 | 1000 |
 | `maxSleepMs` (jittered cap) | — | 2000 | 1500 | 1000 |
 
-**Surfaces.** `gbrain embed --stale --pace[=mode]` (bare `--pace` = balanced),
+**Surfaces.** `modusbrain embed --stale --pace[=mode]` (bare `--pace` = balanced),
 `--pace-max-concurrency=N`. `--background` carries explicit pace OVERRIDES (not
 the resolved bundle) into the `embed` job payload; the handler re-resolves
-env>config>bundle at execution so `GBRAIN_PACE_*` still wins (CX5). Config-level
+env>config>bundle at execution so `MODUSBRAIN_PACE_*` still wins (CX5). Config-level
 `pace.mode` paces EVERY `runEmbedCore` caller (cycle embed, embed-catch-up,
 sync-auto-embed) and the prod `embed-backfill` job automatically. `sync` reads
 env/config. PGLite / mode `off` → no-op pacer.
@@ -609,7 +609,7 @@ ms, max waiters) for `--json`; a one-line summary prints to stderr.
 
 ## Build
 
-`bun build --compile --outfile bin/gbrain src/cli.ts`
+`bun build --compile --outfile bin/modusbrain src/cli.ts`
 
 ## Version locations (single source of truth: `VERSION` file)
 
@@ -634,7 +634,7 @@ four numeric segments are required first. Historical 3-segment versions
 | File | What lives there | Format |
 |---|---|---|
 | `VERSION` | The single source of truth. Read first by `/ship`, the binary, and CI version-gate. | Bare 4-segment string `MAJOR.MINOR.PATCH.MICRO` (e.g. `0.31.4.1`), no leading `v`. |
-| `package.json` | Bun/npm package version. `gbrain --version` reads it via the compiled binary's bundled package metadata. CI version-gate cross-checks this against `VERSION` and fails if they drift. | `"version": "0.31.4.1"` |
+| `package.json` | Bun/npm package version. `modusbrain --version` reads it via the compiled binary's bundled package metadata. CI version-gate cross-checks this against `VERSION` and fails if they drift. | `"version": "0.31.4.1"` |
 | `CHANGELOG.md` | Top entry header `## [0.31.4.1] - YYYY-MM-DD` plus the "To take advantage of v0.31.4.1" block. | Standard Keep-a-Changelog header. |
 | `TODOS.md` | Any TODO entries that mention "follow-up from vX.Y.Z.W" use the version of the release that filed them. Update only when filing NEW follow-up TODOs. | Inline `vX.Y.Z.W` references in TODO bodies. |
 | `CLAUDE.md` | The Key Files section's per-file annotations carry `vX.Y.Z.W (#NNN)` tags noting which release introduced a behavior. Update whenever a wave's annotations get folded in. | Inline `vX.Y.Z.W (#NNN, contributed by @user)` references. |
@@ -839,9 +839,9 @@ public-facing artifact.** Public artifacts include: `CHANGELOG.md`, `README.md`,
 code. Query examples, benchmark stories, and migration guides MUST use generic
 placeholders.
 
-Why: gbrain runs a personal knowledge brain containing notes on real people and
+Why: modusbrain runs a personal knowledge brain containing notes on real people and
 real companies (YC founders, portfolio companies, funds, investors, meeting
-attendees). When a doc copies a query like `gbrain graph diana-hu --depth 2` or
+attendees). When a doc copies a query like `modusbrain graph diana-hu --depth 2` or
 names a specific agent fork like `Wintermute`, that real name gets indexed by
 search engines, surfaced in cross-references, and distributed with every release.
 
@@ -896,7 +896,7 @@ tweets, blog posts.
 **Do write:**
 - "Security hardening pass. Fresh installs secure by default. Existing brains
   brought to the same bar automatically on upgrade."
-- "If `gbrain doctor` still flags anything after upgrade, the message names each
+- "If `modusbrain doctor` still flags anything after upgrade, the message names each
   table and gives the exact fix."
 
 Why: anyone reading the release page before they've upgraded now has a directed
@@ -906,7 +906,7 @@ get them. But the release page is a broadcast channel. Don't hand attackers a
 curated list with a banner.
 
 **The test:** if a reader with no prior context could read the release note and
-walk away knowing "gbrain at version X has table Y readable by anon key until
+walk away knowing "modusbrain at version X has table Y readable by anon key until
 they patch," the note is too specific. Rewrite until that's no longer possible.
 
 **What IS fine in public artifacts:**
@@ -986,9 +986,9 @@ Key routing rules:
 
 ## INSTALL_FOR_AGENTS.md
 
-Source: https://raw.githubusercontent.com/garrytan/gbrain/master/INSTALL_FOR_AGENTS.md
+Source: https://raw.githubusercontent.com/garrytan/modusbrain/master/INSTALL_FOR_AGENTS.md
 
-# GBrain Installation Guide for AI Agents
+# ModusBrain Installation Guide for AI Agents
 
 Read this entire file, then follow the steps. Ask the user for API keys when needed.
 Target: ~30 minutes to a fully working brain.
@@ -1000,38 +1000,38 @@ protocol (install, read order, trust boundary, common tasks). Claude Code reads
 `CLAUDE.md` automatically and can skip ahead.
 
 If you fetched this file by URL without cloning yet, the companion files live at:
-- `https://raw.githubusercontent.com/garrytan/gbrain/master/AGENTS.md` — start here
-- `https://raw.githubusercontent.com/garrytan/gbrain/master/llms.txt` — full doc map
-- `https://raw.githubusercontent.com/garrytan/gbrain/master/llms-full.txt` — same map, inlined
+- `https://raw.githubusercontent.com/garrytan/modusbrain/master/AGENTS.md` — start here
+- `https://raw.githubusercontent.com/garrytan/modusbrain/master/llms.txt` — full doc map
+- `https://raw.githubusercontent.com/garrytan/modusbrain/master/llms-full.txt` — same map, inlined
 
-## Step 1: Install GBrain
+## Step 1: Install ModusBrain
 
-Default path (Bun is required — gbrain is a Bun + TypeScript runtime):
+Default path (Bun is required — modusbrain is a Bun + TypeScript runtime):
 
 ```bash
 curl -fsSL https://bun.sh/install | bash
 export PATH="$HOME/.bun/bin:$PATH"
-bun install -g github:garrytan/gbrain
+bun install -g github:garrytan/modusbrain
 ```
 
-Verify: `gbrain --version` should print a version number. If `gbrain` is not found,
+Verify: `modusbrain --version` should print a version number. If `modusbrain` is not found,
 restart the shell or add the PATH export to the shell profile.
 
-> **If `bun install -g` aborts or `gbrain doctor` reports `schema_version: 0`** (Bun
+> **If `bun install -g` aborts or `modusbrain doctor` reports `schema_version: 0`** (Bun
 > occasionally blocks the top-level postinstall hook on global installs, so schema
 > migrations don't run automatically), the CLI prints a recovery hint pointing at
-> [#218](https://github.com/garrytan/gbrain/issues/218). Run `gbrain apply-migrations --yes`
+> [#218](https://github.com/garrytan/gbrain/issues/218). Run `modusbrain apply-migrations --yes`
 > to recover. If that doesn't work, fall back to the deterministic install path:
 >
 > ```bash
-> git clone https://github.com/garrytan/gbrain.git ~/gbrain && cd ~/gbrain
+> git clone https://github.com/garrytan/gbrain.git ~/modusbrain && cd ~/modusbrain
 > bun install && bun link
 > ```
 
 ## Step 2: API Keys
 
-Ask the user for these. gbrain defaults to the ZeroEntropy embedding + reranker stack
-(as of v0.36.2.0); OpenAI/Voyage are still supported as fallbacks via `gbrain config
+Ask the user for these. modusbrain defaults to the ZeroEntropy embedding + reranker stack
+(as of v0.36.2.0); OpenAI/Voyage are still supported as fallbacks via `modusbrain config
 set embedding_model <provider:model>`.
 
 ```bash
@@ -1040,15 +1040,15 @@ export OPENAI_API_KEY=sk-...          # fallback for vector search; also used fo
 export ANTHROPIC_API_KEY=sk-ant-...   # optional, improves search quality via query expansion
 ```
 
-Save to shell profile or `.env`. Keys are picked up by `gbrain config set` automatically
-or can be stored in `~/.gbrain/config.json` (file plane). Without any embedding provider,
+Save to shell profile or `.env`. Keys are picked up by `modusbrain config set` automatically
+or can be stored in `~/.modusbrain/config.json` (file plane). Without any embedding provider,
 keyword search still works. Without Anthropic, search works but skips query expansion.
 
 ## Step 3: Create the Brain
 
 ```bash
-gbrain init                           # PGLite, no server needed
-gbrain doctor --json                  # verify all checks pass
+modusbrain init                           # PGLite, no server needed
+modusbrain doctor --json                  # verify all checks pass
 ```
 
 The user's markdown files (notes, docs, brain repo) are SEPARATE from this tool repo.
@@ -1058,13 +1058,13 @@ Ask the user where their files are, or create a new brain repo:
 mkdir -p ~/brain && cd ~/brain && git init
 ```
 
-Read `~/gbrain/docs/GBRAIN_RECOMMENDED_SCHEMA.md` and set up the MECE directory
+Read `~/modusbrain/docs/MODUSBRAIN_RECOMMENDED_SCHEMA.md` and set up the MECE directory
 structure (people/, companies/, concepts/, etc.) inside the user's brain repo,
-NOT inside ~/gbrain.
+NOT inside ~/modusbrain.
 
 ## Step 3.5: Confirm search mode with the user (DO NOT SKIP)
 
-`gbrain init` auto-applied a default search mode (`tokenmax` unless your subagent
+`modusbrain init` auto-applied a default search mode (`tokenmax` unless your subagent
 tier is Haiku-class or no OpenAI key is configured). The init output included the
 cost matrix below preceded by `[AGENT]` markers. You must NOT silently accept the
 default. Stop and ask the operator.
@@ -1086,7 +1086,7 @@ Per-query cost @ 10K queries/mo (typical single-user volume):
 
 **Ask the operator (paraphrase if needed):**
 
-> Your gbrain just installed with search mode `<auto-applied default>`. This is
+> Your modusbrain just installed with search mode `<auto-applied default>`. This is
 > a one-time setup decision that controls retrieval payload size. Which mode
 > do you want?
 >
@@ -1103,16 +1103,16 @@ Per-query cost @ 10K queries/mo (typical single-user volume):
 
 If the operator picks a non-default mode, run:
 ```bash
-gbrain config set search.mode <mode>
+modusbrain config set search.mode <mode>
 ```
 
 If they pick tokenmax AND want to preserve the literal v0.31.x default
 (limit=20 instead of tokenmax's 50), also run:
 ```bash
-gbrain config set search.searchLimit 20
+modusbrain config set search.searchLimit 20
 ```
 
-Verify the choice with `gbrain search modes` before continuing.
+Verify the choice with `modusbrain search modes` before continuing.
 
 **Why this matters:** the cost spread between corners of the matrix is 25x.
 An agent that silently accepts the default and starts running queries against
@@ -1122,9 +1122,9 @@ spend. Confirm before continuing.
 ## Step 4: Import and Index
 
 ```bash
-gbrain import ~/brain/ --no-embed     # import markdown files
-gbrain embed --stale                  # generate vector embeddings
-gbrain query "key themes across these documents?"
+modusbrain import ~/brain/ --no-embed     # import markdown files
+modusbrain embed --stale                  # generate vector embeddings
+modusbrain query "key themes across these documents?"
 ```
 
 ## Step 4.5: Wire the Knowledge Graph
@@ -1134,17 +1134,17 @@ the typed-link graph and structured timeline. This populates the `links` and
 `timeline_entries` tables that future writes will maintain automatically.
 
 ```bash
-gbrain extract links --source db --dry-run | head -20    # preview
-gbrain extract links --source db                         # commit
-gbrain extract timeline --source db                      # dated events
-gbrain stats                                             # verify links > 0
+modusbrain extract links --source db --dry-run | head -20    # preview
+modusbrain extract links --source db                         # commit
+modusbrain extract timeline --source db                      # dated events
+modusbrain stats                                             # verify links > 0
 ```
 
 For brand-new empty brains, skip this step — auto-link populates the graph as the
 agent writes pages going forward. There is nothing to backfill yet.
 
 After this step:
-- `gbrain graph-query <slug> --depth 2` works (relationship traversal)
+- `modusbrain graph-query <slug> --depth 2` works (relationship traversal)
 - Search ranks well-connected entities higher (backlink boost)
 - Every future `put_page` auto-creates typed links and reconciles stale ones
 
@@ -1155,23 +1155,23 @@ and supports `--since YYYY-MM-DD` for incremental runs.
 
 If the user imported an Obsidian or Notion vault that uses **bare** `[[note-name]]`
 wikilinks — where `[[struktura]]` written in one folder means the page that lives
-at `projects/struktura.md` in another — GBrain does NOT connect those by default.
+at `projects/struktura.md` in another — ModusBrain does NOT connect those by default.
 Out of the box it only resolves path-qualified refs like `[[projects/struktura]]`,
 so a vault full of bare links shows up as a thin, broken graph. Turn on basename
 resolution so the cross-folder links connect:
 
 ```bash
-gbrain config set link_resolution.global_basename true
-gbrain extract links --source db          # re-run so the new edges land
+modusbrain config set link_resolution.global_basename true
+modusbrain extract links --source db          # re-run so the new edges land
 ```
 
-`gbrain doctor` surfaces a `link_resolution_opportunity` hint with the exact count
+`modusbrain doctor` surfaces a `link_resolution_opportunity` hint with the exact count
 ("47 of 60 bare wikilinks would resolve") so you know whether it's worth enabling
 before you flip it. When a bare name matches more than one page (`[[struktura]]` →
-both `projects/struktura` and `archive/struktura`), GBrain emits one edge to each
+both `projects/struktura` and `archive/struktura`), ModusBrain emits one edge to each
 rather than guessing a winner — review and prune the duplicates with
-`gbrain graph-query <slug>`. The mode is also honored on the filesystem-walk path
-(`gbrain extract links` with no `--source db`) and by auto-link on every future
+`modusbrain graph-query <slug>`. The mode is also honored on the filesystem-walk path
+(`modusbrain extract links` with no `--source db`) and by auto-link on every future
 `put_page`.
 
 ## Step 5: Load Skills
@@ -1181,17 +1181,17 @@ scaffold the bundled skills into it:
 
 ```bash
 cd /path/to/agent/workspace
-gbrain skillpack scaffold --all       # copy 43 curated skills + RESOLVER.md
+modusbrain skillpack scaffold --all       # copy 43 curated skills + RESOLVER.md
 ```
 
 Scaffolded skills are first-class files in your repo. Edit freely; re-running scaffold
-refuses to overwrite anything that exists. Use `gbrain skillpack reference <name>` to
-diff against gbrain's bundle when you want upstream improvements. (The legacy
-`gbrain skillpack install` managed-block model was retired in v0.36.0.0 — run
-`gbrain skillpack migrate-fence` once if upgrading from an older release.)
+refuses to overwrite anything that exists. Use `modusbrain skillpack reference <name>` to
+diff against modusbrain's bundle when you want upstream improvements. (The legacy
+`modusbrain skillpack install` managed-block model was retired in v0.36.0.0 — run
+`modusbrain skillpack migrate-fence` once if upgrading from an older release.)
 
 Whether you scaffolded or not, read `skills/RESOLVER.md` (in your workspace, or the
-bundled copy at `~/gbrain/skills/RESOLVER.md` when running from the cloned repo). It's
+bundled copy at `~/modusbrain/skills/RESOLVER.md` when running from the cloned repo). It's
 the skill dispatcher — tells you which skill to read for any task. Save this to your
 memory permanently.
 
@@ -1222,29 +1222,29 @@ If skipped, minimal defaults are installed automatically.
 ## Step 7: Recurring Jobs
 
 Set up using your platform's scheduler (OpenClaw cron, Railway cron, crontab), or skip the
-platform glue entirely with `gbrain autopilot --install` (built-in self-maintaining daemon):
+platform glue entirely with `modusbrain autopilot --install` (built-in self-maintaining daemon):
 
-- **Live sync** (every 15 min): `gbrain sync --repo ~/brain && gbrain embed --stale`
-  — or `gbrain sync --watch` for a continuous loop.
-- **Auto-update** (daily): `gbrain check-update --json` (tell user, never auto-install).
-- **Dream cycle** (nightly): `gbrain dream` runs the 8-phase overnight maintenance cycle.
+- **Live sync** (every 15 min): `modusbrain sync --repo ~/brain && modusbrain embed --stale`
+  — or `modusbrain sync --watch` for a continuous loop.
+- **Auto-update** (daily): `modusbrain check-update --json` (tell user, never auto-install).
+- **Dream cycle** (nightly): `modusbrain dream` runs the 8-phase overnight maintenance cycle.
   Entity sweep, citation fixes, memory consolidation, plus (v0.23+) overnight conversation
   synthesis and cross-session pattern detection. One cron-friendly command. This is what
   makes the brain compound. Do not skip it. See `docs/guides/cron-schedule.md` for the
   full protocol.
-- **Weekly**: `gbrain doctor --json && gbrain embed --stale`
+- **Weekly**: `modusbrain doctor --json && modusbrain embed --stale`
 
 ## Step 8: Integrations
 
-Run `gbrain integrations list`. Each recipe in `~/gbrain/recipes/` is a self-contained
+Run `modusbrain integrations list`. Each recipe in `~/modusbrain/recipes/` is a self-contained
 installer. It tells you what credentials to ask for, how to validate, and what cron
 to register. Ask the user which integrations they want (email, calendar, voice, Twitter).
 
-Verify: `gbrain integrations doctor` (after at least one is configured)
+Verify: `modusbrain integrations doctor` (after at least one is configured)
 
 ## Step 9: Verify
 
-Read `docs/GBRAIN_VERIFY.md` and run all 7 verification checks. Check #4 (live sync
+Read `docs/MODUSBRAIN_VERIFY.md` and run all 7 verification checks. Check #4 (live sync
 actually works) is the most important.
 
 ## Upgrade
@@ -1252,61 +1252,61 @@ actually works) is the most important.
 If you installed via `bun install -g`:
 
 ```bash
-gbrain upgrade                        # self-updates the binary, runs schema migrations,
+modusbrain upgrade                        # self-updates the binary, runs schema migrations,
                                       # and prints post-upgrade notes for the version range
 ```
 
 If you installed via `git clone + bun link`:
 
 ```bash
-cd ~/gbrain && git pull origin master && bun install
-gbrain apply-migrations --yes         # apply schema migrations (idempotent)
-gbrain post-upgrade                   # show migration notes for the version range
+cd ~/modusbrain && git pull origin master && bun install
+modusbrain apply-migrations --yes         # apply schema migrations (idempotent)
+modusbrain post-upgrade                   # show migration notes for the version range
 ```
 
-Then read `~/gbrain/skills/migrations/v<NEW_VERSION>.md` (and any intermediate
+Then read `~/modusbrain/skills/migrations/v<NEW_VERSION>.md` (and any intermediate
 versions you skipped) and run any backfill or verification steps it lists. Skipping
 this is how features ship in the binary but stay dormant in the user's brain.
 
 **v0.32.3 search modes (one-time upgrade prompt):** if the user's brain was
-created before v0.32.3, `gbrain post-upgrade` prints a banner including the
+created before v0.32.3, `modusbrain post-upgrade` prints a banner including the
 9-cell cost matrix (mode × downstream model) preceded by `[AGENT]` markers.
 **Do NOT silently move past the banner.** Present the matrix to the operator
 verbatim, ask which mode they want (recommended default: `tokenmax` to preserve
-v0.31.x retrieval shape), then run `gbrain config set search.mode <mode>`. See
+v0.31.x retrieval shape), then run `modusbrain config set search.mode <mode>`. See
 Step 3.5 above for the full ask-the-user protocol — the upgrade path uses the
 same matrix and same default.
 
 For v0.12.0+ specifically: if your brain was created before v0.12.0, run
-`gbrain extract links --source db && gbrain extract timeline --source db` to
+`modusbrain extract links --source db && modusbrain extract timeline --source db` to
 backfill the new graph layer (see Step 4.5 above).
 
 For v0.12.2+ specifically: if your brain is Postgres- or Supabase-backed and
-predates v0.12.2, the `v0_12_2` migration runs `gbrain repair-jsonb`
-automatically during `gbrain post-upgrade` to fix the double-encoded JSONB
+predates v0.12.2, the `v0_12_2` migration runs `modusbrain repair-jsonb`
+automatically during `modusbrain post-upgrade` to fix the double-encoded JSONB
 columns. PGLite brains no-op. If wiki-style imports were truncated by the old
-`splitBody` bug, run `gbrain sync --full` after upgrading to rebuild
+`splitBody` bug, run `modusbrain sync --full` after upgrading to rebuild
 `compiled_truth` from source markdown.
 
 ## v0.42.0+ onboard surface (NEW)
 
-`gbrain onboard` is the activation surface gbrain did not have before.
-Once your brain has any content, run `gbrain onboard --check --json` to
+`modusbrain onboard` is the activation surface modusbrain did not have before.
+Once your brain has any content, run `modusbrain onboard --check --json` to
 see structured recommendations across 5 brain-health axes (orphans,
 stale embeddings, entity link coverage, timeline coverage, takes count).
 
-**On first connect (after `gbrain init`):**
+**On first connect (after `modusbrain init`):**
 ```bash
-gbrain onboard --check --json
+modusbrain onboard --check --json
 ```
 The JSON envelope (`schema_version: 1`) carries `recommendations[]` with
 `apply_policy` per item: `auto_apply` (safe to run unattended),
 `prompt_required` (needs explicit user consent), or `manual_only`
 (LLM-bearing, user must run themselves).
 
-**After every `gbrain upgrade`:**
+**After every `modusbrain upgrade`:**
 ```bash
-gbrain onboard --check --json
+modusbrain onboard --check --json
 ```
 New versions may surface new opportunities. The post-upgrade banner
 nudges the user when it runs, but agents should re-probe as a hygiene
@@ -1314,7 +1314,7 @@ step regardless.
 
 **Unattended remediation (cron / autopilot):**
 ```bash
-gbrain onboard --auto --max-usd 5
+modusbrain onboard --auto --max-usd 5
 ```
 Refuses without `--max-usd N`. Runs auto-eligible items only. The
 autopilot daemon also consults onboard recommendations on its tick — no
@@ -1330,7 +1330,7 @@ scope — admin alone is insufficient. The MCP op returns
 grants.
 
 **Privacy + consent gates:**
-- `gbrain takes extract --from-pages` sends concept/atom/lore/briefing/
+- `modusbrain takes extract --from-pages` sends concept/atom/lore/briefing/
   writing/originals page content to your configured chat model (default
   Anthropic Haiku). Refuses to run unless `takes.bootstrap_enabled=true`
   is set in config AND `--yes` is passed. Two-gate opt-in by design.
@@ -1339,7 +1339,7 @@ grants.
 
 **Suppress nudges in CI / scripted environments:**
 ```bash
-export GBRAIN_NO_ONBOARD_NUDGE=1
+export MODUSBRAIN_NO_ONBOARD_NUDGE=1
 ```
 Init + upgrade banners auto-skip in non-TTY too.
 
@@ -1347,9 +1347,9 @@ Init + upgrade banners auto-skip in non-TTY too.
 
 ## skills/RESOLVER.md
 
-Source: https://raw.githubusercontent.com/garrytan/gbrain/master/skills/RESOLVER.md
+Source: https://raw.githubusercontent.com/garrytan/modusbrain/master/skills/RESOLVER.md
 
-# GBrain Skill Resolver
+# ModusBrain Skill Resolver
 
 This is the dispatcher. Skills are the implementation. **Read the skill file before acting.** If two skills could match, read both. They are designed to chain (e.g., ingest then enrich for each entity).
 
@@ -1375,8 +1375,8 @@ This is the dispatcher. Skills are the implementation. **Read the skill file bef
 | "Research", "track", "extract from email", "investor updates", "donations" | `skills/data-research/SKILL.md` |
 | Share a brain page as a link | `skills/publish/SKILL.md` |
 | "validate frontmatter", "check frontmatter", "fix frontmatter", "frontmatter audit", "brain lint" | `skills/frontmatter-guard/SKILL.md` |
-| "what search mode", "is my cache hot", "tune my retrieval", "compare search modes", "clear search overrides" | `gbrain search modes/stats/tune` directly. See `skills/conventions/search-modes.md` |
-| "eval results", "search benchmark", "haters-immune methodology", "regression check on retrieval" | `gbrain eval run-all` / `gbrain eval compare`. See `docs/eval/SEARCH_MODE_METHODOLOGY.md` |
+| "what search mode", "is my cache hot", "tune my retrieval", "compare search modes", "clear search overrides" | `modusbrain search modes/stats/tune` directly. See `skills/conventions/search-modes.md` |
+| "eval results", "search benchmark", "haters-immune methodology", "regression check on retrieval" | `modusbrain eval run-all` / `modusbrain eval compare`. See `docs/eval/SEARCH_MODE_METHODOLOGY.md` |
 
 ## Content & media ingestion
 
@@ -1408,33 +1408,33 @@ This is the dispatcher. Skills are the implementation. **Read the skill file bef
 | Morning prep, meeting context, day planning | `skills/daily-task-prep/SKILL.md` |
 | Daily briefing, "what's happening today" | `skills/briefing/SKILL.md` |
 | Cron scheduling, quiet hours, job staggering | `skills/cron-scheduler/SKILL.md` |
-| "get more out of gbrain", "is my brain set up right", "weekly brain checkup", "advise me on my brain", "gbrain advisor" | `skills/gbrain-advisor/SKILL.md` |
+| "get more out of modusbrain", "is my brain set up right", "weekly brain checkup", "advise me on my brain", "modusbrain advisor" | `skills/modusbrain-advisor/SKILL.md` |
 | Save or load reports | `skills/reports/SKILL.md` |
 | "Create a skill", "improve this skill" | `skills/skill-creator/SKILL.md` |
 | "Skillify this", "is this a skill?", "make this proper" | `skills/skillify/SKILL.md` |
 | "Compress my resolver", "AGENTS.md too large", "RESOLVER.md too big", "functional area dispatcher", "shrink routing table" | `skills/functional-area-resolver/SKILL.md` |
-| "Is gbrain healthy?", morning health check, skillpack-check | `skills/skillpack-check/SKILL.md` |
-| "harvest this skill into gbrain", "publish this skill to gbrain", "lift this skill upstream", "share this skill with other gbrain clients", "promote my skill to gbrain" | `skills/skillpack-harvest/SKILL.md` |
+| "Is modusbrain healthy?", morning health check, skillpack-check | `skills/skillpack-check/SKILL.md` |
+| "harvest this skill into modusbrain", "publish this skill to modusbrain", "lift this skill upstream", "share this skill with other modusbrain clients", "promote my skill to modusbrain" | `skills/skillpack-harvest/SKILL.md` |
 | Post-restart health + auto-fix, "did the container restart break anything", smoke test | `skills/smoke-test/SKILL.md` |
 | Cross-modal review, second opinion | `skills/cross-modal-review/SKILL.md` |
 | "Validate skills", skill health check | `skills/testing/SKILL.md` |
 | Webhook setup, external event processing | `skills/webhook-transforms/SKILL.md` |
-| "Spawn agent", "background task", "parallel tasks", "steer agent", "pause/resume agent", "gbrain jobs submit", "submit a gbrain job", "submit a shell job", "shell job" | `skills/minion-orchestrator/SKILL.md` |
+| "Spawn agent", "background task", "parallel tasks", "steer agent", "pause/resume agent", "modusbrain jobs submit", "submit a modusbrain job", "submit a shell job", "shell job" | `skills/minion-orchestrator/SKILL.md` |
 | "present options", "ask before proceeding", "choice gate", "user decision" | `skills/ask-user/SKILL.md` |
 
 ## Setup & migration
 
 | Trigger | Skill |
 |---------|-------|
-| "Set up GBrain", first boot | `skills/setup/SKILL.md` |
+| "Set up ModusBrain", first boot | `skills/setup/SKILL.md` |
 | "Now what?", "fill my brain", "cold start", "bootstrap", "import my data", "what should I import first" | `skills/cold-start/SKILL.md` |
 | "Migrate from Obsidian/Notion/Logseq" | `skills/migrate/SKILL.md` |
 | Brain health check, maintenance run | `skills/maintain/SKILL.md` |
 | "Extract links", "build link graph", "populate timeline" | `skills/maintain/SKILL.md` (extraction sections) |
 | "Run dream", "process today's session", "synthesize my conversations", "consolidate yesterday's conversations", "what patterns did you see", "did the dream cycle run" | `skills/maintain/SKILL.md` (dream cycle section) |
-| "Brain health", "what features am I missing", "brain score" | Run `gbrain features --json` |
-| "Set up autopilot", "run brain maintenance", "keep brain updated" | Run `gbrain autopilot --install --repo ~/brain` |
-| "Upgrade gbrain", "update gbrain", "gbrain update available", `UPGRADE_AVAILABLE`, "is gbrain up to date" | `skills/gbrain-upgrade/SKILL.md` |
+| "Brain health", "what features am I missing", "brain score" | Run `modusbrain features --json` |
+| "Set up autopilot", "run brain maintenance", "keep brain updated" | Run `modusbrain autopilot --install --repo ~/brain` |
+| "Upgrade modusbrain", "update modusbrain", "modusbrain update available", `UPGRADE_AVAILABLE`, "is modusbrain up to date" | `skills/modusbrain-upgrade/SKILL.md` |
 | Agent identity, "who am I", customize agent | `skills/soul-audit/SKILL.md` |
 | "Populate links", "extract links", "backfill graph" | `skills/maintain/SKILL.md` (graph population phase) |
 | "Populate timeline", "extract timeline entries" | `skills/maintain/SKILL.md` (graph population phase) |
@@ -1483,14 +1483,14 @@ These apply to ALL brain-writing skills:
 | "verify this academic claim", "check this study", "academic verify", "validate citation", "is this study real" | `skills/academic-verify/SKILL.md` |
 | "make pdf from brain", "brain pdf", "convert brain page to pdf", "publish this page as pdf", "export brain page" | `skills/brain-pdf/SKILL.md` |
 | "voice note", "ingest this voice memo", "transcribe and file", "voice note ingest", "save this audio note" | `skills/voice-note-ingest/SKILL.md` |
-| "add a page type", "add a type to my schema", "schema author", "schema mutate", "schema pack add", "my brain has untyped pages", "propose new types from my corpus", "backfill page types", "evolve my schema", "researcher type", "make X an expert type" (dispatcher for: gbrain schema active/list/show/validate/graph/lint/stats/explain/use/downgrade/reload/init/fork/edit/diff/add-type/remove-type/update-type/add-alias/remove-alias/add-prefix/remove-prefix/add-link-type/remove-link-type/set-extractable/set-expert-routing/detect/suggest/review-candidates/review-orphans/sync) | `skills/schema-author/SKILL.md` |
-| "unify my types", "migrate to gbrain-base-v2", "94 types to 14", "apply canonical taxonomy", "clean up my page types", "pack upgrade", "shrink type proliferation", "consolidate page types", "retype pages to canonical" (dispatcher for: gbrain onboard --check, gbrain onboard --check --explain, gbrain jobs submit unify-types, gbrain pages restore) | `skills/schema-unify/SKILL.md` |
+| "add a page type", "add a type to my schema", "schema author", "schema mutate", "schema pack add", "my brain has untyped pages", "propose new types from my corpus", "backfill page types", "evolve my schema", "researcher type", "make X an expert type" (dispatcher for: modusbrain schema active/list/show/validate/graph/lint/stats/explain/use/downgrade/reload/init/fork/edit/diff/add-type/remove-type/update-type/add-alias/remove-alias/add-prefix/remove-prefix/add-link-type/remove-link-type/set-extractable/set-expert-routing/detect/suggest/review-candidates/review-orphans/sync) | `skills/schema-author/SKILL.md` |
+| "unify my types", "migrate to gbrain-base-v2", "94 types to 14", "apply canonical taxonomy", "clean up my page types", "pack upgrade", "shrink type proliferation", "consolidate page types", "retype pages to canonical" (dispatcher for: modusbrain onboard --check, modusbrain onboard --check --explain, modusbrain jobs submit unify-types, modusbrain pages restore) | `skills/schema-unify/SKILL.md` |
 
 ---
 
 ## README.md
 
-Source: https://raw.githubusercontent.com/garrytan/gbrain/master/README.md
+Source: https://raw.githubusercontent.com/garrytan/modusbrain/master/README.md
 
 # ModusBrain
 
@@ -1498,7 +1498,7 @@ Source: https://raw.githubusercontent.com/garrytan/gbrain/master/README.md
 
 ModusBrain compiles scattered company knowledge — policies, runbooks, wikis, tickets — into **versioned operational skills** with confidence gating, human approval workflows, conflict queues, and full action audit trails. Agents execute against approved skills, not fresh chat hallucinations.
 
-> Built on the open-source [GBrain](https://github.com/garrytan/gbrain) engine (MIT License). GBrain handles retrieval, graph, and freshness; ModusBrain adds the safe-execution layer for autonomous company operations.
+> Built on the open-source [ModusBrain](https://github.com/garrytan/gbrain) engine (MIT License). ModusBrain handles retrieval, graph, and freshness; ModusBrain adds the safe-execution layer for autonomous company operations.
 
 **Domain:** [modusbrain.com](https://modusbrain.com) · **Launch playbook:** [MODUSBRAIN_LAUNCH.md](./MODUSBRAIN_LAUNCH.md) · **Technical guide:** [company-brain-rfs-analysis.md](./company-brain-rfs-analysis.md)
 
@@ -1525,7 +1525,7 @@ modusbrain opskill execute refund-handling \
 modusbrain opskill audit --json
 ```
 
-The legacy `gbrain` CLI alias still works during migration.
+The legacy `modusbrain` CLI alias still works during migration.
 
 ---
 
@@ -1539,7 +1539,7 @@ The legacy `gbrain` CLI alias still works during migration.
 | **4. Audit** | Log every agent action: skill, version, confidence, result |
 | **5. Feedback** | Human corrections → evidence → auto re-compile |
 
-Full GBrain capabilities (hybrid search, synthesis, graph, dream cycle, MCP) remain available under the hood.
+Full ModusBrain capabilities (hybrid search, synthesis, graph, dream cycle, MCP) remain available under the hood.
 
 ---
 
@@ -1564,9 +1564,9 @@ Run `modusbrain --help` for the full command list. Deep engine docs: [`llms.txt`
 
 | Setting | Value |
 |---|---|
-| Config dir | `~/.modusbrain` (falls back to `~/.gbrain` if present) |
-| Env vars | `MODUSBRAIN_*` preferred; `GBRAIN_*` legacy alias still honored |
-| Source dotfile | `.modusbrain-source` (legacy `.gbrain-source` still read) |
+| Config dir | `~/.modusbrain` (falls back to `~/.modusbrain` if present) |
+| Env vars | `MODUSBRAIN_*` preferred; `MODUSBRAIN_*` legacy alias still honored |
+| Source dotfile | `.modusbrain-source` (legacy `.modusbrain-source` still read) |
 | Branding module | `src/core/branding.ts` (single source of truth) |
 
 ---
@@ -1583,7 +1583,7 @@ MCP operations for operational skills: `compile_operational_skill`, `execute_ope
 
 ## Attribution
 
-ModusBrain extends [GBrain](https://github.com/garrytan/gbrain) (MIT License). See [LICENSE](./LICENSE) and [NOTICE](./NOTICE).
+ModusBrain extends [ModusBrain](https://github.com/garrytan/gbrain) (MIT License). See [LICENSE](./LICENSE) and [NOTICE](./NOTICE).
 
 ---
 
@@ -1602,13 +1602,13 @@ bun run src/cli.ts opskill --help
 
 ## docs/ENGINES.md
 
-Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/ENGINES.md
+Source: https://raw.githubusercontent.com/garrytan/modusbrain/master/docs/ENGINES.md
 
 # Pluggable Engine Architecture
 
 ## The idea
 
-Every GBrain operation goes through `BrainEngine`. The engine is the contract between "what the brain can do" and "how it's stored." Swap the engine, keep everything else.
+Every ModusBrain operation goes through `BrainEngine`. The engine is the contract between "what the brain can do" and "how it's stored." Swap the engine, keep everything else.
 
 v0 shipped `PostgresEngine` backed by Supabase. v0.7 adds `PGLiteEngine` -- embedded Postgres 17.5 via WASM (@electric-sql/pglite), zero-config default. The interface is designed so a `DuckDBEngine`, `TursoEngine`, or any custom backend could slot in without touching the CLI, MCP server, skills, or any consumer code.
 
@@ -1625,7 +1625,7 @@ Different users have different constraints:
 | Researcher | Analytics, bulk exports, embeddings | DuckDBEngine (someday) |
 | Edge/mobile | Offline-first, sync later | PGLiteEngine + sync (someday) |
 
-The engine interface means we don't have to choose. PGLite is the zero-friction default. Supabase is the production scale path. `gbrain migrate --to supabase/pglite` moves between them.
+The engine interface means we don't have to choose. PGLite is the zero-friction default. Supabase is the production scale path. `modusbrain migrate --to supabase/pglite` moves between them.
 
 ## The interface
 
@@ -1764,7 +1764,7 @@ RRF fusion, multi-query expansion, and 4-layer dedup are engine-agnostic. They o
 - Uses `pglite-schema.ts` for DDL (pgvector extension, pg_trgm, triggers, indexes)
 - Parameterized queries throughout (shared utilities in `src/core/utils.ts`)
 - `hybridSearch` keyword-only fallback when `OPENAI_API_KEY` is not set
-- Data stored at `~/.gbrain/brain.db` (configurable)
+- Data stored at `~/.modusbrain/brain.db` (configurable)
 - pgvector HNSW index for cosine similarity vector search (same as Postgres)
 - tsvector + ts_rank for full-text search (same as Postgres)
 - pg_trgm for fuzzy slug resolution (same as Postgres)
@@ -1773,14 +1773,14 @@ RRF fusion, multi-query expansion, and 4-layer dedup are engine-agnostic. They o
 
 | Factor | PGLite | PostgresEngine + Supabase |
 |--------|--------|--------------------------|
-| Setup | `gbrain init` (zero-config) | Account + connection string |
+| Setup | `modusbrain init` (zero-config) | Account + connection string |
 | Scale | Good for < 1,000 files | Production-proven at 10K+ |
 | Multi-device | Single machine only | Any device via remote MCP |
 | Cost | Free | Supabase Pro ($25/mo) |
 | Concurrency | Single process | Connection pooling |
 | Backups | Manual (file copy) | Managed by Supabase |
 
-**Migration:** `gbrain migrate --to supabase` exports everything (pages, chunks, embeddings, links, tags, timeline) and imports into Supabase. `gbrain migrate --to pglite` goes the other direction. Bidirectional, lossless.
+**Migration:** `modusbrain migrate --to supabase` exports everything (pages, chunks, embeddings, links, tags, timeline) and imports into Supabase. `modusbrain migrate --to pglite` goes the other direction. Bidirectional, lossless.
 
 ## JSONB writes: never double-encode (the #2339 trap)
 
@@ -1830,7 +1830,7 @@ and assert `jsonb_typeof` — the assertion PGLite cannot make.
    }
    ```
    The factory uses dynamic imports so engines are only loaded when selected.
-3. Store engine type in `~/.gbrain/config.json`: `{ "engine": "myengine", ... }`
+3. Store engine type in `~/.modusbrain/config.json`: `{ "engine": "myengine", ... }`
 4. Add tests. The test suite should be engine-agnostic where possible... same test cases, different engine constructor.
 5. Document in this file + add a design doc in `docs/`
 
@@ -1876,17 +1876,17 @@ Note: The original SQLite engine plan (`docs/SQLITE_ENGINE.md`) was superseded b
 
 ## docs/what-schemas-unlock.md
 
-Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/what-schemas-unlock.md
+Source: https://raw.githubusercontent.com/garrytan/modusbrain/master/docs/what-schemas-unlock.md
 
 # What schemas unlock
 
 Most note-taking apps treat every page the same. You write something, it goes in a pile, you search the pile with text matching. Tags help, but tags are flat. After a few thousand pages, the pile gets noisy and the search gets stupid.
 
-Schemas are how gbrain stops being a pile of notes and becomes something with structure. A schema declares what KINDS of things live in your brain (`person`, `company`, `meeting`, `researcher`, `case`, `lab-result`), what they link to (`attended`, `authored`, `prescribed-by`), what facts the system should extract automatically (`mrr=50000`, `damages=5000000`), and which types route through expert search vs general search.
+Schemas are how modusbrain stops being a pile of notes and becomes something with structure. A schema declares what KINDS of things live in your brain (`person`, `company`, `meeting`, `researcher`, `case`, `lab-result`), what they link to (`attended`, `authored`, `prescribed-by`), what facts the system should extract automatically (`mrr=50000`, `damages=5000000`), and which types route through expert search vs general search.
 
 The default schema (`gbrain-base`) ships with 22 page types covering the universal shapes — people, companies, meetings, notes, daily, calendar events. That's enough to start. But your brain is yours, and your brain's shape is not the default shape. A research brain needs `researcher` and `paper` as first-class types. A founder brain needs `lead`, `investor`, `portco`, `deal-stage`. A lawyer brain needs `case`, `motion`, `deposition`, `precedent`. Same engine, totally different shape.
 
-v0.40.7.0 made it possible for AGENTS to author that shape for you. Not just "the user manually edits YAML in `~/.gbrain/schema-packs/mine/pack.yaml`" but "your agent sees the corpus, proposes a type, asks for approval, applies it atomically with a full audit trail, then backfills 4000 existing pages with one chunked SQL command." That's the new thing.
+v0.40.7.0 made it possible for AGENTS to author that shape for you. Not just "the user manually edits YAML in `~/.modusbrain/schema-packs/mine/pack.yaml`" but "your agent sees the corpus, proposes a type, asks for approval, applies it atomically with a full audit trail, then backfills 4000 existing pages with one chunked SQL command." That's the new thing.
 
 This doc is the WHY. The [tutorial](schema-author-tutorial.md) is the HOW.
 
@@ -1897,7 +1897,7 @@ This doc is the WHY. The [tutorial](schema-author-tutorial.md) is the HOW.
 You have 4000 markdown files under `meetings/` going back two years. The default schema doesn't have a `meeting` type, so all 4000 are typed `note` (the catchall). When you run:
 
 ```bash
-gbrain whoknows "Q3 roadmap discussion"
+modusbrain whoknows "Q3 roadmap discussion"
 ```
 
 You get the top 10 text matches, ranked by raw relevance. The brain has no idea these are meetings. It can't route to attendees. It can't pull dates. It can't surface "this conversation came up again with the same people three weeks later."
@@ -1905,14 +1905,14 @@ You get the top 10 text matches, ranked by raw relevance. The brain has no idea 
 Add a `meeting` type:
 
 ```bash
-gbrain schema add-type meeting --primitive temporal --prefix meetings/ --extractable
-gbrain schema sync --apply
+modusbrain schema add-type meeting --primitive temporal --prefix meetings/ --extractable
+modusbrain schema sync --apply
 ```
 
 The sync backfills `page.type = 'meeting'` on all 4000 pages in 1000-row batches. Now:
 
-- `gbrain whoknows "Q3 roadmap discussion"` routes through the meeting type, ranking by `expert_routing` signal (attendees, recency, salience) instead of raw text.
-- `gbrain extract-facts` runs on every meeting page automatically (because `extractable: true`), pulling typed facts like `attended_by=alice-example`, `date=2026-05-23`.
+- `modusbrain whoknows "Q3 roadmap discussion"` routes through the meeting type, ranking by `expert_routing` signal (attendees, recency, salience) instead of raw text.
+- `modusbrain extract-facts` runs on every meeting page automatically (because `extractable: true`), pulling typed facts like `attended_by=alice-example`, `date=2026-05-23`.
 - The downstream `think` skill can now answer "what did we decide about pricing in the last three roadmap meetings" by querying the meeting graph instead of grep'ing 4000 files.
 
 One command. 4000 pages went from invisible to queryable. The content didn't change. The structure did.
@@ -1924,25 +1924,25 @@ You're a founder or investor with ~500 markdown files mixing leads, portfolio co
 Add the founder shape:
 
 ```bash
-gbrain schema fork gbrain-base mine
-gbrain schema use mine
+modusbrain schema fork gbrain-base mine
+modusbrain schema use mine
 
 # Types
-gbrain schema add-type lead       --primitive entity --prefix people/leads/         --expert
-gbrain schema add-type investor   --primitive entity --prefix people/investors/     --expert --extractable
-gbrain schema add-type portco     --primitive entity --prefix companies/portco/     --expert --extractable
-gbrain schema add-type deal       --primitive entity --prefix companies/deals/      --extractable
+modusbrain schema add-type lead       --primitive entity --prefix people/leads/         --expert
+modusbrain schema add-type investor   --primitive entity --prefix people/investors/     --expert --extractable
+modusbrain schema add-type portco     --primitive entity --prefix companies/portco/     --expert --extractable
+modusbrain schema add-type deal       --primitive entity --prefix companies/deals/      --extractable
 
 # Link verbs
-gbrain schema add-link-type invested-in --page-type investor --target-type portco
-gbrain schema add-link-type intro-from  --page-type lead     --target-type lead
-gbrain schema add-link-type passed-on   --page-type investor --target-type deal
-gbrain schema add-link-type led-by      --page-type deal     --target-type investor
+modusbrain schema add-link-type invested-in --page-type investor --target-type portco
+modusbrain schema add-link-type intro-from  --page-type lead     --target-type lead
+modusbrain schema add-link-type passed-on   --page-type investor --target-type deal
+modusbrain schema add-link-type led-by      --page-type deal     --target-type investor
 
-gbrain schema sync --apply
+modusbrain schema sync --apply
 ```
 
-Now `gbrain whoknows "Series A SaaS"` routes through `investor` and `portco` types specifically, not the noisy general type set. `gbrain graph-query alice-example --type intro-from --depth 2` walks two hops of intros to surface "Alice introduced you to Bob who introduced you to Charlie." `gbrain extract-facts` starts producing typed claims from the fence in your deal pages: `(deals/acme-seed, raise=2000000, valuation=15000000, lead=widget-vc, closed_at=2026-05-23)`.
+Now `modusbrain whoknows "Series A SaaS"` routes through `investor` and `portco` types specifically, not the noisy general type set. `modusbrain graph-query alice-example --type intro-from --depth 2` walks two hops of intros to surface "Alice introduced you to Bob who introduced you to Charlie." `modusbrain extract-facts` starts producing typed claims from the fence in your deal pages: `(deals/acme-seed, raise=2000000, valuation=15000000, lead=widget-vc, closed_at=2026-05-23)`.
 
 The CRM you've been promising yourself you'll set up next quarter? You just shipped it in 4 commands. It's downstream of your notes, not parallel to them.
 
@@ -1951,33 +1951,33 @@ The CRM you've been promising yourself you'll set up next quarter? You just ship
 Replace "founder" with "PhD student" and the same pattern applies with different types: `researcher`, `paper`, `lab`, `grant`, `dataset` + `authored`, `cites`, `funded-by`, `uses-dataset`.
 
 ```bash
-gbrain schema add-type paper --primitive annotation --prefix research/papers/ --extractable
-gbrain schema add-link-type authored   --page-type researcher --target-type paper
-gbrain schema add-link-type cites      --page-type paper      --target-type paper
-gbrain schema add-link-type uses       --page-type paper      --target-type dataset
+modusbrain schema add-type paper --primitive annotation --prefix research/papers/ --extractable
+modusbrain schema add-link-type authored   --page-type researcher --target-type paper
+modusbrain schema add-link-type cites      --page-type paper      --target-type paper
+modusbrain schema add-link-type uses       --page-type paper      --target-type dataset
 ```
 
-Suddenly "show me papers that cite this work AND use the same dataset" is a `gbrain graph-query` traversal, not 30 minutes in Google Scholar. The fact extraction picks up `arxiv_id=2402.04253`, `cited_by_count=140`, `published_date=2026-02-15` automatically. Your reading-list-as-markdown turns into a queryable research graph that knows who works on what and what's connected to what.
+Suddenly "show me papers that cite this work AND use the same dataset" is a `modusbrain graph-query` traversal, not 30 minutes in Google Scholar. The fact extraction picks up `arxiv_id=2402.04253`, `cited_by_count=140`, `published_date=2026-02-15` automatically. Your reading-list-as-markdown turns into a queryable research graph that knows who works on what and what's connected to what.
 
 ### 4. The legal brain (or any domain where claims have numbers)
 
 Lawyers, medical providers, accountants, anyone working in a domain where the meaning of a number depends on its type. A "judgment of $5M" against a "$2M case strategy threshold" is a comparison the brain can do — but only if both numbers are typed.
 
 ```bash
-gbrain schema add-type case --primitive entity --prefix legal/cases/ --extractable --expert
-gbrain schema add-type motion --primitive annotation --prefix legal/motions/ --extractable
-gbrain schema add-type deposition --primitive annotation --prefix legal/depositions/ --extractable
-gbrain schema add-link-type filed-in --page-type motion --target-type case
-gbrain schema add-link-type cites    --page-type motion --target-type precedent
+modusbrain schema add-type case --primitive entity --prefix legal/cases/ --extractable --expert
+modusbrain schema add-type motion --primitive annotation --prefix legal/motions/ --extractable
+modusbrain schema add-type deposition --primitive annotation --prefix legal/depositions/ --extractable
+modusbrain schema add-link-type filed-in --page-type motion --target-type case
+modusbrain schema add-link-type cites    --page-type motion --target-type precedent
 ```
 
-Now `## Facts` fences in your case notes can carry typed claims (`damages=5000000`, `filed_date=2026-05-23`, `judge=jane-doe`) that gbrain stores as first-class columns. `gbrain eval trajectory legal/cases/acme-v-widget` prints the case history with regressions flagged. `gbrain founder scorecard` (renamed for legal: roll up plaintiff success rate, average damages, settlement-vs-trial ratio) gives you a structured view of how your practice is performing.
+Now `## Facts` fences in your case notes can carry typed claims (`damages=5000000`, `filed_date=2026-05-23`, `judge=jane-doe`) that modusbrain stores as first-class columns. `modusbrain eval trajectory legal/cases/acme-v-widget` prints the case history with regressions flagged. `modusbrain founder scorecard` (renamed for legal: roll up plaintiff success rate, average damages, settlement-vs-trial ratio) gives you a structured view of how your practice is performing.
 
-This isn't possible without typed page kinds. You can write the same prose in any note-taking app. Only gbrain treats the numbers as comparable across pages of the same type.
+This isn't possible without typed page kinds. You can write the same prose in any note-taking app. Only modusbrain treats the numbers as comparable across pages of the same type.
 
 ### 5. The team brain
 
-`gbrain mounts add` lets you stack additional brains alongside your personal one. Each mounted brain has its OWN schema pack. The eng team's brain has `incident`, `runbook`, `service`, `oncall-rotation`. The design team's brain has `component`, `experiment`, `ab-test`, `figma-link`. The legal team's brain has cases and depositions.
+`modusbrain mounts add` lets you stack additional brains alongside your personal one. Each mounted brain has its OWN schema pack. The eng team's brain has `incident`, `runbook`, `service`, `oncall-rotation`. The design team's brain has `component`, `experiment`, `ab-test`, `figma-link`. The legal team's brain has cases and depositions.
 
 When you query, the schema pack governs how each source's content is routed. An eng query against the mounted eng brain knows that `incidents/2026-05-23-db-outage.md` is an `incident` page with `severity=p0`, `mttr=47min`, `on_call=alice-example` — extractable typed facts. Your personal query against the same brain still works, but the routing is sharper because the eng team has invested in their ontology.
 
@@ -1987,7 +1987,7 @@ The schema is the team's tribal knowledge made explicit. Two engineers on differ
 
 This is what v0.40.7.0 actually enabled, and what the closed PR #1321 was reaching for.
 
-Your OpenClaw (or any agent connected to your brain over HTTPS MCP with admin scope) watches your ingestion stream. After a week of you dumping notes under `garrytan/companies/yc-w24/`, the agent runs `gbrain schema detect` periodically, sees that prefix accumulating, and proposes:
+Your OpenClaw (or any agent connected to your brain over HTTPS MCP with admin scope) watches your ingestion stream. After a week of you dumping notes under `garrytan/companies/yc-w24/`, the agent runs `modusbrain schema detect` periodically, sees that prefix accumulating, and proposes:
 
 > You have 47 pages under `companies/yc-w24/` typed as `company` (generic). They share a structural pattern (founder names, raise amounts, batch tag). Should I add a `yc-w24-company` type with `extractable: true` and the existing aliases pointing back to `company`? I'd backfill the 47 pages and add `cohort=W24` as a typed fact extracted from each page.
 
@@ -2013,21 +2013,21 @@ The brain learns. The agent is the curator. You approve, the agent does the work
 
 If you want to FEEL the difference without buying the pitch:
 
-Pick a real corpus you have. Run `gbrain whoknows` on a topic that should match. Note the top-3 results.
+Pick a real corpus you have. Run `modusbrain whoknows` on a topic that should match. Note the top-3 results.
 
-Then run `gbrain schema review-orphans --limit 50 --json` and look at the untyped pages. If 10+ of them share an obvious prefix that should be a real type, add the type + sync.
+Then run `modusbrain schema review-orphans --limit 50 --json` and look at the untyped pages. If 10+ of them share an obvious prefix that should be a real type, add the type + sync.
 
 Re-run the same `whoknows` query. Top-3 should shift, because the new type is now routing through expert ranking instead of being lumped into the catchall. The numerical delta IS the win. You can run a tutorial in 5 minutes; this experiment proves it matters on your actual content.
 
 ## Why this matters
 
-Three things gbrain does that generic note systems can't:
+Three things modusbrain does that generic note systems can't:
 
-**1. The brain knows the difference between a person and an idea.** Page-type matters at query time. `gbrain whoknows` only considers `expert_routing: true` types. `gbrain extract-facts` only runs on `extractable: true` types. `gbrain graph-query` walks declared link verbs. None of that works on a flat tag system because tags don't have semantics — they're labels. Types are first-class citizens with rules attached.
+**1. The brain knows the difference between a person and an idea.** Page-type matters at query time. `modusbrain whoknows` only considers `expert_routing: true` types. `modusbrain extract-facts` only runs on `extractable: true` types. `modusbrain graph-query` walks declared link verbs. None of that works on a flat tag system because tags don't have semantics — they're labels. Types are first-class citizens with rules attached.
 
 **2. Untyped content is invisible content.** If your meetings are typed as `note`, expert routing skips them, facts extraction ignores them, link inference doesn't fire. They exist on disk and they're indexed for text search, but the structural surfaces (whoknows, find_experts, recall, think) treat them as second-class. Adding a type isn't cosmetic; it's structural promotion.
 
-**3. The schema is queryable AND mutable AND auditable.** You can ask the brain what its schema looks like (`gbrain schema graph`), evolve it through 14 atomic CLI verbs + 9 MCP ops with full lock + audit semantics, and recover from any mistake (every primitive has an inverse, plus `gbrain schema downgrade` restores the previous active pack). This isn't "vibes-based knowledge management." It's a production system with structural integrity guarantees.
+**3. The schema is queryable AND mutable AND auditable.** You can ask the brain what its schema looks like (`modusbrain schema graph`), evolve it through 14 atomic CLI verbs + 9 MCP ops with full lock + audit semantics, and recover from any mistake (every primitive has an inverse, plus `modusbrain schema downgrade` restores the previous active pack). This isn't "vibes-based knowledge management." It's a production system with structural integrity guarantees.
 
 ## What changed in v0.40.7.0 specifically
 
@@ -2037,10 +2037,10 @@ v0.40.7.0 closed those gaps:
 
 - **`withMutation` skeleton** wraps every primitive in 8 ordered safety steps (bundled-guard → lock → read → mutate → validate → atomic write → audit → invalidate). The pack file on disk is never partial. Two concurrent agents can't race.
 - **Per-pack `O_CREAT|O_EXCL` atomic lock** (not the TOCTOU `existsSync+writeFileSync` pattern from page-lock.ts — codex caught that during plan review). TTL refresh every 10s while a mutation runs; `--force` means "steal stale lock" not "skip locking."
-- **Privacy-redacted audit log** at `~/.gbrain/audit/schema-mutations-YYYY-Www.jsonl`. Type names sha8-hashed, prefixes truncated to first segment only. A leaked screenshot of the audit can't reveal sensitive taxonomy like `personal/oncology/` or `legal/depositions/`.
+- **Privacy-redacted audit log** at `~/.modusbrain/audit/schema-mutations-YYYY-Www.jsonl`. Type names sha8-hashed, prefixes truncated to first segment only. A leaked screenshot of the audit can't reveal sensitive taxonomy like `personal/oncology/` or `legal/depositions/`.
 - **9 new MCP ops** including the batched `schema_apply_mutations` (admin scope, NOT localOnly — your OpenClaw and any remote agent author packs over normal HTTPS MCP, with `client_id` captured as `actor: mcp:<clientId8>`).
 - **T1.5 wiring** finally completes for `whoknows` and `find_experts`: a custom `researcher` type marked `--expert` now actually surfaces in query results. Pre-v0.40.7 it silently never matched because the query path read hardcoded `['person', 'company']`.
-- **Cross-process invalidation** via stat-mtime TTL gate inside `loadActivePack`. Operator runs `gbrain schema add-type` from a terminal; the autopilot daemon picks up the new type within 1 second without a restart.
+- **Cross-process invalidation** via stat-mtime TTL gate inside `loadActivePack`. Operator runs `modusbrain schema add-type` from a terminal; the autopilot daemon picks up the new type within 1 second without a restart.
 
 The cumulative effect: an agent can safely co-curate your ontology with a complete forensic trail. That's the new thing.
 
@@ -2050,7 +2050,7 @@ The cumulative effect: an agent can safely co-curate your ontology with a comple
 - **Want the agent recipe?** Read [`skills/schema-author/SKILL.md`](../skills/schema-author/SKILL.md). 7-phase workflow agents follow when they detect a schema-evolution opportunity.
 - **Want the rules of thumb?** Read [`skills/conventions/schema-evolution.md`](../skills/conventions/schema-evolution.md). Decision tree for when to add a type vs alias vs prefix. <20 pages don't pack-codify. 100+ pages need first-class types.
 - **Want the architecture?** The "Schema Cathedral v3 (v0.40.7.0)" section in `CLAUDE.md` has the 14-bullet module-by-module breakdown, each citing the design decision and codex finding that motivated it.
-- **Want to set up an agent that co-curates your brain?** Run `gbrain auth register-client my-agent --scopes admin` to mint an OAuth client your remote agent can use to call `schema_apply_mutations` over MCP. The agent then runs detect → suggest → apply on its own cadence and asks you to approve substantive changes.
+- **Want to set up an agent that co-curates your brain?** Run `modusbrain auth register-client my-agent --scopes admin` to mint an OAuth client your remote agent can use to call `schema_apply_mutations` over MCP. The agent then runs detect → suggest → apply on its own cadence and asks you to approve substantive changes.
 
 The killer feature isn't "schemas." Personal knowledge systems have had schemas forever. The killer feature is that your AGENT can shape them safely on your behalf, with structural integrity guarantees that match what you'd expect from a database, not a notes app.
 
@@ -2060,11 +2060,11 @@ That's what we built. Try it on a corpus you actually have and the numbers go up
 
 ## docs/schema-author-tutorial.md
 
-Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/schema-author-tutorial.md
+Source: https://raw.githubusercontent.com/garrytan/modusbrain/master/docs/schema-author-tutorial.md
 
 # Tutorial: Build your first schema pack
 
-You'll fork the bundled `gbrain-base` pack, add a custom `researcher` page type, import a handful of placeholder researcher pages, backfill their `page.type` column with one command, then prove the wiring works by running `gbrain whoknows` and seeing your new type surface in results. End state: a forked-and-active pack on disk, ~5 pages typed as `researcher`, and a query that proves the pack-aware routing fires end-to-end.
+You'll fork the bundled `gbrain-base` pack, add a custom `researcher` page type, import a handful of placeholder researcher pages, backfill their `page.type` column with one command, then prove the wiring works by running `modusbrain whoknows` and seeing your new type surface in results. End state: a forked-and-active pack on disk, ~5 pages typed as `researcher`, and a query that proves the pack-aware routing fires end-to-end.
 
 **Want the WHY before the HOW?** Read [`what-schemas-unlock.md`](what-schemas-unlock.md) first — 7 concrete use cases (4000 invisible meetings, the founder ops brain, the research brain, the legal brain, the team brain, agent-as-co-curator) plus the structural argument for why types matter at query time. Then come back here for the 5-minute walkthrough.
 
@@ -2072,8 +2072,8 @@ The whole walkthrough takes about 5 minutes. You'll see something working by ste
 
 ## What you'll need
 
-- gbrain v0.40.7.0 or later (`gbrain --version` to check)
-- A brain that's been initialized (`gbrain init` already run; either PGLite or Postgres is fine)
+- modusbrain v0.40.7.0 or later (`modusbrain --version` to check)
+- A brain that's been initialized (`modusbrain init` already run; either PGLite or Postgres is fine)
 - A terminal you can paste commands into
 
 That's it. No API keys required for this tutorial — every step works against the bundled pack and local-only commands.
@@ -2081,7 +2081,7 @@ That's it. No API keys required for this tutorial — every step works against t
 ## Step 1: See what pack is active today
 
 ```bash
-gbrain schema active --json
+modusbrain schema active --json
 ```
 
 You'll see something like:
@@ -2103,29 +2103,29 @@ You'll see something like:
 ## Step 2: Fork the bundled pack
 
 ```bash
-gbrain schema fork gbrain-base mine
+modusbrain schema fork gbrain-base mine
 ```
 
-Output: `Forked 'gbrain-base' → 'mine' at ~/.gbrain/schema-packs/mine/pack.json`.
+Output: `Forked 'gbrain-base' → 'mine' at ~/.modusbrain/schema-packs/mine/pack.json`.
 
-The fork is a byte-for-byte copy of `gbrain-base` living at `~/.gbrain/schema-packs/mine/pack.json`. Now you have a writable pack you can mutate.
+The fork is a byte-for-byte copy of `gbrain-base` living at `~/.modusbrain/schema-packs/mine/pack.json`. Now you have a writable pack you can mutate.
 
 ## Step 3: Activate the fork
 
 ```bash
-gbrain schema use mine
+modusbrain schema use mine
 ```
 
 Output: `Pack: mine (json) ... Active.`
 
-Run `gbrain schema active --json` again to confirm `pack_name` is now `mine` and `source_tier` is `home-config` (read from `~/.gbrain/config.json`).
+Run `modusbrain schema active --json` again to confirm `pack_name` is now `mine` and `source_tier` is `home-config` (read from `~/.modusbrain/config.json`).
 
 **You've already accomplished something visible** — the active pack changed, and any future query will route through your fork. The next four steps add a custom type and prove it works.
 
 ## Step 4: Add a researcher type
 
 ```bash
-gbrain schema add-type researcher \
+modusbrain schema add-type researcher \
   --primitive entity \
   --prefix people/researchers/ \
   --extractable \
@@ -2137,12 +2137,12 @@ Output: `Pack: mine (json)` + `Sha8: <prev> → <new>`.
 What just happened:
 - The mutation went through `withMutation`'s 8-step skeleton: bundled-guard → per-pack lock → read → mutate → file-plane lint validation → atomic write → audit log → cache invalidation.
 - The pack now declares `researcher` as an entity primitive bound to `people/researchers/`, marked `extractable: true` (eligible for facts extraction) and `expert_routing: true` (surfaces in `whoknows` queries).
-- An audit row landed in `~/.gbrain/audit/schema-mutations-YYYY-Www.jsonl` with your type name SHA-8-redacted and the prefix's first segment only (`people`) for privacy.
+- An audit row landed in `~/.modusbrain/audit/schema-mutations-YYYY-Www.jsonl` with your type name SHA-8-redacted and the prefix's first segment only (`people`) for privacy.
 
 Verify the type is in the pack:
 
 ```bash
-gbrain schema explain researcher
+modusbrain schema explain researcher
 ```
 
 You'll see the resolved settings printed back.
@@ -2177,7 +2177,7 @@ title: Charlie Example
 RL researcher at Acme Research. Focus on inverse reinforcement learning.
 EOF
 
-gbrain sync
+modusbrain sync
 ```
 
 The sync imports the new files. They'll be stored in the database but their `type` column will still be empty — the new type was added to the pack AFTER these pages already existed (the typical real-world scenario for an agent walking into an existing brain).
@@ -2185,7 +2185,7 @@ The sync imports the new files. They'll be stored in the database but their `typ
 ## Step 6: See the gap with `stats`
 
 ```bash
-gbrain schema stats --json | jq '.aggregate, .dead_prefixes'
+modusbrain schema stats --json | jq '.aggregate, .dead_prefixes'
 ```
 
 You'll see `untyped_pages: 3` (or however many you just imported) and `dead_prefixes: []` — your new prefix has 3 matching pages, so it's not dead.
@@ -2197,7 +2197,7 @@ The 3 researcher pages are "orphaned" by type even though they live in the right
 First dry-run to see what would happen:
 
 ```bash
-gbrain schema sync --json
+modusbrain schema sync --json
 ```
 
 You'll see something like:
@@ -2223,7 +2223,7 @@ You'll see something like:
 `would_apply: 3` is what you'd touch. `sample_slugs` is the agent's drilldown signal — if those slugs look wrong, abort. They look right, so apply:
 
 ```bash
-gbrain schema sync --apply
+modusbrain schema sync --apply
 ```
 
 You'll see per-batch progress lines on stderr and a final `total_applied: 3`. The UPDATE ran in chunks of 1000 (yours fit in one chunk) and never wedged any concurrent writer.
@@ -2231,7 +2231,7 @@ You'll see per-batch progress lines on stderr and a final `total_applied: 3`. Th
 ## Step 8: Prove the wiring works
 
 ```bash
-gbrain whoknows "machine learning"
+modusbrain whoknows "machine learning"
 ```
 
 If your researcher pages contain ML-related content, they'll surface in the ranked results — even though they're typed `researcher`, not `person` or `company`.
@@ -2241,10 +2241,10 @@ If your researcher pages contain ML-related content, they'll surface in the rank
 ## What you built
 
 You now have:
-- A fork of `gbrain-base` named `mine` at `~/.gbrain/schema-packs/mine/pack.json`, active in your brain via `~/.gbrain/config.json`.
+- A fork of `gbrain-base` named `mine` at `~/.modusbrain/schema-packs/mine/pack.json`, active in your brain via `~/.modusbrain/config.json`.
 - A `researcher` page type registered in the pack with `entity` primitive, `people/researchers/` prefix, `extractable: true`, `expert_routing: true`.
-- 3 pages typed as `researcher` (backfilled from disk via `gbrain schema sync --apply`).
-- A query path that routes through the new type: `gbrain whoknows` reads the pack and includes `researcher` in its type filter.
+- 3 pages typed as `researcher` (backfilled from disk via `modusbrain schema sync --apply`).
+- A query path that routes through the new type: `modusbrain whoknows` reads the pack and includes `researcher` in its type filter.
 
 You also exercised the full mutation skeleton: bundled-pack guard, per-pack lock, validation gate, atomic write, audit log, cache invalidation. Every step was idempotent — re-running any of them is a no-op.
 
@@ -2253,17 +2253,17 @@ You also exercised the full mutation skeleton: bundled-pack guard, per-pack lock
 **Add a link verb.** A `researcher` can `author` a `paper`. To model that:
 
 ```bash
-gbrain schema add-type paper --primitive annotation --prefix research/papers/ --extractable
-gbrain schema add-link-type authored --page-type researcher --target-type paper
-gbrain schema graph
+modusbrain schema add-type paper --primitive annotation --prefix research/papers/ --extractable
+modusbrain schema add-link-type authored --page-type researcher --target-type paper
+modusbrain schema graph
 ```
 
 The graph now shows `researcher --(authored)--> paper`.
 
-**Add aliases for query closure.** If you want `gbrain query researcher` to also surface `person` rows (because researchers ARE people):
+**Add aliases for query closure.** If you want `modusbrain query researcher` to also surface `person` rows (because researchers ARE people):
 
 ```bash
-gbrain schema add-alias researcher person
+modusbrain schema add-alias researcher person
 ```
 
 Read [`skills/conventions/schema-evolution.md`](../skills/conventions/schema-evolution.md) for the decision tree on when to add types vs aliases vs prefixes. The short version: <20 pages → don't pack-codify; 20-100 → alias on existing type; 100+ → first-class type.
@@ -2271,18 +2271,18 @@ Read [`skills/conventions/schema-evolution.md`](../skills/conventions/schema-evo
 **Lint your pack before shipping.** The 11-rule lint surface (with the optional `--with-db` flag for DB-aware checks) catches dangling references, prefix collisions, and dead-corpus warnings:
 
 ```bash
-gbrain schema lint --with-db
+modusbrain schema lint --with-db
 ```
 
-**Commit your pack to source control.** If `~/.gbrain/schema-packs/mine/` is a git repo, commit `pack.json` and push. Your pack survives across machines, and the `mutation_count_anomaly` lint rule will nudge you when you hit >50 mutations in a week (the "you should be committing this" signal).
+**Commit your pack to source control.** If `~/.modusbrain/schema-packs/mine/` is a git repo, commit `pack.json` and push. Your pack survives across machines, and the `mutation_count_anomaly` lint rule will nudge you when you hit >50 mutations in a week (the "you should be committing this" signal).
 
 **For agents (MCP):** the same operations are reachable over HTTPS MCP via 9 new ops. Register an admin-scope OAuth client and `schema_apply_mutations` lets a remote agent compose multi-step refactors as one atomic batch. The batched MCP op + per-pack lock + audit log are the load-bearing primitives that make remote schema authoring safe. See [`skills/schema-author/SKILL.md`](../skills/schema-author/SKILL.md) for the agent dispatcher.
 
-**Undo a mistake.** Every mutation primitive has an inverse (`remove-type`, `remove-alias`, `remove-prefix`, `remove-link-type`, `set-extractable false`, etc.). If you fork twice and want to revert, `gbrain schema downgrade` restores the previous active pack from `~/.gbrain/schema-pack-history.jsonl`.
+**Undo a mistake.** Every mutation primitive has an inverse (`remove-type`, `remove-alias`, `remove-prefix`, `remove-link-type`, `set-extractable false`, etc.). If you fork twice and want to revert, `modusbrain schema downgrade` restores the previous active pack from `~/.modusbrain/schema-pack-history.jsonl`.
 
 ## Related docs
 
-- **Reference:** `gbrain schema --help` for the full 22-verb CLI surface; CLAUDE.md's "Schema Cathedral v3 (v0.40.7.0)" section for the module-by-module architecture.
+- **Reference:** `modusbrain schema --help` for the full 22-verb CLI surface; CLAUDE.md's "Schema Cathedral v3 (v0.40.7.0)" section for the module-by-module architecture.
 - **How-to:** [`skills/schema-author/SKILL.md`](../skills/schema-author/SKILL.md) — the agent dispatcher with the 7-phase workflow (brain → assess → propose → apply → sync → verify → commit).
 - **Explanation:** [`skills/conventions/schema-evolution.md`](../skills/conventions/schema-evolution.md) — when to add a type vs alias vs prefix.
 - **Plan + decisions:** the original design captured 21 decisions including the bundled-pack guard rationale (D6), the empty-filter fallback contract (D4), and the MCP non-localOnly trust posture (D2). Lives in `~/.claude/plans/system-instruction-you-are-working-recursive-thacker.md` (private).
@@ -2291,7 +2291,7 @@ gbrain schema lint --with-db
 
 ## docs/guides/live-sync.md
 
-Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/guides/live-sync.md
+Source: https://raw.githubusercontent.com/garrytan/modusbrain/master/docs/guides/live-sync.md
 
 # Live Sync: Keep the Index Current
 
@@ -2302,7 +2302,7 @@ Every markdown change in the brain repo is searchable within minutes, automatica
 ## What the User Gets
 
 Without this: you correct a hallucination in a brain page, but the vector DB
-keeps serving the old text because nobody ran `gbrain sync`. Stale search
+keeps serving the old text because nobody ran `modusbrain sync`. Stale search
 results erode trust. The brain becomes unreliable.
 
 With this: edits show up in search within minutes. The vector DB stays current
@@ -2312,7 +2312,7 @@ with the brain repo automatically. You never have to remember to run sync.
 
 ### Prerequisite: a reachable direct connection
 
-GBrain is tuned for the Supabase **Transaction pooler** (port 6543): it
+ModusBrain is tuned for the Supabase **Transaction pooler** (port 6543): it
 auto-disables prepared statements there and routes `engine.transaction()`
 (migrations, DDL, sync imports) to a derived **direct** connection
 (`db.<ref>.supabase.co:5432`). That direct host is IPv6-only, so on an
@@ -2320,9 +2320,9 @@ IPv4-only host, reads work but sync **silently skips most pages**. This is the
 number one cause of "sync ran but nothing happened."
 
 Fix: make the direct connection reachable over IPv4. Either set
-`GBRAIN_DIRECT_DATABASE_URL` to the **Session pooler** string (port 5432 on the
+`MODUSBRAIN_DIRECT_DATABASE_URL` to the **Session pooler** string (port 5432 on the
 `pooler.supabase.com` host, IPv4), or enable Supabase's IPv4 add-on. Verify by
-running `gbrain sync` and checking that the page count in `gbrain stats` matches
+running `modusbrain sync` and checking that the page count in `modusbrain stats` matches
 the syncable file count in the repo.
 
 ### The Primitives
@@ -2330,15 +2330,15 @@ the syncable file count in the repo.
 Always chain sync + embed:
 
 ```bash
-gbrain sync --repo /path/to/brain && gbrain embed --stale
+modusbrain sync --repo /path/to/brain && modusbrain embed --stale
 ```
 
-- `gbrain sync --repo <path>` -- one-shot incremental sync. Detects changes via
+- `modusbrain sync --repo <path>` -- one-shot incremental sync. Detects changes via
   `git diff`, imports only what changed. For small changesets (<= 100 files),
   embeddings are generated inline during import.
-- `gbrain embed --stale` -- backfill embeddings for any chunks that don't have
+- `modusbrain embed --stale` -- backfill embeddings for any chunks that don't have
   them. Safety net for large syncs (>100 files) or prior `--no-embed` runs.
-- `gbrain sync --watch --repo <path>` -- foreground polling loop, every 60s
+- `modusbrain sync --watch --repo <path>` -- foreground polling loop, every 60s
   (configurable with `--interval N`). Embeds inline for small changesets. Exits
   after 5 consecutive failures, so run under a process manager or pair with a
   cron fallback.
@@ -2348,23 +2348,23 @@ gbrain sync --repo /path/to/brain && gbrain embed --stale
 Run every 5-30 minutes. Works with any cron scheduler.
 
 ```bash
-gbrain sync --repo /data/brain && gbrain embed --stale
+modusbrain sync --repo /data/brain && modusbrain embed --stale
 ```
 
 **OpenClaw:**
 ```
-Name: gbrain-auto-sync
+Name: modusbrain-auto-sync
 Schedule: */15 * * * *
-Prompt: "Run: gbrain sync --repo /data/brain && gbrain embed --stale
+Prompt: "Run: modusbrain sync --repo /data/brain && modusbrain embed --stale
   Log the result. If sync errors mention an unreachable host or timeout,
   the direct connection isn't reachable over IPv4 (set
-  GBRAIN_DIRECT_DATABASE_URL to the Session pooler, or enable the IPv4 add-on)."
+  MODUSBRAIN_DIRECT_DATABASE_URL to the Session pooler, or enable the IPv4 add-on)."
 ```
 
 **Hermes:**
 ```
-/cron add "*/15 * * * *" "Run gbrain sync --repo /data/brain &&
-  gbrain embed --stale. Log the result." --name "gbrain-auto-sync"
+/cron add "*/15 * * * *" "Run modusbrain sync --repo /data/brain &&
+  modusbrain embed --stale. Log the result." --name "modusbrain-auto-sync"
 ```
 
 ### Approach 2: Long-Lived Watcher
@@ -2374,7 +2374,7 @@ auto-restarts on exit. Pair with a cron fallback since `--watch` exits
 on repeated failures.
 
 ```bash
-gbrain sync --watch --repo /data/brain
+modusbrain sync --watch --repo /data/brain
 ```
 
 ### Approach 3: Git Hook / Webhook
@@ -2382,7 +2382,7 @@ gbrain sync --watch --repo /data/brain
 Triggers sync on push events for instant sync (<5s).
 
 - **GitHub webhook:** Set up the webhook to call
-  `gbrain sync --repo /data/brain && gbrain embed --stale`.
+  `modusbrain sync --repo /data/brain && modusbrain embed --stale`.
   Verify `X-Hub-Signature-256` against a shared secret.
 - **Git post-receive hook:** If the brain repo is on the same machine.
 
@@ -2400,8 +2400,8 @@ hashes match. If both a cron and `--watch` fire simultaneously, no conflict.
 
 ## Tricky Spots
 
-1. **Always chain sync + embed.** Running `gbrain sync` without
-   `gbrain embed --stale` leaves new chunks without embeddings. They exist
+1. **Always chain sync + embed.** Running `modusbrain sync` without
+   `modusbrain embed --stale` leaves new chunks without embeddings. They exist
    in the database but are invisible to vector search. Always run both
    commands together. The `&&` ensures embed only runs if sync succeeds.
 
@@ -2419,39 +2419,39 @@ hashes match. If both a cron and `--watch` fire simultaneously, no conflict.
    to import (malformed YAML frontmatter, an unquoted colon, etc.), sync holds
    the bookmark and tells you exactly which file broke — a *fresh* failure
    fails closed so nothing is silently dropped. But a file that fails the same
-   way `GBRAIN_SYNC_AUTOSKIP_AFTER` consecutive syncs (default 3, set `0` to
+   way `MODUSBRAIN_SYNC_AUTOSKIP_AFTER` consecutive syncs (default 3, set `0` to
    disable) is auto-skipped so the rest of the brain keeps indexing past it.
-   Skipped files don't disappear: `gbrain doctor` keeps warning until you fix
+   Skipped files don't disappear: `modusbrain doctor` keeps warning until you fix
    or delete them, and fixing the file clears it on the next sync. A repository
    history rewrite still hard-blocks even with `--skip-failed`. Run
-   `gbrain sync --skip-failed` to acknowledge a known-bad set yourself.
+   `modusbrain sync --skip-failed` to acknowledge a known-bad set yourself.
 
 ## How to Verify
 
 1. **Edit a file and search for the change.** Edit a brain markdown file,
    commit, and push. Wait for the next sync cycle (cron interval or `--watch`
-   poll). Run `gbrain search "<text from the edit>"`. The updated content
+   poll). Run `modusbrain search "<text from the edit>"`. The updated content
    should appear in results. If it returns old content, sync failed.
 
-2. **Compare page count to file count.** Run `gbrain stats` and count the
+2. **Compare page count to file count.** Run `modusbrain stats` and count the
    syncable markdown files in the brain repo. The page count in the database
    should match. If they diverge, files are being silently skipped (likely an
    unreachable direct connection on IPv4 — see the prerequisite above).
 
-3. **Check embedded chunk count.** In `gbrain stats`, the embedded chunk
+3. **Check embedded chunk count.** In `modusbrain stats`, the embedded chunk
    count should be close to the total chunk count. A large gap means
-   `gbrain embed --stale` isn't running after sync, leaving chunks invisible
+   `modusbrain embed --stale` isn't running after sync, leaving chunks invisible
    to vector search.
 
 ---
 
-*Part of the [GBrain Skillpack](../GBRAIN_SKILLPACK.md).*
+*Part of the [ModusBrain Skillpack](../MODUSBRAIN_SKILLPACK.md).*
 
 ---
 
 ## docs/guides/cron-schedule.md
 
-Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/guides/cron-schedule.md
+Source: https://raw.githubusercontent.com/garrytan/modusbrain/master/docs/guides/cron-schedule.md
 
 # Reference Cron Schedule
 
@@ -2478,7 +2478,7 @@ fixed. You wake up and the brain is smarter than when you went to sleep.
 | 3x/day (weekdays) | Meeting sync | Full ingestion + attendee propagation | [meeting-sync](../../recipes/meeting-sync.md) |
 | Weekly | Calendar sync | Daily files + attendee enrichment | [calendar-to-brain](../../recipes/calendar-to-brain.md) |
 | Daily AM | Morning briefing | Search calendar attendees, deal status, active threads | [briefing skill](../../skills/briefing/SKILL.md) |
-| Weekly | Brain maintenance | `gbrain doctor`, embed stale, orphan detection | [maintain skill](../../skills/maintain/SKILL.md) |
+| Weekly | Brain maintenance | `modusbrain doctor`, embed stale, orphan detection | [maintain skill](../../skills/maintain/SKILL.md) |
 | Nightly | Dream cycle | Entity sweep, enrich thin spots, fix citations | See below |
 
 ## Implementation: Setting Up Cron Jobs
@@ -2497,7 +2497,7 @@ fixed. You wake up and the brain is smarter than when you went to sleep.
 0 10 * * 0 cd /path/to/calendar-sync && node calendar-sync.mjs --start $(date -v-7d +%Y-%m-%d) --end $(date +%Y-%m-%d)
 
 # Brain health — weekly Mondays at 6 AM
-0 6 * * 1 gbrain doctor --json >> /tmp/gbrain-health.log 2>&1 && gbrain embed --stale
+0 6 * * 1 modusbrain doctor --json >> /tmp/modusbrain-health.log 2>&1 && modusbrain embed --stale
 
 # Dream cycle — nightly at 2 AM
 0 2 * * * /path/to/dream-cycle.sh
@@ -2529,7 +2529,7 @@ infer your current location and timezone. All times shown in YOUR local timezone
 // Hold the notification, fold into morning briefing
 
 get_user_timezone():
-  calendar = gbrain search "flight" --type calendar --recent 7d
+  calendar = modusbrain search "flight" --type calendar --recent 7d
   if recent_flight:
     return infer_timezone(flight.destination)
   return config.default_timezone  // fallback: US/Pacific
@@ -2552,7 +2552,7 @@ dream_cycle():
   for message in conversations:
     entities = detect_entities(message)
     for entity in entities:
-      page = gbrain search "{entity.name}"
+      page = modusbrain search "{entity.name}"
       if not page:
         create_page(entity)        // new entity, create + enrich
       elif page.is_thin():
@@ -2561,7 +2561,7 @@ dream_cycle():
         update_timeline(entity)    // existing page, add today's mentions
 
   // Phase 2: Fix Broken Citations
-  pages = gbrain list --type person --limit 100
+  pages = modusbrain list --type person --limit 100
   for page in pages:
     for entry in page.timeline:
       if not entry.has_source_attribution():
@@ -2575,8 +2575,8 @@ dream_cycle():
     promote_to_memory(pattern)     // ephemeral → durable knowledge
 
   // Phase 4: Sync
-  gbrain sync --no-pull --no-embed
-  gbrain embed --stale
+  modusbrain sync --no-pull --no-embed
+  modusbrain embed --stale
 ```
 
 ### Setting Up the Dream Cycle
@@ -2588,7 +2588,7 @@ deep, REM) run automatically during quiet hours.
 ```bash
 /cron add "0 2 * * *" "Dream cycle: search today's sessions for
   entities I mentioned. For each person, company, or idea: check
-  if a brain page exists (gbrain search), create or update it if
+  if a brain page exists (modusbrain search), create or update it if
   thin. Fix any broken citations. Then consolidate: read MEMORY.md,
   promote important signals, remove stale entries."
   --name "nightly-dream-cycle"
@@ -2606,10 +2606,10 @@ echo "Dream cycle starting at $(date)"
 # Read today's conversation logs, extract entities, update brain
 
 # Phase 2: Citation hygiene
-gbrain doctor --json | jq '.checks[] | select(.status=="warn")'
+modusbrain doctor --json | jq '.checks[] | select(.status=="warn")'
 
 # Phase 3: Embed any stale content
-gbrain embed --stale
+modusbrain embed --stale
 
 echo "Dream cycle complete at $(date)"
 ```
@@ -2641,17 +2641,17 @@ echo "Dream cycle complete at $(date)"
    got enriched and broken citations were fixed.
 3. **Email collector cron:** Wait 30 minutes. Check `data/digests/` for new digest.
 4. **Morning briefing:** Check that held messages appear in the briefing.
-5. **Health check:** Run `gbrain doctor --json`. All checks should pass.
+5. **Health check:** Run `modusbrain doctor --json`. All checks should pass.
 
 ---
 
-*Part of the [GBrain Skillpack](../GBRAIN_SKILLPACK.md). See also: [Quiet Hours](quiet-hours.md), [Operational Disciplines](operational-disciplines.md)*
+*Part of the [ModusBrain Skillpack](../MODUSBRAIN_SKILLPACK.md). See also: [Quiet Hours](quiet-hours.md), [Operational Disciplines](operational-disciplines.md)*
 
 ---
 
 ## docs/guides/quiet-hours.md
 
-Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/guides/quiet-hours.md
+Source: https://raw.githubusercontent.com/garrytan/modusbrain/master/docs/guides/quiet-hours.md
 
 # Quiet Hours and Timezone-Aware Delivery
 
@@ -2817,13 +2817,13 @@ Set `enabled: false` to disable quiet hours entirely (e.g., for 24/7 monitoring)
 
 ---
 
-*Part of the [GBrain Skillpack](../GBRAIN_SKILLPACK.md).*
+*Part of the [ModusBrain Skillpack](../MODUSBRAIN_SKILLPACK.md).*
 
 ---
 
 ## docs/guides/scaling-skills.md
 
-Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/guides/scaling-skills.md
+Source: https://raw.githubusercontent.com/garrytan/modusbrain/master/docs/guides/scaling-skills.md
 
 # Scaling skills past 300 without drowning the context window
 
@@ -2949,14 +2949,14 @@ This is the routing-table pattern but applied to the skill manifest itself.
 The resolver routes to skills, but it also routes around skills, keeping
 them out of the context window until they're needed.
 
-GBrain ships with a [bundled `skills/RESOLVER.md`](../../skills/RESOLVER.md)
+ModusBrain ships with a [bundled `skills/RESOLVER.md`](../../skills/RESOLVER.md)
 you can use as a reference shape. The skillpack story for distributing
 your own resolvers across machines is covered in
 [skillpacks as scaffolding](skillpacks-as-scaffolding.md).
 
 ## The compact list format (v0.41.7.0)
 
-GBrain's resolver parser used to require markdown tables:
+ModusBrain's resolver parser used to require markdown tables:
 
 ```markdown
 | Trigger | Skill |
@@ -2973,7 +2973,7 @@ format that scales better:
 - **flight-tracker**: track my flight | flight status | when does my flight land
 ```
 
-Before v0.41.7.0, `gbrain doctor` only spoke the table dialect. On a
+Before v0.41.7.0, `modusbrain doctor` only spoke the table dialect. On a
 306-skill compact-format resolver, the doctor reported every skill as
 unreachable: **238 FAIL errors on every doctor run**. The parser was
 silently treating the compact dialect as zero skills.
@@ -2981,7 +2981,7 @@ silently treating the compact dialect as zero skills.
 v0.41.7.0 ships dual-format support. The same `parseResolverEntries`
 function reads both table rows and list rows in the same file, with the
 v0.31.7 multi-resolver merge (skillpack `skills/RESOLVER.md` + workspace
-`../AGENTS.md`) folding everything into one unified view. Run `gbrain doctor`
+`../AGENTS.md`) folding everything into one unified view. Run `modusbrain doctor`
 and the 238 FAILs collapse to 0.
 
 ### The list-format contract
@@ -3005,7 +3005,7 @@ A few rules to keep the parser unambiguous:
   works as a fallback.
 
 You can mix table and list rows in the same file. Useful when a brain
-inherits a table-format `RESOLVER.md` from gbrain and a list-format
+inherits a table-format `RESOLVER.md` from modusbrain and a list-format
 `../AGENTS.md` from OpenClaw.
 
 ## The doctor safety net
@@ -3014,7 +3014,7 @@ The danger with tiering is invisible skill loss. You disable a skill from
 native scanning, forget to add it to the resolver, and now the agent can't
 do something it used to do. You won't notice until the moment you need it.
 
-`gbrain doctor` walks every skill on disk and verifies it's reachable,
+`modusbrain doctor` walks every skill on disk and verifies it's reachable,
 either through native scanning (Tier A) or through the resolver (Tier B
 and C). On Garry's setup, the first run after tiering found 63 unreachable
 skills. Sixty-three capabilities that existed on disk but had no routing
@@ -3023,14 +3023,14 @@ path. Fixed in an hour by adding resolver entries.
 Run it after every skill change:
 
 ```bash
-gbrain doctor
+modusbrain doctor
 ```
 
 For CI gates, use the JSON-emitting variant:
 
 ```bash
-gbrain check-resolvable --json
-gbrain check-resolvable --strict  # warnings fail too
+modusbrain check-resolvable --json
+modusbrain check-resolvable --strict  # warnings fail too
 ```
 
 If a skill is unreachable, the output tells you which one and suggests
@@ -3083,7 +3083,7 @@ actually ask for things:
 That's it. The model handles the rest. When a request doesn't match Tier A,
 it checks the resolver, reads the matching SKILL.md, and executes.
 
-### 4. Run `gbrain doctor` and fix any unreachable skills
+### 4. Run `modusbrain doctor` and fix any unreachable skills
 
 The doctor sweep tells you which skills don't have a routing path. Add a
 resolver entry for each one, re-run, repeat until the count is zero.
@@ -3131,7 +3131,7 @@ capability. You're organizing, not deleting.
 - [Sub-agent routing](sub-agent-routing.md) — when to delegate to a
   sub-agent vs handle in-line, and the model routing table for each path.
 
-GBrain: [github.com/garrytan/gbrain](https://github.com/garrytan/gbrain).
+ModusBrain: [github.com/garrytan/gbrain](https://github.com/garrytan/gbrain).
 The `parseResolverEntries` parser lives at
 [`src/core/check-resolvable.ts`](../../src/core/check-resolvable.ts);
 the bundled resolver lives at [`skills/RESOLVER.md`](../../skills/RESOLVER.md).
@@ -3140,7 +3140,7 @@ the bundled resolver lives at [`skills/RESOLVER.md`](../../skills/RESOLVER.md).
 
 ## docs/guides/push-context.md
 
-Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/guides/push-context.md
+Source: https://raw.githubusercontent.com/garrytan/modusbrain/master/docs/guides/push-context.md
 
 # Push-based context (#2095, v0.42.43.0)
 
@@ -3154,8 +3154,8 @@ Three channels share one zero-LLM core (`src/core/context/volunteer.ts`):
 | Channel | Surface | When to use |
 |---|---|---|
 | `reflex` | automatic, inside the context engine | default-on for plugin hosts; nothing to call |
-| `op` | `gbrain volunteer-context` / MCP `volunteer_context` | agents without the plugin; one call per turn |
-| `watch` | `gbrain watch` | stream a transcript in, volunteered pages stream out |
+| `op` | `modusbrain volunteer-context` / MCP `volunteer_context` | agents without the plugin; one call per turn |
+| `watch` | `modusbrain watch` | stream a transcript in, volunteered pages stream out |
 
 ## How it decides
 
@@ -3175,13 +3175,13 @@ Three channels share one zero-LLM core (`src/core/context/volunteer.ts`):
 ```bash
 # one-shot: pipe recent turns (oldest → newest)
 printf 'user: ask alice-example about the deal\nassistant: noted\nuser: what did she say?\n' \
-  | gbrain volunteer-context
+  | modusbrain volunteer-context
 
 # streaming: volunteered pages print as the transcript flows
-some-transcript-feed | gbrain watch --json
+some-transcript-feed | modusbrain watch --json
 
 # the feedback loop: how often were volunteered pages actually opened?
-gbrain volunteer-context --stats
+modusbrain volunteer-context --stats
 ```
 
 Stats are **approximate** by design: "used" means `pages.last_retrieved_at >
@@ -3189,8 +3189,8 @@ volunteered_at` — the 5-minute last-retrieved throttle causes false negatives
 and unrelated reads of the same page cause false positives. Use the per-arm
 precision to tune `min_confidence`, not as an exact metric.
 
-**PGLite + `gbrain watch`:** PGLite is single-connection, and watch holds its
-connection for the whole session — a concurrent `gbrain serve` or any write
+**PGLite + `modusbrain watch`:** PGLite is single-connection, and watch holds its
+connection for the whole session — a concurrent `modusbrain serve` or any write
 path blocks until watch exits. On a PGLite brain, run watch in bursts (piped
 input exits at EOF) or use the ambient reflex channel instead, which routes
 through a running serve's resolve socket rather than taking the lock. Routing
@@ -3201,11 +3201,11 @@ brains are unaffected.
 
 | Key | Default | What it does |
 |---|---|---|
-| `retrieval_reflex_window_turns` | 4 | turns the ambient reflex extracts from; 1 = legacy current-turn-only (file/env plane: `GBRAIN_RETRIEVAL_REFLEX_WINDOW_TURNS`) |
+| `retrieval_reflex_window_turns` | 4 | turns the ambient reflex extracts from; 1 = legacy current-turn-only (file/env plane: `MODUSBRAIN_RETRIEVAL_REFLEX_WINDOW_TURNS`) |
 | `retrieval_reflex` | true | the ambient channel's master switch |
 | `retrieval_reflex_max_pointers` | 3 | pointer cap per turn |
 
-Per-call knobs: `max_pages` + `min_confidence` on both the op and `gbrain watch`
+Per-call knobs: `max_pages` + `min_confidence` on both the op and `modusbrain watch`
 (`--max-pages` / `--min-confidence`, plus `--window-turns` / `--source` on watch);
 on the op only: `prior_context` (text whose already-surfaced slugs are suppressed),
 `session_id` / `turn` attribution params (watch stamps its own per-session id and
@@ -3226,11 +3226,11 @@ never reach a prompt regardless of caller trust.
 
 ## docs/mcp/DEPLOY.md
 
-Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/mcp/DEPLOY.md
+Source: https://raw.githubusercontent.com/garrytan/modusbrain/master/docs/mcp/DEPLOY.md
 
-# Deploy GBrain Remote MCP Server
+# Deploy ModusBrain Remote MCP Server
 
-> **v0.26.0+:** `gbrain serve --http` ships full OAuth 2.1 (client credentials,
+> **v0.26.0+:** `modusbrain serve --http` ships full OAuth 2.1 (client credentials,
 > auth code + PKCE, refresh rotation, optional DCR), an embedded React admin
 > dashboard at `/admin`, scoped operations, and a live SSE activity feed.
 > Pre-v0.26 legacy bearer tokens still work — `verifyAccessToken` falls back
@@ -3239,8 +3239,8 @@ Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/mcp/DEPLOY
 > OAuth tables work on both PGLite and Postgres. See [SECURITY.md](../../SECURITY.md)
 > for env vars and tunable defaults.
 
-Access your brain from any device, any AI client. GBrain ships two transports:
-`gbrain serve` (stdio) for local agents, and `gbrain serve --http` (v0.26.0+)
+Access your brain from any device, any AI client. ModusBrain ships two transports:
+`modusbrain serve` (stdio) for local agents, and `modusbrain serve --http` (v0.26.0+)
 for remote clients over OAuth 2.1.
 
 ## Three Paths
@@ -3248,7 +3248,7 @@ for remote clients over OAuth 2.1.
 ### Local stdio (zero setup)
 
 ```bash
-gbrain serve
+modusbrain serve
 ```
 
 Works with Claude Code, Cursor, Windsurf, and any MCP client that supports stdio.
@@ -3257,9 +3257,9 @@ No server, no tunnel, no token needed. Works on both PGLite and Postgres engines
 ### Remote over OAuth 2.1 (recommended, v0.26.0+)
 
 ```bash
-gbrain serve --http --port 3131
+modusbrain serve --http --port 3131
 ngrok http 3131 --url your-brain.ngrok.app
-gbrain serve --http --port 3131 --public-url https://your-brain.ngrok.app
+modusbrain serve --http --port 3131 --public-url https://your-brain.ngrok.app
 ```
 
 Built-in HTTP transport with OAuth 2.1, scoped operations, an admin dashboard
@@ -3282,16 +3282,16 @@ See the [OAuth 2.1 setup](#oauth-21-setup-v100) section below.
 ```
 Your AI client (Claude Desktop, Perplexity, etc.)
   → ngrok tunnel (https://YOUR-DOMAIN.ngrok.app)
-  → gbrain serve --http  (built-in transport with bearer auth)
+  → modusbrain serve --http  (built-in transport with bearer auth)
   → Postgres (pooler connection or self-hosted)
 ```
 
 This requires:
 1. A Postgres-backed brain (the `access_tokens` table only exists on Postgres;
-   running `gbrain serve --http` against a PGLite install fails fast at startup)
-2. A machine running `gbrain serve --http`
+   running `modusbrain serve --http` against a PGLite install fails fast at startup)
+2. A machine running `modusbrain serve --http`
 3. A public tunnel (ngrok, Tailscale, or cloud host)
-4. A bearer token created via `gbrain auth create <name>`
+4. A bearer token created via `modusbrain auth create <name>`
 
 Pre-v1.0 tokens are grandfathered as `read+write+admin` scopes when you upgrade
 to the HTTP server, so no migration is required.
@@ -3301,7 +3301,7 @@ to the HTTP server, so no migration is required.
 ### 1. Start the HTTP server
 
 ```bash
-gbrain serve --http --port 3131
+modusbrain serve --http --port 3131
 ```
 
 On first start, the server prints an **admin bootstrap token** to stderr:
@@ -3320,7 +3320,7 @@ and per-client config export.
 > Declared param keys are kept (intersected against the operation's spec); unknown
 > keys are counted but never named, and byte sizes round up to 1KB so size-probe
 > attacks can't binary-search secret content. Operators on a personal laptop who
-> want raw payloads back can pass `gbrain serve --http --log-full-params` (loud
+> want raw payloads back can pass `modusbrain serve --http --log-full-params` (loud
 > stderr warning fires at startup). Multi-tenant deployments should leave it on
 > the redacted default.
 
@@ -3342,7 +3342,7 @@ Register clients from the **`/admin` dashboard**:
 Or from the CLI — faster for scripting:
 
 ```bash
-gbrain auth register-client perplexity \
+modusbrain auth register-client perplexity \
   --grant-types client_credentials \
   --scopes "read write"
 ```
@@ -3352,7 +3352,7 @@ write authority to one source and its read scope to a curated set with the
 new `--source` and `--federated-read` flags:
 
 ```bash
-gbrain auth register-client dept-x-agent \
+modusbrain auth register-client dept-x-agent \
   --grant-types client_credentials \
   --scopes "read write" \
   --source dept-x \
@@ -3363,7 +3363,7 @@ gbrain auth register-client dept-x-agent \
 land in `dept-x`. `--federated-read` controls the read axis independently;
 queries return rows from any of the listed sources. Omit both flags for the
 v0.33-compatible super-client shape. Pre-v0.34 clients are backfilled to
-`source_id='default'` on `gbrain upgrade`.
+`source_id='default'` on `modusbrain upgrade`.
 
 Host-repo wrappers can register programmatically:
 
@@ -3381,12 +3381,12 @@ start the server with `--enable-dcr`. DCR is off by default.
 
 ### 3. Expose the server
 
-**v0.34 — bind explicitly.** `gbrain serve --http` defaults to `127.0.0.1`.
+**v0.34 — bind explicitly.** `modusbrain serve --http` defaults to `127.0.0.1`.
 To accept connections from the ngrok tunnel (or any non-loopback source),
 restart with `--bind`:
 
 ```bash
-gbrain serve --http --port 3131 --bind 0.0.0.0 --public-url https://your-brain.ngrok.app
+modusbrain serve --http --port 3131 --bind 0.0.0.0 --public-url https://your-brain.ngrok.app
 ```
 
 When `--public-url` is set without `--bind`, a stderr WARN fires at
@@ -3436,13 +3436,13 @@ ngrok http 8787 --url your-brain.ngrok.app  # Hobby tier for fixed domain
 
 ```bash
 # Create a token for each client
-gbrain auth create "claude-desktop"
+modusbrain auth create "claude-desktop"
 
 # List all tokens
-gbrain auth list
+modusbrain auth list
 
 # Revoke a token
-gbrain auth revoke "claude-desktop"
+modusbrain auth revoke "claude-desktop"
 ```
 
 Tokens are per-client. Create one for each device/app. Revoke individually
@@ -3450,7 +3450,7 @@ if compromised. Tokens are stored SHA-256 hashed in your database.
 
 ### 3. Connect your AI client
 
-- **ChatGPT:** [setup guide](CHATGPT.md) (OAuth 2.1 + PKCE, requires `gbrain serve --http`)
+- **ChatGPT:** [setup guide](CHATGPT.md) (OAuth 2.1 + PKCE, requires `modusbrain serve --http`)
 - **Claude Code:** [setup guide](CLAUDE_CODE.md)
 - **Claude Desktop:** [setup guide](CLAUDE_DESKTOP.md) (must use GUI, not JSON config)
 - **Claude Cowork:** [setup guide](CLAUDE_COWORK.md)
@@ -3459,21 +3459,21 @@ if compromised. Tokens are stored SHA-256 hashed in your database.
 ### 4. Verify
 
 ```bash
-gbrain auth test \
+modusbrain auth test \
   https://YOUR-DOMAIN.ngrok.app/mcp \
   --token YOUR_TOKEN
 ```
 
 ## Operations
 
-All 30 GBrain operations are available remotely, including `sync_brain` and
+All 30 ModusBrain operations are available remotely, including `sync_brain` and
 `file_upload` (no timeout limits with self-hosted server).
 
 **Security note on `file_upload`:** remote MCP callers are confined to the working
-directory where `gbrain serve` was launched. Symlinks, `..` traversal, and absolute
+directory where `modusbrain serve` was launched. Symlinks, `..` traversal, and absolute
 paths outside cwd are rejected. Page slugs and filenames are allowlist-validated
 (alphanumeric + hyphens; no control chars, RTL overrides, or backslashes). Local
-CLI callers (`gbrain file upload ...`) keep unrestricted filesystem access since
+CLI callers (`modusbrain file upload ...`) keep unrestricted filesystem access since
 the user owns the machine.
 
 ## Deployment Options
@@ -3487,7 +3487,7 @@ Funnel, and cloud hosts (Fly.io, Railway).
 Include the Authorization header: `Authorization: Bearer YOUR_TOKEN`
 
 **"invalid_token" error**
-Run `gbrain auth list` to see active tokens.
+Run `modusbrain auth list` to see active tokens.
 
 **"service_unavailable" error**
 Database connection failed. Check your Supabase dashboard for outages.
@@ -3507,7 +3507,7 @@ Remote servers must be added via Settings > Integrations, NOT
 | put_page | 100-500ms | Write + trigger search_vector update |
 | get_stats | < 100ms | Aggregate query |
 
-**Note:** `gbrain serve --http` shipped in v0.26.0 with OAuth 2.1 + admin
+**Note:** `modusbrain serve --http` shipped in v0.26.0 with OAuth 2.1 + admin
 dashboard baked into the binary. The custom HTTP wrapper pattern (see
 [voice recipe](../../recipes/twilio-voice-brain.md)) is still supported for
 teams that need bespoke middleware, but for most remote deployments the
@@ -3519,13 +3519,13 @@ built-in server is the recommended path.
 
 # Debugging
 
-## docs/GBRAIN_VERIFY.md
+## docs/MODUSBRAIN_VERIFY.md
 
-Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/GBRAIN_VERIFY.md
+Source: https://raw.githubusercontent.com/garrytan/modusbrain/master/docs/MODUSBRAIN_VERIFY.md
 
-# GBrain Installation Verification Runbook
+# ModusBrain Installation Verification Runbook
 
-Run these checks after install to confirm every part of GBrain is working.
+Run these checks after install to confirm every part of ModusBrain is working.
 Each check includes the command, expected output, and what to do if it fails.
 
 The most important check is #4 (live sync). "Sync ran" is not the same as
@@ -3539,7 +3539,7 @@ worse than no sync at all, because you think it's working.
 **Command:**
 
 ```bash
-gbrain doctor --json
+modusbrain doctor --json
 ```
 
 **Expected:** All checks return `"ok"`:
@@ -3558,12 +3558,12 @@ check. See `skills/setup/SKILL.md` Error Recovery table.
 
 **Check:** Ask the agent: "What is the brain-agent loop?"
 
-**Expected:** The agent references GBRAIN_SKILLPACK.md Section 2 and describes
+**Expected:** The agent references MODUSBRAIN_SKILLPACK.md Section 2 and describes
 the read-write cycle: detect entities, read brain, respond with context, write
 brain, sync.
 
 **If it fails:** The agent hasn't loaded the skillpack. Run step 6 from the
-install paste (read `docs/GBRAIN_SKILLPACK.md`).
+install paste (read `docs/MODUSBRAIN_SKILLPACK.md`).
 
 ---
 
@@ -3572,13 +3572,13 @@ install paste (read `docs/GBRAIN_SKILLPACK.md`).
 **Command:**
 
 ```bash
-gbrain check-update --json
+modusbrain check-update --json
 ```
 
 **Expected:** Returns JSON with `current_version`, `latest_version`,
-`update_available` (boolean). The cron `gbrain-update-check` is registered.
+`update_available` (boolean). The cron `modusbrain-update-check` is registered.
 
-**If it fails:** Run step 7 from the install paste. See GBRAIN_SKILLPACK.md
+**If it fails:** Run step 7 from the install paste. See MODUSBRAIN_SKILLPACK.md
 Section 17.
 
 ---
@@ -3592,7 +3592,7 @@ This is the most important check. Three parts.
 Compare page count in the DB against syncable file count in the repo:
 
 ```bash
-gbrain stats
+modusbrain stats
 ```
 
 Then count syncable files:
@@ -3609,24 +3609,24 @@ find /data/brain -name '*.md' \
   | wc -l
 ```
 
-**Expected:** Page count in `gbrain stats` should be close to the file count.
+**Expected:** Page count in `modusbrain stats` should be close to the file count.
 Some difference is normal (files added since last sync), but if page count is
 less than half the file count, sync is silently skipping pages.
 
 **If page count is way too low:** The #1 cause is an unreachable direct
-connection on an IPv4-only host. GBrain uses the Transaction pooler (port 6543)
+connection on an IPv4-only host. ModusBrain uses the Transaction pooler (port 6543)
 for reads, but routes migrations, DDL, and sync transactions to a derived direct
 connection (`db.<ref>.supabase.co:5432`), which is IPv6-only.
 - On an IPv4-only host, reads work but sync transactions fail and silently skip
   pages.
-- Fix: set `GBRAIN_DIRECT_DATABASE_URL` to the **Session pooler** string (port
+- Fix: set `MODUSBRAIN_DIRECT_DATABASE_URL` to the **Session pooler** string (port
   5432 on the `pooler.supabase.com` host, IPv4), or enable Supabase's IPv4
-  add-on. Then run `gbrain sync --full` to reimport everything.
+  add-on. Then run `modusbrain sync --full` to reimport everything.
 
 ### 4b. Embed Check
 
 ```bash
-gbrain stats
+modusbrain stats
 ```
 
 **Expected:** Embedded chunk count should be close to total chunk count.
@@ -3634,7 +3634,7 @@ gbrain stats
 **If embedded is much lower than total:**
 
 ```bash
-gbrain embed --stale
+modusbrain embed --stale
 ```
 
 If `OPENAI_API_KEY` is not set, embeddings can't be generated. Keyword search
@@ -3658,16 +3658,16 @@ git add -A && git commit -m "test: verify live sync" && git push
 3. Search for the corrected text:
 
 ```bash
-gbrain search "<text from the correction>"
+modusbrain search "<text from the correction>"
 ```
 
 **Expected:** The search returns the **corrected** text, not the old version.
 
 **If it returns old text:** Sync failed silently. Check:
 - Is the sync cron registered and running?
-- Is `gbrain sync --watch` still alive (if using watch mode)?
-- Run `gbrain config get sync.last_run` to see when sync last ran.
-- Run `gbrain sync --repo /data/brain` manually and check for errors.
+- Is `modusbrain sync --watch` still alive (if using watch mode)?
+- Run `modusbrain config get sync.last_run` to see when sync last ran.
+- Run `modusbrain sync --repo /data/brain` manually and check for errors.
 - If sync errors mention an unreachable host or connection timeout, the direct
   connection isn't reachable on IPv4 (see 4a above).
 
@@ -3678,7 +3678,7 @@ gbrain search "<text from the correction>"
 **Command:**
 
 ```bash
-gbrain stats
+modusbrain stats
 ```
 
 **Expected:** Embedded chunk count matches (or is close to) total chunk count.
@@ -3692,7 +3692,7 @@ echo $OPENAI_API_KEY | head -c 10
 If blank, set the key. Then:
 
 ```bash
-gbrain embed --stale
+modusbrain embed --stale
 ```
 
 ---
@@ -3701,7 +3701,7 @@ gbrain embed --stale
 
 **Check:** Ask the agent about a person or concept that exists in the brain.
 
-**Expected:** The agent uses `gbrain search` or `gbrain query` FIRST, not grep
+**Expected:** The agent uses `modusbrain search` or `modusbrain query` FIRST, not grep
 or external APIs. The response includes brain-sourced context with source
 attribution.
 
@@ -3718,7 +3718,7 @@ auto-linked, but historical pages need a one-time backfill.
 **Command:**
 
 ```bash
-gbrain stats | grep -E 'links|timeline'
+modusbrain stats | grep -E 'links|timeline'
 ```
 
 **Expected:** Both `links` and `timeline_entries` are non-zero (assuming the brain
@@ -3727,17 +3727,17 @@ has content with entity references and dated markdown).
 **If it's zero on a brain with imported content:** Run the backfill.
 
 ```bash
-gbrain extract links --source db --dry-run | head -5    # preview
-gbrain extract links --source db                         # commit
-gbrain extract timeline --source db
-gbrain stats                                             # confirm > 0
+modusbrain extract links --source db --dry-run | head -5    # preview
+modusbrain extract links --source db                         # commit
+modusbrain extract timeline --source db
+modusbrain stats                                             # confirm > 0
 ```
 
 **Bonus check** — graph traversal works:
 
 ```bash
 # Pick any well-connected slug from your brain
-gbrain graph-query people/<some-person-slug> --depth 2
+modusbrain graph-query people/<some-person-slug> --depth 2
 ```
 
 **Expected:** Indented tree of typed edges (`--attended-->`, `--works_at-->`, etc.).
@@ -3754,14 +3754,14 @@ heuristics won't find them — file an issue with a sample page.
 ## 8. JSONB Frontmatter Integrity (v0.12.2)
 
 Postgres-backed brains created before v0.12.2 had double-encoded JSONB columns
-(`frontmatter->>'key'` returned NULL, GIN indexes were inert). `gbrain upgrade`
-runs `gbrain repair-jsonb` automatically via the `v0_12_2` orchestrator.
+(`frontmatter->>'key'` returned NULL, GIN indexes were inert). `modusbrain upgrade`
+runs `modusbrain repair-jsonb` automatically via the `v0_12_2` orchestrator.
 Verify the repair succeeded.
 
 **Command:**
 
 ```bash
-gbrain repair-jsonb --dry-run --json
+modusbrain repair-jsonb --dry-run --json
 ```
 
 **Expected:** `totalRepaired: 0` across all 5 columns (`pages.frontmatter`,
@@ -3773,7 +3773,7 @@ JSON objects, not string-encoded JSON.
 without `--dry-run`:
 
 ```bash
-gbrain repair-jsonb
+modusbrain repair-jsonb
 ```
 
 Idempotent. PGLite brains always report 0 (unaffected by the original bug).
@@ -3781,7 +3781,7 @@ Idempotent. PGLite brains always report 0 (unaffected by the original bug).
 **Bonus check** — frontmatter-keyed queries actually resolve:
 
 ```bash
-gbrain call list_pages '{"frontmatterKey": "type", "frontmatterValue": "person"}'
+modusbrain call list_pages '{"frontmatterKey": "type", "frontmatterValue": "person"}'
 ```
 
 If this returns rows on a brain with person pages, the JSONB path is healthy.
@@ -3792,28 +3792,28 @@ If this returns rows on a brain with person pages, the JSONB path is healthy.
 
 ```bash
 # 1. Schema
-gbrain doctor --json
+modusbrain doctor --json
 
 # 2. Sync recency
-gbrain config get sync.last_run
+modusbrain config get sync.last_run
 
 # 3. Page count + embed coverage
-gbrain stats
+modusbrain stats
 
 # 4. Search works
-gbrain search "test query from your brain content"
+modusbrain search "test query from your brain content"
 
 # 5. Catch any unembedded chunks
-gbrain embed --stale
+modusbrain embed --stale
 
 # 6. Auto-update
-gbrain check-update --json
+modusbrain check-update --json
 
 # 7. Knowledge graph populated (links + timeline > 0)
-gbrain stats | grep -E 'links|timeline'
+modusbrain stats | grep -E 'links|timeline'
 
 # 8. JSONB integrity (v0.12.2 — Postgres only, PGLite always 0)
-gbrain repair-jsonb --dry-run --json
+modusbrain repair-jsonb --dry-run --json
 ```
 
 If all eight return successfully, the installation is healthy. For the full
@@ -3823,16 +3823,16 @@ end-to-end sync test (4c), push a real change and verify it appears in search.
 
 ## docs/guides/minions-fix.md
 
-Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/guides/minions-fix.md
+Source: https://raw.githubusercontent.com/garrytan/modusbrain/master/docs/guides/minions-fix.md
 
 # Minions fix — repairing a half-migrated install
 
 **tl;dr:** on v0.11.1+ everything should self-heal. If Minions is partially
-set up (no `~/.gbrain/preferences.json`, autopilot still inline, cron jobs
+set up (no `~/.modusbrain/preferences.json`, autopilot still inline, cron jobs
 still on `agentTurn`), run:
 
 ```bash
-gbrain apply-migrations --yes
+modusbrain apply-migrations --yes
 ```
 
 It's idempotent. On v0.11.1 installs that already migrated it's a cheap
@@ -3844,12 +3844,12 @@ v0.11.0 shipped the Minions schema, queue, worker, and migration skill —
 but the migration skill itself never fired on upgrade. `runPostUpgrade`
 printed the feature pitch and stopped. v0.11.0 was never released
 publicly; v0.11.1 is the first public Minions ship and fixes the
-mega-bug (migration fires automatically on `gbrain upgrade` and via
+mega-bug (migration fires automatically on `modusbrain upgrade` and via
 the `postinstall` hook).
 
 If you're on a pre-v0.11.1 branch build (e.g. running the
 `minions-jobs` branch before v0.11.1 tagged), Minions may be installed
-but not wired: schema is v7, but no `~/.gbrain/preferences.json`,
+but not wired: schema is v7, but no `~/.modusbrain/preferences.json`,
 autopilot still runs inline, cron jobs still call `agentTurn`.
 
 This guide covers both paths: the canonical v0.11.1+ fix, and the
@@ -3858,53 +3858,53 @@ stopgap for pre-v0.11.1 binaries that don't have `apply-migrations`.
 ## Detecting the half-migrated state
 
 ```bash
-gbrain doctor
+modusbrain doctor
 ```
 
 If the install is half-migrated, you'll see:
 
 ```
-[FAIL] minions_migration: MINIONS HALF-INSTALLED (partial migration: 0.11.0). Run: gbrain apply-migrations --yes
+[FAIL] minions_migration: MINIONS HALF-INSTALLED (partial migration: 0.11.0). Run: modusbrain apply-migrations --yes
 ```
 
 or
 
 ```
-[FAIL] minions_config: MINIONS HALF-INSTALLED (schema v7+ but no ~/.gbrain/preferences.json). Run: gbrain apply-migrations --yes
+[FAIL] minions_config: MINIONS HALF-INSTALLED (schema v7+ but no ~/.modusbrain/preferences.json). Run: modusbrain apply-migrations --yes
 ```
 
 For a machine-readable report (cron-friendly):
 
 ```bash
-gbrain skillpack-check --quiet && echo healthy || echo needs_action
-gbrain skillpack-check | jq -r '.actions[]'    # prints the exact commands to run
+modusbrain skillpack-check --quiet && echo healthy || echo needs_action
+modusbrain skillpack-check | jq -r '.actions[]'    # prints the exact commands to run
 ```
 
 ## The fix (v0.11.1 or later)
 
 ```bash
-gbrain apply-migrations --yes
+modusbrain apply-migrations --yes
 ```
 
-Reads `~/.gbrain/migrations/completed.jsonl`, diffs against the TS
+Reads `~/.modusbrain/migrations/completed.jsonl`, diffs against the TS
 migration registry, runs whatever's pending. Seven phases:
 
 ```
-A. Schema        gbrain init --migrate-only
-B. Smoke         gbrain jobs smoke
+A. Schema        modusbrain init --migrate-only
+B. Smoke         modusbrain jobs smoke
 C. Mode          prompt (or --yes default pain_triggered)
-D. Prefs         write ~/.gbrain/preferences.json
-E. Host          AGENTS.md marker injection + cron rewrites for gbrain
+D. Prefs         write ~/.modusbrain/preferences.json
+E. Host          AGENTS.md marker injection + cron rewrites for modusbrain
                  builtins; JSONL TODOs for host-specific handlers
-F. Install       gbrain autopilot --install (env-aware)
+F. Install       modusbrain autopilot --install (env-aware)
 G. Record        append completed.jsonl status:"complete"
 ```
 
 If Phase E emits TODOs for host-specific handlers (e.g. your OpenClaw's
-~29 non-gbrain crons), the migration finishes with `status: "partial"`.
+~29 non-modusbrain crons), the migration finishes with `status: "partial"`.
 Your host agent walks the TODOs using `skills/migrations/v0.11.0.md` +
 `docs/guides/plugin-handlers.md`, ships handler registrations in the
-host repo, then re-runs `gbrain apply-migrations --yes`. Newly
+host repo, then re-runs `modusbrain apply-migrations --yes`. Newly
 registerable cron entries get rewritten and the JSONL rows mark
 `status: "complete"`.
 
@@ -3913,24 +3913,24 @@ registerable cron entries get rewritten and the JSONL rows mark
 If you're stuck on a branch build that doesn't have `apply-migrations`:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/garrytan/gbrain/v0.11.1/scripts/fix-v0.11.0.sh | bash
+curl -fsSL https://raw.githubusercontent.com/garrytan/modusbrain/v0.11.1/scripts/fix-v0.11.0.sh | bash
 ```
 
 This bash script does what apply-migrations does from a shell environment:
 
-1. `gbrain init --migrate-only` — schema v7.
-2. `gbrain jobs smoke` — verify Minions health.
+1. `modusbrain init --migrate-only` — schema v7.
+2. `modusbrain jobs smoke` — verify Minions health.
 3. Prompt for `minion_mode` (defaults `pain_triggered` on non-TTY).
-4. Write `~/.gbrain/preferences.json` atomically.
-5. Append `~/.gbrain/migrations/completed.jsonl` with `status: "partial"`
+4. Write `~/.modusbrain/preferences.json` atomically.
+5. Append `~/.modusbrain/migrations/completed.jsonl` with `status: "partial"`
    and `apply_migrations_pending: true`. That partial record is the
    signal to v0.11.1's `apply-migrations` to pick up remaining phases
    after the user upgrades.
 6. Detect host agent repos and PRINT rewrite instructions (never
    auto-edits from a curl-piped script).
-7. Print the next step: `Run: gbrain autopilot --install`.
+7. Print the next step: `Run: modusbrain autopilot --install`.
 
-Once v0.11.1 is installed, re-run `gbrain apply-migrations --yes` to
+Once v0.11.1 is installed, re-run `modusbrain apply-migrations --yes` to
 finish the remaining phases (host rewrites + autopilot install). The
 stopgap's `status: "partial"` record is designed to resume cleanly
 (it doesn't poison the permanent migration path).
@@ -3939,24 +3939,24 @@ stopgap's `status: "partial"` record is designed to resume cleanly
 
 ```bash
 # 1. Preferences exist and are readable
-cat ~/.gbrain/preferences.json
+cat ~/.modusbrain/preferences.json
 
 # 2. Migration recorded
-cat ~/.gbrain/migrations/completed.jsonl
+cat ~/.modusbrain/migrations/completed.jsonl
 
 # 3. Autopilot is supervising a Minions worker child
-gbrain autopilot --status
+modusbrain autopilot --status
 ps aux | grep 'jobs work'
 
 # 4. Jobs show up in the queue
-gbrain jobs list
+modusbrain jobs list
 
 # 5. Any host-specific TODOs still pending
-cat ~/.gbrain/migrations/pending-host-work.jsonl 2>/dev/null || echo "(none — all host work is done)"
+cat ~/.modusbrain/migrations/pending-host-work.jsonl 2>/dev/null || echo "(none — all host work is done)"
 
 # 6. Doctor + skillpack-check should both be clean
-gbrain doctor
-gbrain skillpack-check --quiet && echo ok
+modusbrain doctor
+modusbrain skillpack-check --quiet && echo ok
 ```
 
 ## If the fix fails
@@ -3964,15 +3964,15 @@ gbrain skillpack-check --quiet && echo ok
 Each phase is idempotent. Re-running is safe. Common failure modes:
 
 - **Phase B smoke fails:** the schema didn't apply. Check
-  `~/.gbrain/config.json` has a valid `database_url` (or `database_path`
-  for PGLite). Run `gbrain init --migrate-only` directly and look at
+  `~/.modusbrain/config.json` has a valid `database_url` (or `database_path`
+  for PGLite). Run `modusbrain init --migrate-only` directly and look at
   the error.
 - **Phase F install fails:** your host environment doesn't match any
   detected target. Pass `--target <macos|linux-systemd|ephemeral-container|linux-cron>`
   explicitly.
 - **Pending host work never clears:** your host agent hasn't shipped
   handler registrations yet. Read
-  `~/.gbrain/migrations/pending-host-work.jsonl`, open
+  `~/.modusbrain/migrations/pending-host-work.jsonl`, open
   `skills/migrations/v0.11.0.md`, and follow the host-agent instruction
   manual.
 
@@ -3989,13 +3989,13 @@ Each phase is idempotent. Re-running is safe. Common failure modes:
 
 ## docs/integrations/reliability-repair.md
 
-Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/integrations/reliability-repair.md
+Source: https://raw.githubusercontent.com/garrytan/modusbrain/master/docs/integrations/reliability-repair.md
 
 # Reliability repair (v0.12.2)
 
 If you ran v0.12.0 on real Postgres or Supabase, two bugs may have corrupted
 data already in your brain. v0.12.1 fixed the code going forward.
-v0.12.2 adds detection in `gbrain doctor` and a standalone `gbrain repair-jsonb`
+v0.12.2 adds detection in `modusbrain doctor` and a standalone `modusbrain repair-jsonb`
 command for the mechanically fixable class. PGLite users are not affected.
 
 ## What got corrupted
@@ -4014,13 +4014,13 @@ content at import time.
 ## Detect
 
 ```
-gbrain doctor
+modusbrain doctor
 ```
 
 Reports two new checks:
 
 - `jsonb_integrity` — counts double-encoded rows per table and points you
-  at `gbrain repair-jsonb`.
+  at `modusbrain repair-jsonb`.
 - `markdown_body_completeness` — heuristic for pages whose `compiled_truth`
   is suspiciously short compared to `raw_data.data ->> 'content'`.
 
@@ -4029,30 +4029,30 @@ Reports two new checks:
 For JSONB (mechanically fixable):
 
 ```
-gbrain repair-jsonb
+modusbrain repair-jsonb
 ```
 
 Runs `UPDATE <table> SET <col> = (<col>#>>'{}')::jsonb WHERE jsonb_typeof(<col>) = 'string'`
 across every affected column. Idempotent. Second run reports 0 rows. Use
 `--dry-run` to preview, `--json` for structured output. The `v0_12_2`
-migration runs this automatically on `gbrain upgrade`.
+migration runs this automatically on `modusbrain upgrade`.
 
 For truncated markdown bodies (source-dependent):
 
 ```
-gbrain sync --force
+modusbrain sync --force
 # or per-page
-gbrain import <slug> --force
+modusbrain import <slug> --force
 ```
 
 v0.12.2 cannot recover content that was already lost if you no longer have
-the source markdown file. `gbrain doctor` tells you which pages look short;
+the source markdown file. `modusbrain doctor` tells you which pages look short;
 you decide whether to re-import from source or accept the truncation.
 
 ## Verify
 
 ```
-gbrain doctor
+modusbrain doctor
 ```
 
 All four `jsonb_integrity` rows should read zero. `markdown_body_completeness`

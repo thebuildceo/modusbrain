@@ -8,7 +8,7 @@
  *   - appendCompletedMigration no-ops on double 'complete' (idempotency).
  *
  * Infrastructure: point HOME at a tmpdir so the ledger writes don't
- * stomp the real ~/.gbrain/migrations/completed.jsonl.
+ * stomp the real ~/.modusbrain/migrations/completed.jsonl.
  */
 
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
@@ -18,22 +18,22 @@ import { tmpdir } from 'os';
 
 let tmpHome: string;
 const originalHome = process.env.HOME;
-const originalGbrainHome = process.env.GBRAIN_HOME;
+const originalModusbrainHome = process.env.MODUSBRAIN_HOME;
 
 beforeEach(() => {
-  tmpHome = mkdtempSync(join(tmpdir(), 'gbrain-migration-resume-'));
-  // preferences.ts's gbrainDir() returns `$HOME/.gbrain` when GBRAIN_HOME
-  // is unset. Set HOME only; clear any inherited GBRAIN_HOME so the test
-  // body matches the migrations dir at `$tmpHome/.gbrain/migrations/`.
+  tmpHome = mkdtempSync(join(tmpdir(), 'modusbrain-migration-resume-'));
+  // preferences.ts's modusbrainDir() returns `$HOME/.modusbrain` when MODUSBRAIN_HOME
+  // is unset. Set HOME only; clear any inherited MODUSBRAIN_HOME so the test
+  // body matches the migrations dir at `$tmpHome/.modusbrain/migrations/`.
   process.env.HOME = tmpHome;
-  delete process.env.GBRAIN_HOME;
+  delete process.env.MODUSBRAIN_HOME;
 });
 
 afterEach(() => {
   if (originalHome) process.env.HOME = originalHome;
   else delete process.env.HOME;
-  if (originalGbrainHome) process.env.GBRAIN_HOME = originalGbrainHome;
-  else delete process.env.GBRAIN_HOME;
+  if (originalModusbrainHome) process.env.MODUSBRAIN_HOME = originalModusbrainHome;
+  else delete process.env.MODUSBRAIN_HOME;
   try { rmSync(tmpHome, { recursive: true, force: true }); } catch { /* ignore */ }
 });
 

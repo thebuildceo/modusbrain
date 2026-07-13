@@ -11,18 +11,18 @@ import {
 
 describe('v0.39 T14 — artifact abstraction', () => {
   test('detectArtifactKind by extension', () => {
-    expect(detectArtifactKind('/tmp/foo.gbrain-schema')).toBe('schemapack');
-    expect(detectArtifactKind('/tmp/foo.gbrain-skillpack')).toBe('skillpack');
+    expect(detectArtifactKind('/tmp/foo.modusbrain-schema')).toBe('schemapack');
+    expect(detectArtifactKind('/tmp/foo.modusbrain-skillpack')).toBe('skillpack');
     expect(detectArtifactKind('/tmp/foo.tar.gz')).toBe(null);
   });
 
   test('targetDirForKind routes to distinct subdirectories', () => {
-    expect(targetDirForKind('schemapack', '/home/u/.gbrain')).toBe('/home/u/.gbrain/schema-packs');
-    expect(targetDirForKind('skillpack', '/home/u/.gbrain')).toBe('/home/u/.gbrain/skillpacks');
+    expect(targetDirForKind('schemapack', '/home/u/.modusbrain')).toBe('/home/u/.modusbrain/schema-packs');
+    expect(targetDirForKind('skillpack', '/home/u/.modusbrain')).toBe('/home/u/.modusbrain/skillpacks');
   });
 
   test('validateManifestByKind: schemapack happy path', () => {
-    expect(() => validateManifestByKind('schemapack', { api_version: 'gbrain-schema-pack-v1' })).not.toThrow();
+    expect(() => validateManifestByKind('schemapack', { api_version: 'modusbrain-schema-pack-v1' })).not.toThrow();
   });
 
   test('validateManifestByKind: skillpack happy path', () => {
@@ -31,7 +31,7 @@ describe('v0.39 T14 — artifact abstraction', () => {
 
   test('validateManifestByKind: rejects wrong api_version', () => {
     expect(() => validateManifestByKind('schemapack', { api_version: 'gbrain-skillpack-v1' })).toThrow(/api_version/);
-    expect(() => validateManifestByKind('skillpack', { api_version: 'gbrain-schema-pack-v1' })).toThrow(/api_version/);
+    expect(() => validateManifestByKind('skillpack', { api_version: 'modusbrain-schema-pack-v1' })).toThrow(/api_version/);
   });
 
   test('validateManifestByKind: rejects non-object', () => {

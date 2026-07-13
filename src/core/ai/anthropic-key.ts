@@ -5,8 +5,8 @@
  * time (`think/index.ts`, `cycle/synthesize.ts`, `conversation-parser/llm-base.ts`).
  * Same drift class as the four colon-only model-id normalizers — one source of truth.
  *
- * Reads BOTH env (`ANTHROPIC_API_KEY`) AND the gbrain config file
- * (`anthropic_api_key` set via `gbrain config set`) so stdio MCP launches that
+ * Reads BOTH env (`ANTHROPIC_API_KEY`) AND the modusbrain config file
+ * (`anthropic_api_key` set via `modusbrain config set`) so stdio MCP launches that
  * don't inherit shell env keep working. `loadConfig` can throw on first-run
  * installs; that is swallowed and treated as "no key available."
  *

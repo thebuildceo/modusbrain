@@ -35,7 +35,7 @@ import type {
   ToolDef,
 } from '../types.ts';
 import type { BrainEngine } from '../../engine.ts';
-import type { GBrainConfig } from '../../config.ts';
+import type { ModusBrainConfig } from '../../config.ts';
 import { loadConfig } from '../../config.ts';
 import { buildBrainTools, filterAllowedTools } from '../tools/brain-allowlist.ts';
 import {
@@ -79,11 +79,11 @@ export function resolveLeaseCap(raw: string | undefined): number {
   const n = Number(raw);
   if (Number.isFinite(n) && n > 0) return n;
   throw new Error(
-    `GBRAIN_ANTHROPIC_MAX_INFLIGHT="${raw}" is invalid. ` +
+    `MODUSBRAIN_ANTHROPIC_MAX_INFLIGHT="${raw}" is invalid. ` +
     `Use a positive integer, "unlimited" (or "none"), or omit for default 32.`,
   );
 }
-const DEFAULT_MAX_CONCURRENT = resolveLeaseCap(process.env.GBRAIN_ANTHROPIC_MAX_INFLIGHT);
+const DEFAULT_MAX_CONCURRENT = resolveLeaseCap(process.env.MODUSBRAIN_ANTHROPIC_MAX_INFLIGHT);
 const DEFAULT_LEASE_TTL_MS = 120_000;
 // v0.41 Approach C: DEFAULT_SUBAGENT_SYSTEM lives in ./system-prompt.ts
 // so the renderer and the handler share one source of truth. Kept as
@@ -113,10 +113,10 @@ export interface SubagentDeps {
    */
   makeAnthropic?: () => Anthropic;
   /** Config (MCP, brain, etc.). Defaults to loadConfig(). */
-  config?: GBrainConfig;
+  config?: ModusBrainConfig;
   /** Rate-lease key. Defaults to `anthropic:messages`. */
   rateLeaseKey?: string;
-  /** Max concurrent inflight calls on that key. Defaults to GBRAIN_ANTHROPIC_MAX_INFLIGHT or 8. */
+  /** Max concurrent inflight calls on that key. Defaults to MODUSBRAIN_ANTHROPIC_MAX_INFLIGHT or 8. */
   maxConcurrent?: number;
   /** Lease TTL. Defaults to 120s. */
   leaseTtlMs?: number;
@@ -167,7 +167,7 @@ export function makeSubagentHandler(deps: SubagentDeps) {
   // site (subagent.ts invokes client.create(...) with client === sdk.messages).
   const makeAnthropic = deps.makeAnthropic ?? (() => new Anthropic());
   const client: MessagesClient = deps.client ?? makeAnthropic().messages;
-  const config = deps.config ?? loadConfig() ?? ({ engine: 'postgres' } as GBrainConfig);
+  const config = deps.config ?? loadConfig() ?? ({ engine: 'postgres' } as ModusBrainConfig);
   const rateLeaseKey = deps.rateLeaseKey ?? DEFAULT_RATE_KEY;
   const maxConcurrent = deps.maxConcurrent ?? DEFAULT_MAX_CONCURRENT;
   const leaseTtlMs = deps.leaseTtlMs ?? DEFAULT_LEASE_TTL_MS;
@@ -181,14 +181,14 @@ export function makeSubagentHandler(deps: SubagentDeps) {
     // v0.38 (S1.5 + S1.7) — capability-based gate replaces the v0.31.12
     // Anthropic-only check. The handler now routes between two paths:
     //   1. Gateway path (gateway.toolLoop, provider-agnostic) — opt in via
-    //      `gbrain config set agent.use_gateway_loop true`
+    //      `modusbrain config set agent.use_gateway_loop true`
     //   2. Legacy Anthropic-direct path (existing code below)
     // Default is the legacy path so v0.38 patch releases ship the same
     // behavior as v0.37. Users dogfood the gateway path by flipping the flag.
     //
     // Refuse-at-handler-entry when the model literally lacks tool calling
     // OR is from an unknown provider. The queue.ts gate already catches this
-    // for queue-submitted jobs; the check here covers direct `gbrain agent run`
+    // for queue-submitted jobs; the check here covers direct `modusbrain agent run`
     // invocations and any code path that bypasses the queue's capability check.
     if (data.model) {
       const verdict = classifyCapabilities(data.model);
@@ -229,7 +229,7 @@ export function makeSubagentHandler(deps: SubagentDeps) {
       throw new Error(
         `subagent job: resolved model "${model}" is non-Anthropic but agent.use_gateway_loop is not enabled. ` +
         `Enable the gateway-native loop to run on this provider: ` +
-        `\`gbrain config set agent.use_gateway_loop true\`. ` +
+        `\`modusbrain config set agent.use_gateway_loop true\`. ` +
         `Or use an Anthropic model (e.g. anthropic:claude-sonnet-4-6).`,
       );
     }
@@ -729,10 +729,10 @@ interface GatewayRunArgs {
  * Adapts the existing brain-tool registry (anthropic-shaped ToolDef) to the
  * gateway's provider-neutral `ChatToolDef` + `ToolHandler` shapes, wires
  * persistence callbacks that use the v0.38 stable-ID columns (ordinal +
- * gbrain_tool_use_id from migration v81), and invokes the gateway loop.
+ * modusbrain_tool_use_id from migration v81), and invokes the gateway loop.
  *
  * Replay semantics: loads prior `subagent_messages` + `subagent_tool_executions`,
- * builds a `ToolLoopReplayState` keyed by `gbrain_tool_use_id`. For pre-v81
+ * builds a `ToolLoopReplayState` keyed by `modusbrain_tool_use_id`. For pre-v81
  * legacy rows (ordinal NULL), the D5 read-time shim synthesizes a stable key
  * from `(job_id, message_idx, content_blocks index, tool_name)` so the
  * reconciler sees both shapes uniformly.
@@ -865,7 +865,7 @@ async function runSubagentViaGateway(args: GatewayRunArgs): Promise<SubagentResu
       heartbeat('llm_call_completed', { turn_idx: turnIdx, tokens: usage });
     },
     onToolCallStart: async (turnIdx, messageIdx, ordinal, toolName, input, providerToolCallId) => {
-      // CRITICAL — read back the canonical gbrain_tool_use_id from RETURNING,
+      // CRITICAL — read back the canonical modusbrain_tool_use_id from RETURNING,
       // NOT the locally-generated UUID. On crash-replay the (job_id,
       // message_idx, ordinal) row already exists with the ORIGINAL UUID from
       // the pre-crash run; the ON CONFLICT DO UPDATE keeps it. If we
@@ -875,33 +875,33 @@ async function runSubagentViaGateway(args: GatewayRunArgs): Promise<SubagentResu
       // circuit silently breaks and the tool re-executes. Pinned by
       // test/e2e/subagent-crash-replay-multi-provider.test.ts.
       const candidateId = randomUUIDv7();
-      const rows = await engine.executeRaw<{ gbrain_tool_use_id: string }>(
+      const rows = await engine.executeRaw<{ modusbrain_tool_use_id: string }>(
         `INSERT INTO subagent_tool_executions
-           (job_id, message_idx, tool_use_id, tool_name, input, status, schema_version, ordinal, gbrain_tool_use_id, provider_id)
+           (job_id, message_idx, tool_use_id, tool_name, input, status, schema_version, ordinal, modusbrain_tool_use_id, provider_id)
          VALUES ($1, $2, $3, $4, $5::text::jsonb, 'pending', 2, $6, $7, $8)
          ON CONFLICT (job_id, message_idx, ordinal) DO UPDATE
            SET status = subagent_tool_executions.status
-         RETURNING gbrain_tool_use_id::text AS gbrain_tool_use_id`,
+         RETURNING modusbrain_tool_use_id::text AS modusbrain_tool_use_id`,
         [ctx.id, messageIdx, providerToolCallId, toolName, JSON.stringify(input ?? null), ordinal, candidateId, recipeIdFromModel(model)],
       );
-      const gbrainToolUseId = rows[0]?.gbrain_tool_use_id ?? candidateId;
+      const modusbrainToolUseId = rows[0]?.modusbrain_tool_use_id ?? candidateId;
       heartbeat('tool_called', { turn_idx: turnIdx, tool_name: toolName });
-      return { gbrainToolUseId };
+      return { modusbrainToolUseId };
     },
-    onToolCallComplete: async (gbrainToolUseId, output) => {
+    onToolCallComplete: async (modusbrainToolUseId, output) => {
       await engine.executeRaw(
         `UPDATE subagent_tool_executions
            SET status = 'complete', output = $1::text::jsonb, ended_at = now()
-         WHERE gbrain_tool_use_id::text = $2`,
-        [JSON.stringify(output ?? null), gbrainToolUseId],
+         WHERE modusbrain_tool_use_id::text = $2`,
+        [JSON.stringify(output ?? null), modusbrainToolUseId],
       );
     },
-    onToolCallFailed: async (gbrainToolUseId, errorMsg) => {
+    onToolCallFailed: async (modusbrainToolUseId, errorMsg) => {
       await engine.executeRaw(
         `UPDATE subagent_tool_executions
            SET status = 'failed', error = $1, ended_at = now()
-         WHERE gbrain_tool_use_id::text = $2`,
-        [errorMsg, gbrainToolUseId],
+         WHERE modusbrain_tool_use_id::text = $2`,
+        [errorMsg, modusbrainToolUseId],
       );
     },
     onHeartbeat: heartbeat,
@@ -947,7 +947,7 @@ function recipeIdFromModel(modelString: string): string {
  *   stripProviderPrefix('anthropic:claude-sonnet-4-6') === 'claude-sonnet-4-6'
  *   stripProviderPrefix('claude-sonnet-4-6') === 'claude-sonnet-4-6'
  *
- * v0.41 Bug 3 — pre-fix, `gbrain agent run --model anthropic:claude-sonnet-4-6`
+ * v0.41 Bug 3 — pre-fix, `modusbrain agent run --model anthropic:claude-sonnet-4-6`
  * sent the prefixed string straight into `client.messages.create()`, which
  * Anthropic rejects with "model not found." Omitting `--model` worked because
  * `resolveModel()` returns the bare id; explicit-model users hit the bug.
@@ -1024,7 +1024,7 @@ interface PriorToolV2Row {
 /**
  * Load prior tool executions keyed by a stable key.
  *
- *   - v2 rows: gbrain_tool_use_id is the stable key (set at first observation
+ *   - v2 rows: modusbrain_tool_use_id is the stable key (set at first observation
  *     by onToolCallStart).
  *   - v1 legacy rows: D5 shim synthesizes a stable key from
  *     (job_id, message_idx, ordinal-position-by-array-index, tool_name).
@@ -1034,7 +1034,7 @@ interface PriorToolV2Row {
  */
 async function loadPriorToolsV2(engine: BrainEngine, jobId: number): Promise<PriorToolV2Row[]> {
   const rows = await engine.executeRaw<Record<string, unknown>>(
-    `SELECT message_idx, tool_use_id, tool_name, ordinal, gbrain_tool_use_id::text AS gbrain_tool_use_id,
+    `SELECT message_idx, tool_use_id, tool_name, ordinal, modusbrain_tool_use_id::text AS modusbrain_tool_use_id,
             status, output, error
        FROM subagent_tool_executions
       WHERE job_id = $1
@@ -1042,9 +1042,9 @@ async function loadPriorToolsV2(engine: BrainEngine, jobId: number): Promise<Pri
     [jobId],
   );
   return rows.map(r => {
-    const gbrainId = r.gbrain_tool_use_id as string | null;
-    const stableKey = gbrainId
-      ? gbrainId
+    const modusbrainId = r.modusbrain_tool_use_id as string | null;
+    const stableKey = modusbrainId
+      ? modusbrainId
       // D5 legacy shim: derive a stable key from (job, msg_idx, tool_name, tool_use_id).
       // Pre-v81 rows don't have ordinal; the provider tool_use_id is stable
       // within a single Anthropic turn so it's safe as a fallback hash input.

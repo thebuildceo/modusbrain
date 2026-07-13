@@ -3,7 +3,7 @@
   "recipe": "agent-voice",
   "version": "0.1.0",
   "install_kind": "copy-into-host-repo",
-  "description": "src → target mapping consumed by `gbrain integrations install agent-voice`. The install command reads this manifest, computes SHA-256 of each source file at copy time, writes the per-file hash to <host>/services/voice-agent/.gbrain-source.json so --refresh can do three-way classification (unchanged-identical / unchanged-stale / locally-modified).",
+  "description": "src → target mapping consumed by `modusbrain integrations install agent-voice`. The install command reads this manifest, computes SHA-256 of each source file at copy time, writes the per-file hash to <host>/services/voice-agent/.modusbrain-source.json so --refresh can do three-way classification (unchanged-identical / unchanged-stale / locally-modified).",
   "target_root_relative_to_host_repo": "services/voice-agent",
   "skills_target_root_relative_to_host_repo": "skills",
   "files": [
@@ -11,7 +11,7 @@
     { "src": "code/server.mjs", "target": "services/voice-agent/code/server.mjs", "mode": "0755" },
     { "src": "code/prompt.mjs", "target": "services/voice-agent/code/prompt.mjs", "mode": "0644" },
     { "src": "code/tools.mjs", "target": "services/voice-agent/code/tools.mjs", "mode": "0644" },
-    { "src": "code/gbrain-client.mjs", "target": "services/voice-agent/code/gbrain-client.mjs", "mode": "0644" },
+    { "src": "code/modusbrain-client.mjs", "target": "services/voice-agent/code/modusbrain-client.mjs", "mode": "0644" },
     { "src": "code/lib/personas/personas.mjs", "target": "services/voice-agent/code/lib/personas/personas.mjs", "mode": "0644" },
     { "src": "code/lib/personas/mars.mjs", "target": "services/voice-agent/code/lib/personas/mars.mjs", "mode": "0644" },
     { "src": "code/lib/personas/venus.mjs", "target": "services/voice-agent/code/lib/personas/venus.mjs", "mode": "0644" },

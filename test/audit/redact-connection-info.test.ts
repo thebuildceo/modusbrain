@@ -19,13 +19,13 @@ import {
 describe('redactConnectionInfo: per-pattern coverage', () => {
   it('case 1 — postgres:// URL with embedded credentials', () => {
     const out = redactConnectionInfo(
-      'connection failed: postgres://garry:hunter2@db.example.com:5432/gbrain',
+      'connection failed: postgres://garry:hunter2@db.example.com:5432/modusbrain',
     );
     expect(out).toContain('<REDACTED:pg_url>');
     expect(out).not.toContain('garry');
     expect(out).not.toContain('hunter2');
     expect(out).not.toContain('db.example.com');
-    expect(out).not.toContain('5432/gbrain');
+    expect(out).not.toContain('5432/modusbrain');
   });
 
   it('case 2 — postgresql:// (with -ql) treated the same as postgres://', () => {

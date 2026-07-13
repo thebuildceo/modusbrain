@@ -1,5 +1,5 @@
 /**
- * `gbrain sync` cost-gate wiring regressions (PGLite).
+ * `modusbrain sync` cost-gate wiring regressions (PGLite).
  *
  * Pure shouldBlockSync / willEmbedSynchronously / parseUsdLimit logic is pinned
  * in test/sync-cost-preview.test.ts. THIS file pins the end-to-end wiring in
@@ -60,7 +60,7 @@ beforeEach(async () => {
     embedding_dimensions: 1536,
     env: { OPENAI_API_KEY: 'sk-test-costgate' },
   });
-  repoPath = mkdtempSync(join(tmpdir(), 'gbrain-costgate-'));
+  repoPath = mkdtempSync(join(tmpdir(), 'modusbrain-costgate-'));
   execSync('git init', { cwd: repoPath, stdio: 'pipe' });
   execSync('git config user.email "t@t.com"', { cwd: repoPath, stdio: 'pipe' });
   execSync('git config user.name "T"', { cwd: repoPath, stdio: 'pipe' });

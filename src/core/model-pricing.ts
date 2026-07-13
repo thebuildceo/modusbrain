@@ -53,7 +53,7 @@ export interface ModelPricing {
 export const CANONICAL_PRICING: Record<string, ModelPricing> = {
   // ── Anthropic ──────────────────────────────────────────────────────────
   // Opus 4.x: $5 in / $25 out. 4.8 (released 2026-05-28) shares 4.7's
-  // per-token rate — closes gbrain#1819.
+  // per-token rate — closes modusbrain#1819.
   'anthropic:claude-opus-4-8':            { input:  5.00, output: 25.00 },
   'anthropic:claude-opus-4-7':            { input:  5.00, output: 25.00 },
   'anthropic:claude-opus-4-6':            { input:  5.00, output: 25.00 },

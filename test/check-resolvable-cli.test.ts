@@ -142,7 +142,7 @@ describe('check-resolvable — unit: resolveSkillsDir', () => {
   it('v0.31.7: empty cwd falls back to install-path (finds bundled skills/)', () => {
     // Temporarily chdir to a guaranteed-empty tmpdir. findRepoRoot from cwd
     // walks up and fails — but autoDetectSkillsDirReadOnly's tier-5
-    // install-path fallback then walks up from the gbrain module's own
+    // install-path fallback then walks up from the modusbrain module's own
     // location and finds the bundled skills/ dir. This is the v0.31.7
     // capability: doctor and check-resolvable work from anywhere.
     //
@@ -154,7 +154,7 @@ describe('check-resolvable — unit: resolveSkillsDir', () => {
     try {
       process.chdir(empty);
       const r = resolveSkillsDir({ help: false, json: false, fix: false, dryRun: false, verbose: false, strict: false, skillsDir: null });
-      // Install-path fallback succeeds when test runs inside the gbrain repo.
+      // Install-path fallback succeeds when test runs inside the modusbrain repo.
       expect(r.error).toBeNull();
       expect(r.dir).toMatch(/\/skills$/);
       expect(r.source).toBe('install_path');
@@ -165,9 +165,9 @@ describe('check-resolvable — unit: resolveSkillsDir', () => {
   });
 
   it('finds skills via cwd_walk_up when cwd is inside a repo (no --skills-dir)', () => {
-    // Running from this test file — we're inside the real gbrain repo.
+    // Running from this test file — we're inside the real modusbrain repo.
     // v0.33 added the cwd_walk_up tier ahead of repo_root, so the same
-    // skills/ dir is matched via the broader (no gbrain-shape gate)
+    // skills/ dir is matched via the broader (no modusbrain-shape gate)
     // path. Behavior unchanged — source label updated. The repo_root
     // tier is now functionally subsumed; kept in the type union for
     // back-compat. See src/core/repo-root.ts.
@@ -223,7 +223,7 @@ describe('check-resolvable — unit: DEFERRED', () => {
 // Integration tests: subprocess via bun src/cli.ts (cwd = repo root)
 // ---------------------------------------------------------------------------
 
-describe('gbrain check-resolvable CLI — integration', () => {
+describe('modusbrain check-resolvable CLI — integration', () => {
   const created: string[] = [];
   afterEach(() => {
     while (created.length) {
@@ -235,7 +235,7 @@ describe('gbrain check-resolvable CLI — integration', () => {
   it('prints usage and exits 0 on --help', () => {
     const r = run(['--help']);
     expect(r.status).toBe(0);
-    expect(r.stdout).toContain('gbrain check-resolvable');
+    expect(r.stdout).toContain('modusbrain check-resolvable');
     expect(r.stdout).toContain('--json');
     expect(r.stdout).toContain('--fix');
     expect(r.stdout).toContain('--strict');
@@ -378,8 +378,8 @@ describe('gbrain check-resolvable CLI — integration', () => {
   });
 
   // v0.31.7 D6 regression guard: --fix must refuse install-path fallback.
-  // Without this gate, `cd ~ && gbrain check-resolvable --fix` would silently
-  // mutate SKILL.md files in the bundled gbrain repo via autoFixDryViolations.
+  // Without this gate, `cd ~ && modusbrain check-resolvable --fix` would silently
+  // mutate SKILL.md files in the bundled modusbrain repo via autoFixDryViolations.
   // Codex caught this leak in the v0.31.7 ship review.
   it('v0.31.7 D6: --fix refuses when source is install_path', () => {
     // Run from a guaranteed-empty tempdir so the install-path fallback fires.
@@ -388,13 +388,13 @@ describe('gbrain check-resolvable CLI — integration', () => {
       // Pass --fix; expect refusal exit + clear error message.
       const r = bunSpawnSync( ['run', CLI, 'check-resolvable', '--fix'], {
         cwd: empty,
-        env: { ...process.env, OPENCLAW_WORKSPACE: '', GBRAIN_SKILLS_DIR: '' },
+        env: { ...process.env, OPENCLAW_WORKSPACE: '', MODUSBRAIN_SKILLS_DIR: '' },
         encoding: 'utf-8',
       });
       expect(r.status).toBe(1);
       expect(r.stderr).toContain('install-path fallback');
       expect(r.stderr).toContain('refused');
-      expect(r.stderr).toMatch(/GBRAIN_SKILLS_DIR|OPENCLAW_WORKSPACE|--skills-dir/);
+      expect(r.stderr).toMatch(/MODUSBRAIN_SKILLS_DIR|OPENCLAW_WORKSPACE|--skills-dir/);
     } finally {
       rmSync(empty, { recursive: true, force: true });
     }

@@ -1,7 +1,7 @@
 /**
  * Out-of-band hard-deadline watchdog (#1633).
  *
- * THE PROBLEM. A `gbrain sync` that spins (e.g. synchronous catastrophic-regex
+ * THE PROBLEM. A `modusbrain sync` that spins (e.g. synchronous catastrophic-regex
  * in pack link-inference) STARVES the main event loop. When the loop never
  * yields, the SIGTERM handler (process-cleanup.ts) can't run, a `--timeout`
  * `setTimeout` can't fire, and the abort-flag checks between import iterations

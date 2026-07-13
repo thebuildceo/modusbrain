@@ -31,9 +31,9 @@ beforeEach(async () => {
   // MinionQueue.ensureSchema requires (full resetPgliteState wipes it).
   // Same pattern as test/minions.test.ts.
   await engine.executeRaw('DELETE FROM minion_jobs').catch(() => {});
-  await engine.executeRaw('DELETE FROM gbrain_cycle_locks').catch(() => {});
+  await engine.executeRaw('DELETE FROM modusbrain_cycle_locks').catch(() => {});
   await engine.executeRaw(`DELETE FROM sources WHERE id <> 'default'`).catch(() => {});
-  brainDir = mkdtempSync(join(tmpdir(), 'gbrain-autopilot-handler-'));
+  brainDir = mkdtempSync(join(tmpdir(), 'modusbrain-autopilot-handler-'));
 });
 
 async function seedSource(id: string, opts: { archived?: boolean } = {}): Promise<void> {

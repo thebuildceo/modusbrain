@@ -4,7 +4,7 @@
  *
  * Composes the foundation pieces:
  *   resolveSource → loadSkillpackManifest → askTrust → enumerateScaffoldEntries
- *   → copyArtifacts → saveState (~/.gbrain/skillpack-state.json) → buildBootstrapDisplay
+ *   → copyArtifacts → saveState (~/.modusbrain/skillpack-state.json) → buildBootstrapDisplay
  *
  * Mirrors the contracts of v0.36's `runScaffold` (no managed-block writes,
  * refuses to overwrite, partial-state policy via enumerateScaffoldEntries +
@@ -72,7 +72,7 @@ export class ScaffoldThirdPartyError extends Error {
   constructor(
     message: string,
     public code:
-      | 'gbrain_version_too_old'
+      | 'modusbrain_version_too_old'
       | 'manifest_invalid'
       | 'scaffold_failed',
   ) {
@@ -97,7 +97,7 @@ function semverGte(actual: string, required: string): boolean {
 
 export async function runScaffoldThirdParty(
   opts: ScaffoldThirdPartyOptions,
-  currentGbrainVersion: string,
+  currentModusbrainVersion: string,
 ): Promise<ScaffoldThirdPartyResult> {
   // 1. Load + validate the manifest from the resolved pack root.
   let manifest: SkillpackManifest;
@@ -110,11 +110,11 @@ export async function runScaffoldThirdParty(
     );
   }
 
-  // 2. gbrain version check.
-  if (!semverGte(currentGbrainVersion, manifest.gbrain_min_version)) {
+  // 2. modusbrain version check.
+  if (!semverGte(currentModusbrainVersion, manifest.modusbrain_min_version)) {
     throw new ScaffoldThirdPartyError(
-      `skillpack ${manifest.name} requires gbrain >= ${manifest.gbrain_min_version}; you have ${currentGbrainVersion}. Run \`gbrain upgrade\` first.`,
-      'gbrain_version_too_old',
+      `skillpack ${manifest.name} requires modusbrain >= ${manifest.modusbrain_min_version}; you have ${currentModusbrainVersion}. Run \`modusbrain upgrade\` first.`,
+      'modusbrain_version_too_old',
     );
   }
 
@@ -152,7 +152,7 @@ export async function runScaffoldThirdParty(
   let entries: ScaffoldEntry[];
   try {
     entries = enumerateScaffoldEntries({
-      gbrainRoot: opts.resolved.path,
+      modusbrainRoot: opts.resolved.path,
       skillSlug: undefined, // third-party scaffold lands the whole pack
       manifest: bundleManifest,
     });

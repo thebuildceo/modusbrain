@@ -3,7 +3,7 @@
  *
  * Verifies the event trigger auto-enables RLS on newly created public.* tables
  * across CREATE TABLE / CREATE TABLE AS / SELECT INTO, plus the one-time
- * backfill of existing public.* tables without RLS (modulo the GBRAIN:RLS_EXEMPT
+ * backfill of existing public.* tables without RLS (modulo the MODUSBRAIN:RLS_EXEMPT
  * exemption that doctor honors). Postgres-only — PGLite has no RLS or event
  * triggers; that no-op is asserted in test/migrate.test.ts.
  *
@@ -189,15 +189,15 @@ describeE2E('migration v35: auto_rls_event_trigger', () => {
     }
   });
 
-  test('backfill respects GBRAIN:RLS_EXEMPT comment (matches doctor regex)', async () => {
+  test('backfill respects MODUSBRAIN:RLS_EXEMPT comment (matches doctor regex)', async () => {
     const conn = getConn();
     await conn`DROP EVENT TRIGGER IF EXISTS auto_rls_on_create_table`;
     try {
       await conn`CREATE TABLE _test_backfill_exempt (id serial PRIMARY KEY)`;
       await conn`ALTER TABLE _test_backfill_exempt DISABLE ROW LEVEL SECURITY`;
-      // Comment must match doctor.ts EXEMPT_RE: /^GBRAIN:RLS_EXEMPT\s+reason=\S.{3,}/
+      // Comment must match doctor.ts EXEMPT_RE: /^MODUSBRAIN:RLS_EXEMPT\s+reason=\S.{3,}/
       // — "test exempt" is 11 chars after `reason=`, well over the .{3,} floor.
-      await conn`COMMENT ON TABLE _test_backfill_exempt IS 'GBRAIN:RLS_EXEMPT reason=test exempt'`;
+      await conn`COMMENT ON TABLE _test_backfill_exempt IS 'MODUSBRAIN:RLS_EXEMPT reason=test exempt'`;
 
       // Re-run the migration. Backfill should skip this row.
       await conn.unsafe(v35Sql);

@@ -1,5 +1,5 @@
 /**
- * CLI handler for `gbrain jobs` subcommands.
+ * CLI handler for `modusbrain jobs` subcommands.
  * Thin wrapper around MinionQueue and MinionWorker.
  */
 
@@ -63,13 +63,13 @@ export function parseMaxRssFlag(args: string[]): number | undefined {
   return parsed;
 }
 
-/** Parse `--nice N` (then `GBRAIN_NICE` env). Returns:
+/** Parse `--nice N` (then `MODUSBRAIN_NICE` env). Returns:
  *  - undefined if absent (no priority change — inherit)
  *  - the validated integer in [-20, 19] otherwise
  *  Errors and exits the process on non-integer / out-of-range input (mirrors
  *  parseMaxRssFlag's fail-fast). Flag wins over env. (issue #1815) */
 export function parseNiceFlag(args: string[], env: NodeJS.ProcessEnv = process.env): number | undefined {
-  const raw = parseFlag(args, '--nice') ?? env.GBRAIN_NICE;
+  const raw = parseFlag(args, '--nice') ?? env.MODUSBRAIN_NICE;
   if (raw === undefined || raw === '') return undefined;
   try {
     return parseNiceValue(raw);
@@ -80,7 +80,7 @@ export function parseNiceFlag(args: string[], env: NodeJS.ProcessEnv = process.e
 }
 
 export function resolveWorkerConcurrency(args: string[], env: NodeJS.ProcessEnv = process.env): number {
-  const raw = parseFlag(args, '--concurrency') ?? env.GBRAIN_WORKER_CONCURRENCY ?? '1';
+  const raw = parseFlag(args, '--concurrency') ?? env.MODUSBRAIN_WORKER_CONCURRENCY ?? '1';
   const parsed = parseInt(raw, 10);
   // Without validation, NaN / 0 / negative values flow through to the worker
   // loop where `inFlight.size < concurrency` is always false → the worker
@@ -90,9 +90,9 @@ export function resolveWorkerConcurrency(args: string[], env: NodeJS.ProcessEnv 
   if (!Number.isFinite(parsed) || parsed < 1) {
     const source = parseFlag(args, '--concurrency') !== undefined
       ? '--concurrency flag'
-      : 'GBRAIN_WORKER_CONCURRENCY env';
+      : 'MODUSBRAIN_WORKER_CONCURRENCY env';
     process.stderr.write(
-      `[gbrain jobs] invalid concurrency from ${source} (${JSON.stringify(raw)}); ` +
+      `[modusbrain jobs] invalid concurrency from ${source} (${JSON.stringify(raw)}); ` +
       `falling back to 1. Set a positive integer.\n`
     );
     return 1;
@@ -136,10 +136,10 @@ export async function runJobs(engine: BrainEngine, args: string[]): Promise<void
   const sub = args[0];
 
   if (!sub || sub === '--help' || sub === '-h') {
-    console.log(`gbrain jobs — Minions job queue
+    console.log(`modusbrain jobs — Minions job queue
 
 USAGE
-  gbrain jobs submit <name> [--params JSON] [--follow] [--priority N]
+  modusbrain jobs submit <name> [--params JSON] [--follow] [--priority N]
                             [--delay Nms] [--max-attempts N] [--max-stalled N]
                             [--max-waiting N]
                             [--backoff-type fixed|exponential] [--backoff-delay Nms]
@@ -147,17 +147,17 @@ USAGE
                             [--idempotency-key K] [--queue Q] [--dry-run]
                             [--redact-secrets]   (shell only; scrubs inherit
                                                   values from stdout/stderr)
-  gbrain jobs list [--status S] [--queue Q] [--limit N]
-  gbrain jobs get <id>
-  gbrain jobs cancel <id>
-  gbrain jobs retry <id>
-  gbrain jobs prune [--older-than 30d]
-  gbrain jobs delete <id>
-  gbrain jobs stats
-  gbrain jobs smoke
-  gbrain jobs work [--queue Q] [--concurrency N] [--max-rss MB]
+  modusbrain jobs list [--status S] [--queue Q] [--limit N]
+  modusbrain jobs get <id>
+  modusbrain jobs cancel <id>
+  modusbrain jobs retry <id>
+  modusbrain jobs prune [--older-than 30d]
+  modusbrain jobs delete <id>
+  modusbrain jobs stats
+  modusbrain jobs smoke
+  modusbrain jobs work [--queue Q] [--concurrency N] [--max-rss MB]
                    [--health-interval MS] [--nice N]
-  gbrain jobs supervisor [start] [--detach] [--json]
+  modusbrain jobs supervisor [start] [--detach] [--json]
                          [--concurrency N] [--queue Q] [--pid-file PATH]
                          [--max-crashes N] [--health-interval N]
                          [--allow-shell-jobs] [--cli-path PATH]
@@ -166,18 +166,18 @@ USAGE
     --nice N   OS scheduling priority, -20 (highest) to 19 (nicest). Lowers CPU
                priority without cutting concurrency — full throughput when the
                box is idle, yields to foreground work when it's busy. Propagates
-               to spawned workers and their children. Env: GBRAIN_NICE (flag
-               wins). Effective value shows in 'jobs stats' and 'gbrain doctor'.
+               to spawned workers and their children. Env: MODUSBRAIN_NICE (flag
+               wins). Effective value shows in 'jobs stats' and 'modusbrain doctor'.
                Negative values need root.
-  gbrain jobs supervisor status [--json] [--pid-file PATH]
-  gbrain jobs supervisor stop [--json] [--pid-file PATH]
+  modusbrain jobs supervisor status [--json] [--pid-file PATH]
+  modusbrain jobs supervisor stop [--json] [--pid-file PATH]
 
-    Auto-restarting wrapper around 'gbrain jobs work'. Spawns the worker
+    Auto-restarting wrapper around 'modusbrain jobs work'. Spawns the worker
     as a child process and restarts on crash with exponential backoff
-    (1s -> 60s cap). Writes a PID file to ~/.gbrain/supervisor.pid by
-    default (override via --pid-file or GBRAIN_SUPERVISOR_PID_FILE env).
+    (1s -> 60s cap). Writes a PID file to ~/.modusbrain/supervisor.pid by
+    default (override via --pid-file or MODUSBRAIN_SUPERVISOR_PID_FILE env).
     Lifecycle events are appended to
-      \${GBRAIN_AUDIT_DIR:-~/.gbrain/audit}/supervisor-YYYY-Www.jsonl
+      \${MODUSBRAIN_AUDIT_DIR:-~/.modusbrain/audit}/supervisor-YYYY-Www.jsonl
 
     SUBCOMMANDS
       start        (default) Launch the supervisor. --detach returns a
@@ -196,11 +196,11 @@ USAGE
       3  PID file unwritable (permission / path error)
 
     EXAMPLES
-      gbrain jobs supervisor --concurrency 4         # foreground (Ctrl-C stops)
-      gbrain jobs supervisor start --detach --json   # agent-friendly: fork + return JSON
-      gbrain jobs supervisor status --json           # machine-readable health check
-      gbrain jobs supervisor stop                    # graceful stop
-      gbrain jobs supervisor --json --allow-shell-jobs  # JSONL events + shell-exec on
+      modusbrain jobs supervisor --concurrency 4         # foreground (Ctrl-C stops)
+      modusbrain jobs supervisor start --detach --json   # agent-friendly: fork + return JSON
+      modusbrain jobs supervisor status --json           # machine-readable health check
+      modusbrain jobs supervisor stop                    # graceful stop
+      modusbrain jobs supervisor --json --allow-shell-jobs  # JSONL events + shell-exec on
 
 HANDLER TYPES (built in)
   sync              Pull and embed new pages from the repo
@@ -210,7 +210,7 @@ HANDLER TYPES (built in)
   extract           Extract links + timeline entries; '{"mode":"all"}'
   backlinks         Check or fix back-links; '{"action":"fix"}'
   autopilot-cycle   One autopilot pass (sync+extract+embed+backlinks)
-  shell             Run a command or argv. Requires GBRAIN_ALLOW_SHELL_JOBS=1
+  shell             Run a command or argv. Requires MODUSBRAIN_ALLOW_SHELL_JOBS=1
                     on the worker. Params: {cmd?, argv?, cwd, env?}.
                     See: docs/guides/minions-shell-jobs.md
 `);
@@ -223,7 +223,7 @@ HANDLER TYPES (built in)
     case 'submit': {
       const name = args[1];
       if (!name) {
-        console.error('Error: job name required. Usage: gbrain jobs submit <name>');
+        console.error('Error: job name required. Usage: modusbrain jobs submit <name>');
         process.exit(1);
       }
 
@@ -355,18 +355,18 @@ HANDLER TYPES (built in)
       } catch { /* audit failures never block submission */ }
 
       // Starvation warning (DX polish). Fire for every non-`--follow` shell submit
-      // regardless of the submitter's own `GBRAIN_ALLOW_SHELL_JOBS` — the submitter
+      // regardless of the submitter's own `MODUSBRAIN_ALLOW_SHELL_JOBS` — the submitter
       // env is a weak proxy for the worker env (they may run on different machines),
       // so the warning remains useful any time the job might sit in 'waiting'.
       if (!follow && name.trim() === 'shell') {
         process.stderr.write(
-          `\n⚠  Shell jobs require GBRAIN_ALLOW_SHELL_JOBS=1 on the worker process.\n` +
+          `\n⚠  Shell jobs require MODUSBRAIN_ALLOW_SHELL_JOBS=1 on the worker process.\n` +
           `   Your job was queued (id=${job.id}) but will sit in 'waiting' until a\n` +
           `   worker with the env flag starts. To run now:\n\n` +
-          `     GBRAIN_ALLOW_SHELL_JOBS=1 gbrain jobs submit shell \\\n` +
+          `     MODUSBRAIN_ALLOW_SHELL_JOBS=1 modusbrain jobs submit shell \\\n` +
           `       --params '...' --follow\n\n` +
           `   Or start a persistent worker (Postgres only — PGLite uses --follow):\n\n` +
-          `     GBRAIN_ALLOW_SHELL_JOBS=1 gbrain jobs work\n\n`,
+          `     MODUSBRAIN_ALLOW_SHELL_JOBS=1 modusbrain jobs work\n\n`,
         );
       }
 
@@ -458,7 +458,7 @@ HANDLER TYPES (built in)
 
     case 'get': {
       const id = parseInt(args[1], 10);
-      if (isNaN(id)) { console.error('Error: job ID required. Usage: gbrain jobs get <id>'); process.exit(1); }
+      if (isNaN(id)) { console.error('Error: job ID required. Usage: modusbrain jobs get <id>'); process.exit(1); }
 
       // v0.32: thin-client routing (mirrors `list` branch above).
       const cfg = loadConfig();
@@ -606,7 +606,7 @@ HANDLER TYPES (built in)
         // Same threshold the doctor `wedged_queue` check uses, so the two
         // advisory surfaces agree (issue #1801).
         const wedgeMins = (() => {
-          const raw = parseInt(process.env.GBRAIN_WEDGED_QUEUE_WARN_MINUTES ?? '', 10);
+          const raw = parseInt(process.env.MODUSBRAIN_WEDGED_QUEUE_WARN_MINUTES ?? '', 10);
           return Number.isFinite(raw) && raw > 0 ? raw : 15;
         })();
         const wedged = w.active_healthy === 0 && w.waiting > 0 && (mins === null || mins > wedgeMins);
@@ -615,8 +615,8 @@ HANDLER TYPES (built in)
           console.log(
             `\n  ⚠  WEDGED QUEUE '${w.queue}': ${w.waiting} waiting, 0 active (live-lock), ${since}.\n` +
             `     A worker may be alive but stuck (dead DB pool / stuck handler). Fix:\n` +
-            `       gbrain jobs supervisor stop && gbrain jobs supervisor start   # rebuild a fresh pool\n` +
-            `       gbrain jobs retry <id>                                        # for dead-lettered jobs`,
+            `       modusbrain jobs supervisor stop && modusbrain jobs supervisor start   # rebuild a fresh pool\n` +
+            `       modusbrain jobs retry <id>                                        # for dead-lettered jobs`,
           );
         }
       }
@@ -643,7 +643,7 @@ HANDLER TYPES (built in)
           const completed = parseInt(completedRows[0]?.count ?? '0', 10);
           const tag = completed > 0
             ? `(${completed} subagent job${completed === 1 ? '' : 's'} completed, throughput healthy)`
-            : `(no subagent jobs completed — cap may be too tight; \`export GBRAIN_ANTHROPIC_MAX_INFLIGHT=64\`)`;
+            : `(no subagent jobs completed — cap may be too tight; \`export MODUSBRAIN_ANTHROPIC_MAX_INFLIGHT=64\`)`;
           console.log(`  Lease pressure (1h): ${lpCount} bounce${lpCount === 1 ? '' : 's'} ${tag}`);
         } else {
           console.log(`  Lease pressure (1h): 0 bounces`);
@@ -672,7 +672,7 @@ HANDLER TYPES (built in)
             console.log(`\n  Error clusters (24h):`);
             for (const c of clusters.slice(0, 5)) {
               const sample = c.sample_ids.length > 0
-                ? `  (e.g. \`gbrain jobs get ${c.sample_ids[0]}\`)` : '';
+                ? `  (e.g. \`modusbrain jobs get ${c.sample_ids[0]}\`)` : '';
               console.log(`    ${String(c.count).padStart(4)} × ${c.cluster.padEnd(22)}${sample}`);
             }
             if (clusters.length > 5) {
@@ -681,7 +681,7 @@ HANDLER TYPES (built in)
           }
         } catch (e) {
           // error-classify import or SQL fail. Don't block stats output.
-          if (process.env.GBRAIN_DEBUG === '1') {
+          if (process.env.MODUSBRAIN_DEBUG === '1') {
             console.error(`[jobs stats] cluster-errors skipped: ${e instanceof Error ? e.message : String(e)}`);
           }
         }
@@ -835,7 +835,7 @@ HANDLER TYPES (built in)
       const tag = tags.length > 0 ? ` + ${tags.join(' + ')}` : '';
       console.log(`SMOKE PASS — Minions healthy${tag} in ${elapsedSec}s (engine: ${engineLabel})`);
       if (engineLabel === 'pglite') {
-        console.log('Note: the `gbrain jobs work` daemon requires Postgres. PGLite');
+        console.log('Note: the `modusbrain jobs work` daemon requires Postgres. PGLite');
         console.log('supports inline execution only (`submit --follow`).');
       }
       try { await queue.removeJob(job.id); } catch { /* non-fatal cleanup */ }
@@ -847,7 +847,7 @@ HANDLER TYPES (built in)
       const config = (await import('../core/config.ts')).loadConfig();
       if (config?.engine === 'pglite') {
         console.error('Error: Worker daemon requires Postgres. PGLite uses an exclusive file lock that blocks other processes.');
-        console.error('Use --follow for inline execution: gbrain jobs submit <name> --follow');
+        console.error('Use --follow for inline execution: modusbrain jobs submit <name> --follow');
         process.exit(1);
       }
 
@@ -864,7 +864,7 @@ HANDLER TYPES (built in)
 
       // --health-interval: self-health-check period in ms. 0 disables. Default: 60_000 (60s).
       // Provides DB liveness probes + stall detection for bare workers.
-      // Automatically skipped when running under a supervisor (GBRAIN_SUPERVISED=1).
+      // Automatically skipped when running under a supervisor (MODUSBRAIN_SUPERVISED=1).
       // Validated aggressively (parity with --max-rss): reject NaN/negative/non-integer
       // values, and reject suspicious sub-1000ms values that are likely a unit-confusion
       // typo (e.g. "--health-interval 60" thinking the unit is seconds).
@@ -896,7 +896,7 @@ HANDLER TYPES (built in)
         niceResult = applyNiceness(niceVal);
         if (!niceResult.applied) {
           console.error(
-            `[gbrain jobs] could not set niceness to ${niceVal}: ${niceResult.error ?? 'unknown'}. ` +
+            `[modusbrain jobs] could not set niceness to ${niceVal}: ${niceResult.error ?? 'unknown'}. ` +
             `Negative nice needs privilege; running at niceness ${niceResult.effective ?? 'unchanged'}.`,
           );
         }
@@ -929,7 +929,7 @@ HANDLER TYPES (built in)
         process.exit(1);
       });
 
-      const isSupervisedChild = process.env.GBRAIN_SUPERVISED === '1';
+      const isSupervisedChild = process.env.MODUSBRAIN_SUPERVISED === '1';
       let watchdogNote = '';
       if (maxRssMb > 0) {
         if (maxRssExplicit !== undefined) {
@@ -978,7 +978,7 @@ HANDLER TYPES (built in)
         // "engine ownership stays with the creator" invariant that broke
         // tests in earlier waves of this branch.
         try { await engine.disconnect(); }
-        catch (e) { console.error('[gbrain jobs work] engine disconnect failed during shutdown:', e); }
+        catch (e) { console.error('[modusbrain jobs work] engine disconnect failed during shutdown:', e); }
 
         // If the RSS watchdog (not a normal SIGTERM) drained the worker, exit
         // with the distinct WORKER_EXIT_RSS_WATCHDOG code so the supervisor
@@ -997,10 +997,10 @@ HANDLER TYPES (built in)
 
     case 'supervisor': {
       // Dispatcher for supervisor subcommands:
-      //   gbrain jobs supervisor                    → foreground start (back-compat)
-      //   gbrain jobs supervisor start [--detach]   → foreground or detached start
-      //   gbrain jobs supervisor status             → JSON liveness + queue stats
-      //   gbrain jobs supervisor stop               → SIGTERM + drain wait
+      //   modusbrain jobs supervisor                    → foreground start (back-compat)
+      //   modusbrain jobs supervisor start [--detach]   → foreground or detached start
+      //   modusbrain jobs supervisor status             → JSON liveness + queue stats
+      //   modusbrain jobs supervisor stop               → SIGTERM + drain wait
       const { MinionSupervisor, DEFAULT_PID_FILE } = await import('../core/minions/supervisor.ts');
       const { writeSupervisorEvent } = await import('../core/minions/handlers/supervisor-audit.ts');
 
@@ -1052,7 +1052,7 @@ HANDLER TYPES (built in)
         // event (concurrency + effective --max-rss) so split-$HOME deployments
         // see what the live-but-pidfile-invisible supervisor is running.
         const startedEvt = events.filter(e => e.event === 'started').pop() ?? null;
-        // Shared classifier — same code path runs in `gbrain doctor` so the
+        // Shared classifier — same code path runs in `modusbrain doctor` so the
         // two surfaces cannot drift on what counts as a crash. Supersedes
         // v0.35.4.0's binary `classifyWorkerExit({code})` on this surface;
         // see doctor.ts for the layering rationale.
@@ -1174,7 +1174,7 @@ HANDLER TYPES (built in)
         process.exit(1);
       }
 
-      const { resolveGbrainCliPath } = await import('./autopilot.ts');
+      const { resolveModusbrainCliPath } = await import('./autopilot.ts');
 
       const concurrency = parseInt(parseFlag(args, '--concurrency') ?? '2', 10);
       const queueName = parseFlag(args, '--queue') ?? 'default';
@@ -1200,7 +1200,7 @@ HANDLER TYPES (built in)
         healthInterval = parsed;
       }
       const allowShellJobs = hasFlag(args, '--allow-shell-jobs') ||
-                             !!process.env.GBRAIN_ALLOW_SHELL_JOBS;
+                             !!process.env.MODUSBRAIN_ALLOW_SHELL_JOBS;
       const detach = hasFlag(args, '--detach');
       // Supervisor's --max-rss: explicit wins; absent → cgroup-aware auto-size
       // (issue #1678). The supervisor is the main production path, so the
@@ -1216,7 +1216,7 @@ HANDLER TYPES (built in)
       // and exits, not the long-lived re-exec'd child (Codex #1).
       const supNice = parseNiceFlag(args);
 
-      const cliPath = parseFlag(args, '--cli-path') ?? resolveGbrainCliPath();
+      const cliPath = parseFlag(args, '--cli-path') ?? resolveModusbrainCliPath();
 
       // --detach: fork a background supervisor, print PID payload, exit 0.
       // Implementation: re-exec the same CLI as a detached child without --detach,
@@ -1251,7 +1251,7 @@ HANDLER TYPES (built in)
         supNiceResult = applyNiceness(supNice);
         if (!supNiceResult.applied) {
           console.error(
-            `[gbrain jobs] could not set supervisor niceness to ${supNice}: ${supNiceResult.error ?? 'unknown'}. ` +
+            `[modusbrain jobs] could not set supervisor niceness to ${supNice}: ${supNiceResult.error ?? 'unknown'}. ` +
             `Negative nice needs privilege; running at niceness ${supNiceResult.effective ?? 'unchanged'}.`,
           );
         }
@@ -1292,7 +1292,7 @@ HANDLER TYPES (built in)
     }
 
     default:
-      console.error(`Unknown subcommand: ${sub}. Run 'gbrain jobs --help' for usage.`);
+      console.error(`Unknown subcommand: ${sub}. Run 'modusbrain jobs --help' for usage.`);
       process.exit(1);
   }
 }
@@ -1426,7 +1426,7 @@ export async function registerBuiltinHandlers(
   worker.register('embed', async (job) => {
     const { runEmbedCore } = await import('./embed.ts');
     // Primary Minion progress channel is job.updateProgress (DB-backed,
-    // readable via `gbrain jobs get <id>`). Stderr from the worker daemon
+    // readable via `modusbrain jobs get <id>`). Stderr from the worker daemon
     // only emits coarse job-start / job-done lines; per-page detail lives
     // in the DB. Per Codex review #20.
     await runEmbedCore(engine, {
@@ -1437,11 +1437,11 @@ export async function registerBuiltinHandlers(
       sourceId: typeof job.data.sourceId === 'string' ? job.data.sourceId : undefined,
       // CX1+CX5: pace overrides ride in the job payload as explicit overrides
       // only; runEmbedCore re-resolves env > config > bundle at execution so
-      // GBRAIN_PACE_* still wins during an incident.
+      // MODUSBRAIN_PACE_* still wins during an incident.
       ...(job.data.pace && typeof job.data.pace === 'object'
         ? {
             pace: job.data.pace as { perCallMode?: string; perCall?: PaceKeyOverrides },
-            // Serialized from the queued payload → config tier so GBRAIN_PACE_*
+            // Serialized from the queued payload → config tier so MODUSBRAIN_PACE_*
             // on the worker still wins at execution (Codex P2 escape hatch).
             paceFromBackground: true,
           }
@@ -1497,7 +1497,7 @@ export async function registerBuiltinHandlers(
       maxCostUsd: typeof job.data.maxCostUsd === 'number' ? job.data.maxCostUsd : undefined,
       overrideDisabled: !!job.data.overrideDisabled,
       // v0.41.15.0 (D9): round-trip --workers via job.data.workers so
-      // `gbrain extract-conversation-facts --background --workers 20`
+      // `modusbrain extract-conversation-facts --background --workers 20`
       // works end-to-end.
       workers: typeof job.data.workers === 'number' ? job.data.workers : undefined,
     });
@@ -1506,7 +1506,7 @@ export async function registerBuiltinHandlers(
 
   // v0.42.x (#2390) — Life Chronicle event extraction. NOT protected (bounded
   // LLM spend per page; no shell). Enqueued by the put_page chronicle backstop
-  // and by `gbrain chronicle backfill`. Idempotent (content-addressed event
+  // and by `modusbrain chronicle backfill`. Idempotent (content-addressed event
   // slugs + projection upsert), so a retry re-runs to the same state.
   worker.register('chronicle_extract', async (job) => {
     const slug = typeof job.data.slug === 'string' ? job.data.slug : undefined;
@@ -1613,7 +1613,7 @@ export async function registerBuiltinHandlers(
   });
 
   // Autopilot-cycle handler: delegates to runCycle. Shares the exact same
-  // phase set and ordering as `gbrain dream` and autopilot's inline path —
+  // phase set and ordering as `modusbrain dream` and autopilot's inline path —
   // one source of truth for what the brain does overnight.
   //
   // Yields the event loop between phases so the worker's lock-renewal
@@ -1636,12 +1636,12 @@ export async function registerBuiltinHandlers(
   }
 
   // derivation); the handler returns { partial, status, report } so
-  // `gbrain jobs get <id>` shows the full structured report. Does NOT
+  // `modusbrain jobs get <id>` shows the full structured report. Does NOT
   // throw on partial: a flaky phase must not block every future cycle.
   worker.register('autopilot-cycle', async (job) => {
     const { runCycle } = await import('../core/cycle.ts');
     // v0.41.30 (T2): fall back to null (NOT cwd '.') when no repo is configured.
-    // The queued cycle is the same primitive `gbrain dream` uses; a checkout-less
+    // The queued cycle is the same primitive `modusbrain dream` uses; a checkout-less
     // postgres brain should skip filesystem phases (no_brain_dir) and run the
     // DB-only phases (resolve_symbol_edges, embed, ...) — not silently lint/sync
     // against whatever directory the worker happens to be running in.
@@ -1803,15 +1803,15 @@ export async function registerBuiltinHandlers(
 
   // Shell handler is always registered. Runtime env guard lives inside the
   // handler so claimed jobs emit a clear rejection log on workers missing
-  // GBRAIN_ALLOW_SHELL_JOBS=1.
+  // MODUSBRAIN_ALLOW_SHELL_JOBS=1.
   {
     const { shellHandler } = await import('../core/minions/handlers/shell.ts');
     worker.register('shell', shellHandler);
     if (!quiet) {
-      if (process.env.GBRAIN_ALLOW_SHELL_JOBS === '1') {
-        process.stderr.write('[minion worker] shell handler enabled (GBRAIN_ALLOW_SHELL_JOBS=1)\n');
+      if (process.env.MODUSBRAIN_ALLOW_SHELL_JOBS === '1') {
+        process.stderr.write('[minion worker] shell handler enabled (MODUSBRAIN_ALLOW_SHELL_JOBS=1)\n');
       } else {
-        process.stderr.write('[minion worker] shell handler registered in guarded mode (set GBRAIN_ALLOW_SHELL_JOBS=1 to execute shell jobs)\n');
+        process.stderr.write('[minion worker] shell handler registered in guarded mode (set MODUSBRAIN_ALLOW_SHELL_JOBS=1 to execute shell jobs)\n');
       }
     }
   }
@@ -1842,7 +1842,7 @@ export async function registerBuiltinHandlers(
 
   // ============================================================
   // v0.36+ brain-health-100 wave: 11 new handlers for autonomous
-  // remediation via `gbrain doctor --remediate` and autopilot.
+  // remediation via `modusbrain doctor --remediate` and autopilot.
   //
   // PROTECTED via PROTECTED_JOB_NAMES (D11): synthesize, patterns,
   // consolidate — they internally submit `subagent` jobs with
@@ -1914,7 +1914,7 @@ export async function registerBuiltinHandlers(
   const makePhaseHandler = (phase: string) => async (job: any) => {
     const { runCycle } = await import('../core/cycle.ts');
     // v0.41.38 (codex P2 review): fall back to null (NOT cwd '.') when no repo
-    // is configured, matching the autopilot-cycle handler + `gbrain dream`. On a
+    // is configured, matching the autopilot-cycle handler + `modusbrain dream`. On a
     // checkout-less postgres brain a filesystem phase (synthesize/patterns/...)
     // skips with reason 'no_brain_dir' instead of running against the worker cwd;
     // DB-only phases (resolve_symbol_edges/embed/...) ignore brainDir either way.
@@ -1978,7 +1978,7 @@ export async function registerBuiltinHandlers(
     return await makeEmbedBackfillHandler(engine)(job);
   });
 
-  // v0.41.18.0 (A10, T7): extract-ner handler for the gbrain onboard
+  // v0.41.18.0 (A10, T7): extract-ner handler for the modusbrain onboard
   // remediation pipeline. Wraps extractNerLinks; emits typed_ner kind
   // alongside the by-mention 'plain' kind. NOT in PROTECTED_JOB_NAMES
   // (regex-only, no LLM spend).
@@ -2017,7 +2017,7 @@ export async function registerBuiltinHandlers(
     });
   });
 
-  // v0.41.18.0 (A13): embed-catch-up handler for the gbrain onboard
+  // v0.41.18.0 (A13): embed-catch-up handler for the modusbrain onboard
   // remediation pipeline. Wraps runEmbedCore with stale + catchUp + the
   // priority/batchSize the recommendation supplies. NOT in
   // PROTECTED_JOB_NAMES (embedding spend only).
@@ -2041,7 +2041,7 @@ export async function registerBuiltinHandlers(
   // migration that retypes 25K+ pages, creates alias rows, converts edge-
   // shaped pages to link rows, AND flips the active pack at end of run.
   // manual_only via src/core/onboard/render.ts:MANUAL_ONLY_PROTECTED_JOBS.
-  // Operator path: `gbrain jobs submit unify-types --allow-protected --params
+  // Operator path: `modusbrain jobs submit unify-types --allow-protected --params
   // '{"target_pack":"gbrain-base-v2"}'`.
   worker.register('unify-types', async (job) => {
     const { runUnifyTypes } = await import('../core/schema-pack/unify-types-handler.ts');
@@ -2117,7 +2117,7 @@ export async function registerBuiltinHandlers(
 
   // Plugin discovery — one line per discovered plugin (mirrors the
   // openclaw-seam startup line convention from v0.11+). Loaded
-  // unconditionally; empty GBRAIN_PLUGIN_PATH is a no-op.
+  // unconditionally; empty MODUSBRAIN_PLUGIN_PATH is a no-op.
   try {
     const { loadPluginsFromEnv } = await import('../core/minions/plugin-loader.ts');
     const { BRAIN_TOOL_ALLOWLIST } = await import('../core/minions/tools/brain-allowlist.ts');

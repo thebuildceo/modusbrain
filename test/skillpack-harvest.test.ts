@@ -1,8 +1,8 @@
 /**
- * Tests for src/core/skillpack/harvest.ts — the host→gbrain lift.
+ * Tests for src/core/skillpack/harvest.ts — the host→modusbrain lift.
  *
  * Pins:
- *   - happy path: skill files + paired sources land in gbrain's tree
+ *   - happy path: skill files + paired sources land in modusbrain's tree
  *   - openclaw.plugin.json updated (sorted, idempotent)
  *   - slug collision refused unless --overwrite-local
  *   - symlinks in host source rejected
@@ -61,8 +61,8 @@ function scratchHost(opts: { withPairedSource?: boolean; contaminated?: boolean 
   return root;
 }
 
-function scratchGbrain(): string {
-  const root = mkdtempSync(join(tmpdir(), 'sp-h-gbrain-'));
+function scratchModusbrain(): string {
+  const root = mkdtempSync(join(tmpdir(), 'sp-h-modusbrain-'));
   created.push(root);
   mkdirSync(join(root, 'src', 'commands'), { recursive: true });
   writeFileSync(join(root, 'src', 'cli.ts'), '// stub');
@@ -71,7 +71,7 @@ function scratchGbrain(): string {
     join(root, 'openclaw.plugin.json'),
     JSON.stringify(
       {
-        name: 'gbrain',
+        name: 'modusbrain',
         version: '0.33.0',
         skills: ['skills/existing-skill'],
         shared_deps: [],
@@ -92,21 +92,21 @@ function emptyPatternsFile(): string {
 }
 
 describe('runHarvest — happy path', () => {
-  it('copies a clean skill into gbrain, updates manifest', () => {
+  it('copies a clean skill into modusbrain, updates manifest', () => {
     const hostRoot = scratchHost();
-    const gbrainRoot = scratchGbrain();
+    const modusbrainRoot = scratchModusbrain();
 
     const result = runHarvest({
       slug: 'my-fork-skill',
       hostRepoRoot: hostRoot,
-      gbrainRoot,
+      modusbrainRoot,
     });
 
     expect(result.status).toBe('harvested');
-    expect(existsSync(join(gbrainRoot, 'skills', 'my-fork-skill', 'SKILL.md'))).toBe(true);
+    expect(existsSync(join(modusbrainRoot, 'skills', 'my-fork-skill', 'SKILL.md'))).toBe(true);
     expect(result.manifestUpdated).toBe(true);
 
-    const manifest = JSON.parse(readFileSync(join(gbrainRoot, 'openclaw.plugin.json'), 'utf-8'));
+    const manifest = JSON.parse(readFileSync(join(modusbrainRoot, 'openclaw.plugin.json'), 'utf-8'));
     expect(manifest.skills).toContain('skills/my-fork-skill');
     // sorted
     expect(manifest.skills).toEqual([...manifest.skills].sort());
@@ -114,26 +114,26 @@ describe('runHarvest — happy path', () => {
 
   it('copies paired source files declared in host frontmatter', () => {
     const hostRoot = scratchHost({ withPairedSource: true });
-    const gbrainRoot = scratchGbrain();
+    const modusbrainRoot = scratchModusbrain();
 
     const result = runHarvest({
       slug: 'my-fork-skill',
       hostRepoRoot: hostRoot,
-      gbrainRoot,
+      modusbrainRoot,
     });
 
     expect(result.pairedSources).toEqual(['src/commands/my-fork-skill.ts']);
-    expect(existsSync(join(gbrainRoot, 'src', 'commands', 'my-fork-skill.ts'))).toBe(true);
+    expect(existsSync(join(modusbrainRoot, 'src', 'commands', 'my-fork-skill.ts'))).toBe(true);
   });
 });
 
 describe('runHarvest — error paths', () => {
   it('host_skill_missing when --from points at the wrong place', () => {
     const hostRoot = scratchHost();
-    const gbrainRoot = scratchGbrain();
+    const modusbrainRoot = scratchModusbrain();
 
     try {
-      runHarvest({ slug: 'nonexistent', hostRepoRoot: hostRoot, gbrainRoot });
+      runHarvest({ slug: 'nonexistent', hostRepoRoot: hostRoot, modusbrainRoot });
       throw new Error('expected throw');
     } catch (err) {
       expect(err).toBeInstanceOf(HarvestError);
@@ -141,17 +141,17 @@ describe('runHarvest — error paths', () => {
     }
   });
 
-  it('slug_collision when gbrain already has skills/<slug>/ — without --overwrite-local', () => {
+  it('slug_collision when modusbrain already has skills/<slug>/ — without --overwrite-local', () => {
     const hostRoot = scratchHost();
-    const gbrainRoot = scratchGbrain();
-    mkdirSync(join(gbrainRoot, 'skills', 'my-fork-skill'), { recursive: true });
-    writeFileSync(join(gbrainRoot, 'skills', 'my-fork-skill', 'SKILL.md'), '# already here\n');
+    const modusbrainRoot = scratchModusbrain();
+    mkdirSync(join(modusbrainRoot, 'skills', 'my-fork-skill'), { recursive: true });
+    writeFileSync(join(modusbrainRoot, 'skills', 'my-fork-skill', 'SKILL.md'), '# already here\n');
 
     try {
       runHarvest({
         slug: 'my-fork-skill',
         hostRepoRoot: hostRoot,
-        gbrainRoot,
+        modusbrainRoot,
       });
       throw new Error('expected throw');
     } catch (err) {
@@ -162,7 +162,7 @@ describe('runHarvest — error paths', () => {
 
   it('symlinks in host skill dir are rejected (D13 security gate)', () => {
     const hostRoot = scratchHost();
-    const gbrainRoot = scratchGbrain();
+    const modusbrainRoot = scratchModusbrain();
 
     // Plant a symlink inside the skill dir pointing outside.
     const outside = mkdtempSync(join(tmpdir(), 'sp-h-outside-'));
@@ -177,7 +177,7 @@ describe('runHarvest — error paths', () => {
       runHarvest({
         slug: 'my-fork-skill',
         hostRepoRoot: hostRoot,
-        gbrainRoot,
+        modusbrainRoot,
         noLint: true,
       });
       throw new Error('expected throw');
@@ -186,75 +186,75 @@ describe('runHarvest — error paths', () => {
       expect(['symlink_rejected', 'path_traversal']).toContain((err as HarvestError).code);
     }
     // Nothing landed.
-    expect(existsSync(join(gbrainRoot, 'skills', 'my-fork-skill'))).toBe(false);
+    expect(existsSync(join(modusbrainRoot, 'skills', 'my-fork-skill'))).toBe(false);
   });
 });
 
 describe('runHarvest — privacy linter integration (T7)', () => {
   it('default Wintermute pattern triggers rollback (no manifest update)', () => {
     const hostRoot = scratchHost({ contaminated: true });
-    const gbrainRoot = scratchGbrain();
+    const modusbrainRoot = scratchModusbrain();
 
     const result = runHarvest({
       slug: 'my-fork-skill',
       hostRepoRoot: hostRoot,
-      gbrainRoot,
+      modusbrainRoot,
     });
 
     expect(result.status).toBe('lint_failed');
     expect(result.lintHits.length).toBeGreaterThan(0);
     expect(result.lintHits[0]).toContain('Wintermute');
 
-    // Rollback: nothing in gbrain tree.
-    expect(existsSync(join(gbrainRoot, 'skills', 'my-fork-skill'))).toBe(false);
+    // Rollback: nothing in modusbrain tree.
+    expect(existsSync(join(modusbrainRoot, 'skills', 'my-fork-skill'))).toBe(false);
     // Manifest NOT updated.
-    const manifest = JSON.parse(readFileSync(join(gbrainRoot, 'openclaw.plugin.json'), 'utf-8'));
+    const manifest = JSON.parse(readFileSync(join(modusbrainRoot, 'openclaw.plugin.json'), 'utf-8'));
     expect(manifest.skills).not.toContain('skills/my-fork-skill');
   });
 
   it('--no-lint bypasses the linter (editorial workflow opt-out)', () => {
     const hostRoot = scratchHost({ contaminated: true });
-    const gbrainRoot = scratchGbrain();
+    const modusbrainRoot = scratchModusbrain();
 
     const result = runHarvest({
       slug: 'my-fork-skill',
       hostRepoRoot: hostRoot,
-      gbrainRoot,
+      modusbrainRoot,
       noLint: true,
     });
 
     expect(result.status).toBe('harvested');
-    expect(existsSync(join(gbrainRoot, 'skills', 'my-fork-skill', 'SKILL.md'))).toBe(true);
+    expect(existsSync(join(modusbrainRoot, 'skills', 'my-fork-skill', 'SKILL.md'))).toBe(true);
   });
 });
 
 describe('runHarvest — dry-run', () => {
   it('reports plan, writes nothing', () => {
     const hostRoot = scratchHost();
-    const gbrainRoot = scratchGbrain();
+    const modusbrainRoot = scratchModusbrain();
 
     const result = runHarvest({
       slug: 'my-fork-skill',
       hostRepoRoot: hostRoot,
-      gbrainRoot,
+      modusbrainRoot,
       dryRun: true,
     });
 
     expect(result.status).toBe('harvested');
     expect(result.dryRun).toBe(true);
     expect(result.manifestUpdated).toBe(false);
-    expect(existsSync(join(gbrainRoot, 'skills', 'my-fork-skill'))).toBe(false);
+    expect(existsSync(join(modusbrainRoot, 'skills', 'my-fork-skill'))).toBe(false);
   });
 });
 
 describe('addToBundleManifest', () => {
   it('adds a new slug, sorts skills array, idempotent', () => {
-    const gbrainRoot = scratchGbrain();
+    const modusbrainRoot = scratchModusbrain();
 
-    expect(addToBundleManifest(gbrainRoot, 'new-skill')).toBe(true);
-    expect(addToBundleManifest(gbrainRoot, 'new-skill')).toBe(false); // idempotent
+    expect(addToBundleManifest(modusbrainRoot, 'new-skill')).toBe(true);
+    expect(addToBundleManifest(modusbrainRoot, 'new-skill')).toBe(false); // idempotent
 
-    const manifest = JSON.parse(readFileSync(join(gbrainRoot, 'openclaw.plugin.json'), 'utf-8'));
+    const manifest = JSON.parse(readFileSync(join(modusbrainRoot, 'openclaw.plugin.json'), 'utf-8'));
     expect(manifest.skills).toContain('skills/new-skill');
     expect(manifest.skills).toEqual([...manifest.skills].sort());
   });

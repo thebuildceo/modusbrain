@@ -30,24 +30,24 @@ afterEach(() => {
 });
 
 describe('F11 held-out path helpers', () => {
-  test('capturesDir honors GBRAIN_HOME', async () => {
-    await withEnv({ GBRAIN_HOME: tmp }, async () => {
+  test('capturesDir honors MODUSBRAIN_HOME', async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmp }, async () => {
       const dir = capturesDir();
-      expect(dir).toBe(path.join(tmp, '.gbrain', 'skillopt-captures'));
+      expect(dir).toBe(path.join(tmp, '.modusbrain', 'skillopt-captures'));
     });
   });
 
   test('capturePath returns per-skill-per-run JSONL path', async () => {
-    await withEnv({ GBRAIN_HOME: tmp }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmp }, async () => {
       const p = capturePath('my-skill', 'run-123');
-      expect(p).toBe(path.join(tmp, '.gbrain', 'skillopt-captures', 'my-skill', 'run-123.jsonl'));
+      expect(p).toBe(path.join(tmp, '.modusbrain', 'skillopt-captures', 'my-skill', 'run-123.jsonl'));
     });
   });
 });
 
 describe('F11 appendCapture', () => {
   test('writes a JSONL row + mkdir as needed', async () => {
-    await withEnv({ GBRAIN_HOME: tmp }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmp }, async () => {
       appendCapture('test-skill', 'run-1', {
         ts: new Date().toISOString(),
         skill_name: 'test-skill',
@@ -65,7 +65,7 @@ describe('F11 appendCapture', () => {
   });
 
   test('two appends produce two lines', async () => {
-    await withEnv({ GBRAIN_HOME: tmp }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmp }, async () => {
       appendCapture('test-skill', 'run-1', {
         ts: '2026-05-27T12:00:00Z', skill_name: 'test-skill', task: 'a', final_text: 'A', tool_calls: [],
       });

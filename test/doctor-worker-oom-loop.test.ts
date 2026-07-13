@@ -1,6 +1,6 @@
 // #1685 GAP A — worker_oom_loop doctor check.
 //
-// Hermetic: writes synthetic supervisor audit JSONL into a GBRAIN_AUDIT_DIR
+// Hermetic: writes synthetic supervisor audit JSONL into a MODUSBRAIN_AUDIT_DIR
 // tempdir and drives computeWorkerOomLoopCheck with engine=null (supervised
 // half + cap logic + thresholds; the minion_jobs bare-worker branch is
 // Postgres-only and mirrors the queue_health subcheck-3 query covered by E2E).
@@ -36,7 +36,7 @@ const breaker = (cap: number) => ({ event: 'health_warn', ts: nowIso(), reason: 
 
 describe('computeWorkerOomLoopCheck', () => {
   test('fail with breaker-stamped cap when the breaker tripped', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: tmpDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: tmpDir }, async () => {
       writeSupervisorRows([rssKill(), rssKill(), rssKill(), rssKill(), rssKill(), rssKill(), breaker(2048)]);
       const c = await computeWorkerOomLoopCheck(null);
       expect(c?.status).toBe('fail');
@@ -52,7 +52,7 @@ describe('computeWorkerOomLoopCheck', () => {
   });
 
   test('warn with auto-sized cap fallback when no breaker event stamped a cap (CODEX #6)', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: tmpDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: tmpDir }, async () => {
       writeSupervisorRows([rssKill(), rssKill()]);
       const c = await computeWorkerOomLoopCheck(null);
       expect(c?.status).toBe('warn');
@@ -63,7 +63,7 @@ describe('computeWorkerOomLoopCheck', () => {
   });
 
   test('fail at >=5 kills even without a breaker event', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: tmpDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: tmpDir }, async () => {
       writeSupervisorRows([rssKill(), rssKill(), rssKill(), rssKill(), rssKill()]);
       const c = await computeWorkerOomLoopCheck(null);
       expect(c?.status).toBe('fail');
@@ -72,14 +72,14 @@ describe('computeWorkerOomLoopCheck', () => {
   });
 
   test('null when the worker never OOM-looped', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: tmpDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: tmpDir }, async () => {
       writeSupervisorRows([{ event: 'started', ts: nowIso() }]);
       expect(await computeWorkerOomLoopCheck(null)).toBeNull();
     });
   });
 
   test('null on an empty audit dir', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: tmpDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: tmpDir }, async () => {
       expect(await computeWorkerOomLoopCheck(null)).toBeNull();
     });
   });
@@ -87,7 +87,7 @@ describe('computeWorkerOomLoopCheck', () => {
 
 describe('readRecentSupervisorEvents — cross-week (CODEX #7)', () => {
   test('reads a within-24h event from the PREVIOUS ISO-week file', async () => {
-    await withEnv({ GBRAIN_AUDIT_DIR: tmpDir }, async () => {
+    await withEnv({ MODUSBRAIN_AUDIT_DIR: tmpDir }, async () => {
       // Event timestamped within the 24h window but written into last week's
       // file (the Monday-reads-Sunday case). The single-file reader would miss
       // it; the cross-week reader must find it.

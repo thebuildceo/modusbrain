@@ -4,7 +4,7 @@
 
 ModusBrain compiles scattered company knowledge — policies, runbooks, wikis, tickets — into **versioned operational skills** with confidence gating, human approval workflows, conflict queues, and full action audit trails. Agents execute against approved skills, not fresh chat hallucinations.
 
-> Built on the open-source [GBrain](https://github.com/garrytan/gbrain) engine (MIT License). GBrain handles retrieval, graph, and freshness; ModusBrain adds the safe-execution layer for autonomous company operations.
+> Built on the open-source [ModusBrain](https://github.com/garrytan/gbrain) engine (MIT License). ModusBrain handles retrieval, graph, and freshness; ModusBrain adds the safe-execution layer for autonomous company operations.
 
 **Domain:** [modusbrain.com](https://modusbrain.com) · **Launch playbook:** [MODUSBRAIN_LAUNCH.md](./MODUSBRAIN_LAUNCH.md) · **Technical guide:** [company-brain-rfs-analysis.md](./company-brain-rfs-analysis.md)
 
@@ -31,7 +31,7 @@ modusbrain opskill execute refund-handling \
 modusbrain opskill audit --json
 ```
 
-The legacy `gbrain` CLI alias still works during migration.
+The legacy `modusbrain` CLI alias still works during migration.
 
 ---
 
@@ -45,7 +45,7 @@ The legacy `gbrain` CLI alias still works during migration.
 | **4. Audit** | Log every agent action: skill, version, confidence, result |
 | **5. Feedback** | Human corrections → evidence → auto re-compile |
 
-Full GBrain capabilities (hybrid search, synthesis, graph, dream cycle, MCP) remain available under the hood.
+Full ModusBrain capabilities (hybrid search, synthesis, graph, dream cycle, MCP) remain available under the hood.
 
 ---
 
@@ -70,9 +70,9 @@ Run `modusbrain --help` for the full command list. Deep engine docs: [`llms.txt`
 
 | Setting | Value |
 |---|---|
-| Config dir | `~/.modusbrain` (falls back to `~/.gbrain` if present) |
-| Env vars | `MODUSBRAIN_*` preferred; `GBRAIN_*` legacy alias still honored |
-| Source dotfile | `.modusbrain-source` (legacy `.gbrain-source` still read) |
+| Config dir | `~/.modusbrain` (falls back to `~/.modusbrain` if present) |
+| Env vars | `MODUSBRAIN_*` preferred; `MODUSBRAIN_*` legacy alias still honored |
+| Source dotfile | `.modusbrain-source` (legacy `.modusbrain-source` still read) |
 | Branding module | `src/core/branding.ts` (single source of truth) |
 
 ---
@@ -89,7 +89,7 @@ MCP operations for operational skills: `compile_operational_skill`, `execute_ope
 
 ## Attribution
 
-ModusBrain extends [GBrain](https://github.com/garrytan/gbrain) (MIT License). See [LICENSE](./LICENSE) and [NOTICE](./NOTICE).
+ModusBrain extends [ModusBrain](https://github.com/garrytan/gbrain) (MIT License). See [LICENSE](./LICENSE) and [NOTICE](./NOTICE).
 
 ---
 

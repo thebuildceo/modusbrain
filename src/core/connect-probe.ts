@@ -1,5 +1,5 @@
 /**
- * Raw-bearer MCP smoke probe for `gbrain connect --install` (D4).
+ * Raw-bearer MCP smoke probe for `modusbrain connect --install` (D4).
  *
  * Purpose-built so a bad/expired token fails at setup time instead of
  * silently on the agent's first tool call. It does the FULL handshake the
@@ -84,7 +84,7 @@ const DEFAULT_DEPS: ProbeDeps = {
       },
     });
     const client = new Client(
-      { name: 'gbrain-connect-probe', version: '1' },
+      { name: 'modusbrain-connect-probe', version: '1' },
       { capabilities: {} },
     );
     // close() lives in a finally that wraps connect() too — if connect()

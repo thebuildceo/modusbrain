@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'url';
 /**
- * v0.39 subprocess smoke for `gbrain doctor --json`.
+ * v0.39 subprocess smoke for `modusbrain doctor --json`.
  *
  * Covers the runDoctor wrapper paths that buildChecks-only tests can't
  * reach in-process (D10/CMT-2): outputResults render, process.exit code,
@@ -14,7 +14,7 @@ import { fileURLToPath } from 'url';
  * the documented values, checks array is non-empty.
  *
  * Serial because it spawns subprocesses and writes a tmpdir. Skippable
- * via `GBRAIN_SKIP_SUBPROCESS_TESTS=1` for fast-loop budget control.
+ * via `MODUSBRAIN_SKIP_SUBPROCESS_TESTS=1` for fast-loop budget control.
  *
  * Per-spawn cold-start on CI is ~10-20s. Single test, single brain.
  */
@@ -30,7 +30,7 @@ import {
 } from './helpers/brain-isolation.ts';
 
 const REPO = fileURLToPath(new URL('..', import.meta.url)).replace(/[\\/]$/, '');
-const SKIP = process.env.GBRAIN_SKIP_SUBPROCESS_TESTS === '1';
+const SKIP = process.env.MODUSBRAIN_SKIP_SUBPROCESS_TESTS === '1';
 
 async function runCli(
   args: string[],
@@ -58,10 +58,10 @@ async function runCli(
   }
 }
 
-describe('gbrain doctor --json subprocess smoke (D10/CMT-2)', () => {
+describe('modusbrain doctor --json subprocess smoke (D10/CMT-2)', () => {
   test.skipIf(SKIP)('exits 0 on freshly-initialized PGLite brain; JSON envelope is well-formed', async () => {
-    const home = mkdtempSync(join(tmpdir(), 'gbrain-doctor-smoke-'));
-    const shim = makeCliShim(REPO, 'gbrain-shim-doctor-');
+    const home = mkdtempSync(join(tmpdir(), 'modusbrain-doctor-smoke-'));
+    const shim = makeCliShim(REPO, 'modusbrain-shim-doctor-');
     try {
       const cfgDir = isolatedConfigDir(home);
       mkdirSync(cfgDir, { recursive: true });

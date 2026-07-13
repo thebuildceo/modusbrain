@@ -68,7 +68,7 @@ agent-repo/
 ### Brain Repo (world knowledge)
 
 What you know. People, companies, deals, meetings, ideas, media.
-This is the repo GBrain indexes.
+This is the repo ModusBrain indexes.
 
 ```
 brain/
@@ -109,7 +109,7 @@ The brain is the permanent record. The agent repo is replaceable.
 ### Why Two Repos
 
 **Independence.** You can switch AI agents (OpenClaw -> Hermes -> custom) without
-losing your knowledge. You can switch knowledge tools (GBrain -> something else)
+losing your knowledge. You can switch knowledge tools (ModusBrain -> something else)
 without losing your agent setup.
 
 **Scale.** The brain grows large (10,000+ files). The agent repo stays small
@@ -118,8 +118,8 @@ without losing your agent setup.
 **Privacy.** The brain contains sensitive information (people, deals, personal
 notes). The agent repo contains operational config. Different access controls.
 
-**GBrain indexes the brain repo.** Run `gbrain sync --repo ~/brain/` to keep
-the search index current. The agent repo is never indexed by GBrain.
+**ModusBrain indexes the brain repo.** Run `modusbrain sync --repo ~/brain/` to keep
+the search index current. The agent repo is never indexed by ModusBrain.
 
 ## Tricky Spots
 
@@ -133,8 +133,8 @@ the search index current. The agent repo is never indexed by GBrain.
    belongs in the brain. Agent configs, skills, cron jobs, and operational
    state are replaceable. People, companies, ideas, and meetings are not.
 
-3. **Don't index the agent repo.** GBrain indexes the brain repo only.
-   Running `gbrain sync` against the agent repo pollutes search results
+3. **Don't index the agent repo.** ModusBrain indexes the brain repo only.
+   Running `modusbrain sync` against the agent repo pollutes search results
    with operational config instead of world knowledge.
 
 ## How to Verify
@@ -149,10 +149,10 @@ the search index current. The agent repo is never indexed by GBrain.
    switched to a different person?" If the answers don't match the file's
    location, it's in the wrong repo.
 
-3. **Verify GBrain only indexes brain.** Run `gbrain stats` and check the
+3. **Verify ModusBrain only indexes brain.** Run `modusbrain stats` and check the
    indexed paths. None should point to the agent repo directory. If agent
    config files appear in search results, the sync target is misconfigured.
 
 ---
 
-*Part of the [GBrain Skillpack](../GBRAIN_SKILLPACK.md).*
+*Part of the [ModusBrain Skillpack](../MODUSBRAIN_SKILLPACK.md).*

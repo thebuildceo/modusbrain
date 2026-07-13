@@ -75,7 +75,7 @@ describe('buildPgliteInitErrorMessage — hint routing', () => {
 
   test('unknown verdict surfaces the doctor + #223 fallback AND original error', () => {
     const msg = buildPgliteInitErrorMessage('unknown', original);
-    expect(msg).toContain('gbrain doctor');
+    expect(msg).toContain('modusbrain doctor');
     expect(msg).toContain('issues/223');
     expect(msg).toContain(original);
   });

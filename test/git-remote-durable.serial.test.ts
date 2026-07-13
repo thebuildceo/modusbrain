@@ -2,7 +2,7 @@
  * git-remote durability helpers (v0.42.44): divergenceSafePull, detectDefaultBranch,
  * pushProbe, isWorkingTreeDirty. Real git against local bare remotes.
  *
- * Local file transport is enabled via GBRAIN_GIT_ALLOW_FILE_TRANSPORT=1 (the
+ * Local file transport is enabled via MODUSBRAIN_GIT_ALLOW_FILE_TRANSPORT=1 (the
  * documented escape hatch the durability paths honor).
  */
 import { describe, test, expect, beforeAll, afterAll, beforeEach, afterEach } from 'bun:test';
@@ -51,8 +51,8 @@ function secondClone(b: string): string {
   return w;
 }
 
-beforeAll(() => { process.env.GBRAIN_GIT_ALLOW_FILE_TRANSPORT = '1'; });
-afterAll(() => { delete process.env.GBRAIN_GIT_ALLOW_FILE_TRANSPORT; });
+beforeAll(() => { process.env.MODUSBRAIN_GIT_ALLOW_FILE_TRANSPORT = '1'; });
+afterAll(() => { delete process.env.MODUSBRAIN_GIT_ALLOW_FILE_TRANSPORT; });
 beforeEach(() => { root = mkdtempSync(join(tmpdir(), 'gd-')); });
 afterEach(() => { rmSync(root, { recursive: true, force: true }); });
 

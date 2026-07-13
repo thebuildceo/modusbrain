@@ -2,7 +2,7 @@
  * Shared link/timeline extraction utilities.
  *
  * Used by:
- *   - src/commands/extract.ts             (batch DB + FS extraction — `gbrain extract links|timeline|all`)
+ *   - src/commands/extract.ts             (batch DB + FS extraction — `modusbrain extract links|timeline|all`)
  *   - src/commands/backlinks.ts           (filesystem walk, legacy)
  *   - src/core/operations.ts put_page     (auto-link post-hook)
  *
@@ -20,7 +20,7 @@ import { ensureWellFormed } from './text-safe.ts';
  * shape of `extractPageLinks` / `inferLinkType` / `parseTimelineEntries` changes
  * meaningfully, so the extraction freshness watermark (`pages.links_extracted_at`)
  * treats every previously-stamped page as stale and re-extracts it on the next
- * `gbrain extract --stale` sweep. Same role CHUNKER_VERSION plays for chunking.
+ * `modusbrain extract --stale` sweep. Same role CHUNKER_VERSION plays for chunking.
  *
  * Consumed by `countStalePagesForExtraction` / `listStalePagesForExtraction`
  * (both engines) and the `links_extraction_lag` doctor check: a page is stale
@@ -66,7 +66,7 @@ export interface EntityRef {
  * Issue #972: edge type stamped on graph rows produced by the
  * global-basename wikilink resolution path. Distinct from the verb-
  * inferred types (`mentions`, `works_at`, etc.) so users can audit or
- * prune via `gbrain graph-query <slug> --type wikilink_basename`.
+ * prune via `modusbrain graph-query <slug> --type wikilink_basename`.
  *
  * All edges from this path also carry `linkSource: 'wikilink-resolved'`
  * (the link-source provenance is the why; this edge type is the what).
@@ -79,7 +79,7 @@ export type LinkResolutionType = 'qualified' | 'unqualified';
 /**
  * Directory prefix whitelist. These are the top-level slug dirs the extractor
  * recognizes as entity references. Upstream canonical + our extensions:
- *   - Gbrain canonical: people, companies, meetings, concepts, deal, civic, project, source, media, yc, projects
+ *   - Modusbrain canonical: people, companies, meetings, concepts, deal, civic, project, source, media, yc, projects
  *   - Our domain extensions: tech, finance, personal, openclaw (domain-organized wikis)
  *   - Our entity prefix: entities (we kept some legacy entities/projects/ pages)
  */
@@ -213,7 +213,7 @@ export interface CodeRef {
 
 // v0.19.0 E1 — markdown guides that cite 'src/core/sync.ts:42' create an
 // edge to the code page that imported that file. Regex is anchored against
-// the common gbrain repo layout directories so arbitrary prose like
+// the common modusbrain repo layout directories so arbitrary prose like
 // "in foo/bar.js" doesn't generate false positives.
 //
 // The extension list is aligned with detectCodeLanguage in chunkers/code.ts.
@@ -872,7 +872,7 @@ export function queryBasenameIndex(idx: Map<string, string[]>, name: string): st
 /**
  * Create a resolver scoped to a single extract run or single put_page call.
  *
- * mode: 'batch' (migration / gbrain extract) — pg_trgm only, NO search
+ * mode: 'batch' (migration / modusbrain extract) — pg_trgm only, NO search
  * fallback. On a 46K-page brain this avoids N-thousand OpenAI embedding
  * calls + Anthropic Haiku expansion calls (see operations-query-hidden-haiku
  * learning) and keeps the backfill deterministic + under a wall-clock budget.
@@ -1210,14 +1210,14 @@ export async function isAutoTimelineEnabled(engine: BrainEngine): Promise<boolea
  * `linkType: 'wikilink_basename'`. Multiple matches emit multiple edges.
  *
  * Resolution order (highest → lowest):
- *   1. Env var `GBRAIN_LINK_RESOLUTION_GLOBAL_BASENAME=1` (operator override)
+ *   1. Env var `MODUSBRAIN_LINK_RESOLUTION_GLOBAL_BASENAME=1` (operator override)
  *   2. DB plane via `engine.getConfig('link_resolution.global_basename')`
  *   3. Default false
  *
  * Closes https://github.com/garrytan/gbrain/issues/972.
  */
 export async function isGlobalBasenameEnabled(engine: BrainEngine): Promise<boolean> {
-  const envVal = process.env.GBRAIN_LINK_RESOLUTION_GLOBAL_BASENAME;
+  const envVal = process.env.MODUSBRAIN_LINK_RESOLUTION_GLOBAL_BASENAME;
   if (envVal != null) {
     const normalized = envVal.trim().toLowerCase();
     return ['1', 'true', 'yes', 'on'].includes(normalized);

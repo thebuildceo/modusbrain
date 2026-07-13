@@ -1,12 +1,12 @@
 /**
- * #2194 fix #5: `gbrain doctor` warns when autopilot's per-tick fan-out exceeds
+ * #2194 fix #5: `modusbrain doctor` warns when autopilot's per-tick fan-out exceeds
  * the worker's effective concurrency. Fanning out more cycles than there are
  * worker slots guarantees waiters that race the stalled-sweeper — a silent
  * misconfig the operator never saw before this check.
  *
  * Drives computeAutopilotFanoutConcurrencyCheck directly with a fake engine so
  * the fan-out (config) and concurrency (audit) inputs are controllable without
- * spawning a supervisor. The audit read is stubbed via GBRAIN_AUDIT_DIR + a
+ * spawning a supervisor. The audit read is stubbed via MODUSBRAIN_AUDIT_DIR + a
  * hand-written started event.
  */
 
@@ -26,16 +26,16 @@ function fakeEngine(config: Record<string, string> = {}) {
 }
 
 let auditDir: string;
-const prevAuditDir = process.env.GBRAIN_AUDIT_DIR;
+const prevAuditDir = process.env.MODUSBRAIN_AUDIT_DIR;
 
 beforeEach(() => {
-  auditDir = mkdtempSync(join(tmpdir(), 'gbrain-fanout-doctor-'));
-  process.env.GBRAIN_AUDIT_DIR = auditDir;
+  auditDir = mkdtempSync(join(tmpdir(), 'modusbrain-fanout-doctor-'));
+  process.env.MODUSBRAIN_AUDIT_DIR = auditDir;
 });
 
 afterEach(() => {
-  if (prevAuditDir === undefined) delete process.env.GBRAIN_AUDIT_DIR;
-  else process.env.GBRAIN_AUDIT_DIR = prevAuditDir;
+  if (prevAuditDir === undefined) delete process.env.MODUSBRAIN_AUDIT_DIR;
+  else process.env.MODUSBRAIN_AUDIT_DIR = prevAuditDir;
   try { rmSync(auditDir, { recursive: true, force: true }); } catch { /* noop */ }
 });
 

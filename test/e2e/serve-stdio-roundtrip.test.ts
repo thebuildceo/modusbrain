@@ -1,12 +1,12 @@
 /**
- * E2E for the "standalone from nothing" funnel: `gbrain init --pglite` →
- * `gbrain serve` (stdio) wired into a coding agent as an MCP subprocess.
+ * E2E for the "standalone from nothing" funnel: `modusbrain init --pglite` →
+ * `modusbrain serve` (stdio) wired into a coding agent as an MCP subprocess.
  *
  * This is the canonical local path the docs encourage for Claude Code / Codex
  * users with no remote brain:
  *
- *     claude mcp add gbrain -- gbrain serve
- *     codex  mcp add gbrain -- gbrain serve
+ *     claude mcp add modusbrain -- modusbrain serve
+ *     codex  mcp add modusbrain -- modusbrain serve
  *
  * The `connect`/bearer E2E proves the REMOTE (HTTP) funnel. Nothing proved the
  * LOCAL stdio funnel end-to-end: that a freshly-init'd PGLite brain, served
@@ -15,7 +15,7 @@
  * serve-stdio-lifecycle unit test only covers shutdown signalling.
  *
  * No Postgres / Docker. PGLite, hermetic temp HOME. Drives the real
- * StdioClientTransport, so the MCP SDK spawns `gbrain serve` for us, runs the
+ * StdioClientTransport, so the MCP SDK spawns `modusbrain serve` for us, runs the
  * `initialize` handshake, and round-trips `tools/list` + `tools/call`.
  */
 
@@ -44,7 +44,7 @@ describe('serve stdio round-trip E2E (local PGLite → real MCP tool calls)', ()
   let connected = false;
 
   beforeAll(async () => {
-    home = mkdtempSync(join(tmpdir(), 'gbrain-stdio-e2e-'));
+    home = mkdtempSync(join(tmpdir(), 'modusbrain-stdio-e2e-'));
     // Hermetic PGLite: strip any ambient Postgres URL so `init --pglite` and the
     // served brain actually use PGLite even when the shell/CI has DATABASE_URL
     // set (otherwise the subprocess comes up on Postgres → `engine: pglite`
@@ -53,9 +53,9 @@ describe('serve stdio round-trip E2E (local PGLite → real MCP tool calls)', ()
     // undefined values), dropping the ambient DB URLs so the subprocess is PGLite.
     const env: Record<string, string> = {};
     for (const [k, v] of Object.entries(process.env)) if (v !== undefined) env[k] = v;
-    env.GBRAIN_HOME = home;
+    env.MODUSBRAIN_HOME = home;
     delete env.DATABASE_URL;
-    delete env.GBRAIN_DATABASE_URL;
+    delete env.MODUSBRAIN_DATABASE_URL;
 
     // 1. Init a local PGLite brain (the "from nothing" step).
     bunExecFileSync( ['run', 'src/cli.ts', 'init', '--pglite', '--no-embedding', '--non-interactive'], {
@@ -75,15 +75,15 @@ describe('serve stdio round-trip E2E (local PGLite → real MCP tool calls)', ()
       cwd: process.cwd(), env, stdio: 'ignore',
     });
 
-    // 3. Let the MCP SDK spawn `gbrain serve` (stdio) and run the initialize
-    //    handshake — exactly what `claude mcp add gbrain -- gbrain serve` does.
+    // 3. Let the MCP SDK spawn `modusbrain serve` (stdio) and run the initialize
+    //    handshake — exactly what `claude mcp add modusbrain -- modusbrain serve` does.
     transport = new StdioClientTransport({
       command: BUN,
       args: ['run', 'src/cli.ts', 'serve'],
       cwd: process.cwd(),
-      env, // includes PATH (to find `bun`) + GBRAIN_HOME
+      env, // includes PATH (to find `bun`) + MODUSBRAIN_HOME
     });
-    client = new Client({ name: 'gbrain-stdio-e2e', version: '1.0.0' }, { capabilities: {} });
+    client = new Client({ name: 'modusbrain-stdio-e2e', version: '1.0.0' }, { capabilities: {} });
     await client.connect(transport);
     connected = true;
   }, 60_000);

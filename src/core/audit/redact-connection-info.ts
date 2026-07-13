@@ -12,7 +12,7 @@
  *
  * If an operator pastes a JSONL audit dump into a GitHub issue or Slack,
  * those errors leak credentials. The project's audit-as-debug-tool
- * convention is explicit (`tail -F ~/.gbrain/audit/*`), so the audit
+ * convention is explicit (`tail -F ~/.modusbrain/audit/*`), so the audit
  * channel must be safe to share by construction.
  *
  * Pure function, no I/O. Idempotent (running twice produces same output).

@@ -1,5 +1,5 @@
 /**
- * gbrain sources-ops — pure async functions for source-management operations
+ * modusbrain sources-ops — pure async functions for source-management operations
  * (v0.28). Extracted from src/commands/sources.ts so the CLI handlers and the
  * MCP ops (sources_add / list / remove / status) share one implementation.
  *
@@ -14,7 +14,7 @@
  *                  pre-flight SELECT id ─── id taken? ──► error (Q4)
  *                              │
  *                              ▼  (id free)
- *                  mkdir $GBRAIN_HOME/clones/.tmp/<id>-<rand>/
+ *                  mkdir $MODUSBRAIN_HOME/clones/.tmp/<id>-<rand>/
  *                              │
  *                              ▼
  *                  cloneRepo(url, tmp/) ─── fail ──► rm -rf tmp/, throw
@@ -32,7 +32,7 @@
  *
  * Symlink-safe clone-cleanup for removeSource: realpath + lstat confinement
  * mirroring src/core/operations.ts:61 validateUploadPath. String startsWith
- * is symlink-unsafe and would let $GBRAIN_HOME/clones/<id> → /etc resolve
+ * is symlink-unsafe and would let $MODUSBRAIN_HOME/clones/<id> → /etc resolve
  * out of the confine.
  */
 
@@ -49,7 +49,7 @@ import {
   GitOperationError,
   type RepoState,
 } from './git-remote.ts';
-import { gbrainPath } from './config.ts';
+import { modusbrainPath } from './config.ts';
 import { isValidSourceId } from './source-id.ts';
 import { resolveSourceWithTier, type SourceTier } from './source-resolver.ts';
 
@@ -65,7 +65,7 @@ export type SourceOpErrorCode =
   | 'rename_failed'
   | 'not_found'
   | 'protected_id'
-  | 'clone_dir_outside_gbrain'
+  | 'clone_dir_outside_modusbrain'
   | 'symlink_escape'
   | 'unmanaged_path';
 
@@ -92,7 +92,7 @@ export interface SourceRow {
   created_at: Date;
   /**
    * v0.40.3.0: per-source CR mode override. NULL falls through to global
-   * mode bundle. Written only by `gbrain sources set-cr-mode <id> <mode>`
+   * mode bundle. Written only by `modusbrain sources set-cr-mode <id> <mode>`
    * (CLI-write-only per D15 security gate); MCP / OAuth callers cannot
    * mutate this field.
    */
@@ -100,7 +100,7 @@ export interface SourceRow {
   /**
    * v0.40.3.0: per-source mount-frontmatter trust gate (D15). FALSE for
    * mounted sources by default. Flipped via
-   * `gbrain mounts trust-frontmatter <id>`. Host source (id='default') is
+   * `modusbrain mounts trust-frontmatter <id>`. Host source (id='default') is
    * always trusted in the resolver regardless of this column value.
    */
   trust_frontmatter_overrides?: boolean;
@@ -141,7 +141,7 @@ export interface AddSourceOpts {
   remoteUrl?: string;
   federated?: boolean | null;
   /**
-   * Override clone destination. Defaults to $GBRAIN_HOME/clones/<id>/.
+   * Override clone destination. Defaults to $MODUSBRAIN_HOME/clones/<id>/.
    * Only honored when remoteUrl is set.
    */
   cloneDir?: string;
@@ -159,7 +159,7 @@ export interface RemoveSourceOpts {
 
 /**
  * Validate via the canonical regex from `source-id.ts` but rethrow as the
- * sources-ops-tagged error so `gbrain sources add` keeps its user-facing
+ * sources-ops-tagged error so `modusbrain sources add` keeps its user-facing
  * SourceOpError shape. The regex itself is in one place; only the error
  * envelope differs per caller.
  */
@@ -220,15 +220,15 @@ async function countPages(engine: BrainEngine, id: string): Promise<number> {
   return rows[0]?.n ?? 0;
 }
 
-/** Default clone dir for a remote-URL source: $GBRAIN_HOME/clones/<id>/ */
+/** Default clone dir for a remote-URL source: $MODUSBRAIN_HOME/clones/<id>/ */
 export function defaultCloneDir(id: string): string {
-  return gbrainPath('clones', id);
+  return modusbrainPath('clones', id);
 }
 
-/** Temp clone dir under $GBRAIN_HOME/clones/.tmp/<id>-<rand>/ */
+/** Temp clone dir under $MODUSBRAIN_HOME/clones/.tmp/<id>-<rand>/ */
 function makeTempCloneDir(id: string): string {
   const rand = randomBytes(6).toString('hex');
-  return gbrainPath('clones', '.tmp', `${id}-${rand}`);
+  return modusbrainPath('clones', '.tmp', `${id}-${rand}`);
 }
 
 // `isPathContained` moved to `src/core/path-confine.ts` (shared with the
@@ -237,16 +237,16 @@ function makeTempCloneDir(id: string): string {
 export { isPathContained };
 
 /**
- * Did gbrain CREATE this clone (so re-clone/delete is safe)? Ownership, NOT
+ * Did modusbrain CREATE this clone (so re-clone/delete is safe)? Ownership, NOT
  * path-containment — a user-supplied working tree is NEVER owned, even if it
- * happens to sit under $GBRAIN_HOME. This is the #1881 guard: recloneIfMissing
- * deletes local_path, so it must only ever fire on a clone gbrain owns.
+ * happens to sit under $MODUSBRAIN_HOME. This is the #1881 guard: recloneIfMissing
+ * deletes local_path, so it must only ever fire on a clone modusbrain owns.
  *
  * Ownership is proven by either:
  *   1. config.managed_clone === true — written by addSource's --url path
  *      (covers both default-location and --clone-dir clones), OR
  *   2. local_path === defaultCloneDir(id) — back-compat for clones created
- *      before the marker existed (gbrain's default location), via exact
+ *      before the marker existed (modusbrain's default location), via exact
  *      normalized-path equality (symlink-free, so none of isPathContained's
  *      symlinked-parent / lexical-escape edge cases apply).
  *
@@ -286,16 +286,16 @@ export function unownedHint(
   if (state === 'healthy') {
     return (
       `Source "${src.id}" has config.remote_url set but local_path ${path} is not a ` +
-      `clone gbrain created. gbrain syncs it read-only and will never re-clone or delete ` +
-      `it. To silence this, drop config.remote_url, or re-register with --url so gbrain ` +
+      `clone modusbrain created. modusbrain syncs it read-only and will never re-clone or delete ` +
+      `it. To silence this, drop config.remote_url, or re-register with --url so modusbrain ` +
       `owns the clone.`
     );
   }
   return (
     `Source "${src.id}" has config.remote_url set but local_path ${path} is not a clone ` +
-    `gbrain created and is not a usable git repo (state: ${state}). gbrain will NOT ` +
-    `re-clone over it (it is your working tree, not a gbrain-managed mirror). Restore the ` +
-    `directory yourself, or remove + re-add the source with --url to let gbrain manage the ` +
+    `modusbrain created and is not a usable git repo (state: ${state}). modusbrain will NOT ` +
+    `re-clone over it (it is your working tree, not a modusbrain-managed mirror). Restore the ` +
+    `directory yourself, or remove + re-add the source with --url to let modusbrain manage the ` +
     `clone.`
   );
 }
@@ -317,7 +317,7 @@ export async function addSource(
     throw new SourceOpError(
       'source_id_taken',
       `Source id "${opts.id}" is already registered. ` +
-        `Use 'gbrain sources remove ${opts.id} --confirm-destructive' first, then re-add.`,
+        `Use 'modusbrain sources remove ${opts.id} --confirm-destructive' first, then re-add.`,
     );
   }
 
@@ -375,7 +375,7 @@ export async function addSource(
     }
 
     // managed_clone:true is the ownership marker (#1881). It authorizes
-    // recloneIfMissing to rm+replace this clone — gbrain created it, here or at
+    // recloneIfMissing to rm+replace this clone — modusbrain created it, here or at
     // a --clone-dir path. A user-tree row (created by an external INSERT, no
     // --url) never carries this, so it can never be deleted by reclone.
     const config: Record<string, unknown> = {
@@ -403,9 +403,9 @@ export async function addSource(
     }
 
     // Final step: rename temp dir to final clone path. EXDEV (cross-device
-    // rename) is rare on a single-host brain but possible if $GBRAIN_HOME
+    // rename) is rare on a single-host brain but possible if $MODUSBRAIN_HOME
     // and the temp dir are on different mounts. We don't fall back to
-    // recursive copy because the temp dir is in $GBRAIN_HOME by design.
+    // recursive copy because the temp dir is in $MODUSBRAIN_HOME by design.
     try {
       mkdirSync(dirname(finalPath!), { recursive: true });
       // Refuse to rename over an existing path. If finalPath exists at this
@@ -485,7 +485,7 @@ export async function resolveDefaultSource(engine: BrainEngine): Promise<string>
   const sources = await listSources(engine);
   if (sources.length === 0) {
     throw new SourceResolutionError(
-      'no sources registered; run `gbrain sources add` first',
+      'no sources registered; run `modusbrain sources add` first',
       'no_sources',
       [],
     );
@@ -515,7 +515,7 @@ export interface ScopedSourceResolution {
  *
  * Runs the FULL 7-tier resolution chain via `resolveSourceWithTier`
  * (flag → env → dotfile → local_path → brain_default → sole_non_default →
- * seed_default), so a `.gbrain-source` pin (or any real signal) selects the
+ * seed_default), so a `.modusbrain-source` pin (or any real signal) selects the
  * source. The multi-source ambiguity guard (`resolveDefaultSource`) is
  * applied ONLY when the chain matched nothing real (tier `seed_default`):
  * 1 source → returns it, 0 → `no_sources` throw, 2+ → `multiple_sources_ambiguous`.
@@ -596,7 +596,7 @@ export interface RemoveResult {
  * Hard-remove a source row + cascade. v0.28 additions:
  *  - protected-id guard for "default"
  *  - clone-cleanup: delete the on-disk clone IFF its resolved path is
- *    confined under $GBRAIN_HOME/clones/. realpath+lstat (not startsWith)
+ *    confined under $MODUSBRAIN_HOME/clones/. realpath+lstat (not startsWith)
  *    to defeat symlink escape attacks.
  *
  * Soft-delete (archive / restore) lives in destructive-guard.ts and is the
@@ -644,7 +644,7 @@ export async function removeSource(
 
   // Decide whether we own the clone dir before removing the row.
   const remoteUrl = getRemoteUrl(src.config);
-  const cloneRoot = gbrainPath('clones');
+  const cloneRoot = modusbrainPath('clones');
   let cloneRemoved = false;
   if (
     !opts.keepStorage &&
@@ -670,7 +670,7 @@ export async function removeSource(
       // Don't fail the whole remove if rmSync had a permission hiccup — log
       // and continue. The DB row deletion is the user-facing operation.
       console.error(
-        `[gbrain] WARN: clone cleanup at ${src.local_path} failed: ${(e as Error).message}`,
+        `[modusbrain] WARN: clone cleanup at ${src.local_path} failed: ${(e as Error).message}`,
       );
     }
   }
@@ -732,8 +732,8 @@ export async function getSourceStatus(
 
 /**
  * Re-clone a source's remote_url into its local_path if the clone is
- * missing on disk. Used by `gbrain sources restore` after an operator
- * autopurged $GBRAIN_HOME/clones/. Idempotent: returns false (didn't clone)
+ * missing on disk. Used by `modusbrain sources restore` after an operator
+ * autopurged $MODUSBRAIN_HOME/clones/. Idempotent: returns false (didn't clone)
  * if the clone is already there.
  *
  * Throws SourceOpError on clone failure. Does NOT touch the DB row.
@@ -753,7 +753,7 @@ export async function recloneIfMissing(
   if (state === 'healthy') return false;
 
   // #1881 ownership guard — abort BEFORE any filesystem op. recloneIfMissing
-  // deletes local_path; gbrain may only do that to a clone it created, never a
+  // deletes local_path; modusbrain may only do that to a clone it created, never a
   // user working tree. A row with remote_url + an unowned local_path (the
   // gstack-orchestrator federated shape) is refused here, loudly, untouched.
   if (!isOwnedClone(src)) {
@@ -767,7 +767,7 @@ export async function recloneIfMissing(
   const parent = dirname(src.local_path);
   mkdirSync(parent, { recursive: true });
   const rand = randomBytes(6).toString('hex');
-  const tempDir = join(parent, `.gbrain-reclone-${basename(src.local_path)}-${rand}`);
+  const tempDir = join(parent, `.modusbrain-reclone-${basename(src.local_path)}-${rand}`);
   try {
     cloneRepo(remoteUrl, tempDir);
   } catch (e) {
@@ -791,9 +791,9 @@ export async function recloneIfMissing(
       // Symlink leaf guard: never rename/rm *through* a symlinked leaf — that's
       // the TOCTOU swap-in vector (an attacker plants a symlink at local_path
       // between the entry ownership check and this rename). An owned clone's leaf
-      // is a real dir gbrain created; a symlink here means tamper, so fail closed.
+      // is a real dir modusbrain created; a symlink here means tamper, so fail closed.
       // (Symlinked ANCESTORS are intentionally NOT rejected here: for an owned
-      // clone gbrain created the dir at this path — cloneRepo refuses a non-empty
+      // clone modusbrain created the dir at this path — cloneRepo refuses a non-empty
       // dest, so a pre-existing user tree can never become an owned clone — and a
       // realpath-chain check false-positives on ubiquitous system symlinks like
       // macOS /var -> /private/var. The residual DB-trust risk, a forged

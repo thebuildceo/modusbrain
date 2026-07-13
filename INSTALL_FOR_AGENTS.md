@@ -1,4 +1,4 @@
-# GBrain Installation Guide for AI Agents
+# ModusBrain Installation Guide for AI Agents
 
 Read this entire file, then follow the steps. Ask the user for API keys when needed.
 Target: ~30 minutes to a fully working brain.
@@ -10,38 +10,38 @@ protocol (install, read order, trust boundary, common tasks). Claude Code reads
 `CLAUDE.md` automatically and can skip ahead.
 
 If you fetched this file by URL without cloning yet, the companion files live at:
-- `https://raw.githubusercontent.com/garrytan/gbrain/master/AGENTS.md` — start here
-- `https://raw.githubusercontent.com/garrytan/gbrain/master/llms.txt` — full doc map
-- `https://raw.githubusercontent.com/garrytan/gbrain/master/llms-full.txt` — same map, inlined
+- `https://raw.githubusercontent.com/garrytan/modusbrain/master/AGENTS.md` — start here
+- `https://raw.githubusercontent.com/garrytan/modusbrain/master/llms.txt` — full doc map
+- `https://raw.githubusercontent.com/garrytan/modusbrain/master/llms-full.txt` — same map, inlined
 
-## Step 1: Install GBrain
+## Step 1: Install ModusBrain
 
-Default path (Bun is required — gbrain is a Bun + TypeScript runtime):
+Default path (Bun is required — modusbrain is a Bun + TypeScript runtime):
 
 ```bash
 curl -fsSL https://bun.sh/install | bash
 export PATH="$HOME/.bun/bin:$PATH"
-bun install -g github:garrytan/gbrain
+bun install -g github:garrytan/modusbrain
 ```
 
-Verify: `gbrain --version` should print a version number. If `gbrain` is not found,
+Verify: `modusbrain --version` should print a version number. If `modusbrain` is not found,
 restart the shell or add the PATH export to the shell profile.
 
-> **If `bun install -g` aborts or `gbrain doctor` reports `schema_version: 0`** (Bun
+> **If `bun install -g` aborts or `modusbrain doctor` reports `schema_version: 0`** (Bun
 > occasionally blocks the top-level postinstall hook on global installs, so schema
 > migrations don't run automatically), the CLI prints a recovery hint pointing at
-> [#218](https://github.com/garrytan/gbrain/issues/218). Run `gbrain apply-migrations --yes`
+> [#218](https://github.com/garrytan/gbrain/issues/218). Run `modusbrain apply-migrations --yes`
 > to recover. If that doesn't work, fall back to the deterministic install path:
 >
 > ```bash
-> git clone https://github.com/garrytan/gbrain.git ~/gbrain && cd ~/gbrain
+> git clone https://github.com/garrytan/gbrain.git ~/modusbrain && cd ~/modusbrain
 > bun install && bun link
 > ```
 
 ## Step 2: API Keys
 
-Ask the user for these. gbrain defaults to the ZeroEntropy embedding + reranker stack
-(as of v0.36.2.0); OpenAI/Voyage are still supported as fallbacks via `gbrain config
+Ask the user for these. modusbrain defaults to the ZeroEntropy embedding + reranker stack
+(as of v0.36.2.0); OpenAI/Voyage are still supported as fallbacks via `modusbrain config
 set embedding_model <provider:model>`.
 
 ```bash
@@ -50,15 +50,15 @@ export OPENAI_API_KEY=sk-...          # fallback for vector search; also used fo
 export ANTHROPIC_API_KEY=sk-ant-...   # optional, improves search quality via query expansion
 ```
 
-Save to shell profile or `.env`. Keys are picked up by `gbrain config set` automatically
-or can be stored in `~/.gbrain/config.json` (file plane). Without any embedding provider,
+Save to shell profile or `.env`. Keys are picked up by `modusbrain config set` automatically
+or can be stored in `~/.modusbrain/config.json` (file plane). Without any embedding provider,
 keyword search still works. Without Anthropic, search works but skips query expansion.
 
 ## Step 3: Create the Brain
 
 ```bash
-gbrain init                           # PGLite, no server needed
-gbrain doctor --json                  # verify all checks pass
+modusbrain init                           # PGLite, no server needed
+modusbrain doctor --json                  # verify all checks pass
 ```
 
 The user's markdown files (notes, docs, brain repo) are SEPARATE from this tool repo.
@@ -68,13 +68,13 @@ Ask the user where their files are, or create a new brain repo:
 mkdir -p ~/brain && cd ~/brain && git init
 ```
 
-Read `~/gbrain/docs/GBRAIN_RECOMMENDED_SCHEMA.md` and set up the MECE directory
+Read `~/modusbrain/docs/MODUSBRAIN_RECOMMENDED_SCHEMA.md` and set up the MECE directory
 structure (people/, companies/, concepts/, etc.) inside the user's brain repo,
-NOT inside ~/gbrain.
+NOT inside ~/modusbrain.
 
 ## Step 3.5: Confirm search mode with the user (DO NOT SKIP)
 
-`gbrain init` auto-applied a default search mode (`tokenmax` unless your subagent
+`modusbrain init` auto-applied a default search mode (`tokenmax` unless your subagent
 tier is Haiku-class or no OpenAI key is configured). The init output included the
 cost matrix below preceded by `[AGENT]` markers. You must NOT silently accept the
 default. Stop and ask the operator.
@@ -96,7 +96,7 @@ Per-query cost @ 10K queries/mo (typical single-user volume):
 
 **Ask the operator (paraphrase if needed):**
 
-> Your gbrain just installed with search mode `<auto-applied default>`. This is
+> Your modusbrain just installed with search mode `<auto-applied default>`. This is
 > a one-time setup decision that controls retrieval payload size. Which mode
 > do you want?
 >
@@ -113,16 +113,16 @@ Per-query cost @ 10K queries/mo (typical single-user volume):
 
 If the operator picks a non-default mode, run:
 ```bash
-gbrain config set search.mode <mode>
+modusbrain config set search.mode <mode>
 ```
 
 If they pick tokenmax AND want to preserve the literal v0.31.x default
 (limit=20 instead of tokenmax's 50), also run:
 ```bash
-gbrain config set search.searchLimit 20
+modusbrain config set search.searchLimit 20
 ```
 
-Verify the choice with `gbrain search modes` before continuing.
+Verify the choice with `modusbrain search modes` before continuing.
 
 **Why this matters:** the cost spread between corners of the matrix is 25x.
 An agent that silently accepts the default and starts running queries against
@@ -132,9 +132,9 @@ spend. Confirm before continuing.
 ## Step 4: Import and Index
 
 ```bash
-gbrain import ~/brain/ --no-embed     # import markdown files
-gbrain embed --stale                  # generate vector embeddings
-gbrain query "key themes across these documents?"
+modusbrain import ~/brain/ --no-embed     # import markdown files
+modusbrain embed --stale                  # generate vector embeddings
+modusbrain query "key themes across these documents?"
 ```
 
 ## Step 4.5: Wire the Knowledge Graph
@@ -144,17 +144,17 @@ the typed-link graph and structured timeline. This populates the `links` and
 `timeline_entries` tables that future writes will maintain automatically.
 
 ```bash
-gbrain extract links --source db --dry-run | head -20    # preview
-gbrain extract links --source db                         # commit
-gbrain extract timeline --source db                      # dated events
-gbrain stats                                             # verify links > 0
+modusbrain extract links --source db --dry-run | head -20    # preview
+modusbrain extract links --source db                         # commit
+modusbrain extract timeline --source db                      # dated events
+modusbrain stats                                             # verify links > 0
 ```
 
 For brand-new empty brains, skip this step — auto-link populates the graph as the
 agent writes pages going forward. There is nothing to backfill yet.
 
 After this step:
-- `gbrain graph-query <slug> --depth 2` works (relationship traversal)
+- `modusbrain graph-query <slug> --depth 2` works (relationship traversal)
 - Search ranks well-connected entities higher (backlink boost)
 - Every future `put_page` auto-creates typed links and reconciles stale ones
 
@@ -165,23 +165,23 @@ and supports `--since YYYY-MM-DD` for incremental runs.
 
 If the user imported an Obsidian or Notion vault that uses **bare** `[[note-name]]`
 wikilinks — where `[[struktura]]` written in one folder means the page that lives
-at `projects/struktura.md` in another — GBrain does NOT connect those by default.
+at `projects/struktura.md` in another — ModusBrain does NOT connect those by default.
 Out of the box it only resolves path-qualified refs like `[[projects/struktura]]`,
 so a vault full of bare links shows up as a thin, broken graph. Turn on basename
 resolution so the cross-folder links connect:
 
 ```bash
-gbrain config set link_resolution.global_basename true
-gbrain extract links --source db          # re-run so the new edges land
+modusbrain config set link_resolution.global_basename true
+modusbrain extract links --source db          # re-run so the new edges land
 ```
 
-`gbrain doctor` surfaces a `link_resolution_opportunity` hint with the exact count
+`modusbrain doctor` surfaces a `link_resolution_opportunity` hint with the exact count
 ("47 of 60 bare wikilinks would resolve") so you know whether it's worth enabling
 before you flip it. When a bare name matches more than one page (`[[struktura]]` →
-both `projects/struktura` and `archive/struktura`), GBrain emits one edge to each
+both `projects/struktura` and `archive/struktura`), ModusBrain emits one edge to each
 rather than guessing a winner — review and prune the duplicates with
-`gbrain graph-query <slug>`. The mode is also honored on the filesystem-walk path
-(`gbrain extract links` with no `--source db`) and by auto-link on every future
+`modusbrain graph-query <slug>`. The mode is also honored on the filesystem-walk path
+(`modusbrain extract links` with no `--source db`) and by auto-link on every future
 `put_page`.
 
 ## Step 5: Load Skills
@@ -191,17 +191,17 @@ scaffold the bundled skills into it:
 
 ```bash
 cd /path/to/agent/workspace
-gbrain skillpack scaffold --all       # copy 43 curated skills + RESOLVER.md
+modusbrain skillpack scaffold --all       # copy 43 curated skills + RESOLVER.md
 ```
 
 Scaffolded skills are first-class files in your repo. Edit freely; re-running scaffold
-refuses to overwrite anything that exists. Use `gbrain skillpack reference <name>` to
-diff against gbrain's bundle when you want upstream improvements. (The legacy
-`gbrain skillpack install` managed-block model was retired in v0.36.0.0 — run
-`gbrain skillpack migrate-fence` once if upgrading from an older release.)
+refuses to overwrite anything that exists. Use `modusbrain skillpack reference <name>` to
+diff against modusbrain's bundle when you want upstream improvements. (The legacy
+`modusbrain skillpack install` managed-block model was retired in v0.36.0.0 — run
+`modusbrain skillpack migrate-fence` once if upgrading from an older release.)
 
 Whether you scaffolded or not, read `skills/RESOLVER.md` (in your workspace, or the
-bundled copy at `~/gbrain/skills/RESOLVER.md` when running from the cloned repo). It's
+bundled copy at `~/modusbrain/skills/RESOLVER.md` when running from the cloned repo). It's
 the skill dispatcher — tells you which skill to read for any task. Save this to your
 memory permanently.
 
@@ -232,29 +232,29 @@ If skipped, minimal defaults are installed automatically.
 ## Step 7: Recurring Jobs
 
 Set up using your platform's scheduler (OpenClaw cron, Railway cron, crontab), or skip the
-platform glue entirely with `gbrain autopilot --install` (built-in self-maintaining daemon):
+platform glue entirely with `modusbrain autopilot --install` (built-in self-maintaining daemon):
 
-- **Live sync** (every 15 min): `gbrain sync --repo ~/brain && gbrain embed --stale`
-  — or `gbrain sync --watch` for a continuous loop.
-- **Auto-update** (daily): `gbrain check-update --json` (tell user, never auto-install).
-- **Dream cycle** (nightly): `gbrain dream` runs the 8-phase overnight maintenance cycle.
+- **Live sync** (every 15 min): `modusbrain sync --repo ~/brain && modusbrain embed --stale`
+  — or `modusbrain sync --watch` for a continuous loop.
+- **Auto-update** (daily): `modusbrain check-update --json` (tell user, never auto-install).
+- **Dream cycle** (nightly): `modusbrain dream` runs the 8-phase overnight maintenance cycle.
   Entity sweep, citation fixes, memory consolidation, plus (v0.23+) overnight conversation
   synthesis and cross-session pattern detection. One cron-friendly command. This is what
   makes the brain compound. Do not skip it. See `docs/guides/cron-schedule.md` for the
   full protocol.
-- **Weekly**: `gbrain doctor --json && gbrain embed --stale`
+- **Weekly**: `modusbrain doctor --json && modusbrain embed --stale`
 
 ## Step 8: Integrations
 
-Run `gbrain integrations list`. Each recipe in `~/gbrain/recipes/` is a self-contained
+Run `modusbrain integrations list`. Each recipe in `~/modusbrain/recipes/` is a self-contained
 installer. It tells you what credentials to ask for, how to validate, and what cron
 to register. Ask the user which integrations they want (email, calendar, voice, Twitter).
 
-Verify: `gbrain integrations doctor` (after at least one is configured)
+Verify: `modusbrain integrations doctor` (after at least one is configured)
 
 ## Step 9: Verify
 
-Read `docs/GBRAIN_VERIFY.md` and run all 7 verification checks. Check #4 (live sync
+Read `docs/MODUSBRAIN_VERIFY.md` and run all 7 verification checks. Check #4 (live sync
 actually works) is the most important.
 
 ## Upgrade
@@ -262,61 +262,61 @@ actually works) is the most important.
 If you installed via `bun install -g`:
 
 ```bash
-gbrain upgrade                        # self-updates the binary, runs schema migrations,
+modusbrain upgrade                        # self-updates the binary, runs schema migrations,
                                       # and prints post-upgrade notes for the version range
 ```
 
 If you installed via `git clone + bun link`:
 
 ```bash
-cd ~/gbrain && git pull origin master && bun install
-gbrain apply-migrations --yes         # apply schema migrations (idempotent)
-gbrain post-upgrade                   # show migration notes for the version range
+cd ~/modusbrain && git pull origin master && bun install
+modusbrain apply-migrations --yes         # apply schema migrations (idempotent)
+modusbrain post-upgrade                   # show migration notes for the version range
 ```
 
-Then read `~/gbrain/skills/migrations/v<NEW_VERSION>.md` (and any intermediate
+Then read `~/modusbrain/skills/migrations/v<NEW_VERSION>.md` (and any intermediate
 versions you skipped) and run any backfill or verification steps it lists. Skipping
 this is how features ship in the binary but stay dormant in the user's brain.
 
 **v0.32.3 search modes (one-time upgrade prompt):** if the user's brain was
-created before v0.32.3, `gbrain post-upgrade` prints a banner including the
+created before v0.32.3, `modusbrain post-upgrade` prints a banner including the
 9-cell cost matrix (mode × downstream model) preceded by `[AGENT]` markers.
 **Do NOT silently move past the banner.** Present the matrix to the operator
 verbatim, ask which mode they want (recommended default: `tokenmax` to preserve
-v0.31.x retrieval shape), then run `gbrain config set search.mode <mode>`. See
+v0.31.x retrieval shape), then run `modusbrain config set search.mode <mode>`. See
 Step 3.5 above for the full ask-the-user protocol — the upgrade path uses the
 same matrix and same default.
 
 For v0.12.0+ specifically: if your brain was created before v0.12.0, run
-`gbrain extract links --source db && gbrain extract timeline --source db` to
+`modusbrain extract links --source db && modusbrain extract timeline --source db` to
 backfill the new graph layer (see Step 4.5 above).
 
 For v0.12.2+ specifically: if your brain is Postgres- or Supabase-backed and
-predates v0.12.2, the `v0_12_2` migration runs `gbrain repair-jsonb`
-automatically during `gbrain post-upgrade` to fix the double-encoded JSONB
+predates v0.12.2, the `v0_12_2` migration runs `modusbrain repair-jsonb`
+automatically during `modusbrain post-upgrade` to fix the double-encoded JSONB
 columns. PGLite brains no-op. If wiki-style imports were truncated by the old
-`splitBody` bug, run `gbrain sync --full` after upgrading to rebuild
+`splitBody` bug, run `modusbrain sync --full` after upgrading to rebuild
 `compiled_truth` from source markdown.
 
 ## v0.42.0+ onboard surface (NEW)
 
-`gbrain onboard` is the activation surface gbrain did not have before.
-Once your brain has any content, run `gbrain onboard --check --json` to
+`modusbrain onboard` is the activation surface modusbrain did not have before.
+Once your brain has any content, run `modusbrain onboard --check --json` to
 see structured recommendations across 5 brain-health axes (orphans,
 stale embeddings, entity link coverage, timeline coverage, takes count).
 
-**On first connect (after `gbrain init`):**
+**On first connect (after `modusbrain init`):**
 ```bash
-gbrain onboard --check --json
+modusbrain onboard --check --json
 ```
 The JSON envelope (`schema_version: 1`) carries `recommendations[]` with
 `apply_policy` per item: `auto_apply` (safe to run unattended),
 `prompt_required` (needs explicit user consent), or `manual_only`
 (LLM-bearing, user must run themselves).
 
-**After every `gbrain upgrade`:**
+**After every `modusbrain upgrade`:**
 ```bash
-gbrain onboard --check --json
+modusbrain onboard --check --json
 ```
 New versions may surface new opportunities. The post-upgrade banner
 nudges the user when it runs, but agents should re-probe as a hygiene
@@ -324,7 +324,7 @@ step regardless.
 
 **Unattended remediation (cron / autopilot):**
 ```bash
-gbrain onboard --auto --max-usd 5
+modusbrain onboard --auto --max-usd 5
 ```
 Refuses without `--max-usd N`. Runs auto-eligible items only. The
 autopilot daemon also consults onboard recommendations on its tick — no
@@ -340,7 +340,7 @@ scope — admin alone is insufficient. The MCP op returns
 grants.
 
 **Privacy + consent gates:**
-- `gbrain takes extract --from-pages` sends concept/atom/lore/briefing/
+- `modusbrain takes extract --from-pages` sends concept/atom/lore/briefing/
   writing/originals page content to your configured chat model (default
   Anthropic Haiku). Refuses to run unless `takes.bootstrap_enabled=true`
   is set in config AND `--yes` is passed. Two-gate opt-in by design.
@@ -349,6 +349,6 @@ grants.
 
 **Suppress nudges in CI / scripted environments:**
 ```bash
-export GBRAIN_NO_ONBOARD_NUDGE=1
+export MODUSBRAIN_NO_ONBOARD_NUDGE=1
 ```
 Init + upgrade banners auto-skip in non-TTY too.

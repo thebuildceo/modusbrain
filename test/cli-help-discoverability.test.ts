@@ -1,14 +1,14 @@
 /**
  * v0.39.3.0 WARN-5 + WARN-6 — CLI help discoverability.
  *
- * WARN-5: `gbrain capture --help` was showing only the generic
- * `Usage: gbrain capture` line because `capture` was missing from
+ * WARN-5: `modusbrain capture --help` was showing only the generic
+ * `Usage: modusbrain capture` line because `capture` was missing from
  * CLI_ONLY_SELF_HELP (src/cli.ts:34-53). Fix added it to the set AND
  * added a pre-engine-bind `--help` short-circuit at handleCliOnly so
  * the HELP constant is reachable on a fresh tmpdir with no config.
  *
  * WARN-6: `capture`, `brainstorm`, `lsd` were missing from the main
- * `gbrain --help` text. Added a BRAIN section to printHelp.
+ * `modusbrain --help` text. Added a BRAIN section to printHelp.
  *
  * These tests spawn `bun run src/cli.ts` as a subprocess so they
  * exercise the real dispatcher flow end-to-end (no mocking of
@@ -23,7 +23,7 @@ function runCli(args: string[]): { stdout: string; stderr: string; status: numbe
   const result = bunSpawnSync(['run', 'src/cli.ts', ...args], {
     cwd: process.cwd(),
     encoding: 'utf8',
-    env: { ...process.env, GBRAIN_HOME: '/tmp/gbrain-test-help-nonexistent' },
+    env: { ...process.env, MODUSBRAIN_HOME: '/tmp/modusbrain-test-help-nonexistent' },
   });
   return {
     stdout: result.stdout ?? '',
@@ -32,7 +32,7 @@ function runCli(args: string[]): { stdout: string; stderr: string; status: numbe
   };
 }
 
-describe('WARN-5 — `gbrain capture --help` reaches the detailed HELP constant', () => {
+describe('WARN-5 — `modusbrain capture --help` reaches the detailed HELP constant', () => {
   test('output contains every documented flag', () => {
     const { stdout, status } = runCli(['capture', '--help']);
     expect(status).toBe(0);
@@ -47,11 +47,11 @@ describe('WARN-5 — `gbrain capture --help` reaches the detailed HELP constant'
 
   test('output is NOT the generic short-circuit fallback', () => {
     const { stdout } = runCli(['capture', '--help']);
-    // Pre-fix output was: "Usage: gbrain capture\n\ngbrain capture - run gbrain --help ..."
+    // Pre-fix output was: "Usage: modusbrain capture\n\nmodusbrain capture - run modusbrain --help ..."
     // Post-fix HELP is much longer and includes Examples.
     expect(stdout).toContain('Examples:');
     expect(stdout.split('\n').length).toBeGreaterThan(10);
-    expect(stdout).not.toMatch(/^Usage: gbrain capture\s*$/m);
+    expect(stdout).not.toMatch(/^Usage: modusbrain capture\s*$/m);
   });
 
   test('-h short flag also works', () => {
@@ -61,7 +61,7 @@ describe('WARN-5 — `gbrain capture --help` reaches the detailed HELP constant'
   });
 });
 
-describe('WARN-6 — main `gbrain --help` lists capture/brainstorm/lsd', () => {
+describe('WARN-6 — main `modusbrain --help` lists capture/brainstorm/lsd', () => {
   test('output mentions all three commands by name', () => {
     const { stdout, status } = runCli(['--help']);
     expect(status).toBe(0);

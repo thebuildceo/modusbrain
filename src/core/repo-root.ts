@@ -26,13 +26,13 @@ export function findRepoRoot(startDir: string = process.cwd()): string | null {
 
 /**
  * Where auto-detect found the skills directory.
- *   - `env_explicit`                 — $GBRAIN_SKILLS_DIR (operator override; v0.31.7)
+ *   - `env_explicit`                 — $MODUSBRAIN_SKILLS_DIR (operator override; v0.31.7)
  *   - `openclaw_workspace_env`       — $OPENCLAW_WORKSPACE/skills
  *   - `openclaw_workspace_env_root`  — $OPENCLAW_WORKSPACE/ (AGENTS.md at
  *                                      workspace root; skills in subdir)
  *   - `openclaw_workspace_home`      — ~/.openclaw/workspace/skills
  *   - `openclaw_workspace_home_root` — ~/.openclaw/workspace (root AGENTS.md)
- *   - `repo_root`                    — walked up from cwd, found gbrain repo
+ *   - `repo_root`                    — walked up from cwd, found modusbrain repo
  *   - `cwd_skills`                   — ./skills fallback
  *   - `install_path`                 — walked up from this module's install
  *                                      path; READ-ONLY callers only (v0.31.7)
@@ -74,7 +74,7 @@ function resolveWorkspaceSkillsDir(
   // `workspace/_real-skills`) stays contained and is allowed. A non-contained
   // candidate returns null so lower tiers can try, rather than trusting an escape.
   const contained = isPathContained(subdir, workspace);
-  // Preferred: workspace/skills with a resolver file inside it (gbrain-native).
+  // Preferred: workspace/skills with a resolver file inside it (modusbrain-native).
   if (hasResolverFile(subdir)) {
     return contained ? { dir: subdir, source: sourceSubdir } : null;
   }
@@ -90,27 +90,27 @@ function resolveWorkspaceSkillsDir(
 
 /**
  * Auto-detect the skills directory. Priority (v0.31.7 read+write-safe order):
- *   0. $GBRAIN_SKILLS_DIR explicit operator override (any caller)
+ *   0. $MODUSBRAIN_SKILLS_DIR explicit operator override (any caller)
  *   1. $OPENCLAW_WORKSPACE when explicitly set (env > repo-root walk)
  *   2. ~/.openclaw/workspace/ (user's default OpenClaw deployment)
- *   3. findRepoRoot() walk from cwd (gbrain's own repo)
+ *   3. findRepoRoot() walk from cwd (modusbrain's own repo)
  *   4. ./skills fallback (dev scratch, fixtures)
  *
- * Tier 0 ($GBRAIN_SKILLS_DIR) is safe for both read and write paths because
+ * Tier 0 ($MODUSBRAIN_SKILLS_DIR) is safe for both read and write paths because
  * the operator explicitly set the variable — opt-in retargeting is fine. The
  * silent retargeting risk that motivates `autoDetectSkillsDirReadOnly` is
  * about implicit fallback to install-path when no explicit signal is set.
  *
  * The prior order put `findRepoRoot` first, which meant
- * `export OPENCLAW_WORKSPACE=...; gbrain check-resolvable` run from
- * inside the gbrain repo silently shadowed the env var by walking up
- * to gbrain's own skills/. Explicit env should win. Unset env → behavior
+ * `export OPENCLAW_WORKSPACE=...; modusbrain check-resolvable` run from
+ * inside the modusbrain repo silently shadowed the env var by walking up
+ * to modusbrain's own skills/. Explicit env should win. Unset env → behavior
  * is unchanged from before.
  *
  * Write-path callers (skillpack install, skillify scaffold,
  * post-install-advisory) MUST use this function, not the read-only variant —
- * a write-path install-path fallback would let `gbrain skillpack install`
- * from `~` silently target the bundled gbrain repo's skills/ instead of the
+ * a write-path install-path fallback would let `modusbrain skillpack install`
+ * from `~` silently target the bundled modusbrain repo's skills/ instead of the
  * user's workspace.
  *
  * `startDir` + `env` params keep tests hermetic.
@@ -119,14 +119,14 @@ export function autoDetectSkillsDir(
   startDir: string = process.cwd(),
   env: NodeJS.ProcessEnv = process.env,
 ): SkillsDirDetection {
-  // 0. $GBRAIN_SKILLS_DIR explicit operator override. Safe for all callers
+  // 0. $MODUSBRAIN_SKILLS_DIR explicit operator override. Safe for all callers
   //    because the operator explicitly set the env var. Does NOT support the
   //    `workspace-root with AGENTS.md + skills/ sibling` shape — operator who
   //    wants that should point the env var at the skills/ dir directly.
-  if (env.GBRAIN_SKILLS_DIR) {
-    const explicit = isAbsolute(env.GBRAIN_SKILLS_DIR)
-      ? env.GBRAIN_SKILLS_DIR
-      : resolvePath(startDir, env.GBRAIN_SKILLS_DIR);
+  if (env.MODUSBRAIN_SKILLS_DIR) {
+    const explicit = isAbsolute(env.MODUSBRAIN_SKILLS_DIR)
+      ? env.MODUSBRAIN_SKILLS_DIR
+      : resolvePath(startDir, env.MODUSBRAIN_SKILLS_DIR);
     if (hasResolverFile(explicit)) {
       return { dir: explicit, source: 'env_explicit' };
     }
@@ -153,7 +153,7 @@ export function autoDetectSkillsDir(
   //     subdirectory. Comes after $OPENCLAW_WORKSPACE so R5
   //     (precedence regression) holds: explicit env still wins. Comes
   //     before ~/.openclaw/workspace so that `cd ~/git/your-agent-repo
-  //     && gbrain skillpack scaffold X` finds the agent repo, not an
+  //     && modusbrain skillpack scaffold X` finds the agent repo, not an
   //     implicit fallback to OpenClaw's default install.
   {
     let dir = startDir;
@@ -184,9 +184,9 @@ export function autoDetectSkillsDir(
     if (resolved) return resolved;
   }
 
-  // 3. gbrain repo walk from cwd.
+  // 3. modusbrain repo walk from cwd.
   const repoRoot = findRepoRoot(startDir);
-  if (repoRoot && isGbrainRepoRoot(repoRoot)) {
+  if (repoRoot && isModusbrainRepoRoot(repoRoot)) {
     const skillsDir = join(repoRoot, 'skills');
     if (isPathContained(skillsDir, repoRoot)) {
       return { dir: skillsDir, source: 'repo_root' };
@@ -207,7 +207,7 @@ export function autoDetectSkillsDir(
   return { dir: null, source: null };
 }
 
-function isGbrainRepoRoot(dir: string): boolean {
+function isModusbrainRepoRoot(dir: string): boolean {
   return (
     existsSync(join(dir, 'src', 'cli.ts')) &&
     hasResolverFile(join(dir, 'skills'))
@@ -217,22 +217,22 @@ function isGbrainRepoRoot(dir: string): boolean {
 /**
  * Read-only skills-dir detection (v0.31.7). Wraps `autoDetectSkillsDir` and
  * adds an install-path fallback when the primary detection returns null —
- * walks up from this module's install location to find a gbrain repo root,
- * gated by `isGbrainRepoRoot` to avoid false-positive on unrelated repos.
+ * walks up from this module's install location to find a modusbrain repo root,
+ * gated by `isModusbrainRepoRoot` to avoid false-positive on unrelated repos.
  *
- * Use this from READ-ONLY callers only: `gbrain doctor`,
- * `gbrain check-resolvable`, `gbrain routing-eval`. Never from write paths.
+ * Use this from READ-ONLY callers only: `modusbrain doctor`,
+ * `modusbrain check-resolvable`, `modusbrain routing-eval`. Never from write paths.
  *
  * Why a separate function? `autoDetectSkillsDir` is shared with write paths
  * (`skillpack install`, `skillify scaffold`, `post-install-advisory`).
  * Adding the install-path fallback to the shared function would let
- * `gbrain skillpack install` from `~` silently target the bundled gbrain
+ * `modusbrain skillpack install` from `~` silently target the bundled modusbrain
  * repo's skills/ instead of the user's actual workspace — a quiet data-flow
  * regression. Read-only callers don't write anything to the resolved path,
  * so the install-path fallback is safe for them.
  *
  * Closes the install-path footgun for hosted-CLI installs (`bun install -g
- * github:garrytan/gbrain && cd ~ && gbrain doctor`) without expanding the
+ * github:garrytan/modusbrain && cd ~ && modusbrain doctor`) without expanding the
  * blast radius to write-path callers.
  */
 export function autoDetectSkillsDirReadOnly(
@@ -243,13 +243,13 @@ export function autoDetectSkillsDirReadOnly(
   if (primary.dir) return primary;
 
   // Tier-5 install-path fallback: walk up from this module's install
-  // location. Gate with isGbrainRepoRoot so we don't false-positive when
+  // location. Gate with isModusbrainRepoRoot so we don't false-positive when
   // the install path lives inside an unrelated repo (e.g., a monorepo
-  // that vendored gbrain in a subdir).
+  // that vendored modusbrain in a subdir).
   try {
     const moduleDir = fileURLToPath(import.meta.url);
     const installRoot = findRepoRoot(moduleDir);
-    if (installRoot && isGbrainRepoRoot(installRoot)) {
+    if (installRoot && isModusbrainRepoRoot(installRoot)) {
       const skillsDir = join(installRoot, 'skills');
       if (isPathContained(skillsDir, installRoot)) {
         return { dir: skillsDir, source: 'install_path' };
@@ -271,7 +271,7 @@ export function autoDetectSkillsDirReadOnly(
  */
 export const AUTO_DETECT_HINT = [
   `  1. --skills-dir flag`,
-  `  2. $GBRAIN_SKILLS_DIR (explicit operator override)`,
+  `  2. $MODUSBRAIN_SKILLS_DIR (explicit operator override)`,
   `  3. $OPENCLAW_WORKSPACE/{skills/,}{${RESOLVER_FILENAMES.join(',')}}`,
   `  4. cwd + walk-up for any skills/ directory (v0.33; for non-OpenClaw hosts)`,
   `  5. ~/.openclaw/workspace/{skills/,}{${RESOLVER_FILENAMES.join(',')}}`,
@@ -281,10 +281,10 @@ export const AUTO_DETECT_HINT = [
 
 /**
  * Read-only auto-detect hint. Includes the install-path fallback that
- * `autoDetectSkillsDirReadOnly` adds for `gbrain doctor` /
- * `gbrain check-resolvable` / `gbrain routing-eval`.
+ * `autoDetectSkillsDirReadOnly` adds for `modusbrain doctor` /
+ * `modusbrain check-resolvable` / `modusbrain routing-eval`.
  */
 export const AUTO_DETECT_HINT_READ_ONLY = [
   AUTO_DETECT_HINT,
-  `  7. (read-only) walk up from gbrain's install path`,
+  `  7. (read-only) walk up from modusbrain's install path`,
 ].join('\n');

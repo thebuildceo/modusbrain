@@ -1,21 +1,21 @@
 /**
- * v0.11.0 migration orchestrator — GBrain Minions adoption.
+ * v0.11.0 migration orchestrator — ModusBrain Minions adoption.
  *
  * Phases (all idempotent; resumable from a prior status:"partial" run):
- *   A. Schema  — gbrain init --migrate-only (never bare init — that
+ *   A. Schema  — modusbrain init --migrate-only (never bare init — that
  *                defaults to PGLite and clobbers existing configs).
- *   B. Smoke   — gbrain jobs smoke. Fail loudly on non-zero.
+ *   B. Smoke   — modusbrain jobs smoke. Fail loudly on non-zero.
  *   C. Mode    — resolve minion_mode (flag / default / TTY prompt).
- *   D. Prefs   — write ~/.gbrain/preferences.json.
+ *   D. Prefs   — write ~/.modusbrain/preferences.json.
  *   E. Host    — detect AGENTS.md + cron manifests. Inject the subagent-
  *                routing convention marker into each AGENTS.md. Rewrite
- *                cron entries for GBRAIN-BUILTIN handler names only.
+ *                cron entries for MODUSBRAIN-BUILTIN handler names only.
  *                For non-builtin handlers (host-specific, like
  *                ea-inbox-sweep) emit structured TODO rows to
- *                ~/.gbrain/migrations/pending-host-work.jsonl so the host
+ *                ~/.modusbrain/migrations/pending-host-work.jsonl so the host
  *                agent can walk through its plugin-contract work per
  *                skills/migrations/v0.11.0.md.
- *   F. Install — gbrain autopilot --install (env-aware).
+ *   F. Install — modusbrain autopilot --install (env-aware).
  *   G. Record  — append completed.jsonl (status: complete unless any
  *                pending-host-work items remain).
  */
@@ -30,13 +30,13 @@ import { promptLine } from '../../core/cli-util.ts';
 import { VERSION } from '../../version.ts';
 
 const BUILTIN_HANDLERS = new Set(['sync', 'embed', 'lint', 'import', 'extract', 'backlinks', 'autopilot-cycle']);
-const AGENTS_MD_MARKER = '<!-- gbrain:subagent-routing v0.11.0 -->';
-const CRON_MIGRATED_PROPERTY = '_gbrain_migrated_by';
+const AGENTS_MD_MARKER = '<!-- modusbrain:subagent-routing v0.11.0 -->';
+const CRON_MIGRATED_PROPERTY = '_modusbrain_migrated_by';
 const MAX_HOST_FILE_BYTES = 1_000_000;
 
 function home(): string { return process.env.HOME || ''; }
-function gbrainDir(): string { return join(home(), '.gbrain'); }
-function pendingHostWorkPath(): string { return join(gbrainDir(), 'migrations', 'pending-host-work.jsonl'); }
+function modusbrainDir(): string { return join(home(), '.modusbrain'); }
+function pendingHostWorkPath(): string { return join(modusbrainDir(), 'migrations', 'pending-host-work.jsonl'); }
 
 export interface PendingHostWorkEntry {
   type: 'cron-handler-needs-host-registration' | 'agents-md-dispatcher-needs-host-review';
@@ -61,7 +61,7 @@ async function phaseASchema(opts: OrchestratorOpts): Promise<OrchestratorPhaseRe
   if (opts.dryRun) return { name: 'schema', status: 'skipped', detail: 'dry-run' };
   try {
     // v0.41.37.0 #1605: bring schema to head IN-PROCESS for every engine. Was an
-    // a `gbrain init --migrate-only` subprocess subprocess for Postgres (died with
+    // a `modusbrain init --migrate-only` subprocess subprocess for Postgres (died with
     // `getaddrinfo ENOTFOUND` on Windows+bun+Supabase-pooler before it could
     // connect) plus a PGLite-only in-process branch (which separately
     // deadlocked on the file lock, #1100). runMigrateOnlyCore is the single
@@ -82,7 +82,7 @@ async function phaseASchema(opts: OrchestratorOpts): Promise<OrchestratorPhaseRe
 function phaseBSmoke(opts: OrchestratorOpts): OrchestratorPhaseResult {
   if (opts.dryRun) return { name: 'smoke', status: 'skipped', detail: 'dry-run' };
   try {
-    execSync('gbrain jobs smoke', { stdio: 'inherit', timeout: 30_000, env: process.env });
+    execSync('modusbrain jobs smoke', { stdio: 'inherit', timeout: 30_000, env: process.env });
     return { name: 'smoke', status: 'complete' };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
@@ -110,13 +110,13 @@ async function phaseCMode(opts: OrchestratorOpts): Promise<{
 
   // --yes / non-TTY: explicit pain_triggered default with a visible print.
   if (opts.yes || !process.stdin.isTTY) {
-    console.log('Defaulting minion_mode=pain_triggered (non-interactive). Change with `gbrain config set minion_mode <always|off>`.');
+    console.log('Defaulting minion_mode=pain_triggered (non-interactive). Change with `modusbrain config set minion_mode <always|off>`.');
     return { phase: { name: 'mode', status: 'complete', detail: 'mode=pain_triggered (default)' }, mode: 'pain_triggered' };
   }
 
   // Interactive: numbered menu via the shared promptLine helper.
   console.log('');
-  console.log('How should your agent use GBrain Minions?');
+  console.log('How should your agent use ModusBrain Minions?');
   console.log('  [1] always          — route every background agent task through Minions (most durable)');
   console.log('  [2] pain_triggered  — default to native subagents, switch to Minions when pain signals fire (recommended)');
   console.log('  [3] off             — disable Minions; keep native subagents');
@@ -192,7 +192,7 @@ function injectAgentsMdMarker(path: string, opts: OrchestratorOpts): { injected:
   const bakPath = `${path}.bak.${stamp}`;
   try {
     writeFileSync(bakPath, content);
-    const snippet = `\n\n${AGENTS_MD_MARKER}\n## Subagent routing (gbrain v0.11.0)\n\nSee \`skills/conventions/subagent-routing.md\` for the runtime routing convention.\n\`~/.gbrain/preferences.json\` controls \`minion_mode\` (always / pain_triggered / off).\n`;
+    const snippet = `\n\n${AGENTS_MD_MARKER}\n## Subagent routing (modusbrain v0.11.0)\n\nSee \`skills/conventions/subagent-routing.md\` for the runtime routing convention.\n\`~/.modusbrain/preferences.json\` controls \`minion_mode\` (always / pain_triggered / off).\n`;
     // Re-check mtime
     const nowMtime = statSync(path).mtimeMs;
     if (nowMtime !== beforeMtime) {
@@ -258,7 +258,7 @@ function rewriteCronManifest(
   // We load config lazily to avoid a hard dep.
   let enginePglite = false;
   try {
-    const cfg = JSON.parse(readFileSync(join(gbrainDir(), 'config.json'), 'utf-8'));
+    const cfg = JSON.parse(readFileSync(join(modusbrainDir(), 'config.json'), 'utf-8'));
     enginePglite = cfg?.engine === 'pglite';
   } catch { /* best-effort */ }
 
@@ -277,13 +277,13 @@ function rewriteCronManifest(
     if (!handler) continue;
 
     if (BUILTIN_HANDLERS.has(handler)) {
-      // Rewrite to shell + gbrain jobs submit.
+      // Rewrite to shell + modusbrain jobs submit.
       let cmd: string;
       if (enginePglite) {
-        cmd = `gbrain jobs submit ${handler} --params '{}' --follow`;
+        cmd = `modusbrain jobs submit ${handler} --params '{}' --follow`;
       } else {
         // slot computed via date(1). Host scheduler evaluates shell.
-        cmd = `gbrain jobs submit ${handler} --params '{"slot":"$(date -u +%Y-%m-%dT%H:%M)"}' --idempotency-key ${handler}:$(date -u +%Y-%m-%dT%H:%M)`;
+        cmd = `modusbrain jobs submit ${handler} --params '{"slot":"$(date -u +%Y-%m-%dT%H:%M)"}' --idempotency-key ${handler}:$(date -u +%Y-%m-%dT%H:%M)`;
       }
       entry.kind = 'shell';
       entry.cmd = cmd;
@@ -298,7 +298,7 @@ function rewriteCronManifest(
         cron_schedule: schedule,
         manifest_path: path,
         current_cmd: `agentTurn ${handler}`,
-        recommendation: `Add a handler registration for \`${handler}\` in your host worker bootstrap per docs/guides/plugin-handlers.md. Once registered, re-run \`gbrain apply-migrations\` to auto-rewrite this entry.`,
+        recommendation: `Add a handler registration for \`${handler}\` in your host worker bootstrap per docs/guides/plugin-handlers.md. Once registered, re-run \`modusbrain apply-migrations\` to auto-rewrite this entry.`,
         detected_at: new Date().toISOString(),
         status: 'pending',
       });
@@ -403,11 +403,11 @@ function phaseFInstall(opts: OrchestratorOpts): OrchestratorPhaseResult {
   if (opts.dryRun) return { name: 'install', status: 'skipped', detail: 'dry-run' };
   if (opts.noAutopilotInstall) return { name: 'install', status: 'skipped', detail: '--no-autopilot-install' };
   try {
-    execSync('gbrain autopilot --install --yes', { stdio: 'inherit', timeout: 60_000, env: process.env });
+    execSync('modusbrain autopilot --install --yes', { stdio: 'inherit', timeout: 60_000, env: process.env });
     return { name: 'install', status: 'complete' };
   } catch (e) {
     // Install is best-effort — log but don't fail the whole migration. User
-    // can re-run `gbrain autopilot --install` manually.
+    // can re-run `modusbrain autopilot --install` manually.
     return { name: 'install', status: 'failed', detail: e instanceof Error ? e.message : String(e) };
   }
 }
@@ -464,8 +464,8 @@ async function orchestrator(opts: OrchestratorOpts): Promise<OrchestratorResult>
     console.log(`  ${pendingHostWorkPath()}`);
     console.log(`  skills/migrations/v0.11.0.md`);
     console.log('');
-    console.log('The skill walks the host through each item using GBrain\'s plugin contract.');
-    console.log('Re-run `gbrain apply-migrations --yes` after each batch to auto-rewrite newly-');
+    console.log('The skill walks the host through each item using ModusBrain\'s plugin contract.');
+    console.log('Re-run `modusbrain apply-migrations --yes` after each batch to auto-rewrite newly-');
     console.log('registerable crons and mark items done.');
   }
 
@@ -482,7 +482,7 @@ async function orchestrator(opts: OrchestratorOpts): Promise<OrchestratorResult>
 export const v0_11_0: Migration = {
   version: '0.11.0',
   featurePitch: {
-    headline: 'GBrain Minions — durable background agents',
+    headline: 'ModusBrain Minions — durable background agents',
     description:
       'Turn any long-running agent task into a durable job that survives gateway ' +
       'restarts, streams progress, and can be paused, resumed, or steered mid-flight. ' +

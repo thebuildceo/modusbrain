@@ -30,15 +30,15 @@ let auditDir: string;
 let lockDir: string;
 
 function seedPack(packName: string, format: 'json' | 'yaml', initial?: Partial<SchemaPackManifest>): string {
-  // GBRAIN_HOME=/tmp/x → gbrainPath('schema-packs', 'mine') = /tmp/x/.gbrain/schema-packs/mine
-  const dir = join(tmpDir, '.gbrain', 'schema-packs', packName);
+  // MODUSBRAIN_HOME=/tmp/x → modusbrainPath('schema-packs', 'mine') = /tmp/x/.modusbrain/schema-packs/mine
+  const dir = join(tmpDir, '.modusbrain', 'schema-packs', packName);
   mkdirSync(dir, { recursive: true });
   const manifest: SchemaPackManifest = {
-    api_version: 'gbrain-schema-pack-v1',
+    api_version: 'modusbrain-schema-pack-v1',
     name: packName,
     version: '1.0.0',
     description: '',
-    gbrain_min_version: '0.38.0',
+    modusbrain_min_version: '0.38.0',
     extends: null,
     borrow_from: [],
     page_types: [{
@@ -68,9 +68,9 @@ function buildSimpleYaml(m: SchemaPackManifest): string {
 
 beforeEach(() => {
   _resetPackCacheForTests();
-  tmpDir = mkdtempSync(join(tmpdir(), 'gbrain-mutate-test-'));
-  auditDir = mkdtempSync(join(tmpdir(), 'gbrain-mutate-audit-'));
-  lockDir = mkdtempSync(join(tmpdir(), 'gbrain-mutate-locks-'));
+  tmpDir = mkdtempSync(join(tmpdir(), 'modusbrain-mutate-test-'));
+  auditDir = mkdtempSync(join(tmpdir(), 'modusbrain-mutate-audit-'));
+  lockDir = mkdtempSync(join(tmpdir(), 'modusbrain-mutate-locks-'));
 });
 
 afterEach(() => {
@@ -88,19 +88,19 @@ describe('locateMutablePackFile — bundled guard', () => {
     try { locateMutablePackFile('gbrain-base'); } catch (e) {
       const err = e as SchemaPackMutationError;
       expect(err.code).toBe('PACK_READONLY');
-      expect(err.message).toContain('gbrain schema fork');
+      expect(err.message).toContain('modusbrain schema fork');
     }
   });
 
-  it('rejects gbrain-recommended with PACK_READONLY', () => {
-    try { locateMutablePackFile('gbrain-recommended'); } catch (e) {
+  it('rejects modusbrain-recommended with PACK_READONLY', () => {
+    try { locateMutablePackFile('modusbrain-recommended'); } catch (e) {
       expect((e as SchemaPackMutationError).code).toBe('PACK_READONLY');
     }
   });
 
   it('BUNDLED_PACK_NAMES export contains all bundled packs', () => {
     expect(BUNDLED_PACK_NAMES.has('gbrain-base')).toBe(true);
-    expect(BUNDLED_PACK_NAMES.has('gbrain-recommended')).toBe(true);
+    expect(BUNDLED_PACK_NAMES.has('modusbrain-recommended')).toBe(true);
     // v0.42 (T22): gbrain-base-v2 joins the bundled set.
     expect(BUNDLED_PACK_NAMES.has('gbrain-base-v2')).toBe(true);
     expect(BUNDLED_PACK_NAMES.size).toBe(3);
@@ -117,7 +117,7 @@ describe('locateMutablePackFile — bundled guard', () => {
 
 describe('addTypeToPack', () => {
   it('appends a new type to JSON pack and writes atomically', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       const path = seedPack('mine', 'json');
       const result = await addTypeToPack('mine', {
         name: 'researcher', primitive: 'entity', prefix: 'people/researchers/',
@@ -131,7 +131,7 @@ describe('addTypeToPack', () => {
   });
 
   it('rejects when type already exists', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       seedPack('mine', 'json');
       await expect(addTypeToPack('mine', {
         name: 'person', primitive: 'entity', prefix: 'people/',
@@ -140,7 +140,7 @@ describe('addTypeToPack', () => {
   });
 
   it('rejects invalid primitive', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       seedPack('mine', 'json');
       await expect(addTypeToPack('mine', {
         name: 'bad', primitive: 'invalid_primitive' as never, prefix: 'x/',
@@ -149,7 +149,7 @@ describe('addTypeToPack', () => {
   });
 
   it('rejects missing prefix', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       seedPack('mine', 'json');
       await expect(addTypeToPack('mine', {
         name: 'bad', primitive: 'entity', prefix: '',
@@ -158,7 +158,7 @@ describe('addTypeToPack', () => {
   });
 
   it('rejects invalid slug type name', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       seedPack('mine', 'json');
       await expect(addTypeToPack('mine', {
         name: 'has spaces', primitive: 'entity', prefix: 'x/',
@@ -171,7 +171,7 @@ describe('addTypeToPack', () => {
 
 describe('removeTypeFromPack', () => {
   it('removes the type when no references exist', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       const path = seedPack('mine', 'json', {
         page_types: [
           { name: 'person', primitive: 'entity', path_prefixes: ['people/'], aliases: [], extractable: false, expert_routing: false },
@@ -185,7 +185,7 @@ describe('removeTypeFromPack', () => {
   });
 
   it('TYPE_NOT_FOUND when type does not exist', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       seedPack('mine', 'json');
       await expect(removeTypeFromPack('mine', 'ghost', { lockDir }))
         .rejects.toMatchObject({ code: 'TYPE_NOT_FOUND' });
@@ -193,7 +193,7 @@ describe('removeTypeFromPack', () => {
   });
 
   it('CODEX C14: refuses removal when another type aliases the target', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       seedPack('mine', 'json', {
         page_types: [
           { name: 'person', primitive: 'entity', path_prefixes: ['people/'], aliases: [], extractable: false, expert_routing: false },
@@ -206,7 +206,7 @@ describe('removeTypeFromPack', () => {
   });
 
   it('CODEX C14: refuses removal when link_type inference references the target', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       seedPack('mine', 'json', {
         page_types: [
           { name: 'person', primitive: 'entity', path_prefixes: ['people/'], aliases: [], extractable: false, expert_routing: false },
@@ -222,7 +222,7 @@ describe('removeTypeFromPack', () => {
   });
 
   it('CODEX C14: refuses when enrichable_types references the target', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       seedPack('mine', 'json', {
         page_types: [{ name: 'person', primitive: 'entity', path_prefixes: ['p/'], aliases: [], extractable: false, expert_routing: false }],
         enrichable_types: [{ type: 'person', rubric: 'r' }],
@@ -237,7 +237,7 @@ describe('removeTypeFromPack', () => {
 
 describe('updateTypeOnPack', () => {
   it('patches a single field while leaving others untouched', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       const path = seedPack('mine', 'json');
       await updateTypeOnPack('mine', { name: 'person', patch: { extractable: true } }, { lockDir });
       const after = loadPackFromFile(path);
@@ -249,7 +249,7 @@ describe('updateTypeOnPack', () => {
   });
 
   it('name field on patch is ignored (name is identity)', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       const path = seedPack('mine', 'json');
       await updateTypeOnPack('mine', { name: 'person', patch: { name: 'renamed', extractable: true } as never }, { lockDir });
       const after = loadPackFromFile(path);
@@ -260,7 +260,7 @@ describe('updateTypeOnPack', () => {
   });
 
   it('TYPE_NOT_FOUND on patch target missing', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       seedPack('mine', 'json');
       await expect(updateTypeOnPack('mine', { name: 'ghost', patch: { extractable: true } }, { lockDir }))
         .rejects.toMatchObject({ code: 'TYPE_NOT_FOUND' });
@@ -272,7 +272,7 @@ describe('updateTypeOnPack', () => {
 
 describe('addAliasToType', () => {
   it('appends a new alias (alias does NOT shadow another declared type)', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       const path = seedPack('mine', 'json');
       // Alias 'individual' is NOT another declared type, so alias_shadows_type does not fire.
       // alias_references_undeclared_type is a WARNING (not error), so validation gate passes.
@@ -283,7 +283,7 @@ describe('addAliasToType', () => {
   });
 
   it('idempotent on existing alias', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       seedPack('mine', 'json', {
         page_types: [
           { name: 'person', primitive: 'entity', path_prefixes: ['p/'], aliases: ['individual'], extractable: false, expert_routing: false },
@@ -298,7 +298,7 @@ describe('addAliasToType', () => {
 
 describe('removeAliasFromType', () => {
   it('removes an existing alias', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       const path = seedPack('mine', 'json', {
         page_types: [
           { name: 'person', primitive: 'entity', path_prefixes: ['p/'], aliases: ['individual'], extractable: false, expert_routing: false },
@@ -311,7 +311,7 @@ describe('removeAliasFromType', () => {
   });
 
   it('idempotent on missing alias', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       seedPack('mine', 'json');
       const r1 = await removeAliasFromType('mine', 'person', 'never-was', { lockDir });
       const r2 = await removeAliasFromType('mine', 'person', 'never-was', { lockDir });
@@ -322,7 +322,7 @@ describe('removeAliasFromType', () => {
 
 describe('addPrefixToType / removePrefixFromType', () => {
   it('addPrefix appends', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       const path = seedPack('mine', 'json');
       await addPrefixToType('mine', 'person', 'people-archive/', { lockDir });
       const after = loadPackFromFile(path);
@@ -331,7 +331,7 @@ describe('addPrefixToType / removePrefixFromType', () => {
   });
 
   it('addPrefix idempotent on existing', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       seedPack('mine', 'json');
       const r1 = await addPrefixToType('mine', 'person', 'people/', { lockDir });
       const r2 = await addPrefixToType('mine', 'person', 'people/', { lockDir });
@@ -340,7 +340,7 @@ describe('addPrefixToType / removePrefixFromType', () => {
   });
 
   it('removePrefix removes', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       const path = seedPack('mine', 'json', {
         page_types: [{ name: 'person', primitive: 'entity', path_prefixes: ['people/', 'people-archive/'], aliases: [], extractable: false, expert_routing: false }],
       });
@@ -355,7 +355,7 @@ describe('addPrefixToType / removePrefixFromType', () => {
 
 describe('addLinkTypeToPack / removeLinkTypeFromPack', () => {
   it('addLinkType creates a new link verb', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       const path = seedPack('mine', 'json', {
         page_types: [
           { name: 'person', primitive: 'entity', path_prefixes: ['p/'], aliases: [], extractable: false, expert_routing: false },
@@ -373,7 +373,7 @@ describe('addLinkTypeToPack / removeLinkTypeFromPack', () => {
   });
 
   it('addLinkType rejects duplicate name', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       seedPack('mine', 'json', {
         link_types: [{ name: 'attended' }],
       });
@@ -383,7 +383,7 @@ describe('addLinkTypeToPack / removeLinkTypeFromPack', () => {
   });
 
   it('removeLinkType removes when no fm refs exist', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       const path = seedPack('mine', 'json', { link_types: [{ name: 'attended' }] });
       await removeLinkTypeFromPack('mine', 'attended', { lockDir });
       const after = loadPackFromFile(path);
@@ -392,7 +392,7 @@ describe('addLinkTypeToPack / removeLinkTypeFromPack', () => {
   });
 
   it('removeLinkType refuses when frontmatter_links references it', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       seedPack('mine', 'json', {
         page_types: [{ name: 'meeting', primitive: 'temporal', path_prefixes: ['m/'], aliases: [], extractable: false, expert_routing: false }],
         link_types: [{ name: 'attended' }],
@@ -408,7 +408,7 @@ describe('addLinkTypeToPack / removeLinkTypeFromPack', () => {
 
 describe('setExtractableOnType / setExpertRoutingOnType', () => {
   it('setExtractable flips the flag', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       const path = seedPack('mine', 'json');
       await setExtractableOnType('mine', 'person', true, { lockDir });
       expect(loadPackFromFile(path).page_types[0]!.extractable).toBe(true);
@@ -418,7 +418,7 @@ describe('setExtractableOnType / setExpertRoutingOnType', () => {
   });
 
   it('setExpertRouting flips the flag', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       const path = seedPack('mine', 'json');
       await setExpertRoutingOnType('mine', 'person', true, { lockDir });
       expect(loadPackFromFile(path).page_types[0]!.expert_routing).toBe(true);
@@ -426,7 +426,7 @@ describe('setExtractableOnType / setExpertRoutingOnType', () => {
   });
 
   it('TYPE_NOT_FOUND on missing type', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       seedPack('mine', 'json');
       await expect(setExtractableOnType('mine', 'ghost', true, { lockDir }))
         .rejects.toMatchObject({ code: 'TYPE_NOT_FOUND' });
@@ -438,18 +438,18 @@ describe('setExtractableOnType / setExpertRoutingOnType', () => {
 
 describe('YAML round-trip', () => {
   it('mutating a YAML pack preserves YAML format and reparses cleanly', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
-      const dir = join(tmpDir, '.gbrain', 'schema-packs', 'yaml-pack');
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
+      const dir = join(tmpDir, '.modusbrain', 'schema-packs', 'yaml-pack');
       mkdirSync(dir, { recursive: true });
       const path = join(dir, 'pack.yaml');
       // Seed valid YAML (use the manifest validator round-trip).
       // Seed actual block-style YAML (parseYamlMini is hand-rolled and prefers
       // block-style; flow-style JSON-in-YAML isn't fully supported).
-      const yamlBody = `api_version: gbrain-schema-pack-v1
+      const yamlBody = `api_version: modusbrain-schema-pack-v1
 name: yaml-pack
 version: 1.0.0
 description: ""
-gbrain_min_version: 0.38.0
+modusbrain_min_version: 0.38.0
 extends: null
 borrow_from: []
 page_types:
@@ -489,7 +489,7 @@ filing_rules: []
 
 describe('atomicity invariants', () => {
   it('crash-mid-write does not leave the pack file in a partial state', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       const path = seedPack('mine', 'json');
       const before = readFileSync(path, 'utf-8');
       try {
@@ -505,7 +505,7 @@ describe('atomicity invariants', () => {
   });
 
   it('lock is released after a mutator throws', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       seedPack('mine', 'json');
       try {
         await addTypeToPack('mine', {
@@ -525,7 +525,7 @@ describe('atomicity invariants', () => {
 
 describe('validation gate (file-plane lint integration)', () => {
   it('refuses mutation that would create prefix collision', async () => {
-    await withEnv({ GBRAIN_HOME: tmpDir, GBRAIN_AUDIT_DIR: auditDir }, async () => {
+    await withEnv({ MODUSBRAIN_HOME: tmpDir, MODUSBRAIN_AUDIT_DIR: auditDir }, async () => {
       seedPack('mine', 'json');
       // Adding a second type with the SAME prefix → prefix_collision (error).
       await expect(addTypeToPack('mine', {

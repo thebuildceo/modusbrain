@@ -1,5 +1,5 @@
 /**
- * AI Gateway — unified seam for every AI call gbrain makes.
+ * AI Gateway — unified seam for every AI call modusbrain makes.
  *
  * v0.14 exports:
  *   - configureGateway(config) — called once by cli.ts connectEngine()
@@ -56,7 +56,7 @@ import { runGuardrails, hasGuardrails, type GuardrailHook } from '../guardrails.
 // ---- Gateway-wide AI-HTTP timeout (v0.42.20.0, #1762/#1775) ----
 //
 // Plain `fetch` (Bun/Node) has NO default request timeout, so a stalled provider
-// socket makes an `await` never settle — which hangs `gbrain capture`/`search`
+// socket makes an `await` never settle — which hangs `modusbrain capture`/`search`
 // and, on PGLite, pins the single-writer lock. The AI SDK's `maxRetries` only
 // fires on a SETTLED error; a half-open socket never settles. So we bound at the
 // SDK CALL layer: default an `abortSignal` into every generateText / generateObject
@@ -72,11 +72,11 @@ function resolveAiTimeoutMs(envVar: string, fallback: number): number {
   return Number.isFinite(n) && n > 0 ? n : fallback;
 }
 /** chat / expansion / OCR — generous; only catches true hangs (non-streaming generateText). */
-const AI_CHAT_TIMEOUT_MS = resolveAiTimeoutMs('GBRAIN_AI_CHAT_TIMEOUT_MS', 300_000);
+const AI_CHAT_TIMEOUT_MS = resolveAiTimeoutMs('MODUSBRAIN_AI_CHAT_TIMEOUT_MS', 300_000);
 /** embed sub-batch (per SDK call, NOT per whole import). */
-const AI_EMBED_TIMEOUT_MS = resolveAiTimeoutMs('GBRAIN_AI_EMBED_TIMEOUT_MS', 60_000);
+const AI_EMBED_TIMEOUT_MS = resolveAiTimeoutMs('MODUSBRAIN_AI_EMBED_TIMEOUT_MS', 60_000);
 /** multimodal per request. */
-const AI_MULTIMODAL_TIMEOUT_MS = resolveAiTimeoutMs('GBRAIN_AI_MULTIMODAL_TIMEOUT_MS', 60_000);
+const AI_MULTIMODAL_TIMEOUT_MS = resolveAiTimeoutMs('MODUSBRAIN_AI_MULTIMODAL_TIMEOUT_MS', 60_000);
 
 /**
  * Compose a caller signal with a default wall-clock timeout. When the caller
@@ -136,7 +136,7 @@ const _extendedModels: Map<string, Set<string>> = new Map();
  * even when it isn't in the recipe's declared `models:` array.
  *
  * Idempotent + safe to call before/after configureGateway. Exported only
- * for the `gbrain models doctor` probe path (where the operator may want
+ * for the `modusbrain models doctor` probe path (where the operator may want
  * to probe any user-supplied id without re-running configure).
  */
 function registerExtendedModel(modelStr: string): void {
@@ -436,7 +436,7 @@ export function configureGateway(config: AIGatewayConfig): void {
  * config plane.
  *
  * Sync `configureGateway` stays for pre-connect callers (rare bootstrap
- * paths like `gbrain --version` that never touch a brain). Per Codex F3
+ * paths like `modusbrain --version` that never touch a brain). Per Codex F3
  * in the v0.31.12 plan review: spelling out the sync→async boundary instead
  * of hand-waving "config-build time."
  *
@@ -586,7 +586,7 @@ function requireConfig(): AIGatewayConfig {
   if (!_config) {
     throw new AIConfigError(
       'AI gateway is not configured. Call configureGateway() during engine connect.',
-      'This is a gbrain bug — file an issue at https://github.com/garrytan/gbrain/issues',
+      'This is a modusbrain bug — file an issue at https://github.com/thebuildceo/modusbrain/issues',
     );
   }
   return _config;
@@ -1590,7 +1590,7 @@ async function embedSubBatch(
       if (Array.isArray(embedding) && embedding.length !== expectedDims) {
         throw new AIConfigError(
           `Embedding dim mismatch: model ${modelId} returned ${embedding.length} but schema expects ${expectedDims}.`,
-          `Run \`gbrain migrate --embedding-model ${getEmbeddingModel()} --embedding-dimensions ${embedding.length}\` or change models.`,
+          `Run \`modusbrain migrate --embedding-model ${getEmbeddingModel()} --embedding-dimensions ${embedding.length}\` or change models.`,
         );
       }
     }
@@ -2324,11 +2324,11 @@ export interface ChatToolDef {
 }
 
 /**
- * Convert gbrain's provider-neutral ChatMessage[] into AI SDK v6 ModelMessage[].
+ * Convert modusbrain's provider-neutral ChatMessage[] into AI SDK v6 ModelMessage[].
  *
  * The original code passed `opts.messages as any` straight to generateText,
  * which worked on AI SDK v4/v5 but v6 tightened ModelMessage validation:
- *   - tool results must be a `role: 'tool'` message (gbrain pushes them as
+ *   - tool results must be a `role: 'tool'` message (modusbrain pushes them as
  *     `role: 'user'` with tool-result blocks), and
  *   - each tool-result `output` must be a structured `{ type, value }` part,
  *     not a bare value.
@@ -2449,7 +2449,7 @@ export function validateModelId(modelStr: string): ModelIdValidity {
  * can't run SHOULD hard-error, not silently degrade), AND by `tryBuildGatewayClient`
  * + `makeJudgeClient`. One shared predicate, no drift.
  *
- * The key layer uses `hasAnthropicKey` (env OR gbrain config file), which is
+ * The key layer uses `hasAnthropicKey` (env OR modusbrain config file), which is
  * gateway-config-INDEPENDENT — it works before `configureGateway()` and in unit
  * tests, and preserves the historical key-detection source (codex #6; the prior
  * draft used `isAvailable`, which reads gateway `_config.env` and would have
@@ -2470,7 +2470,7 @@ export function probeChatModel(modelStr: string): ChatModelProbe {
     return {
       ok: false,
       reason: 'unavailable',
-      detail: 'no Anthropic API key configured (set ANTHROPIC_API_KEY or run: gbrain config set anthropic_api_key ...)',
+      detail: 'no Anthropic API key configured (set ANTHROPIC_API_KEY or run: modusbrain config set anthropic_api_key ...)',
     };
   }
   return { ok: true };
@@ -2843,10 +2843,10 @@ export interface ToolHandler {
 
 /**
  * State the caller carries in from a prior crashed run. The reconciler keys
- * by gbrain-owned `gbrainToolUseId` (D11), NOT provider-supplied IDs.
+ * by modusbrain-owned `modusbrainToolUseId` (D11), NOT provider-supplied IDs.
  * `priorMessages` is the chat history up to the assistant's last turn;
- * `priorTools` maps gbrainToolUseId → outcome. The D5 read-time shim
- * synthesizes gbrainToolUseIds for legacy v1 rows so this Map sees both
+ * `priorTools` maps modusbrainToolUseId → outcome. The D5 read-time shim
+ * synthesizes modusbrainToolUseIds for legacy v1 rows so this Map sees both
  * shapes uniformly.
  */
 export interface ToolLoopReplayState {
@@ -2895,7 +2895,7 @@ export interface ToolLoopOpts {
   onAssistantTurn?: (turnIdx: number, messageIdx: number, blocks: ChatBlock[], usage: ChatResult['usage'], model: string) => Promise<void>;
   /**
    * Persist a pending tool execution. The caller assigns ordinal + uuid v7 and
-   * returns them so the loop can key replay by gbrainToolUseId. The provider
+   * returns them so the loop can key replay by modusbrainToolUseId. The provider
    * supplies its own `providerToolCallId` (kept as a debug-only side channel).
    */
   onToolCallStart?: (
@@ -2905,9 +2905,9 @@ export interface ToolLoopOpts {
     toolName: string,
     input: unknown,
     providerToolCallId: string,
-  ) => Promise<{ gbrainToolUseId: string }>;
-  onToolCallComplete?: (gbrainToolUseId: string, output: unknown) => Promise<void>;
-  onToolCallFailed?: (gbrainToolUseId: string, error: string) => Promise<void>;
+  ) => Promise<{ modusbrainToolUseId: string }>;
+  onToolCallComplete?: (modusbrainToolUseId: string, output: unknown) => Promise<void>;
+  onToolCallFailed?: (modusbrainToolUseId: string, error: string) => Promise<void>;
 
   /** Optional per-call heartbeat for observability. */
   onHeartbeat?: (event: string, data: Record<string, unknown>) => void;
@@ -2927,9 +2927,9 @@ export interface ToolLoopResult {
 /**
  * Provider-agnostic tool-calling loop. Wraps `gateway.chat()` with:
  *   - assistant→tool-dispatch→tool-result cycle
- *   - gbrain-stable IDs (D11) at first observation
+ *   - modusbrain-stable IDs (D11) at first observation
  *   - write-ordering invariant (persist before side effect)
- *   - crash-replay reconciliation via gbrainToolUseId
+ *   - crash-replay reconciliation via modusbrainToolUseId
  *   - capability-driven cache_control (Anthropic only)
  *
  * This replaces the direct `new Anthropic()` + `client.create()` path in
@@ -3059,20 +3059,20 @@ export async function toolLoop(opts: ToolLoopOpts): Promise<ToolLoopResult> {
         },
       });
 
-      // Step 2: persist pending row + claim gbrainToolUseId. The caller's
+      // Step 2: persist pending row + claim modusbrainToolUseId. The caller's
       // callback handles uniqueness contention via ON CONFLICT DO NOTHING +
       // re-read pattern (see persistToolExecPending in subagent.ts).
-      const { gbrainToolUseId } = (await opts.onToolCallStart?.(
+      const { modusbrainToolUseId } = (await opts.onToolCallStart?.(
         turnIdx,
         assistantMessageIdx,
         callIdx,
         call.toolName,
         call.input,
         call.toolCallId,
-      )) ?? { gbrainToolUseId: `inline-${turnIdx}-${callIdx}` };
+      )) ?? { modusbrainToolUseId: `inline-${turnIdx}-${callIdx}` };
 
       // Replay short-circuit: prior outcome wins, idempotent re-execute allowed.
-      const prior = opts.replayState?.priorTools.get(gbrainToolUseId);
+      const prior = opts.replayState?.priorTools.get(modusbrainToolUseId);
       if (prior?.status === 'complete') {
         toolResultBlocks.push({
           type: 'tool-result',
@@ -3098,7 +3098,7 @@ export async function toolLoop(opts: ToolLoopOpts): Promise<ToolLoopResult> {
         // Non-idempotent crash-mid-execute. Surface as unrecoverable.
         stopReason = 'unrecoverable';
         throw new Error(
-          `non-idempotent tool "${call.toolName}" pending on resume; gbrainToolUseId=${gbrainToolUseId} — cannot safely re-run`,
+          `non-idempotent tool "${call.toolName}" pending on resume; modusbrainToolUseId=${modusbrainToolUseId} — cannot safely re-run`,
         );
       }
 
@@ -3107,7 +3107,7 @@ export async function toolLoop(opts: ToolLoopOpts): Promise<ToolLoopResult> {
       try {
         const output = await handler.execute(call.input, opts.abortSignal ?? new AbortController().signal);
         // Step 4: settle complete.
-        await opts.onToolCallComplete?.(gbrainToolUseId, output);
+        await opts.onToolCallComplete?.(modusbrainToolUseId, output);
         toolResultBlocks.push({
           type: 'tool-result',
           toolCallId: call.toolCallId,
@@ -3117,7 +3117,7 @@ export async function toolLoop(opts: ToolLoopOpts): Promise<ToolLoopResult> {
         opts.onHeartbeat?.('tool_result', { turn_idx: turnIdx, tool_name: call.toolName });
       } catch (err) {
         const errMsg = err instanceof Error ? err.message : String(err);
-        await opts.onToolCallFailed?.(gbrainToolUseId, errMsg);
+        await opts.onToolCallFailed?.(modusbrainToolUseId, errMsg);
         toolResultBlocks.push({
           type: 'tool-result',
           toolCallId: call.toolCallId,

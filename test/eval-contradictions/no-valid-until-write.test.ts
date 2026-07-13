@@ -29,7 +29,7 @@ import { join } from 'node:path';
 // preserves it.
 //
 //   - consolidate.ts (v0.35.4 — chronological writeback)
-//   - facts/forget.ts (v0.32.2 — user-initiated `gbrain forget`; user is
+//   - facts/forget.ts (v0.32.2 — user-initiated `modusbrain forget`; user is
 //     the supersession authority, not the probe)
 //   - postgres-engine.ts + pglite-engine.ts (v0.42.56.0, #2390 — Life
 //     Chronicle ontology: `mergeOntologyFact` forward-supersession closes
