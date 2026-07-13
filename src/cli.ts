@@ -23,6 +23,13 @@ import { loadConfig, loadConfigFileOnly, loadConfigWithEngine, toEngineConfig, i
 import type { GBrainConfig } from './core/config.ts';
 import type { AIGatewayConfig } from './core/ai/types.ts';
 import type { BrainEngine } from './core/engine.ts';
+import {
+  currentExitCode,
+  finishCliTeardown,
+  flushThenExit,
+  setCliExitVerdict,
+  shouldForceExitAfterMain,
+} from './core/cli-force-exit.ts';
 import { operations, OperationError } from './core/operations.ts';
 import { formatVolunteeredPage } from './core/context/volunteer.ts';
 import type { Operation, OperationContext } from './core/operations.ts';

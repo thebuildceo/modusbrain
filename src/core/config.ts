@@ -14,6 +14,7 @@ import { brandConfigDir, brandEnv } from './branding.ts';
  * null only when NO source provides a URL at all.
  */
 export type DbUrlSource =
+  | 'env:MODUSBRAIN_DATABASE_URL'
   | 'env:GBRAIN_DATABASE_URL'
   | 'env:DATABASE_URL'
   | 'config-file'
