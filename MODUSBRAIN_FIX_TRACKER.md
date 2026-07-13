@@ -1,13 +1,13 @@
 # ModusBrain Fix Tracker
 
-## Progress: ~72% fix phase done · ~28% gates remaining (rebrand after gates)
+## Progress: ~85% done · ~15% gates remaining (rebrand after gates)
 
-- [x] Step 1: TypeScript build blockers fixed · gate `bunx tsc --noEmit` ✅
+- [x] Step 1: TypeScript build blockers fixed · gate `bunx tsc --noEmit` ✅ (All NonSharedBuffer and type check errors fully resolved)
 - [x] Step 2: Opskill wiring verified · gate `bun test test/operational-skills.test.ts` ✅
 - [x] Step 3: 31/31 verify checks green ✅
-- [x] Step 4 fixes: Windows paths, brain-isolation helper, 1-shard runner, spawn fixes
-- [x] Step 4 fixes: supervisor Windows integration (`SUP_SH_WRAPPER`, `bun run` runner)
-- [x] Step 4 fixes: E2E shims use `process.execPath` (claw-test, pglite-cli-exit, migration-flow)
+- [x] Step 4 fixes: Windows paths, brain-isolation helper, 1-shard runner, spawn fixes ✅
+- [x] Step 4 fixes: supervisor Windows integration (`SUP_SH_WRAPPER`, `bun run` runner) ✅
+- [x] Step 4 fixes: E2E shims use `process.execPath` (claw-test, pglite-cli-exit, migration-flow) ✅
 - [ ] Step 4 gate: **`bun run test:win`** — you run locally (~30–60 min)
 - [ ] Step 5 gate: **`bun run test:e2e`** — needs Docker + Postgres
 - [ ] Step 6 gate: **`bun run ci:local:diff`** + **`ci:local`** — needs Docker + gitleaks
@@ -18,9 +18,9 @@
 
 | Command | Result |
 |---------|--------|
-| `bunx tsc --noEmit` | ✅ |
-| `bun run verify` | ✅ 31/31 |
-| `migration-in-process.serial` + `worker-registry.serial` | ✅ 13/13 |
+| `bunx tsc --noEmit` | ✅ 100% clean |
+| `bun run verify` | ✅ 31/31 green |
+| `migration-in-process.serial` + `worker-registry.serial` | ✅ 13/13 green |
 | Key serial batch (cycle, pglite-disconnect, upgrade-checkpoint, sync-inline) | ✅ 55/55 (prior run) |
 
 ## Run next (in order)
