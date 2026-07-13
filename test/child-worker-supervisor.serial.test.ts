@@ -20,6 +20,7 @@ import {
 
 interface Harness {
   workerScript: string;
+  workerArgs: string[];
   cleanup: () => void;
 }
 
@@ -30,7 +31,8 @@ function makeHarness(name: string, body: string): Harness {
   writeFileSync(workerScript, `#!/bin/sh\n${body}\n`, 'utf8');
   chmodSync(workerScript, 0o755);
   return {
-    workerScript,
+    workerScript: process.platform === 'win32' ? 'sh' : workerScript,
+    workerArgs: process.platform === 'win32' ? [workerScript] : [],
     cleanup: () => {
       try {
         rmSync(root, { recursive: true, force: true });
@@ -70,7 +72,7 @@ async function runUntilTerminal(
 
   const sup = new ChildWorkerSupervisor({
     cliPath: h.workerScript,
-    args: [],
+    args: h.workerArgs,
     maxCrashes: overrides.maxCrashes ?? 3,
     hardStopMaxCrashes: overrides.hardStopMaxCrashes,
     _backoffFloorMs: overrides._backoffFloorMs ?? 5,
@@ -360,7 +362,7 @@ esac
         let stopping = false;
         const sup = new ChildWorkerSupervisor({
           cliPath: h.workerScript,
-          args: [],
+          args: h.workerArgs,
           maxCrashes: 1,
           _backoffFloorMs: 1,
           isStopping: () => stopping,
@@ -564,7 +566,7 @@ esac
       const firstSpawn = new Promise<number>((r) => { resolveSpawn = r; });
       const sup = new ChildWorkerSupervisor({
         cliPath: h.workerScript,
-        args: [],
+        args: h.workerArgs,
         maxCrashes: 100,
         _backoffFloorMs: 5,
         isStopping: () => stopping,

@@ -12,6 +12,9 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
+source scripts/bun-child-env.sh
+BUN_CMD="$(resolve_bun_cmd)"
+BUN_CHILD_PATH="$(resolve_bun_child_path)"
 
 # Use while-read for portability to macOS bash 3.2 (no mapfile).
 files=()
@@ -41,7 +44,7 @@ echo "[serial-tests] running ${#files[@]} file(s), one bun process per file"
 fail_count=0
 failed_files=()
 for f in "${files[@]}"; do
-  if ! bun test --max-concurrency=1 --timeout=60000 "$f"; then
+  if ! env PATH="$BUN_CHILD_PATH" "$BUN_CMD" test --max-concurrency=1 --timeout=60000 "$f"; then
     fail_count=$((fail_count + 1))
     failed_files+=("$f")
   fi

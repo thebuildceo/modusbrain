@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'url';
 import { describe, test, expect } from 'bun:test';
 import { existsSync, mkdtempSync, readFileSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
@@ -5,7 +6,7 @@ import { join } from 'path';
 
 // Read cli.ts source for structural checks
 const cliSource = readFileSync(new URL('../src/cli.ts', import.meta.url), 'utf-8');
-const repoRoot = new URL('..', import.meta.url).pathname;
+const repoRoot = fileURLToPath(new URL('..', import.meta.url));
 
 function isolatedEnv(home: string): Record<string, string> {
   const env: Record<string, string> = {};
@@ -71,8 +72,8 @@ describe('ask alias', () => {
   });
 
   test('ask does NOT appear in --tools-json output', async () => {
-    const proc = Bun.spawn(['bun', 'run', 'src/cli.ts', '--tools-json'], {
-      cwd: new URL('..', import.meta.url).pathname,
+    const proc = Bun.spawn([process.execPath, 'run', 'src/cli.ts', '--tools-json'], {
+      cwd: fileURLToPath(new URL('..', import.meta.url)),
       stdout: 'pipe',
       stderr: 'pipe',
     });
@@ -86,8 +87,8 @@ describe('ask alias', () => {
 
 describe('CLI dispatch integration', () => {
   test('--version outputs version', async () => {
-    const proc = Bun.spawn(['bun', 'run', 'src/cli.ts', '--version'], {
-      cwd: new URL('..', import.meta.url).pathname,
+    const proc = Bun.spawn([process.execPath, 'run', 'src/cli.ts', '--version'], {
+      cwd: fileURLToPath(new URL('..', import.meta.url)),
       stdout: 'pipe',
       stderr: 'pipe',
     });
@@ -97,8 +98,8 @@ describe('CLI dispatch integration', () => {
   });
 
   test('unknown command prints error and exits 1', async () => {
-    const proc = Bun.spawn(['bun', 'run', 'src/cli.ts', 'notacommand'], {
-      cwd: new URL('..', import.meta.url).pathname,
+    const proc = Bun.spawn([process.execPath, 'run', 'src/cli.ts', 'notacommand'], {
+      cwd: fileURLToPath(new URL('..', import.meta.url)),
       stdout: 'pipe',
       stderr: 'pipe',
     });
@@ -109,7 +110,7 @@ describe('CLI dispatch integration', () => {
   });
 
   test('per-command --help prints usage without DB connection', async () => {
-    const proc = Bun.spawn(['bun', 'run', 'src/cli.ts', 'get', '--help'], {
+    const proc = Bun.spawn([process.execPath, 'run', 'src/cli.ts', 'get', '--help'], {
       cwd: repoRoot,
       stdout: 'pipe',
       stderr: 'pipe',
@@ -121,7 +122,7 @@ describe('CLI dispatch integration', () => {
   });
 
   test('upgrade --help prints usage without running upgrade', async () => {
-    const proc = Bun.spawn(['bun', 'run', 'src/cli.ts', 'upgrade', '--help'], {
+    const proc = Bun.spawn([process.execPath, 'run', 'src/cli.ts', 'upgrade', '--help'], {
       cwd: repoRoot,
       stdout: 'pipe',
       stderr: 'pipe',
@@ -140,7 +141,7 @@ describe('CLI dispatch integration', () => {
     // printed a header but never mentioned --no-embed.
     const home = mkdtempSync(join(tmpdir(), 'gbrain-cli-help-'));
     try {
-      const proc = Bun.spawn(['bun', 'run', 'src/cli.ts', 'sync', '--help'], {
+      const proc = Bun.spawn([process.execPath, 'run', 'src/cli.ts', 'sync', '--help'], {
         cwd: repoRoot,
         stdout: 'pipe',
         stderr: 'pipe',
@@ -166,7 +167,7 @@ describe('CLI dispatch integration', () => {
   test('doctor --help short-circuits CLI-only dispatch without diagnostics', async () => {
     const home = mkdtempSync(join(tmpdir(), 'gbrain-cli-help-'));
     try {
-      const proc = Bun.spawn(['bun', 'run', 'src/cli.ts', 'doctor', '--help'], {
+      const proc = Bun.spawn([process.execPath, 'run', 'src/cli.ts', 'doctor', '--help'], {
         cwd: repoRoot,
         stdout: 'pipe',
         stderr: 'pipe',
@@ -187,7 +188,7 @@ describe('CLI dispatch integration', () => {
   test('init --help short-circuits CLI-only dispatch without writing config', async () => {
     const home = mkdtempSync(join(tmpdir(), 'gbrain-cli-help-'));
     try {
-      const proc = Bun.spawn(['bun', 'run', 'src/cli.ts', 'init', '--help'], {
+      const proc = Bun.spawn([process.execPath, 'run', 'src/cli.ts', 'init', '--help'], {
         cwd: repoRoot,
         stdout: 'pipe',
         stderr: 'pipe',
@@ -204,7 +205,7 @@ describe('CLI dispatch integration', () => {
   });
 
   test('--help prints global help', async () => {
-    const proc = Bun.spawn(['bun', 'run', 'src/cli.ts', '--help'], {
+    const proc = Bun.spawn([process.execPath, 'run', 'src/cli.ts', '--help'], {
       cwd: repoRoot,
       stdout: 'pipe',
       stderr: 'pipe',
@@ -217,7 +218,7 @@ describe('CLI dispatch integration', () => {
   });
 
   test('--tools-json outputs valid JSON with operations', async () => {
-    const proc = Bun.spawn(['bun', 'run', 'src/cli.ts', '--tools-json'], {
+    const proc = Bun.spawn([process.execPath, 'run', 'src/cli.ts', '--tools-json'], {
       cwd: repoRoot,
       stdout: 'pipe',
       stderr: 'pipe',

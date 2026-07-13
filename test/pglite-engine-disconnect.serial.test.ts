@@ -32,7 +32,7 @@
  */
 
 import { describe, test, expect } from 'bun:test';
-import { mkdtempSync, rmSync } from 'fs';
+import { mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { PGLiteEngine } from '../src/core/pglite-engine.ts';
@@ -242,14 +242,17 @@ describe('PGLiteEngine: Emscripten process.exitCode containment (#2084)', () => 
   test('a pre-call verdict survives the create-throw path (finally restores)', async () => {
     const prev = process.exitCode;
     const eng = new PGLiteEngine();
+    const blockingFile = join(tmpdir(), `gbrain-pglite-blocking-${process.pid}-${Date.now()}`);
     try {
       process.exitCode = 3;
+      writeFileSync(blockingFile, 'not a directory');
       // A dataDir under a regular FILE cannot be created — PGlite.create rejects.
       await expect(
-        eng.connect({ engine: 'pglite', database_path: '/dev/null/nope/brain' }),
+        eng.connect({ engine: 'pglite', database_path: join(blockingFile, 'brain') }),
       ).rejects.toThrow();
       expect(Number(process.exitCode)).toBe(3);
     } finally {
+      rmSync(blockingFile, { force: true });
       process.exitCode = prev;
     }
   }, 60_000);

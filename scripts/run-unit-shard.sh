@@ -15,6 +15,9 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
+source scripts/bun-child-env.sh
+BUN_CMD="$(resolve_bun_cmd)"
+BUN_CHILD_PATH="$(resolve_bun_child_path)"
 
 # --max-concurrency=N is forwarded to `bun test`. v0.26.4: invoked by
 # run-unit-parallel.sh; safe to call without (defaults to bun's default cap).
@@ -73,6 +76,6 @@ fi
 
 echo "[unit-shard ${SHARD:-(unsharded)}] running ${#files[@]} files"
 if [ -n "$MAX_CONC" ]; then
-  exec bun test --max-concurrency="$MAX_CONC" --timeout=60000 "${files[@]}"
+  exec env PATH="$BUN_CHILD_PATH" "$BUN_CMD" test --max-concurrency="$MAX_CONC" --timeout=60000 "${files[@]}"
 fi
-exec bun test --timeout=60000 "${files[@]}"
+exec env PATH="$BUN_CHILD_PATH" "$BUN_CMD" test --timeout=60000 "${files[@]}"

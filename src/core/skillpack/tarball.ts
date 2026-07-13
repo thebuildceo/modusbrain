@@ -145,6 +145,15 @@ function resolveTarBinary(preferGnu: boolean): string {
   return 'tar';
 }
 
+function toTarPath(p: string): string {
+  if (process.platform !== 'win32') return p;
+  const converted = spawnSync('cygpath', ['-u', p], { encoding: 'utf-8' });
+  if (converted.status === 0 && converted.stdout.trim()) {
+    return converted.stdout.trim();
+  }
+  return p.replace(/\\/g, '/').replace(/^([A-Za-z]):/, (_match, drive: string) => `/${drive.toLowerCase()}`);
+}
+
 /**
  * Pack a directory deterministically. Same inputs -> same SHA every time.
  */
@@ -179,7 +188,7 @@ export function packTarball(opts: TarballPackOptions): TarballPackResult {
       '--create',
       '--gzip',
       '--file',
-      stage,
+      toTarPath(stage),
       '--sort=name',
       '--mtime=@0',
       '--owner=0',
@@ -187,7 +196,7 @@ export function packTarball(opts: TarballPackOptions): TarballPackResult {
       '--numeric-owner',
       '--pax-option=delete=atime,delete=ctime,exthdr.name=%d/PaxHeaders/%f',
       '-C',
-      sourceParent,
+      toTarPath(sourceParent),
       ...excludeFlags,
       sourceLeaf,
     ],
@@ -225,7 +234,7 @@ export function packTarball(opts: TarballPackOptions): TarballPackResult {
   const compressedBytes = statSync(opts.outPath).size;
 
   // Count files (re-list via tar -tzf for a quick traversal).
-  const listResult = spawnSync(tar, ['--list', '--file', opts.outPath], { encoding: 'utf-8' });
+  const listResult = spawnSync(tar, ['--list', '--file', toTarPath(opts.outPath)], { encoding: 'utf-8' });
   if (listResult.status !== 0) {
     throw new TarballError(
       `tar --list failed on freshly-packed tarball: ${listResult.stderr}`,
@@ -278,7 +287,7 @@ export function extractTarball(opts: TarballExtractOptions): TarballExtractResul
   // Use --list --verbose for type info (the leading char encodes file type).
   const listResult = spawnSync(
     tar,
-    ['--list', '--verbose', '--file', opts.tgzPath, '--numeric-owner'],
+    ['--list', '--verbose', '--file', toTarPath(opts.tgzPath), '--numeric-owner'],
     { encoding: 'utf-8' },
   );
   if (listResult.status !== 0) {
@@ -385,7 +394,7 @@ export function extractTarball(opts: TarballExtractOptions): TarballExtractResul
   // GNU tar's --no-same-owner is implicit when not root; pass numeric-owner only.
   const extractResult = spawnSync(
     tar,
-    ['--extract', '--gzip', '--file', opts.tgzPath, '-C', opts.destDir, '--numeric-owner'],
+    ['--extract', '--gzip', '--file', toTarPath(opts.tgzPath), '-C', toTarPath(opts.destDir), '--numeric-owner'],
     { encoding: 'utf-8' },
   );
   if (extractResult.status !== 0) {

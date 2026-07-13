@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'url';
 import { describe, test, expect } from 'bun:test';
 import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'fs';
 import { dirname, join } from 'path';
@@ -9,8 +10,8 @@ import { resolveBunGlobalRoot } from '../src/commands/upgrade.ts';
 
 describe('upgrade command', () => {
   test('--help prints usage and exits 0', async () => {
-    const proc = Bun.spawn(['bun', 'run', 'src/cli.ts', 'upgrade', '--help'], {
-      cwd: new URL('..', import.meta.url).pathname,
+    const proc = Bun.spawn([process.execPath, 'run', 'src/cli.ts', 'upgrade', '--help'], {
+      cwd: fileURLToPath(new URL('..', import.meta.url)),
       stdout: 'pipe',
       stderr: 'pipe',
     });
@@ -22,8 +23,8 @@ describe('upgrade command', () => {
   });
 
   test('-h also prints usage', async () => {
-    const proc = Bun.spawn(['bun', 'run', 'src/cli.ts', 'upgrade', '-h'], {
-      cwd: new URL('..', import.meta.url).pathname,
+    const proc = Bun.spawn([process.execPath, 'run', 'src/cli.ts', 'upgrade', '-h'], {
+      cwd: fileURLToPath(new URL('..', import.meta.url)),
       stdout: 'pipe',
       stderr: 'pipe',
     });
@@ -149,7 +150,7 @@ describe('resolveBunGlobalRoot', () => {
     try {
       process.env.BUN_INSTALL = '/custom/bun';
       process.env.HOME = '/ignored/home';
-      expect(resolveBunGlobalRoot()).toBe('/custom/bun/install/global');
+      expect(resolveBunGlobalRoot()).toBe(join('/custom/bun', 'install', 'global'));
     } finally {
       restoreEnv();
     }
@@ -204,8 +205,8 @@ describe('post-upgrade behavior (post v0.12.0 merge)', () => {
   //   - --help still prints usage.
 
   test('--help prints usage', async () => {
-    const proc = Bun.spawn(['bun', 'run', 'src/cli.ts', 'post-upgrade', '--help'], {
-      cwd: new URL('..', import.meta.url).pathname,
+    const proc = Bun.spawn([process.execPath, 'run', 'src/cli.ts', 'post-upgrade', '--help'], {
+      cwd: fileURLToPath(new URL('..', import.meta.url)),
       stdout: 'pipe',
       stderr: 'pipe',
     });

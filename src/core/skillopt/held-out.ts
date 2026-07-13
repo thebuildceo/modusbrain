@@ -28,6 +28,7 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import type { BrainEngine } from '../engine.ts';
+import { gbrainPath } from '../config.ts';
 import { loadBenchmark } from './benchmark.ts';
 import { D_SEL_MIN_SIZE } from './types.ts';
 import type { BenchmarkTask } from './types.ts';
@@ -45,8 +46,7 @@ const CAPTURE_CONFIG_KEY = 'skillopt.capture_enabled';
 export const MIN_HELD_OUT_SIZE = D_SEL_MIN_SIZE;
 
 export function capturesDir(): string {
-  const home = process.env.GBRAIN_HOME ?? process.env.HOME ?? '';
-  return path.join(home, '.gbrain', 'skillopt-captures');
+  return gbrainPath('skillopt-captures');
 }
 
 export function capturePath(skillName: string, runId: string): string {

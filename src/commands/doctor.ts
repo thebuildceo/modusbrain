@@ -4103,7 +4103,7 @@ export function buildRetrievalReflexCheck(skillsDir: string | null): Check {
     }
 
     // Heartbeat is the authority for "is it firing".
-    const hbPath = join(homedir(), '.gbrain', 'integrations', 'retrieval-reflex', 'heartbeat.jsonl');
+    const hbPath = gbrainPath('integrations', 'retrieval-reflex', 'heartbeat.jsonl');
     let lastFired: string | null = null;
     try {
       if (existsSync(hbPath)) {

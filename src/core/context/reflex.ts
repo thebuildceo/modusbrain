@@ -15,10 +15,9 @@
  *   4. else → disabled (policy skill carries; doctor reports it)
  */
 
-import { homedir } from 'node:os';
-import { join } from 'node:path';
+import { dirname } from 'node:path';
 import { mkdirSync, appendFileSync } from 'node:fs';
-import { loadConfig, type GBrainConfig } from '../config.ts';
+import { gbrainPath, loadConfig, type GBrainConfig } from '../config.ts';
 import type { BrainEngine } from '../engine.ts';
 import {
   extractCandidates,
@@ -97,7 +96,9 @@ export function windowTurnCount(cfg: GBrainConfig | null): number {
 }
 
 const TIMEOUT_MS = 1500; // generous per-turn ceiling; the work is usually <100ms
-const HEARTBEAT_PATH = join(homedir(), '.gbrain', 'integrations', 'retrieval-reflex', 'heartbeat.jsonl');
+function heartbeatPath(): string {
+  return gbrainPath('integrations', 'retrieval-reflex', 'heartbeat.jsonl');
+}
 
 /** File-plane + env gate. Default ON. DB-plane does NOT gate (assemble() is sync). */
 export function reflexEnabled(cfg: GBrainConfig | null): boolean {
@@ -251,10 +252,11 @@ export async function disposeReflex(): Promise<void> {
 
 function writeHeartbeat(cfg: GBrainConfig | null, count: number): void {
   try {
-    mkdirSync(join(homedir(), '.gbrain', 'integrations', 'retrieval-reflex'), { recursive: true });
+    const path = heartbeatPath();
+    mkdirSync(dirname(path), { recursive: true });
     const engine = cfg?.engine ?? 'unknown';
     appendFileSync(
-      HEARTBEAT_PATH,
+      path,
       JSON.stringify({ ts: new Date().toISOString(), event: 'inject', pointers: count, engine }) + '\n',
     );
   } catch {

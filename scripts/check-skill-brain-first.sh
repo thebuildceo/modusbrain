@@ -41,28 +41,28 @@ trap "rm -f \"$TMPOUT\"" EXIT
 
 GBRAIN_SKILLS_DIR="$ROOT/skills" bun run src/cli.ts doctor --fast --json >"$TMPOUT" 2>/dev/null || true
 
-# Extract the skill_brain_first check status. Use python3 (already a
-# repo-wide dependency via image-decoders + admin tooling) so we don't
-# add jq to the verify chain.
-STATUS=$(python3 -c "
-import json, sys
-with open('$TMPOUT') as fp:
-    for line in fp:
-        line = line.strip()
-        if not (line.startswith('{') and line.endswith('}')):
-            continue
-        try:
-            report = json.loads(line)
-        except Exception:
-            continue
-        for c in report.get('checks', []):
-            if c.get('name') == 'skill_brain_first':
-                print(c.get('status', 'missing'))
-                sys.exit(0)
-        print('missing')
-        sys.exit(0)
-print('parse_error')
-" 2>/dev/null || echo "parse_error")
+# Extract the skill_brain_first check status. Use Node instead of python3:
+# Windows often exposes a Microsoft Store python3 stub that exits before
+# parsing, which made this guard report parse_error even with valid JSON.
+STATUS=$(node - "$TMPOUT" <<'NODE' 2>/dev/null || echo "parse_error"
+const fs = require('fs');
+const file = process.argv[2];
+const text = fs.readFileSync(file, 'utf8');
+for (const rawLine of text.split(/\r?\n/)) {
+  const line = rawLine.trim();
+  if (!line.startsWith('{') || !line.endsWith('}')) continue;
+  try {
+    const report = JSON.parse(line);
+    const check = (report.checks || []).find((entry) => entry.name === 'skill_brain_first');
+    console.log(check ? (check.status || 'missing') : 'missing');
+    process.exit(0);
+  } catch {
+    // Keep scanning; doctor may have non-JSON progress noise.
+  }
+}
+console.log('parse_error');
+NODE
+)
 
 case "$STATUS" in
   ok)

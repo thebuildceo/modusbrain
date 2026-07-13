@@ -16,16 +16,21 @@ import {
 
 let tmpHome: string;
 let originalHome: string | undefined;
+let originalModusHome: string | undefined;
 
 beforeEach(() => {
   tmpHome = mkdtempSync(join(tmpdir(), 'gbrain-upgrade-checkpoint-test-'));
   originalHome = process.env.GBRAIN_HOME;
+  originalModusHome = process.env.MODUSBRAIN_HOME;
   process.env.GBRAIN_HOME = tmpHome;
+  process.env.MODUSBRAIN_HOME = tmpHome;
 });
 
 afterEach(() => {
   if (originalHome === undefined) delete process.env.GBRAIN_HOME;
   else process.env.GBRAIN_HOME = originalHome;
+  if (originalModusHome === undefined) delete process.env.MODUSBRAIN_HOME;
+  else process.env.MODUSBRAIN_HOME = originalModusHome;
   if (existsSync(tmpHome)) rmSync(tmpHome, { recursive: true, force: true });
 });
 
@@ -86,8 +91,8 @@ describe('writeCheckpoint + loadCheckpoint round-trip', () => {
       completed_steps: [],
     };
     writeCheckpoint(cp);
-    // Corrupt the file. gbrainPath resolves to GBRAIN_HOME/.gbrain/<file>.
-    const path = join(tmpHome, '.gbrain', 'upgrade-checkpoint.json');
+    // Corrupt the file. gbrainPath resolves to MODUSBRAIN_HOME/.modusbrain/<file>.
+    const path = join(tmpHome, '.modusbrain', 'upgrade-checkpoint.json');
     writeFileSync(path, 'not json {{');
     expect(loadCheckpoint()).toBeNull();
   });

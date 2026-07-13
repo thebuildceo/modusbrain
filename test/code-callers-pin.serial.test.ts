@@ -57,7 +57,7 @@ async function addSource(id: string, localPath: string | null): Promise<void> {
 
 function pinnedDir(sourceId: string): string {
   const dir = mkdtempSync(join(tmpdir(), 'gbrain-pin-cli-'));
-  writeFileSync(join(dir, '.gbrain-source'), `${sourceId}\n`);
+  writeFileSync(join(dir, '.modusbrain-source'), `${sourceId}\n`);
   return dir;
 }
 
@@ -102,7 +102,8 @@ describe('code-callers / code-callees — .gbrain-source pin (CLI wiring)', () =
       expect(callees.exitCode).toBeNull();
       expect(callees.logs.join('\n')).toContain("repo-a");
     } finally {
-      rmSync(dir, { recursive: true, force: true });
+      process.chdir(origCwd);
+      rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     }
   });
 
@@ -121,7 +122,8 @@ describe('code-callers / code-callees — .gbrain-source pin (CLI wiring)', () =
         capture(() => runCodeCallees(engine, ['someSym', '--no-json'])));
       expect(callees.exitCode).toBe(2);
     } finally {
-      rmSync(dir, { recursive: true, force: true });
+      process.chdir(origCwd);
+      rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     }
   });
 
@@ -138,7 +140,8 @@ describe('code-callers / code-callees — .gbrain-source pin (CLI wiring)', () =
       expect(env.source_id).toBe('repo-b');
       expect(env.scope).toBe('single');
     } finally {
-      rmSync(dir, { recursive: true, force: true });
+      process.chdir(origCwd);
+      rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     }
   });
 
@@ -155,7 +158,8 @@ describe('code-callers / code-callees — .gbrain-source pin (CLI wiring)', () =
       expect(env.scope).toBe('single');
       expect(env.symbol).toBe('someSym');
     } finally {
-      rmSync(dir, { recursive: true, force: true });
+      process.chdir(origCwd);
+      rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     }
   });
 
@@ -172,7 +176,8 @@ describe('code-callers / code-callees — .gbrain-source pin (CLI wiring)', () =
       expect(env.source_id).toBeNull();
       expect(env.scope).toBe('all');
     } finally {
-      rmSync(dir, { recursive: true, force: true });
+      process.chdir(origCwd);
+      rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     }
   });
 
@@ -187,7 +192,8 @@ describe('code-callers / code-callees — .gbrain-source pin (CLI wiring)', () =
       expect(exitCode).toBeNull();
       expect(errs.join('\n')).toContain("routing to source 'repo-a'");
     } finally {
-      rmSync(dir, { recursive: true, force: true });
+      process.chdir(origCwd);
+      rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     }
   });
 
@@ -201,7 +207,8 @@ describe('code-callers / code-callees — .gbrain-source pin (CLI wiring)', () =
         capture(() => runCodeCallers(engine, ['someSym', '--json'])));
       expect(errs.join('\n')).not.toContain('routing to source');
     } finally {
-      rmSync(dir, { recursive: true, force: true });
+      process.chdir(origCwd);
+      rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     }
   });
 
@@ -223,7 +230,8 @@ describe('code-callers / code-callees — .gbrain-source pin (CLI wiring)', () =
       expect(env.count).toBe(0);
       expect(env.hint).toContain('--all-sources');
     } finally {
-      rmSync(dir, { recursive: true, force: true });
+      process.chdir(origCwd);
+      rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     }
   });
 
@@ -239,7 +247,8 @@ describe('code-callers / code-callees — .gbrain-source pin (CLI wiring)', () =
       const env = JSON.parse(logs.join('\n'));
       expect(env.error.code).toBe('invalid_source_pin');
     } finally {
-      rmSync(dir, { recursive: true, force: true });
+      process.chdir(origCwd);
+      rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     }
   });
 });

@@ -46,7 +46,7 @@ describe('classifyLiveness (Codex #9)', () => {
 describe('register + read round trip', () => {
   test('registerWorker writes under gbrainPath; readWorkers returns the live worker', async () => {
     const { registerWorker, readWorkers, workerRegistryDir } = await reg();
-    expect(workerRegistryDir()).toBe(join(home, '.gbrain', 'workers'));
+    expect(workerRegistryDir()).toBe(join(home, '.modusbrain', 'workers'));
 
     const cleanup = registerWorker({
       pid: process.pid, // a definitely-alive pid

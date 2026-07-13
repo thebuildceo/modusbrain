@@ -29,17 +29,23 @@ import {
 } from '../../src/core/brainstorm/checkpoint.ts';
 
 let homeBackup: string | undefined;
+let modusHomeBackup: string | undefined;
 let tmp: string;
+const configDir = '.modusbrain';
 
 beforeEach(() => {
   tmp = mkdtempSync(join(tmpdir(), 'gbrain-bs-cp-'));
   homeBackup = process.env.GBRAIN_HOME;
+  modusHomeBackup = process.env.MODUSBRAIN_HOME;
   process.env.GBRAIN_HOME = tmp;
+  process.env.MODUSBRAIN_HOME = tmp;
 });
 
 afterEach(() => {
   if (homeBackup === undefined) delete process.env.GBRAIN_HOME;
   else process.env.GBRAIN_HOME = homeBackup;
+  if (modusHomeBackup === undefined) delete process.env.MODUSBRAIN_HOME;
+  else process.env.MODUSBRAIN_HOME = modusHomeBackup;
   rmSync(tmp, { recursive: true, force: true });
 });
 
@@ -124,7 +130,7 @@ describe('save + load round-trip (TX3 load-bearing — full ideas preserved)', (
   test('atomic write: no .tmp left behind on success', () => {
     const cp = fixtureCheckpoint('atomicrenameabcd');
     saveCheckpoint(cp);
-    const dir = join(tmp, '.gbrain', 'brainstorm');
+    const dir = join(tmp, configDir, 'brainstorm');
     expect(existsSync(join(dir, 'atomicrenameabcd.json'))).toBe(true);
     expect(existsSync(join(dir, 'atomicrenameabcd.json.tmp'))).toBe(false);
   });
@@ -137,7 +143,7 @@ describe('save + load round-trip (TX3 load-bearing — full ideas preserved)', (
     const runId = 'schemamismatch00';
     const cp = fixtureCheckpoint(runId);
     saveCheckpoint(cp);
-    const path = join(tmp, '.gbrain', 'brainstorm', `${runId}.json`);
+    const path = join(tmp, configDir, 'brainstorm', `${runId}.json`);
     const raw = JSON.parse(readFileSync(path, 'utf-8'));
     raw.schema_version = 1;
     writeFileSync(path, JSON.stringify(raw));
@@ -147,7 +153,7 @@ describe('save + load round-trip (TX3 load-bearing — full ideas preserved)', (
   test('loadCheckpoint returns null on corrupt JSON', () => {
     const runId = 'corruptjson00000';
     saveCheckpoint(fixtureCheckpoint(runId));
-    writeFileSync(join(tmp, '.gbrain', 'brainstorm', `${runId}.json`), '{not json}');
+    writeFileSync(join(tmp, configDir, 'brainstorm', `${runId}.json`), '{not json}');
     expect(loadCheckpoint(runId)).toBeNull();
   });
 });
@@ -175,13 +181,13 @@ describe('gcStaleCheckpoints (A5 7-day window)', () => {
     saveCheckpoint(fixtureCheckpoint(stale));
     saveCheckpoint(fixtureCheckpoint(fresh));
     // Set the stale file's mtime to 30 days ago.
-    const stalePath = join(tmp, '.gbrain', 'brainstorm', `${stale}.json`);
+    const stalePath = join(tmp, configDir, 'brainstorm', `${stale}.json`);
     const oldTime = (Date.now() - 30 * 24 * 60 * 60 * 1000) / 1000;
     utimesSync(stalePath, oldTime, oldTime);
     const removed = gcStaleCheckpoints(7);
     expect(removed).toBe(1);
     expect(existsSync(stalePath)).toBe(false);
-    expect(existsSync(join(tmp, '.gbrain', 'brainstorm', `${fresh}.json`))).toBe(true);
+    expect(existsSync(join(tmp, configDir, 'brainstorm', `${fresh}.json`))).toBe(true);
   });
 
   test('returns 0 when dir is empty', () => {
@@ -192,7 +198,7 @@ describe('gcStaleCheckpoints (A5 7-day window)', () => {
 describe('clearCheckpoint', () => {
   test('removes file when present', () => {
     saveCheckpoint(fixtureCheckpoint('cleartest0000000'));
-    const path = join(tmp, '.gbrain', 'brainstorm', `cleartest0000000.json`);
+    const path = join(tmp, configDir, 'brainstorm', `cleartest0000000.json`);
     expect(existsSync(path)).toBe(true);
     clearCheckpoint('cleartest0000000');
     expect(existsSync(path)).toBe(false);
@@ -215,7 +221,7 @@ describe('isCheckpointFresh', () => {
 
   test('false for >7 day old checkpoint', () => {
     saveCheckpoint(fixtureCheckpoint('oldtest000000000'));
-    const path = join(tmp, '.gbrain', 'brainstorm', 'oldtest000000000.json');
+    const path = join(tmp, configDir, 'brainstorm', 'oldtest000000000.json');
     const oldTime = (Date.now() - 10 * 24 * 60 * 60 * 1000) / 1000;
     utimesSync(path, oldTime, oldTime);
     expect(isCheckpointFresh('oldtest000000000')).toBe(false);

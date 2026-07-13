@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'url';
 /**
  * v0.36.1.x #1090: admin embed E2E — spawns `gbrain serve --http` from a
  * fresh tmpdir (so `process.cwd()/admin/dist` doesn't exist), then issues
@@ -29,7 +30,7 @@ import { join } from 'path';
 import { tmpdir } from 'os';
 import type { Subprocess } from 'bun';
 
-const REPO = new URL('..', import.meta.url).pathname.replace(/\/$/, '');
+const REPO = fileURLToPath(new URL('..', import.meta.url)).replace(/[\\/]$/, '');
 
 interface ServeProc {
   proc: Subprocess;
@@ -46,12 +47,12 @@ function pickPort(): number {
 
 async function spawnServer(): Promise<ServeProc> {
   const home = mkdtempSync(join(tmpdir(), 'gbrain-admin-embed-'));
-  mkdirSync(join(home, '.gbrain'), { recursive: true });
+  mkdirSync(join(home, '.modusbrain'), { recursive: true });
   writeFileSync(
-    join(home, '.gbrain', 'config.json'),
+    join(home, '.modusbrain', 'config.json'),
     JSON.stringify({
       engine: 'pglite',
-      database_path: join(home, '.gbrain', 'brain.pglite'),
+      database_path: join(home, '.modusbrain', 'brain.pglite'),
       embedding_dimensions: 1536,
     }) + '\n',
   );
@@ -68,8 +69,7 @@ async function spawnServer(): Promise<ServeProc> {
   // bundled assets via Bun's `with { type: 'file' }` import resolution.
   const proc = Bun.spawn(
     [
-      'bun',
-      'run',
+      process.execPath,
       `${REPO}/src/cli.ts`,
       'serve',
       '--http',
@@ -84,6 +84,7 @@ async function spawnServer(): Promise<ServeProc> {
         ...process.env,
         HOME: home,
         GBRAIN_HOME: home,
+        MODUSBRAIN_HOME: home,
         GBRAIN_ADMIN_BOOTSTRAP_TOKEN: bootstrapToken,
         // Don't let test-process inherit any auth keys it doesn't need.
         OPENAI_API_KEY: '',

@@ -35,6 +35,9 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
+source scripts/bun-child-env.sh
+BUN_CMD="$(resolve_bun_cmd)"
+BUN_CHILD_PATH="$(resolve_bun_child_path)"
 
 # --- HOME isolation: snapshot real user config before switching ---
 # Tolerate unset HOME (minimal containers, exotic CI shells) without tripping set -u.
@@ -174,7 +177,7 @@ for f in "${files[@]}"; do
   else
     TIMEOUT_CMD=""
   fi
-  if output=$($TIMEOUT_CMD bun test --timeout=60000 "$f" 2>&1); then
+  if output=$($TIMEOUT_CMD env PATH="$BUN_CHILD_PATH" "$BUN_CMD" test --timeout=60000 "$f" 2>&1); then
     pass_files=$((pass_files + 1))
     # Extract pass/fail counts from bun's summary (e.g., "123 pass")
     p=$(echo "$output" | grep -oE '[0-9]+ pass' | tail -1 | grep -oE '[0-9]+' || echo 0)

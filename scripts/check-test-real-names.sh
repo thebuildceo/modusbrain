@@ -120,6 +120,9 @@ while IFS= read -r line; do
   [ -z "$line" ] && continue
   # Extract filename and content (everything after second :).
   file="${line%%:*}"
+  # Git Bash/ripgrep on Windows can emit backslash path separators. The
+  # allowlist is repo-relative POSIX style, so normalize before comparing.
+  file="${file//\\//}"
   rest="${line#*:}"
   # rest is "lineno:content" — strip lineno.
   content="${rest#*:}"

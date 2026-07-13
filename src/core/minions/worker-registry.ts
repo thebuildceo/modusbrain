@@ -159,7 +159,22 @@ function processStartMs(pid: number): number | null {
     const t = Date.parse(out);
     return Number.isNaN(t) ? null : t;
   } catch {
-    return null;
+    if (process.platform !== 'win32') return null;
+    try {
+      const systemRoot = process.env.SystemRoot || process.env.WINDIR || 'C:\\Windows';
+      const powershell = join(systemRoot, 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe');
+      const script = `(Get-Process -Id ${pid} -ErrorAction Stop).StartTime.ToUniversalTime().ToString('o')`;
+      const out = execFileSync(powershell, ['-NoProfile', '-Command', script], {
+        encoding: 'utf8',
+        timeout: 2000,
+        stdio: ['ignore', 'pipe', 'ignore'],
+      }).trim();
+      if (!out) return null;
+      const t = Date.parse(out);
+      return Number.isNaN(t) ? null : t;
+    } catch {
+      return null;
+    }
   }
 }
 

@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'url';
 /**
  * E2E Upgrade Tests — Tier 1 (no API keys required, needs network)
  *
@@ -30,8 +31,8 @@ if (skip) {
 
 describeE2E('E2E: Check-Update', () => {
   test('check-update --json returns valid JSON with current version', async () => {
-    const proc = Bun.spawn(['bun', 'run', 'src/cli.ts', 'check-update', '--json'], {
-      cwd: new URL('../..', import.meta.url).pathname,
+    const proc = Bun.spawn([process.execPath, 'run', 'src/cli.ts', 'check-update', '--json'], {
+      cwd: fileURLToPath(new URL('../..', import.meta.url)),
       stdout: 'pipe',
       stderr: 'pipe',
     });
@@ -47,8 +48,8 @@ describeE2E('E2E: Check-Update', () => {
   });
 
   test('check-update without --json prints human-readable output', async () => {
-    const proc = Bun.spawn(['bun', 'run', 'src/cli.ts', 'check-update'], {
-      cwd: new URL('../..', import.meta.url).pathname,
+    const proc = Bun.spawn([process.execPath, 'run', 'src/cli.ts', 'check-update'], {
+      cwd: fileURLToPath(new URL('../..', import.meta.url)),
       stdout: 'pipe',
       stderr: 'pipe',
     });
@@ -60,8 +61,8 @@ describeE2E('E2E: Check-Update', () => {
   });
 
   test('check-update --help prints usage', async () => {
-    const proc = Bun.spawn(['bun', 'run', 'src/cli.ts', 'check-update', '--help'], {
-      cwd: new URL('../..', import.meta.url).pathname,
+    const proc = Bun.spawn([process.execPath, 'run', 'src/cli.ts', 'check-update', '--help'], {
+      cwd: fileURLToPath(new URL('../..', import.meta.url)),
       stdout: 'pipe',
       stderr: 'pipe',
     });
@@ -74,8 +75,8 @@ describeE2E('E2E: Check-Update', () => {
   });
 
   test('handles no-releases gracefully (current repo state)', async () => {
-    const proc = Bun.spawn(['bun', 'run', 'src/cli.ts', 'check-update', '--json'], {
-      cwd: new URL('../..', import.meta.url).pathname,
+    const proc = Bun.spawn([process.execPath, 'run', 'src/cli.ts', 'check-update', '--json'], {
+      cwd: fileURLToPath(new URL('../..', import.meta.url)),
       stdout: 'pipe',
       stderr: 'pipe',
     });

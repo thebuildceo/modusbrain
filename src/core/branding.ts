@@ -30,13 +30,18 @@ export const BRAND = {
 export function brandEnv(name: string): string | undefined {
   const modus = `MODUSBRAIN_${name}`;
   const legacy = `GBRAIN_${name}`;
-  return process.env[modus] ?? process.env[legacy];
+  return cleanEnvValue(process.env[modus]) ?? cleanEnvValue(process.env[legacy]);
+}
+
+function cleanEnvValue(value: string | undefined): string | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed || trimmed === 'undefined' || trimmed === 'null') return undefined;
+  return trimmed;
 }
 
 /** Home override: MODUSBRAIN_HOME or GBRAIN_HOME (parent dir; we append config dir). */
 export function brandHomeOverride(): string | undefined {
-  const v = brandEnv('HOME') ?? process.env.GBRAIN_HOME;
-  return v?.trim() || undefined;
+  return brandEnv('HOME') ?? cleanEnvValue(process.env.GBRAIN_HOME);
 }
 
 /**
@@ -52,7 +57,10 @@ export function brandConfigDir(): string {
     if (override.split(/[\\/]/).includes('..')) {
       throw new Error(`MODUSBRAIN_HOME must not contain '..' segments; got: ${override}`);
     }
-    return join(override, BRAND.configDirName);
+    if (cleanEnvValue(process.env.MODUSBRAIN_HOME)) {
+      return join(override, BRAND.configDirName);
+    }
+    return join(override, BRAND.legacyConfigDirName);
   }
 
   const modusDir = join(homedir(), BRAND.configDirName);

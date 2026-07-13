@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test';
+import { withEnv } from './helpers/with-env.ts';
 import { BRAND, brandEnv, brandHelp, cliCmd } from '../src/core/branding.ts';
 
 describe('branding', () => {
@@ -8,13 +9,17 @@ describe('branding', () => {
     expect(BRAND.domain).toBe('modusbrain.com');
   });
 
-  test('brandEnv prefers MODUSBRAIN_ over GBRAIN_', () => {
+  test('brandEnv prefers MODUSBRAIN_ over GBRAIN_', async () => {
     const key = 'TEST_BRAND_ENV_' + Date.now();
-    process.env[`GBRAIN_${key}`] = 'legacy';
-    process.env[`MODUSBRAIN_${key}`] = 'modus';
-    expect(brandEnv(key)).toBe('modus');
-    delete process.env[`GBRAIN_${key}`];
-    delete process.env[`MODUSBRAIN_${key}`];
+    await withEnv(
+      {
+        [`GBRAIN_${key}`]: 'legacy',
+        [`MODUSBRAIN_${key}`]: 'modus',
+      },
+      () => {
+        expect(brandEnv(key)).toBe('modus');
+      },
+    );
   });
 
   test('brandHelp rewrites user-facing strings', () => {

@@ -120,9 +120,17 @@ function pushLogPath(): string {
 // Rendered into BOTH the (committed) helper and the (local, untracked) hook so
 // there is one source of truth without the hook executing repo-controlled code.
 const PUSH_RETRY = `# --- gbrain durability push-retry (generated; one source of truth) ---
+gbrain_shell_home() {
+  _home="\${GBRAIN_HOME:-$HOME/.gbrain}"
+  if command -v cygpath >/dev/null 2>&1; then
+    cygpath -u "$_home" 2>/dev/null || printf '%s\\n' "$_home"
+  else
+    printf '%s\\n' "$_home"
+  fi
+}
 brain_push() {
   _branch="$1"
-  _log="\${GBRAIN_HOME:-$HOME/.gbrain}/brain-push.log"
+  _log="$(gbrain_shell_home)/brain-push.log"
   mkdir -p "$(dirname "$_log")" 2>/dev/null || true
   _gd="$(git rev-parse --git-dir 2>/dev/null || echo .git)"
   # Serialize concurrent pushes (commit bursts) so they coalesce instead of a
@@ -153,7 +161,9 @@ set -euo pipefail
 
 _branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo HEAD)"
 if [ "$_branch" = "HEAD" ]; then
-  echo "$(date -u +%FT%TZ) [push] detached HEAD; skip" >> "\${GBRAIN_HOME:-$HOME/.gbrain}/brain-push.log" 2>/dev/null || true
+  _log="$(gbrain_shell_home)/brain-push.log"
+  mkdir -p "$(dirname "$_log")" 2>/dev/null || true
+  echo "$(date -u +%FT%TZ) [push] detached HEAD; skip" >> "$_log" 2>/dev/null || true
   exit 0
 fi
 

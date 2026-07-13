@@ -10,7 +10,9 @@
  */
 
 import { describe, test, expect, mock, beforeEach, beforeAll, afterAll, afterEach } from 'bun:test';
-import { existsSync, unlinkSync } from 'fs';
+import { existsSync, mkdtempSync, rmSync, unlinkSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
 
 // ─── Mocks ──────────────────────────────────────────────────────────
 // Track what each phase was called with so tests can assert.
@@ -116,6 +118,7 @@ mock.module('../../src/commands/orphans.ts', () => ({
 
 // Import after mocks.
 const { runCycle, ALL_PHASES } = await import('../../src/core/cycle.ts');
+const { gbrainPath } = await import('../../src/core/config.ts');
 const { PGLiteEngine } = await import('../../src/core/pglite-engine.ts');
 
 // Shared PGLite engine per describe block. Each block does its own
@@ -289,10 +292,26 @@ describe('runCycle — cycle_already_running skip', () => {
 // ─── Engine null path ─────────────────────────────────────────────
 
 describe('runCycle — engine = null (filesystem-only mode)', () => {
-  const lockFile = require('path').join(require('os').homedir(), '.gbrain', 'cycle.lock');
+  let lockHome: string;
+  let originalGbrainHome: string | undefined;
+  let originalModusbrainHome: string | undefined;
+
+  beforeEach(() => {
+    originalGbrainHome = process.env.GBRAIN_HOME;
+    originalModusbrainHome = process.env.MODUSBRAIN_HOME;
+    lockHome = mkdtempSync(join(tmpdir(), 'gbrain-cycle-null-'));
+    process.env.MODUSBRAIN_HOME = lockHome;
+    process.env.GBRAIN_HOME = lockHome;
+  });
 
   afterEach(() => {
+    const lockFile = gbrainPath('cycle.lock');
     if (existsSync(lockFile)) { try { unlinkSync(lockFile); } catch { /* */ } }
+    if (existsSync(lockHome)) rmSync(lockHome, { recursive: true, force: true });
+    if (originalGbrainHome === undefined) delete process.env.GBRAIN_HOME;
+    else process.env.GBRAIN_HOME = originalGbrainHome;
+    if (originalModusbrainHome === undefined) delete process.env.MODUSBRAIN_HOME;
+    else process.env.MODUSBRAIN_HOME = originalModusbrainHome;
   });
 
   test('filesystem phases still run when engine is null', async () => {
@@ -313,6 +332,10 @@ describe('runCycle — engine = null (filesystem-only mode)', () => {
   });
 
   test('file lock blocks concurrent engine=null cycles', async () => {
+    const holder = Bun.spawn([process.execPath, '-e', 'setTimeout(() => {}, 30000)'], {
+      stdout: 'ignore',
+      stderr: 'ignore',
+    });
     // Seed a lock file pointing at PID 1 (init/launchd — always alive on
     // unix, and never equals our test PID). Fresh mtime means "live holder".
     // With engine=null + the default phases selection, lint + backlinks
@@ -320,8 +343,9 @@ describe('runCycle — engine = null (filesystem-only mode)', () => {
     // returns null → runCycle returns skipped/cycle_already_running.
     const { writeFileSync, mkdirSync } = require('fs');
     const path = require('path');
+    const lockFile = gbrainPath('cycle.lock');
     mkdirSync(path.dirname(lockFile), { recursive: true });
-    writeFileSync(lockFile, `1\n${new Date().toISOString()}\n`);
+    writeFileSync(lockFile, `${holder.pid}\n${new Date().toISOString()}\n`);
 
     const report = await runCycle(null, { brainDir: '/tmp/brain' });
     expect(report.status).toBe('skipped');
@@ -329,6 +353,8 @@ describe('runCycle — engine = null (filesystem-only mode)', () => {
     // None of the filesystem phases ran because the lock blocked entry.
     expect(lintCalls.length).toBe(0);
     expect(backlinksCalls.length).toBe(0);
+    holder.kill();
+    await holder.exited.catch(() => {});
   });
 });
 

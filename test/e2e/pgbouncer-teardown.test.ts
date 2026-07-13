@@ -54,7 +54,7 @@ async function runCli(
   timeoutMs: number,
 ): Promise<{ exitCode: number; stdout: string; stderr: string; wallMs: number }> {
   const t0 = Date.now();
-  const proc = Bun.spawn(['bun', 'run', join(REPO, 'src', 'cli.ts'), ...args], {
+  const proc = Bun.spawn([process.execPath, 'run', join(REPO, 'src', 'cli.ts'), ...args], {
     cwd: REPO,
     env: { ...process.env, ...env, GBRAIN_SKIP_STARTUP_HOOKS: '1' },
     stdout: 'pipe',

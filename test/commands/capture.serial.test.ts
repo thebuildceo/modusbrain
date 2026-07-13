@@ -8,7 +8,7 @@
  * gets the same write-through plumbing).
  */
 
-import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'bun:test';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test } from 'bun:test';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
@@ -20,6 +20,9 @@ import { runCapture, __testing } from '../../src/commands/capture.ts';
 let engine: PGLiteEngine;
 let tmpRoot: string;
 let brainDir: string;
+let oldHome: string | undefined;
+let oldGbrainHome: string | undefined;
+let oldModusbrainHome: string | undefined;
 
 beforeAll(async () => {
   engine = new PGLiteEngine();
@@ -33,10 +36,23 @@ afterAll(async () => {
 
 beforeEach(async () => {
   await resetPgliteState(engine);
+  oldHome = process.env.HOME;
+  oldGbrainHome = process.env.GBRAIN_HOME;
+  oldModusbrainHome = process.env.MODUSBRAIN_HOME;
   tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'gbrain-capture-'));
+  process.env.HOME = tmpRoot;
+  process.env.GBRAIN_HOME = tmpRoot;
+  process.env.MODUSBRAIN_HOME = tmpRoot;
   brainDir = path.join(tmpRoot, 'brain');
   fs.mkdirSync(brainDir, { recursive: true });
   await engine.setConfig('sync.repo_path', brainDir);
+});
+
+afterEach(() => {
+  if (oldHome === undefined) delete process.env.HOME; else process.env.HOME = oldHome;
+  if (oldGbrainHome === undefined) delete process.env.GBRAIN_HOME; else process.env.GBRAIN_HOME = oldGbrainHome;
+  if (oldModusbrainHome === undefined) delete process.env.MODUSBRAIN_HOME; else process.env.MODUSBRAIN_HOME = oldModusbrainHome;
+  fs.rmSync(tmpRoot, { recursive: true, force: true });
 });
 
 describe('capture — defaultSlug helper', () => {

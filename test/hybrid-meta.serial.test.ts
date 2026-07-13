@@ -83,13 +83,13 @@ describe('hybridSearch onMeta callback — expansion_applied', () => {
     expect(meta!.expansion_applied).toBe(false);
   });
 
-  test('false when OPENAI_API_KEY missing (early-return short-circuits expansion)', async () => {
+  test('true when caller provides expandFn without OPENAI_API_KEY', async () => {
     delete process.env.OPENAI_API_KEY;
     const meta = await runWithMeta('alice', {
       expansion: true,
       expandFn: async () => ['alice', 'alice example', 'the person alice'],
     });
-    expect(meta!.expansion_applied).toBe(false);
+    expect(meta!.expansion_applied).toBe(true);
   });
 });
 

@@ -30,7 +30,7 @@
 
 import { readFileSync, readdirSync, lstatSync, existsSync } from 'fs';
 import { setCliExitVerdict } from '../core/cli-force-exit.ts';
-import { join, relative, dirname } from 'path';
+import { join, relative, dirname, posix } from 'path';
 import type { BrainEngine, LinkBatchInput, TimelineBatchInput } from '../core/engine.ts';
 import type { PageType } from '../core/types.ts';
 import { parseMarkdown } from '../core/markdown.ts';
@@ -267,15 +267,19 @@ export function extractMarkdownLinks(content: string): { name: string; relTarget
  * Returns null when no matching slug is found (dangling link).
  */
 export function resolveSlug(fileDir: string, relTarget: string, allSlugs: Set<string>): string | null {
-  const targetNoExt = relTarget.endsWith('.md') ? relTarget.slice(0, -3) : relTarget;
+  const normalizedFileDir = fileDir.replace(/\\/g, '/');
+  const normalizedTarget = relTarget.replace(/\\/g, '/');
+  const targetNoExt = normalizedTarget.endsWith('.md') ? normalizedTarget.slice(0, -3) : normalizedTarget;
 
-  const s1 = join(fileDir, targetNoExt);
+  const s1 = posix.normalize(posix.join(normalizedFileDir, targetNoExt));
   if (allSlugs.has(s1)) return s1;
 
-  const parts = fileDir.split('/').filter(Boolean);
+  const parts = normalizedFileDir.split('/').filter(Boolean);
   for (let strip = 1; strip <= parts.length; strip++) {
     const ancestor = parts.slice(0, parts.length - strip).join('/');
-    const candidate = ancestor ? join(ancestor, targetNoExt) : targetNoExt;
+    const candidate = ancestor
+      ? posix.normalize(posix.join(ancestor, targetNoExt))
+      : posix.normalize(targetNoExt);
     if (allSlugs.has(candidate)) return candidate;
   }
 

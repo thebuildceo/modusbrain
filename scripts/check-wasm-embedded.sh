@@ -20,15 +20,22 @@ REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
 
 OUT_BIN="$(mktemp /tmp/gbrain-wasm-check.XXXXXX)"
-trap 'rm -f "$OUT_BIN"' EXIT
+trap 'rm -f "$OUT_BIN" "$OUT_BIN.exe"' EXIT
 
 # Build a minimal smoketest binary that imports the chunker. We compile this
 # instead of the full gbrain CLI so the failure mode is laser-focused on
 # chunker + WASM path resolution, not unrelated CLI wiring.
 bun build --compile --outfile "$OUT_BIN" scripts/chunker-smoketest.ts >/dev/null 2>&1
 
+# On Windows, Bun appends .exe to the requested output path and leaves the
+# original mktemp file empty. Prefer the executable sibling when present.
+RUN_BIN="$OUT_BIN"
+if [ -f "$OUT_BIN.exe" ]; then
+  RUN_BIN="$OUT_BIN.exe"
+fi
+
 # Run it and capture JSON output.
-OUTPUT="$("$OUT_BIN" 2>&1)"
+OUTPUT="$("$RUN_BIN" 2>&1)"
 
 # Sanity: JSON parses and has expected shape.
 # - has_symbol_names: at least one chunk carries a concrete symbol name

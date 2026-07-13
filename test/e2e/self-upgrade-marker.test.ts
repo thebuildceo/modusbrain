@@ -44,7 +44,7 @@ function runGbrain(mode: string | undefined): { stdout: string; stderr: string; 
   env.GBRAIN_HOME = home;
   if (mode === undefined) delete env.GBRAIN_SELF_UPGRADE_MODE;
   else env.GBRAIN_SELF_UPGRADE_MODE = mode;
-  const r = Bun.spawnSync(['bun', 'src/cli.ts', 'config', 'get', 'self_upgrade.mode'], {
+  const r = Bun.spawnSync([process.execPath, 'src/cli.ts', 'config', 'get', 'self_upgrade.mode'], {
     cwd: repoRoot,
     env,
     stdout: 'pipe',
@@ -99,7 +99,7 @@ describe('self-upgrade marker on a real invocation', () => {
     delete env.NODE_ENV;
     env.GBRAIN_HOME = home;
     env.GBRAIN_SELF_UPGRADE_MODE = 'notify';
-    const r = Bun.spawnSync(['bun', 'src/cli.ts', '--quiet', 'config', 'get', 'self_upgrade.mode'], {
+    const r = Bun.spawnSync([process.execPath, 'src/cli.ts', '--quiet', 'config', 'get', 'self_upgrade.mode'], {
       cwd: repoRoot,
       env,
       stdout: 'pipe',

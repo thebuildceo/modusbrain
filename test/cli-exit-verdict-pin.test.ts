@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'url';
 /**
  * #2084 class pin — every exit-code write in src/ routes through
  * setCliExitVerdict.
@@ -27,7 +28,7 @@ describe('exit-verdict ownership — no raw process.exitCode assignments', () =>
     // form — every shape is equally zeroed by the owned-verdict read.
     const hits = execSync(
       String.raw`grep -rnE "process(\.|\[')exitCode('\])?[[:space:]]*([?|&]{2})?=[^=]" src --include='*.ts' | grep -v "core/cli-force-exit.ts" | grep -v "core/pglite-engine.ts" || true`,
-      { encoding: 'utf-8', cwd: new URL('..', import.meta.url).pathname },
+      { encoding: 'utf-8', cwd: fileURLToPath(new URL('..', import.meta.url)) },
     ).trim();
     expect(hits).toBe('');
   });

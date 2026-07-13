@@ -78,7 +78,11 @@ INTRA_CONC="${MAX_CONCURRENCY_OVERRIDE:-${GBRAIN_TEST_MAX_CONCURRENCY:-4}}"
 # had completed in 968s. 1500s cap gives ~55% headroom over observed
 # 4-shard wallclock; real hangs still hit it. Override via
 # GBRAIN_TEST_SHARD_TIMEOUT=N.
-SHARD_TIMEOUT="${GBRAIN_TEST_SHARD_TIMEOUT:-1500}"
+DEFAULT_SHARD_TIMEOUT=1500
+case "$(uname -s 2>/dev/null || echo unknown)" in
+  MINGW*|MSYS*|CYGWIN*) DEFAULT_SHARD_TIMEOUT=3600 ;;
+esac
+SHARD_TIMEOUT="${GBRAIN_TEST_SHARD_TIMEOUT:-$DEFAULT_SHARD_TIMEOUT}"
 
 # ──────────────────────────────────────────────────────────────────────────
 # Output directories. Prefer workspace-local .context/, fall back to /tmp.

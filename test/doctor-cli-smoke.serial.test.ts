@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'url';
 /**
  * v0.39 subprocess smoke for `gbrain doctor --json`.
  *
@@ -22,7 +23,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync, chmodSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 
-const REPO = new URL('..', import.meta.url).pathname.replace(/\/$/, '');
+const REPO = fileURLToPath(new URL('..', import.meta.url)).replace(/[\\/]$/, '');
 const SKIP = process.env.GBRAIN_SKIP_SUBPROCESS_TESTS === '1';
 
 function makeGbrainShim(): { binDir: string; cleanup: () => void } {
@@ -43,7 +44,7 @@ async function runCli(
   env: Record<string, string>,
   timeoutMs: number,
 ): Promise<{ exitCode: number; stdout: string; stderr: string }> {
-  const proc = Bun.spawn(['bun', 'run', `${REPO}/src/cli.ts`, ...args], {
+  const proc = Bun.spawn([process.execPath, 'run', `${REPO}/src/cli.ts`, ...args], {
     cwd: REPO,
     env: { ...process.env, ...env },
     stdout: 'pipe',

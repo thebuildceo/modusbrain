@@ -19,7 +19,7 @@ async function runHarness(
   graceMs: number,
   hardCapMs: number,
 ): Promise<{ exitCode: number | null; signalled: boolean; elapsedMs: number; stdout: string; killedByTest: boolean }> {
-  const proc = Bun.spawn(['bun', HARNESS, mode, String(deadlineMs), String(graceMs)], {
+  const proc = Bun.spawn([process.execPath, HARNESS, mode, String(deadlineMs), String(graceMs)], {
     stdout: 'pipe',
     stderr: 'pipe',
   });

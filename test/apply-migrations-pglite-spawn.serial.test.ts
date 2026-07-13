@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'url';
 /**
  * v0.36.1.x #1100: PGLite + `gbrain apply-migrations` chain spawn test.
  *
@@ -29,7 +30,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync, chmodSync } 
 import { join } from 'path';
 import { tmpdir } from 'os';
 
-const REPO = new URL('..', import.meta.url).pathname.replace(/\/$/, '');
+const REPO = fileURLToPath(new URL('..', import.meta.url)).replace(/[\\/]$/, '');
 
 /**
  * Make a shim `gbrain` binary that routes to `bun run <repo>/src/cli.ts`.
@@ -45,10 +46,15 @@ const REPO = new URL('..', import.meta.url).pathname.replace(/\/$/, '');
 function makeGbrainShim(): { binDir: string; cleanup: () => void } {
   const binDir = mkdtempSync(join(tmpdir(), 'gbrain-shim-'));
   const shimPath = join(binDir, 'gbrain');
+  const shimCmdPath = join(binDir, 'gbrain.cmd');
   writeFileSync(
     shimPath,
     `#!/bin/sh\nexec bun run ${REPO}/src/cli.ts "$@"\n`,
     { mode: 0o755 },
+  );
+  writeFileSync(
+    shimCmdPath,
+    `@echo off\r\n"${process.execPath}" run "${REPO}\\src\\cli.ts" %*\r\n`,
   );
   chmodSync(shimPath, 0o755);
   return {
@@ -64,7 +70,7 @@ async function runCli(
   env: Record<string, string>,
   timeoutMs: number,
 ): Promise<{ exitCode: number; stdout: string; stderr: string }> {
-  const proc = Bun.spawn(['bun', 'run', `${REPO}/src/cli.ts`, ...args], {
+  const proc = Bun.spawn([process.execPath, 'run', `${REPO}/src/cli.ts`, ...args], {
     cwd: REPO,
     env: { ...process.env, ...env },
     stdout: 'pipe',
@@ -93,12 +99,12 @@ describe('apply-migrations on fresh PGLite (v0.36.1.x #1100)', () => {
     const home = mkdtempSync(join(tmpdir(), 'gbrain-pglite-spawn-'));
     const shim = makeGbrainShim();
     try {
-      mkdirSync(join(home, '.gbrain'), { recursive: true });
+      mkdirSync(join(home, '.modusbrain'), { recursive: true });
       writeFileSync(
-        join(home, '.gbrain', 'config.json'),
+        join(home, '.modusbrain', 'config.json'),
         JSON.stringify({
           engine: 'pglite',
-          database_path: join(home, '.gbrain', 'brain.pglite'),
+          database_path: join(home, '.modusbrain', 'brain.pglite'),
           embedding_dimensions: 1536,
         }) + '\n',
       );
@@ -109,7 +115,8 @@ describe('apply-migrations on fresh PGLite (v0.36.1.x #1100)', () => {
       const env = {
         HOME: home,
         GBRAIN_HOME: home,
-        PATH: `${shim.binDir}:${process.env.PATH ?? ''}`,
+        MODUSBRAIN_HOME: home,
+        PATH: `${shim.binDir}${process.platform === 'win32' ? ';' : ':'}${process.env.PATH ?? ''}`,
       };
 
       // Step 1: init --migrate-only seeds the schema. Pre-fix on PGLite this
@@ -138,7 +145,7 @@ describe('apply-migrations on fresh PGLite (v0.36.1.x #1100)', () => {
       const applyOut = apply.stdout + apply.stderr;
       expect(applyOut).not.toMatch(/Timed out waiting for PGLite lock/);
       expect(applyOut).not.toMatch(/Phase A \(schema\) failed/);
-      expect(existsSync(join(home, '.gbrain', 'brain.pglite'))).toBe(true);
+      expect(existsSync(join(home, '.modusbrain', 'brain.pglite'))).toBe(true);
 
       // Step 3: re-run is idempotent — "All migrations up to date" must exit
       // 0, not fall through to implicit non-zero (the #1062 fix path).

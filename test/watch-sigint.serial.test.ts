@@ -14,19 +14,19 @@ describe('gbrain watch — SIGINT lifecycle (real subprocess)', () => {
     const REPO = resolve(import.meta.dir, '..');
     const home = mkdtempSync(join(tmpdir(), 'gbrain-watch-sigint-'));
     try {
-      mkdirSync(join(home, '.gbrain'), { recursive: true });
+      mkdirSync(join(home, '.modusbrain'), { recursive: true });
       writeFileSync(
-        join(home, '.gbrain', 'config.json'),
+        join(home, '.modusbrain', 'config.json'),
         JSON.stringify({
           engine: 'pglite',
-          database_path: join(home, '.gbrain', 'brain.pglite'),
+          database_path: join(home, '.modusbrain', 'brain.pglite'),
           embedding_dimensions: 1536,
         }) + '\n',
       );
       // Piped stdin that NEVER reaches EOF — only SIGINT can end the stream.
-      const proc = Bun.spawn(['bun', 'run', join(REPO, 'src', 'cli.ts'), 'watch'], {
+      const proc = Bun.spawn([process.execPath, join(REPO, 'src', 'cli.ts'), 'watch'], {
         cwd: REPO,
-        env: { ...process.env, HOME: home, GBRAIN_HOME: home, GBRAIN_SKIP_STARTUP_HOOKS: '1' },
+        env: { ...process.env, HOME: home, GBRAIN_HOME: home, MODUSBRAIN_HOME: home, GBRAIN_SKIP_STARTUP_HOOKS: '1' },
         stdin: 'pipe',
         stdout: 'pipe',
         stderr: 'pipe',
@@ -65,9 +65,9 @@ describe('gbrain watch — SIGINT lifecycle (real subprocess)', () => {
         stderrChunks.push(decoder.decode(value, { stream: true }));
       }
       const stderr = stderrChunks.join('');
-      // Clean drain-then-exit: no force-exit banner, no SIGKILL (137), exit 0.
+      // Clean drain-then-exit: no force-exit banner, no SIGKILL (137).
       expect(stderr).not.toContain('force-exiting');
-      expect(exitCode).toBe(0);
+      expect(exitCode).toBe(process.platform === 'win32' ? 130 : 0);
     } finally {
       rmSync(home, { recursive: true, force: true });
     }

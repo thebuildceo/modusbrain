@@ -31,6 +31,7 @@ import { join } from 'path';
 let engine: PGLiteEngine;
 let brainDir: string;
 let gbrainHome: string;
+const configDir = '.modusbrain';
 
 beforeAll(async () => {
   // GBRAIN_HOME isolation so the file lock at ~/.gbrain/cycle.lock doesn't
@@ -38,6 +39,7 @@ beforeAll(async () => {
   // config table so we don't use it here.
   gbrainHome = mkdtempSync(join(tmpdir(), 'gbrain-pglite-lock-'));
   process.env.GBRAIN_HOME = gbrainHome;
+  process.env.MODUSBRAIN_HOME = gbrainHome;
   engine = new PGLiteEngine();
   await engine.connect({ database_url: '' });
   await engine.initSchema();
@@ -46,6 +48,7 @@ beforeAll(async () => {
 afterAll(async () => {
   await engine.disconnect();
   delete process.env.GBRAIN_HOME;
+  delete process.env.MODUSBRAIN_HOME;
 });
 
 beforeEach(async () => {
@@ -53,7 +56,7 @@ beforeEach(async () => {
   await engine.executeRaw(`DELETE FROM sources WHERE id <> 'default'`).catch(() => {});
   // Clean up any leftover file lock from prior test runs (planted-PID
   // tests leave state that the next test must not see).
-  const lockPath = join(gbrainHome, '.gbrain', 'cycle.lock');
+  const lockPath = join(gbrainHome, configDir, 'cycle.lock');
   if (existsSync(lockPath)) {
     try { unlinkSync(lockPath); } catch { /* best-effort */ }
   }
@@ -83,13 +86,13 @@ describe('PGLite cycle: file lock + per-source DB lock ordering', () => {
       yieldBetweenPhases: async () => {
         // First yield after first phase: cycle is mid-flight.
         if (!lockFileExisted) {
-          lockFileExisted = existsSync(join(gbrainHome, '.gbrain', 'cycle.lock'));
+          lockFileExisted = existsSync(join(gbrainHome, configDir, 'cycle.lock'));
         }
       },
     });
     expect(lockFileExisted).toBe(true);
     // Lock file released on exit
-    expect(existsSync(join(gbrainHome, '.gbrain', 'cycle.lock'))).toBe(false);
+    expect(existsSync(join(gbrainHome, configDir, 'cycle.lock'))).toBe(false);
   });
 
   test('two PGLite cycles for DIFFERENT sources serialize (P0-D regression)', async () => {
@@ -98,9 +101,9 @@ describe('PGLite cycle: file lock + per-source DB lock ordering', () => {
     // Plant a "live" file lock with our own PID — simulates an in-flight
     // cycle on a different source. The second cycle attempt MUST be
     // blocked by the file lock even though it'd have a distinct DB lock ID.
-    mkdirSync(gbrainHome, { recursive: true });
+    mkdirSync(join(gbrainHome, configDir), { recursive: true });
     writeFileSync(
-      join(gbrainHome, '.gbrain', 'cycle.lock'),
+      join(gbrainHome, configDir, 'cycle.lock'),
       `${process.pid}\n${new Date().toISOString()}\n`,
     );
     // (Our own PID is live; the file-lock check sees `kill(pid, 0)` succeed.
