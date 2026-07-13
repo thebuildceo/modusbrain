@@ -80,7 +80,18 @@ INTRA_CONC="${MAX_CONCURRENCY_OVERRIDE:-${GBRAIN_TEST_MAX_CONCURRENCY:-4}}"
 # GBRAIN_TEST_SHARD_TIMEOUT=N.
 DEFAULT_SHARD_TIMEOUT=1500
 case "$(uname -s 2>/dev/null || echo unknown)" in
-  MINGW*|MSYS*|CYGWIN*) DEFAULT_SHARD_TIMEOUT=3600 ;;
+  MINGW*|MSYS*|CYGWIN*)
+    DEFAULT_SHARD_TIMEOUT=3600
+    # Git Bash on Windows cannot reliably fork multiple concurrent bash
+    # children (cygheap copy failures). Default to 1 shard unless overridden.
+    if [ -z "${SHARDS_OVERRIDE:-}" ] && [ -z "${SHARDS:-}" ]; then
+      N=1
+    fi
+    # Lower intra-shard concurrency to reduce memory pressure on Windows.
+    if [ -z "${MAX_CONCURRENCY_OVERRIDE:-}" ] && [ -z "${GBRAIN_TEST_MAX_CONCURRENCY:-}" ]; then
+      INTRA_CONC=2
+    fi
+    ;;
 esac
 SHARD_TIMEOUT="${GBRAIN_TEST_SHARD_TIMEOUT:-$DEFAULT_SHARD_TIMEOUT}"
 

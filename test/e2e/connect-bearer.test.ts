@@ -62,7 +62,7 @@ describe('connect bearer probe E2E (PGLite + real serve --http)', () => {
     oauthClientSecret = (regOut.match(/Client Secret:\s+(\S+)/) ?? ['', ''])[1];
     if (!oauthClientId || !oauthClientSecret) throw new Error(`register-client did not yield creds:\n${regOut}`);
 
-    server = spawn('bun', [
+    server = spawn(process.execPath, [
       'run', 'src/cli.ts', 'serve', '--http',
       '--bind', '127.0.0.1', '--port', String(PORT),
       '--public-url', BASE,

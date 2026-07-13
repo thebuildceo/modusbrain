@@ -64,7 +64,7 @@ describeE2E('serve-http OAuth 2.1 E2E (v0.26.1 + v0.26.2 + v0.26.3)', () => {
 
     // Start the HTTP server. v0.26.2 adds --enable-dcr so the /register
     // endpoint is reachable for the DCR response-shape test.
-    serverProcess = spawn('bun', [
+    serverProcess = spawn(process.execPath, [
       'run', 'src/cli.ts', 'serve', '--http',
       '--port', String(PORT),
       '--public-url', `http://localhost:${PORT}`,

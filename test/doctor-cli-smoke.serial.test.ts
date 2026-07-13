@@ -19,25 +19,18 @@ import { fileURLToPath } from 'url';
  * Per-spawn cold-start on CI is ~10-20s. Single test, single brain.
  */
 import { describe, test, expect } from 'bun:test';
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync, chmodSync } from 'fs';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
+import {
+  isolatedBrainEnv,
+  isolatedConfigDir,
+  makeCliShim,
+  withShimPath,
+} from './helpers/brain-isolation.ts';
 
 const REPO = fileURLToPath(new URL('..', import.meta.url)).replace(/[\\/]$/, '');
 const SKIP = process.env.GBRAIN_SKIP_SUBPROCESS_TESTS === '1';
-
-function makeGbrainShim(): { binDir: string; cleanup: () => void } {
-  const binDir = mkdtempSync(join(tmpdir(), 'gbrain-shim-doctor-'));
-  const shimPath = join(binDir, 'gbrain');
-  writeFileSync(shimPath, `#!/bin/sh\nexec bun run ${REPO}/src/cli.ts "$@"\n`, { mode: 0o755 });
-  chmodSync(shimPath, 0o755);
-  return {
-    binDir,
-    cleanup: () => {
-      try { rmSync(binDir, { recursive: true, force: true }); } catch { /* best effort */ }
-    },
-  };
-}
 
 async function runCli(
   args: string[],
@@ -68,22 +61,21 @@ async function runCli(
 describe('gbrain doctor --json subprocess smoke (D10/CMT-2)', () => {
   test.skipIf(SKIP)('exits 0 on freshly-initialized PGLite brain; JSON envelope is well-formed', async () => {
     const home = mkdtempSync(join(tmpdir(), 'gbrain-doctor-smoke-'));
-    const shim = makeGbrainShim();
+    const shim = makeCliShim(REPO, 'gbrain-shim-doctor-');
     try {
-      mkdirSync(join(home, '.gbrain'), { recursive: true });
+      const cfgDir = isolatedConfigDir(home);
+      mkdirSync(cfgDir, { recursive: true });
       writeFileSync(
-        join(home, '.gbrain', 'config.json'),
+        join(cfgDir, 'config.json'),
         JSON.stringify({
           engine: 'pglite',
-          database_path: join(home, '.gbrain', 'brain.pglite'),
+          database_path: join(cfgDir, 'brain.pglite'),
           embedding_dimensions: 1536,
         }) + '\n',
       );
-      const env = {
-        HOME: home,
-        GBRAIN_HOME: home,
-        PATH: `${shim.binDir}:${process.env.PATH ?? ''}`,
-      };
+      const env = isolatedBrainEnv(home, {
+        PATH: withShimPath(shim.binDir),
+      });
 
       // Step 1: init + apply migrations so the brain is at head before doctor runs.
       // Without this, the brain would be detected as mid-migration and doctor would

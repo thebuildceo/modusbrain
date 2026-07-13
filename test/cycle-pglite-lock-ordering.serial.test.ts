@@ -150,7 +150,7 @@ describe('PGLite cycle: file lock + per-source DB lock ordering', () => {
     expect(r.status).toBe('skipped');
     expect(r.reason).toBe('cycle_already_running');
     // File lock must NOT be stranded after the skip
-    expect(existsSync(join(gbrainHome, '.gbrain', 'cycle.lock'))).toBe(false);
+    expect(existsSync(join(gbrainHome, configDir, 'cycle.lock'))).toBe(false);
   });
 
   test('cycle without engine (file-lock-only path) still works', async () => {
@@ -161,7 +161,7 @@ describe('PGLite cycle: file lock + per-source DB lock ordering', () => {
     });
     expect(['ok', 'clean']).toContain(r.status);
     // Lock file released
-    expect(existsSync(join(gbrainHome, '.gbrain', 'cycle.lock'))).toBe(false);
+    expect(existsSync(join(gbrainHome, configDir, 'cycle.lock'))).toBe(false);
   });
 
   test('DB lock row uses per-source ID even though file lock is global', async () => {
@@ -191,7 +191,7 @@ describe('PGLite cycle: file lock + per-source DB lock ordering', () => {
     expect(['ok', 'clean']).toContain(r1.status);
     expect(['ok', 'clean']).toContain(r2.status);
     // Both locks released after second cycle too
-    expect(existsSync(join(gbrainHome, '.gbrain', 'cycle.lock'))).toBe(false);
+    expect(existsSync(join(gbrainHome, configDir, 'cycle.lock'))).toBe(false);
     const dbRows = await engine.executeRaw<{ id: string }>(
       `SELECT id FROM gbrain_cycle_locks WHERE id = 'gbrain-cycle:zeta'`,
     );

@@ -31,7 +31,7 @@ const CLI = `bun run ${REPO_ROOT}/src/cli.ts`;
 async function runCli(args: string[], opts: { env?: NodeJS.ProcessEnv; gbrainHome: string; cwd?: string; stdinIsTTY?: boolean } = { gbrainHome: '' }): Promise<{ stdout: string; stderr: string; exitCode: number }> {
   const { spawn } = await import('child_process');
   return new Promise((resolve) => {
-    const child = spawn('bun', ['run', `${REPO_ROOT}/src/cli.ts`, ...args], {
+    const child = spawn(process.execPath, ['run', `${REPO_ROOT}/src/cli.ts`, ...args], {
       env: {
         // Start from a minimal env to avoid the ambient host env (which
         // might have OPENAI_API_KEY already set, contaminating our tests).

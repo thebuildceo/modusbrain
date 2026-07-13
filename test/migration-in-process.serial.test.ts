@@ -7,6 +7,10 @@ import { tmpdir } from 'os';
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { withEnv } from './helpers/with-env.ts';
+import {
+  legacyBrainEnv,
+  legacyConfigDir,
+} from './helpers/brain-isolation.ts';
 import { PGLiteEngine } from '../src/core/pglite-engine.ts';
 import {
   runMigrateOnlyCore,
@@ -24,14 +28,15 @@ describe('#1605 runMigrateOnlyCore (in-process schema)', () => {
   test('brings a fresh PGLite brain to head without spawning', async () => {
     const home = mkdtempSync(join(tmpdir(), 'mip-'));
     const dataDir = join(home, 'data');
-    mkdirSync(join(home, '.gbrain'), { recursive: true });
+    const cfgDir = legacyConfigDir(home);
+    mkdirSync(cfgDir, { recursive: true });
     writeFileSync(
-      join(home, '.gbrain', 'config.json'),
+      join(cfgDir, 'config.json'),
       JSON.stringify({ engine: 'pglite', database_path: dataDir }),
     );
 
     const result = await withEnv(
-      { GBRAIN_HOME: home, DATABASE_URL: undefined, GBRAIN_DATABASE_URL: undefined },
+      legacyBrainEnv(home),
       () => runMigrateOnlyCore(),
     );
     expect(result.engine).toBe('pglite');

@@ -41,6 +41,7 @@
     "docs:nav": "bun scripts/generate-mintlify-nav.mjs",
     "build:pglite-snapshot": "bun run scripts/build-pglite-snapshot.ts",
     "test": "bash scripts/run-unit-parallel.sh",
+    "test:win": "bash scripts/run-unit-parallel.sh --shards 1 --max-concurrency 2",
     "eval:autocut": "bun test test/search/autocut-eval.test.ts",
     "test:full": "bun run verify && bash scripts/run-unit-parallel.sh && bun run test:slow && ([ -n \"$DATABASE_URL\" ] && bash scripts/run-e2e.sh || echo '[test:full] skipped E2E (no DATABASE_URL); run docker-compose -f docker-compose.ci.yml up + bun run test:e2e to include' 1>&2)",
     "verify": "bash scripts/run-verify-parallel.sh",
@@ -87,7 +88,7 @@
     "check:fixture-privacy": "bash scripts/check-fixture-privacy.sh",
     "check:conversation-parser": "bun src/cli.ts eval conversation-parser test/fixtures/conversation-formats/all.jsonl --no-llm",
     "check:source-scope-onboard": "bash scripts/check-source-scope-onboard.sh",
-    "postinstall": "command -v gbrain >/dev/null 2>&1 && gbrain apply-migrations --yes --non-interactive || echo '[gbrain] postinstall skipped. If installed via bun install -g github:...: run `gbrain doctor` and `gbrain apply-migrations --yes` manually. See https://github.com/garrytan/gbrain/issues/218' 1>&2",
+    "postinstall": "command -v modusbrain >/dev/null 2>&1 && modusbrain apply-migrations --yes --non-interactive || command -v gbrain >/dev/null 2>&1 && gbrain apply-migrations --yes --non-interactive || echo '[modusbrain] postinstall skipped. If installed via bun install -g: run `modusbrain doctor` and `modusbrain apply-migrations --yes` manually.' 1>&2",
     "prepublish:clawhub": "bun run build:all",
     "publish:clawhub": "clawhub package publish . --family bundle-plugin"
   },
