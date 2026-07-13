@@ -817,6 +817,7 @@ export const KNOWN_CONFIG_KEYS: readonly string[] = [
   'database_path',
   'openai_api_key',
   'anthropic_api_key',
+  'zeroentropy_api_key',
   'embedding_model',
   'embedding_dimensions',
   'embedding_disabled',
