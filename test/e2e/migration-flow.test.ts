@@ -23,8 +23,9 @@ import {
   mkdirSync,
   statSync,
 } from 'fs';
-import { join } from 'path';
 import { tmpdir } from 'os';
+import { join, resolve } from 'path';
+import { cliShimScript } from '../helpers/brain-isolation.ts';
 
 import { v0_11_0 } from '../../src/commands/migrations/v0_11_0.ts';
 import { loadPreferences, loadCompletedMigrations } from '../../src/core/preferences.ts';
@@ -51,12 +52,8 @@ if (!SKIP) {
   origPath = process.env.PATH;
   fakeBinDir = mkdtempSync(join(tmpdir(), 'gbrain-e2e-bin-'));
   const shim = join(fakeBinDir, 'gbrain');
-  writeFileSync(
-    shim,
-    `#!/usr/bin/env bash\nexec bun run "${CLI_PATH}" "$@"\n`,
-    { mode: 0o755 },
-  );
-  process.env.PATH = `${fakeBinDir}:${origPath ?? ''}`;
+  writeFileSync(shim, cliShimScript(join(import.meta.dir, '..', '..')), { mode: 0o755 });
+  process.env.PATH = `${fakeBinDir}${process.platform === 'win32' ? ';' : ':'}${origPath ?? ''}`;
   console.log('[migration-flow.e2e] shim installed at', shim, 'PATH prepended');
 }
 

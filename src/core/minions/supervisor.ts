@@ -127,6 +127,12 @@ export interface SupervisorOpts {
    * @internal
    */
   _backoffFloorMs?: number;
+  /**
+   * Test-only: argv prefix prepended before `jobs work …` args. Used by
+   * supervisor-runner on Windows where fake worker scripts run via `sh script.sh`.
+   * @internal
+   */
+  _cliArgsPrefix?: string[];
 }
 
 export const DEFAULT_PID_FILE: string = (() => {
@@ -823,7 +829,7 @@ export class MinionSupervisor {
    * so JSONL audit consumers see byte-compatible output.
    */
   private async runSuperviseLoop(): Promise<void> {
-    const workerArgs = buildWorkerArgs(this.opts);
+    const workerArgs = [...(this.opts._cliArgsPrefix ?? []), ...buildWorkerArgs(this.opts)];
 
     // Build child env. Explicit handling for GBRAIN_ALLOW_SHELL_JOBS:
     // inherit only when caller opts in, otherwise strip from the clone.

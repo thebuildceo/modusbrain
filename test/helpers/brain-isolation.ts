@@ -46,25 +46,30 @@ export function withShimPath(binDir: string, basePath = process.env.PATH ?? ''):
   return `${binDir}${pathSep}${basePath}`;
 }
 
+/** Shell script body for a `gbrain`/`modusbrain` shim (Git Bash / Unix). */
+export function cliShimScript(repoRoot: string): string {
+  const repo = repoRoot.replace(/\\/g, '/');
+  const exec = process.execPath.replace(/\\/g, '/');
+  return `#!/bin/sh\nexec "${exec}" run "${repo}/src/cli.ts" "$@"\n`;
+}
+
+/** Windows `.cmd` shim body. */
+export function cliShimCmd(repoRoot: string): string {
+  const repoWin = repoRoot.replace(/\//g, '\\');
+  return `@echo off\r\n"${process.execPath}" run "${repoWin}\\src\\cli.ts" %*\r\n`;
+}
+
 /**
- * Creates `gbrain` + `modusbrain` shims that invoke `bun run <repo>/src/cli.ts`.
  * Migration orchestrators shell out to `gbrain …`; Windows needs `.cmd` stubs too.
  */
 export function makeCliShim(repoRoot: string, prefix = 'gbrain-shim-'): { binDir: string; cleanup: () => void } {
   const binDir = mkdtempSync(join(tmpdir(), prefix));
-  const repo = repoRoot.replace(/\\/g, '/');
-  const repoWin = repoRoot.replace(/\//g, '\\');
-  const exec = process.execPath.replace(/\\/g, '/');
-  const execWin = process.execPath.replace(/\//g, '\\');
 
   for (const name of ['gbrain', 'modusbrain'] as const) {
     const shimPath = join(binDir, name);
-    writeFileSync(shimPath, `#!/bin/sh\nexec "${exec}" run "${repo}/src/cli.ts" "$@"\n`, { mode: 0o755 });
+    writeFileSync(shimPath, cliShimScript(repoRoot), { mode: 0o755 });
     chmodSync(shimPath, 0o755);
-    writeFileSync(
-      join(binDir, `${name}.cmd`),
-      `@echo off\r\n"${execWin}" run "${repoWin}\\src\\cli.ts" %*\r\n`,
-    );
+    writeFileSync(join(binDir, `${name}.cmd`), cliShimCmd(repoRoot));
   }
 
   return {

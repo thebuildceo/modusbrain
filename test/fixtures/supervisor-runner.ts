@@ -43,6 +43,9 @@ if (!pidFile) {
 }
 
 const cliPath = process.env.SUP_CLI_PATH ?? '/bin/sh';
+const useShWrapper = process.env.SUP_SH_WRAPPER === '1';
+const resolvedCliPath = useShWrapper ? 'sh' : cliPath;
+const cliArgsPrefix = useShWrapper ? [cliPath] : undefined;
 const maxCrashes = parseInt(process.env.SUP_MAX_CRASHES ?? '3', 10);
 const backoffFloor = parseInt(process.env.SUP_BACKOFF_FLOOR_MS ?? '1', 10);
 const healthInterval = parseInt(process.env.SUP_HEALTH_INTERVAL_MS ?? '999999', 10);
@@ -66,10 +69,11 @@ const supervisor = new MinionSupervisor(mockEngine as BrainEngine, {
   pidFile,
   maxCrashes,
   healthInterval,
-  cliPath,
+  cliPath: resolvedCliPath,
   allowShellJobs,
   json: true,
   _backoffFloorMs: backoffFloor,
+  _cliArgsPrefix: cliArgsPrefix,
   ...(maxRssExplicit !== undefined ? { maxRssMb: maxRssExplicit } : {}),
   onEvent: (emission) => writeSupervisorEvent(emission, supervisorPid),
 });

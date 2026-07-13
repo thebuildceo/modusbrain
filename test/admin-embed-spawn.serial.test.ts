@@ -68,16 +68,7 @@ async function spawnServer(): Promise<ServeProc> {
   // not exist. The pre-fix code would 404 here; the fix serves from the
   // bundled assets via Bun's `with { type: 'file' }` import resolution.
   const proc = Bun.spawn(
-    [
-      process.execPath,
-      `${REPO}/src/cli.ts`,
-      'serve',
-      '--http',
-      '--port',
-      String(port),
-      '--bind',
-      '127.0.0.1',
-    ],
+    [process.execPath, 'run', `${REPO}/src/cli.ts`, 'serve', '--http', '--port', String(port), '--bind', '127.0.0.1'],
     {
       cwd: home,
       env: {

@@ -24,7 +24,7 @@ function runHarness(env: Record<string, string>, readerDelayMs: number): Promise
 }> {
   return new Promise((resolveOut, reject) => {
     const t0 = Date.now();
-    const child = spawn('bun', ['run', HARNESS], {
+    const child = spawn(process.execPath, ['run', HARNESS], {
       env: { ...process.env, ...env },
       stdio: ['ignore', 'pipe', 'inherit'],
     });

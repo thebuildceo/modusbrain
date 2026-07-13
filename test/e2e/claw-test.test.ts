@@ -21,6 +21,7 @@ import { execFileSync, spawnSync } from 'child_process';
 import { mkdirSync, existsSync, mkdtempSync, rmSync, readFileSync, readdirSync, writeFileSync, chmodSync } from 'fs';
 import { tmpdir } from 'os';
 import { join, resolve } from 'path';
+import { cliShimScript } from '../helpers/brain-isolation.ts';
 
 const REPO_ROOT = resolve(import.meta.dir, '..', '..');
 const BIN_CACHE = join(REPO_ROOT, 'test', '.cache');
@@ -32,7 +33,7 @@ beforeAll(() => {
   // Shim that delegates to `bun run src/cli.ts` so PGLite assets resolve from
   // the source tree (bun --compile doesn't bundle them). Marked executable so
   // child_process.spawn can run it directly.
-  const shim = `#!/bin/sh\nexec bun run "${join(REPO_ROOT, 'src', 'cli.ts')}" "$@"\n`;
+  const shim = cliShimScript(REPO_ROOT);
   writeFileSync(BIN_PATH, shim, 'utf-8');
   chmodSync(BIN_PATH, 0o755);
 }, 30_000);

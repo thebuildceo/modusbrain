@@ -43,6 +43,7 @@ import {
 } from 'fs';
 import { tmpdir } from 'os';
 import { join, resolve } from 'path';
+import { cliShimScript } from '../helpers/brain-isolation.ts';
 
 const REPO_ROOT = resolve(import.meta.dir, '..', '..');
 const BIN_CACHE = join(REPO_ROOT, 'test', '.cache');
@@ -52,7 +53,7 @@ beforeAll(() => {
   // Same shim pattern as claw-test e2e: bun --compile can't bundle
   // PGLite's pglite.data, so we delegate to `bun run src/cli.ts`.
   mkdirSync(BIN_CACHE, { recursive: true });
-  const shim = `#!/bin/sh\nexec bun run "${join(REPO_ROOT, 'src', 'cli.ts')}" "$@"\n`;
+  const shim = cliShimScript(REPO_ROOT);
   writeFileSync(SHIM_PATH, shim, 'utf-8');
   chmodSync(SHIM_PATH, 0o755);
 }, 10_000);
