@@ -10,9 +10,10 @@ import { spawnSync } from 'node:child_process';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { bunSpawnSync } from './helpers/bun-exec.ts';
 
 function run(args: string[], home: string) {
-  const r = spawnSync('bun', ['run', 'src/cli.ts', ...args], {
+  const r = bunSpawnSync(['run', 'src/cli.ts', ...args], {
     cwd: process.cwd(),
     encoding: 'utf8',
     env: { ...process.env, GBRAIN_HOME: home, DATABASE_URL: '', GBRAIN_DATABASE_URL: '' },

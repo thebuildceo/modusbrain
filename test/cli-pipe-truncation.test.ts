@@ -11,6 +11,7 @@
 import { describe, test, expect } from 'bun:test';
 import { spawnSync } from 'child_process';
 import { join, resolve } from 'path';
+import { bunSpawnSync } from './helpers/bun-exec.ts';
 
 const REPO = resolve(import.meta.dir, '..');
 const CLI = join(REPO, 'src', 'cli.ts');
@@ -19,7 +20,7 @@ describe('cli pipe completeness — deliberate exit never truncates piped stdout
   test('real CLI: --tools-json over a pipe is complete, parseable, byte-stable, and prompt', () => {
     const run = () => {
       const t0 = Date.now();
-      const res = spawnSync('bun', [CLI, '--tools-json'], {
+      const res = bunSpawnSync([CLI, '--tools-json'], {
         stdio: ['ignore', 'pipe', 'pipe'],
         encoding: 'utf-8',
         timeout: 60_000,

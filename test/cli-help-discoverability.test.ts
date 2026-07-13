@@ -17,9 +17,10 @@
 
 import { describe, test, expect } from 'bun:test';
 import { spawnSync } from 'node:child_process';
+import { bunSpawnSync } from './helpers/bun-exec.ts';
 
 function runCli(args: string[]): { stdout: string; stderr: string; status: number } {
-  const result = spawnSync('bun', ['run', 'src/cli.ts', ...args], {
+  const result = bunSpawnSync(['run', 'src/cli.ts', ...args], {
     cwd: process.cwd(),
     encoding: 'utf8',
     env: { ...process.env, GBRAIN_HOME: '/tmp/gbrain-test-help-nonexistent' },

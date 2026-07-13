@@ -1,13 +1,15 @@
 import { execSync, execFileSync } from 'child_process';
 import { existsSync, readFileSync, writeFileSync, mkdirSync, appendFileSync, realpathSync } from 'fs';
 import { basename, join, dirname, resolve } from 'path';
+import { brandHelp } from '../core/branding.ts';
 import { VERSION } from '../version.ts';
 
 const GBRAIN_GITHUB_REPO = 'garrytan/gbrain';
+const BUN = process.execPath;
 
 export async function runUpgrade(args: string[]) {
   if (args.includes('--help') || args.includes('-h')) {
-    console.log('Usage: gbrain upgrade [--swap-only]\n\nSelf-update the CLI.\n\nDetects install method (bun, binary, clawhub) and runs the appropriate update.\nAfter upgrading, shows what\'s new and offers to set up new features.\n\n--swap-only  Perform ONLY the binary/source swap and skip post-upgrade\n             (migrations run on the next launch). Used by the autopilot\n             silent self-upgrade channel so the daemon can swap + relaunch\n             without a 30-min blocking post-upgrade inside its tick.');
+    console.log(brandHelp('Usage: gbrain upgrade [--swap-only]\n\nSelf-update the CLI.\n\nDetects install method (bun, binary, clawhub) and runs the appropriate update.\nAfter upgrading, shows what\'s new and offers to set up new features.\n\n--swap-only  Perform ONLY the binary/source swap and skip post-upgrade\n             (migrations run on the next launch). Used by the autopilot\n             silent self-upgrade channel so the daemon can swap + relaunch\n             without a 30-min blocking post-upgrade inside its tick.'));
     return;
   }
 
@@ -32,7 +34,7 @@ export async function runUpgrade(args: string[]) {
       console.log(`Upgrading bun-link source clone at ${linkInfo.repoRoot}...`);
       try {
         execFileSync('git', ['-C', linkInfo.repoRoot, 'pull', '--ff-only'], { stdio: 'inherit', timeout: 120_000 });
-        execFileSync('bun', ['install'], { cwd: linkInfo.repoRoot, stdio: 'inherit', timeout: 120_000 });
+        execFileSync(BUN, ['install'], { cwd: linkInfo.repoRoot, stdio: 'inherit', timeout: 120_000 });
         upgraded = true;
       } catch {
         console.error('Auto-upgrade failed. Try manually:');
@@ -45,7 +47,7 @@ export async function runUpgrade(args: string[]) {
       console.log('Upgrading via bun...');
       const bunGlobalRoot = resolveBunGlobalRoot();
       try {
-        execFileSync('bun', ['update', 'gbrain'], { cwd: bunGlobalRoot, stdio: 'inherit', timeout: 120_000 });
+        execFileSync(BUN, ['update', 'gbrain'], { cwd: bunGlobalRoot, stdio: 'inherit', timeout: 120_000 });
         upgraded = true;
       } catch {
         console.error('Upgrade failed. Try running manually:');
@@ -335,7 +337,7 @@ async function applySelfUpgradeSetup(): Promise<void> {
 
 export async function runPostUpgrade(args: string[] = []): Promise<void> {
   if (args.includes('--help') || args.includes('-h')) {
-    console.log('Usage: gbrain post-upgrade');
+    console.log(brandHelp('Usage: gbrain post-upgrade'));
     console.log('Prints feature pitches for new migrations and runs apply-migrations.');
     console.log('Idempotent — safe to re-run any time.');
     return;

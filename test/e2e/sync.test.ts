@@ -411,13 +411,15 @@ describeE2E('E2E: Git-to-DB Sync Pipeline', () => {
  */
 describeE2E('E2E: sync --skip-failed structured summary loop (v0.22.12, issue #500)', () => {
   let repoPath: string;
-  const realFailuresPath = join(homedir(), '.gbrain', 'sync-failures.jsonl');
+  let realFailuresPath: string;
   let savedFailuresContent: string | null = null;
 
   beforeAll(async () => {
     await setupDB();
+    const { gbrainPath, configDir } = await import('../../src/core/config.ts');
+    realFailuresPath = gbrainPath('sync-failures.jsonl');
 
-    // Save+clear the real ~/.gbrain/sync-failures.jsonl so the test starts from
+    // Save+clear the real sync-failures.jsonl so the test starts from
     // a known-empty state. Restored in afterAll. This file is per-machine, NOT
     // per-repo, so we have to be defensive about a developer running this
     // suite on their actual brain machine.
@@ -443,9 +445,10 @@ describeE2E('E2E: sync --skip-failed structured summary loop (v0.22.12, issue #5
     await teardownDB();
     if (repoPath) rmSync(repoPath, { recursive: true, force: true });
 
+    const { configDir } = await import('../../src/core/config.ts');
     // Restore the user's real sync-failures.jsonl, if any.
     if (savedFailuresContent !== null) {
-      mkdirSync(join(homedir(), '.gbrain'), { recursive: true });
+      mkdirSync(configDir(), { recursive: true });
       writeFileSync(realFailuresPath, savedFailuresContent);
     } else if (existsSync(realFailuresPath)) {
       // Test wrote one but there was none before. Clean up.

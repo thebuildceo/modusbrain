@@ -59,7 +59,7 @@ describe('runConversationParser — help', () => {
       cap.restore();
     }
     const text = cap.out.join('');
-    expect(text).toContain('Usage: gbrain conversation-parser');
+    expect(text).toContain('Usage: modusbrain conversation-parser');
     expect(text).toContain('scan');
     expect(text).toContain('list-builtins');
     expect(text).toContain('validate');
@@ -72,7 +72,7 @@ describe('runConversationParser — help', () => {
     } finally {
       cap.restore();
     }
-    expect(cap.out.join('')).toContain('Usage: gbrain conversation-parser');
+    expect(cap.out.join('')).toContain('Usage: modusbrain conversation-parser');
   });
 });
 

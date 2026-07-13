@@ -40,15 +40,13 @@ describe('GBRAIN_HOME write-side isolation', () => {
     }
   });
 
-  test('configDir() falls back to homedir when GBRAIN_HOME unset', async () => {
+  test('configDir() falls back to ModusBrain homedir when overrides unset', async () => {
     delete process.env.GBRAIN_HOME;
+    delete process.env.MODUSBRAIN_HOME;
     try {
       const { configDir } = await import('../src/core/config.ts');
-      // Contract: when GBRAIN_HOME is unset, configDir() === os.homedir()/.gbrain.
-      // Asserting against os.homedir() (rather than a "not /tmp/" sentinel) keeps
-      // this test correct under safety wrappers that redirect HOME=/tmp/... — the
-      // behavior we care about is that the fallback path equals homedir().
-      expect(configDir()).toBe(join(homedir(), '.gbrain'));
+      const { BRAND } = await import('../src/core/branding.ts');
+      expect(configDir()).toBe(join(homedir(), BRAND.configDirName));
     } finally {
       if (ORIG_GBRAIN_HOME !== undefined) process.env.GBRAIN_HOME = ORIG_GBRAIN_HOME;
     }

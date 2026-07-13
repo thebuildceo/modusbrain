@@ -3,6 +3,7 @@ import { readdirSync, lstatSync, existsSync, copyFileSync, mkdirSync, readFileSy
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { homedir } from 'os';
+import { brandHelp } from '../core/branding.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -1466,7 +1467,7 @@ export function reportModStatus(): void {
 }
 
 function printInitHelp() {
-  console.log(`
+  console.log(brandHelp(`
 gbrain init — initialize a brain (PGLite or Supabase Postgres)
 
 USAGE
@@ -1510,5 +1511,5 @@ NOTES
     interactive setup. With <1000 files (or with --pglite explicitly), defaults
     to PGLite at ~/.gbrain/brain.pglite.
   - Existing config is preserved unless --force is passed.
-`.trim());
+`.trim()));
 }

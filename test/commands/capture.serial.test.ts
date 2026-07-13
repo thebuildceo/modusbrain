@@ -249,6 +249,6 @@ describe('capture — help', () => {
     } finally {
       console.log = origLog;
     }
-    expect(logCaptured.join('\n')).toContain('Usage: gbrain capture');
+    expect(logCaptured.join('\n')).toContain('Usage: modusbrain capture');
   });
 });

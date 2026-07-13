@@ -18,9 +18,10 @@ import { readFileSync, existsSync } from 'node:fs';
 import { BUILTIN_PATTERNS } from '../core/conversation-parser/builtins.ts';
 import { parseConversation } from '../core/conversation-parser/parse.ts';
 import type { BrainEngine } from '../core/engine.ts';
+import { brandHelp } from '../core/branding.ts';
 
 function printHelp(): void {
-  process.stdout.write(`Usage: gbrain conversation-parser <subcommand> [options]
+  process.stdout.write(brandHelp(`Usage: gbrain conversation-parser <subcommand> [options]
 
 Subcommands:
   scan <slug>          Dry-run the parser on a page; report pattern hit.
@@ -37,7 +38,7 @@ Examples:
 Global flags:
   --json               Emit JSON envelope on stdout (where applicable).
   --help, -h           Print this help.
-`);
+`));
 }
 
 export async function runConversationParser(

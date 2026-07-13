@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import { withEnv } from './helpers/with-env.ts';
-import { BRAND, brandEnv, brandHelp, cliCmd } from '../src/core/branding.ts';
+import { BRAND, brandEnv, brandHelp, cliCmd, usageLine } from '../src/core/branding.ts';
 
 describe('branding', () => {
   test('product constants', () => {
@@ -32,5 +32,9 @@ describe('branding', () => {
   test('cliCmd formats commands', () => {
     expect(cliCmd()).toBe('modusbrain');
     expect(cliCmd('init')).toBe('modusbrain init');
+  });
+
+  test('usageLine formats branded usage', () => {
+    expect(usageLine('init')).toBe('Usage: modusbrain init');
   });
 });

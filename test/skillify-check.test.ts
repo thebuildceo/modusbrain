@@ -12,13 +12,14 @@
 import { describe, test, expect } from 'bun:test';
 import { execFileSync } from 'child_process';
 import { join } from 'path';
+import { bunExecFileSync } from './helpers/bun-exec.ts';
 
 const REPO = join(__dirname, '..');
 const SCRIPT = join(REPO, 'scripts', 'skillify-check.ts');
 
 function run(args: string[]): { exitCode: number; stdout: string; stderr: string } {
   try {
-    const stdout = execFileSync('bun', ['run', SCRIPT, ...args], {
+    const stdout = bunExecFileSync(['run', SCRIPT, ...args], {
       encoding: 'utf-8',
       stdio: ['ignore', 'pipe', 'pipe'],
       cwd: REPO,

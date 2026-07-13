@@ -19,6 +19,7 @@ import { spawnSync } from 'child_process';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join, resolve } from 'path';
+import { bunSpawnSync } from './helpers/bun-exec.ts';
 
 const CLI = resolve(import.meta.dir, '..', 'src', 'cli.ts');
 const REPO_ROOT = resolve(import.meta.dir, '..');
@@ -72,7 +73,7 @@ describe('gbrain routing-eval CLI — --llm placeholder behavior', () => {
 
   it('--llm emits a stderr notice and exits 0 on clean fixtures', () => {
     const skillsDir = makeFixture(created);
-    const proc = spawnSync('bun', [CLI, 'routing-eval', '--skills-dir', skillsDir, '--llm'], {
+    const proc = bunSpawnSync( [CLI, 'routing-eval', '--skills-dir', skillsDir, '--llm'], {
       cwd: REPO_ROOT,
       encoding: 'utf-8',
     });
@@ -84,7 +85,7 @@ describe('gbrain routing-eval CLI — --llm placeholder behavior', () => {
 
   it('--llm --json emits warning on stderr AND valid structural JSON on stdout (no bleed)', () => {
     const skillsDir = makeFixture(created);
-    const proc = spawnSync('bun', [CLI, 'routing-eval', '--skills-dir', skillsDir, '--llm', '--json'], {
+    const proc = bunSpawnSync( [CLI, 'routing-eval', '--skills-dir', skillsDir, '--llm', '--json'], {
       cwd: REPO_ROOT,
       encoding: 'utf-8',
     });
@@ -100,7 +101,7 @@ describe('gbrain routing-eval CLI — --llm placeholder behavior', () => {
 
   it('WITHOUT --llm, no placeholder warning on stderr (regression guard)', () => {
     const skillsDir = makeFixture(created);
-    const proc = spawnSync('bun', [CLI, 'routing-eval', '--skills-dir', skillsDir], {
+    const proc = bunSpawnSync( [CLI, 'routing-eval', '--skills-dir', skillsDir], {
       cwd: REPO_ROOT,
       encoding: 'utf-8',
     });
@@ -128,7 +129,7 @@ describe('gbrain routing-eval CLI — --llm placeholder behavior', () => {
       join(skillsDir, 'manifest.json'),
       JSON.stringify({ skills: [{ name: 'bar-skill', path: 'bar-skill/SKILL.md' }] }, null, 2),
     );
-    const proc = spawnSync('bun', [CLI, 'routing-eval', '--skills-dir', skillsDir, '--llm'], {
+    const proc = bunSpawnSync( [CLI, 'routing-eval', '--skills-dir', skillsDir, '--llm'], {
       cwd: REPO_ROOT,
       encoding: 'utf-8',
     });

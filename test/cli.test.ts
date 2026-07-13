@@ -94,7 +94,7 @@ describe('CLI dispatch integration', () => {
     });
     const stdout = await new Response(proc.stdout).text();
     await proc.exited;
-    expect(stdout.trim()).toMatch(/^gbrain \d+\.\d+\.\d+/);
+    expect(stdout.trim()).toMatch(/^modusbrain \d+\.\d+\.\d+/);
   });
 
   test('unknown command prints error and exits 1', async () => {
@@ -117,7 +117,7 @@ describe('CLI dispatch integration', () => {
     });
     const stdout = await new Response(proc.stdout).text();
     const exitCode = await proc.exited;
-    expect(stdout).toContain('Usage: gbrain get');
+    expect(stdout).toContain('Usage: modusbrain get');
     expect(exitCode).toBe(0);
   });
 
@@ -129,7 +129,7 @@ describe('CLI dispatch integration', () => {
     });
     const stdout = await new Response(proc.stdout).text();
     const exitCode = await proc.exited;
-    expect(stdout).toContain('Usage: gbrain upgrade');
+    expect(stdout).toContain('Usage: modusbrain upgrade');
     expect(exitCode).toBe(0);
   });
 
@@ -150,7 +150,7 @@ describe('CLI dispatch integration', () => {
       const stdout = await new Response(proc.stdout).text();
       const stderr = await new Response(proc.stderr).text();
       const exitCode = await proc.exited;
-      expect(stdout).toContain('Usage: gbrain sync');
+      expect(stdout).toContain('Usage: modusbrain sync');
       // D.4 regression: the user-visible flag that the bug report wanted
       // surfaced. Pre-v0.37 this string was unreachable.
       expect(stdout).toContain('--no-embed');
@@ -176,7 +176,7 @@ describe('CLI dispatch integration', () => {
       const stdout = await new Response(proc.stdout).text();
       const stderr = await new Response(proc.stderr).text();
       const exitCode = await proc.exited;
-      expect(stdout).toContain('Usage: gbrain doctor');
+      expect(stdout).toContain('Usage: modusbrain doctor');
       expect(stdout).not.toContain('resolver_health');
       expect(stderr).not.toContain('No brain configured');
       expect(exitCode).toBe(0);
@@ -196,7 +196,7 @@ describe('CLI dispatch integration', () => {
       });
       const stdout = await new Response(proc.stdout).text();
       const exitCode = await proc.exited;
-      expect(stdout).toContain('Usage: gbrain init');
+      expect(stdout).toContain('modusbrain init');
       expect(existsSync(join(home, '.gbrain', 'config.json'))).toBe(false);
       expect(exitCode).toBe(0);
     } finally {
@@ -213,7 +213,7 @@ describe('CLI dispatch integration', () => {
     const stdout = await new Response(proc.stdout).text();
     const exitCode = await proc.exited;
     expect(stdout).toContain('USAGE');
-    expect(stdout).toContain('gbrain <command>');
+    expect(stdout).toContain('modusbrain <command>');
     expect(exitCode).toBe(0);
   });
 

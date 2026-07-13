@@ -300,7 +300,7 @@ describe('CLI aliases + help (OV10 + OV11)', () => {
       console.log = orig;
     }
     const out = lines.join('\n');
-    expect(out).toContain('Usage: gbrain link-add');
-    expect(out).not.toContain('Usage: gbrain link ');
+    expect(out).toContain('Usage: modusbrain link-add');
+    expect(out).not.toContain('Usage: modusbrain link ');
   });
 });

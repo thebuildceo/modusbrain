@@ -45,6 +45,7 @@ import type { SyncManifest } from '../core/sync.ts';
 import { createProgress } from '../core/progress.ts';
 import { getCliOptions, cliOptsToProgressOptions } from '../core/cli-options.ts';
 import { loadConfig } from '../core/config.ts';
+import { brandHelp } from '../core/branding.ts';
 import {
   autoConcurrency,
   shouldRunParallel,
@@ -3291,7 +3292,7 @@ export async function runSync(engine: BrainEngine, args: string[]) {
   // passed. Pre-fix this was unreachable because the dispatcher's generic
   // CLI-only short-circuit fired first; sync is now in CLI_ONLY_SELF_HELP.
   if (args.includes('--help') || args.includes('-h')) {
-    console.log(`Usage: gbrain sync [options]
+    console.log(brandHelp(`Usage: gbrain sync [options]
 
 Sync the brain repo's text content into the engine, then embed.
 
@@ -3344,7 +3345,7 @@ Options:
 See also:
   gbrain embed --stale    Re-embed all stale chunks (post --no-embed).
   gbrain doctor           Diagnose dim mismatches and other sync issues.
-`);
+`));
     return;
   }
 

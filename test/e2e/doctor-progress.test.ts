@@ -13,6 +13,7 @@
 import { describe, test, expect, beforeAll, afterAll } from 'bun:test';
 import { spawnSync } from 'child_process';
 import { join } from 'path';
+import { bunSpawnSync } from '../helpers/bun-exec.ts';
 import {
   hasDatabase, setupDB, teardownDB, importFixtures,
 } from './helpers.ts';
@@ -34,7 +35,7 @@ describeE2E('gbrain doctor --progress-json (E2E)', () => {
   });
 
   test('stderr has JSONL progress events, stdout stays clean', () => {
-    const res = spawnSync('bun', [CLI, '--progress-json', 'doctor', '--json'], {
+    const res = bunSpawnSync( [CLI, '--progress-json', 'doctor', '--json'], {
       encoding: 'utf-8',
       env: { ...process.env, NO_COLOR: '1' },
       timeout: 30_000,
@@ -84,7 +85,7 @@ describeE2E('gbrain doctor --progress-json (E2E)', () => {
   });
 
   test('default (no --progress-json) writes human-plain progress to stderr only', () => {
-    const res = spawnSync('bun', [CLI, 'doctor'], {
+    const res = bunSpawnSync( [CLI, 'doctor'], {
       encoding: 'utf-8',
       env: { ...process.env, NO_COLOR: '1' },
       timeout: 30_000,
@@ -102,7 +103,7 @@ describeE2E('gbrain doctor --progress-json (E2E)', () => {
   });
 
   test('--quiet suppresses progress entirely', () => {
-    const res = spawnSync('bun', [CLI, '--quiet', 'doctor'], {
+    const res = bunSpawnSync( [CLI, '--quiet', 'doctor'], {
       encoding: 'utf-8',
       env: { ...process.env, NO_COLOR: '1' },
       timeout: 30_000,

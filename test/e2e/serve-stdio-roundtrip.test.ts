@@ -24,6 +24,7 @@ import { execFileSync } from 'child_process';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
+import { BUN, bunExecFileSync } from '../helpers/bun-exec.ts';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 
@@ -57,7 +58,7 @@ describe('serve stdio round-trip E2E (local PGLite → real MCP tool calls)', ()
     delete env.GBRAIN_DATABASE_URL;
 
     // 1. Init a local PGLite brain (the "from nothing" step).
-    execFileSync('bun', ['run', 'src/cli.ts', 'init', '--pglite', '--no-embedding', '--non-interactive'], {
+    bunExecFileSync( ['run', 'src/cli.ts', 'init', '--pglite', '--no-embedding', '--non-interactive'], {
       cwd: process.cwd(), env, stdio: 'ignore',
     });
 
@@ -70,14 +71,14 @@ describe('serve stdio round-trip E2E (local PGLite → real MCP tool calls)', ()
       join(notes, 'marker.md'),
       `---\ntitle: ${MARKER} note\n---\n\n# ${MARKER}\n\nThis page exists to prove ${MARKER} is retrievable over stdio MCP.\n`,
     );
-    execFileSync('bun', ['run', 'src/cli.ts', 'import', notes, '--no-embed'], {
+    bunExecFileSync( ['run', 'src/cli.ts', 'import', notes, '--no-embed'], {
       cwd: process.cwd(), env, stdio: 'ignore',
     });
 
     // 3. Let the MCP SDK spawn `gbrain serve` (stdio) and run the initialize
     //    handshake — exactly what `claude mcp add gbrain -- gbrain serve` does.
     transport = new StdioClientTransport({
-      command: 'bun',
+      command: BUN,
       args: ['run', 'src/cli.ts', 'serve'],
       cwd: process.cwd(),
       env, // includes PATH (to find `bun`) + GBRAIN_HOME

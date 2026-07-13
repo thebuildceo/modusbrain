@@ -20,6 +20,7 @@ import { execFileSync } from 'child_process';
 import { mkdtempSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
+import { bunExecFileSync } from '../helpers/bun-exec.ts';
 
 describe('non-TTY output contract: jobs watch (#1784)', () => {
   let home: string;
@@ -29,7 +30,7 @@ describe('non-TTY output contract: jobs watch (#1784)', () => {
     home = mkdtempSync(join(tmpdir(), 'gbrain-nontty-e2e-'));
     env = { ...process.env, GBRAIN_HOME: home };
     // Fresh local PGLite brain so `jobs watch` has an engine to read.
-    execFileSync('bun', ['run', 'src/cli.ts', 'init', '--pglite', '--no-embedding', '--non-interactive'], {
+    bunExecFileSync( ['run', 'src/cli.ts', 'init', '--pglite', '--no-embedding', '--non-interactive'], {
       cwd: process.cwd(), env, stdio: 'ignore',
     });
   }, 60_000);
@@ -40,7 +41,7 @@ describe('non-TTY output contract: jobs watch (#1784)', () => {
 
   test('non-TTY, no flags → ONE human snapshot, non-empty, not JSON, exit 0', () => {
     // stdin 'ignore' + stdout 'pipe' makes the child non-TTY on both ends.
-    const out = execFileSync('bun', ['run', 'src/cli.ts', 'jobs', 'watch'], {
+    const out = bunExecFileSync( ['run', 'src/cli.ts', 'jobs', 'watch'], {
       cwd: process.cwd(), env, stdio: ['ignore', 'pipe', 'ignore'], encoding: 'utf-8', timeout: 30_000,
     });
     expect(out.length).toBeGreaterThan(0);                 // the bug was (no output)
@@ -50,7 +51,7 @@ describe('non-TTY output contract: jobs watch (#1784)', () => {
   }, 35_000);
 
   test('non-TTY, --json → ONE JSON snapshot, parses, exit 0', () => {
-    const out = execFileSync('bun', ['run', 'src/cli.ts', 'jobs', 'watch', '--json'], {
+    const out = bunExecFileSync( ['run', 'src/cli.ts', 'jobs', 'watch', '--json'], {
       cwd: process.cwd(), env, stdio: ['ignore', 'pipe', 'ignore'], encoding: 'utf-8', timeout: 30_000,
     });
     const firstLine = out.split('\n').find(l => l.trim().length > 0) ?? '';

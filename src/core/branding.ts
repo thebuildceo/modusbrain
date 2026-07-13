@@ -86,3 +86,8 @@ export function brandHelp(text: string): string {
     .replace(/\bGBRAIN_/g, 'MODUSBRAIN_')
     .replace(/\.gbrain-source/g, BRAND.sourceDotfile);
 }
+
+/** Branded `Usage: …` line for CLI help and error messages. */
+export function usageLine(sub: string): string {
+  return brandHelp(`Usage: gbrain ${sub}`);
+}

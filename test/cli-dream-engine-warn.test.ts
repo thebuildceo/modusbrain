@@ -19,13 +19,14 @@ import { spawnSync } from 'node:child_process';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { bunSpawnSync } from './helpers/bun-exec.ts';
 
 function runDream(args: string[], extraEnv: Record<string, string> = {}): {
   stdout: string;
   stderr: string;
   status: number;
 } {
-  const result = spawnSync('bun', ['run', 'src/cli.ts', 'dream', ...args], {
+  const result = bunSpawnSync(['run', 'src/cli.ts', 'dream', ...args], {
     cwd: process.cwd(),
     encoding: 'utf8',
     env: { ...process.env, ...extraEnv },

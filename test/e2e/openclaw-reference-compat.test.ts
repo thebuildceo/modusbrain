@@ -16,6 +16,7 @@ import { existsSync, mkdtempSync, rmSync, writeFileSync, mkdirSync, readFileSync
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { spawnSync } from 'child_process';
+import { bunSpawnSync } from '../helpers/bun-exec.ts';
 
 import { checkResolvable } from '../../src/core/check-resolvable.ts';
 import { autoDetectSkillsDir } from '../../src/core/repo-root.ts';
@@ -89,8 +90,7 @@ describe('OpenClaw reference workspace compat (W1 + W2 + W3)', () => {
   });
 
   it('CLI subprocess: gbrain check-resolvable --json --skills-dir FIXTURE clean', () => {
-    const r = spawnSync(
-      'bun',
+    const r = bunSpawnSync(
       [CLI, 'check-resolvable', '--json', '--skills-dir', SKILLS_DIR],
       { encoding: 'utf-8', cwd: REPO, maxBuffer: 10 * 1024 * 1024 },
     );
@@ -102,7 +102,7 @@ describe('OpenClaw reference workspace compat (W1 + W2 + W3)', () => {
   });
 
   it('CLI subprocess: $OPENCLAW_WORKSPACE auto-detect without --skills-dir', () => {
-    const r = spawnSync('bun', [CLI, 'check-resolvable', '--json'], {
+    const r = bunSpawnSync([CLI, 'check-resolvable', '--json'], {
       encoding: 'utf-8',
       cwd: REPO,
       env: { ...process.env, OPENCLAW_WORKSPACE: FIXTURE },

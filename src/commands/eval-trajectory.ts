@@ -15,6 +15,7 @@
 
 import type { BrainEngine } from '../core/engine.ts';
 import { loadConfig, isThinClient } from '../core/config.ts';
+import { brandHelp } from '../core/branding.ts';
 import { callRemoteTool, unpackToolResult } from '../core/mcp-client.ts';
 import {
   computeTrajectoryStats,
@@ -99,7 +100,7 @@ function parseArgs(args: string[]): RunOpts | { help: true } | { error: string }
 export async function runEvalTrajectory(engine: BrainEngine, args: string[]): Promise<void> {
   const parsed = parseArgs(args);
   if ('help' in parsed) {
-    console.log(HELP);
+    console.log(brandHelp(HELP));
     return;
   }
   if ('error' in parsed) {

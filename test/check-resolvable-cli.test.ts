@@ -3,6 +3,7 @@ import { spawnSync } from 'child_process';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join, resolve } from 'path';
+import { bunSpawnSync } from './helpers/bun-exec.ts';
 import {
   parseFlags,
   resolveSkillsDir,
@@ -81,7 +82,7 @@ interface RunResult {
 }
 
 function run(args: string[]): RunResult {
-  const res = spawnSync('bun', [CLI, 'check-resolvable', ...args], {
+  const res = bunSpawnSync( [CLI, 'check-resolvable', ...args], {
     encoding: 'utf-8',
     cwd: REPO_ROOT,
     maxBuffer: 10 * 1024 * 1024,
@@ -385,7 +386,7 @@ describe('gbrain check-resolvable CLI — integration', () => {
     const empty = mkdtempSync(join(tmpdir(), 'cr-fix-installpath-'));
     try {
       // Pass --fix; expect refusal exit + clear error message.
-      const r = spawnSync('bun', ['run', CLI, 'check-resolvable', '--fix'], {
+      const r = bunSpawnSync( ['run', CLI, 'check-resolvable', '--fix'], {
         cwd: empty,
         env: { ...process.env, OPENCLAW_WORKSPACE: '', GBRAIN_SKILLS_DIR: '' },
         encoding: 'utf-8',

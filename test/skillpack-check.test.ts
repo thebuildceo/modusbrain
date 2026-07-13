@@ -19,6 +19,7 @@ import { mkdtempSync, rmSync, mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { execFileSync } from 'child_process';
+import { bunExecFileSync } from './helpers/bun-exec.ts';
 
 const CLI = join(__dirname, '..', 'src', 'cli.ts');
 
@@ -30,7 +31,7 @@ function run(args: string[]): { exitCode: number; stdout: string; stderr: string
   delete env.DATABASE_URL;
   delete env.GBRAIN_DATABASE_URL;
   try {
-    const stdout = execFileSync('bun', ['run', CLI, ...args], {
+    const stdout = bunExecFileSync(['run', CLI, ...args], {
       env: env as Record<string, string>,
       encoding: 'utf-8',
       stdio: ['ignore', 'pipe', 'pipe'],

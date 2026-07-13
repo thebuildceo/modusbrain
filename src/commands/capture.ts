@@ -34,6 +34,7 @@ import { readFileSync } from 'node:fs';
 import matter from 'gray-matter';
 import type { BrainEngine } from '../core/engine.ts';
 import { loadConfig, isThinClient } from '../core/config.ts';
+import { brandHelp } from '../core/branding.ts';
 import { callRemoteTool, unpackToolResult, RemoteMcpError } from '../core/mcp-client.ts';
 import { computeContentHash } from '../core/ingestion/types.ts';
 import { operations } from '../core/operations.ts';
@@ -382,7 +383,7 @@ function printReceipt(result: CaptureResult, quiet: boolean, json: boolean): voi
 export async function runCapture(engine: BrainEngine | null, args: string[]): Promise<void> {
   const parsed = parseArgs(args);
   if ('help' in parsed) {
-    console.log(HELP);
+    console.log(brandHelp(HELP));
     return;
   }
 

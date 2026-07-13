@@ -17,7 +17,7 @@ describe('upgrade command', () => {
     });
     const stdout = await new Response(proc.stdout).text();
     const exitCode = await proc.exited;
-    expect(stdout).toContain('Usage: gbrain upgrade');
+    expect(stdout).toContain('Usage: modusbrain upgrade');
     expect(stdout).toContain('Detects install method');
     expect(exitCode).toBe(0);
   });
@@ -30,7 +30,7 @@ describe('upgrade command', () => {
     });
     const stdout = await new Response(proc.stdout).text();
     const exitCode = await proc.exited;
-    expect(stdout).toContain('Usage: gbrain upgrade');
+    expect(stdout).toContain('Usage: modusbrain upgrade');
     expect(exitCode).toBe(0);
   });
 });
@@ -106,12 +106,12 @@ describe('detectInstallMethod heuristic (source analysis)', () => {
     // dry-fix.ts:172). execSync with template strings is vulnerable to
     // paths containing shell metacharacters.
     expect(source).toContain("execFileSync('git', ['-C', linkInfo.repoRoot, 'pull', '--ff-only']");
-    expect(source).toContain("execFileSync('bun', ['install']");
+    expect(source).toContain('execFileSync(BUN, [\'install\']');
   });
 
   test('bun global upgrade passes cwd to bun update', () => {
     expect(source).toContain('const bunGlobalRoot = resolveBunGlobalRoot()');
-    expect(source).toContain("execFileSync('bun', ['update', 'gbrain'], { cwd: bunGlobalRoot");
+    expect(source).toContain("execFileSync(BUN, ['update', 'gbrain'], { cwd: bunGlobalRoot");
   });
 
   test('classifyBunInstall checks repository.url AND src/cli.ts marker', () => {
@@ -213,6 +213,6 @@ describe('post-upgrade behavior (post v0.12.0 merge)', () => {
     const stdout = await new Response(proc.stdout).text();
     const exitCode = await proc.exited;
     expect(exitCode).toBe(0);
-    expect(stdout).toContain('Usage: gbrain post-upgrade');
+    expect(stdout).toContain('Usage: modusbrain post-upgrade');
   });
 });

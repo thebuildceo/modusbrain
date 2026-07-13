@@ -9,6 +9,7 @@ import { spawnSync } from 'node:child_process';
 import { mkdtempSync, rmSync, existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { bunSpawnSync } from './helpers/bun-exec.ts';
 
 const REPO_ROOT = join(import.meta.dir, '..');
 
@@ -37,7 +38,7 @@ function gbrain(
   // so pass env explicitly. CLAUDE.md flags this pattern as load-bearing for
   // any subprocess test that needs GBRAIN_HOME isolation.
   const env = { ...process.env, GBRAIN_HOME: DEFAULT_GBRAIN_HOME, ...extraEnv };
-  const result = spawnSync('bun', ['run', 'src/cli.ts', ...args], {
+  const result = bunSpawnSync(['run', 'src/cli.ts', ...args], {
     cwd: REPO_ROOT,
     encoding: 'utf-8',
     env,

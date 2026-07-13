@@ -17,6 +17,7 @@ import { spawn, spawnSync, execFileSync, type ChildProcess } from 'child_process
 import { mkdtempSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
+import { bunExecFileSync, bunSpawnSync } from '../helpers/bun-exec.ts';
 import { probeBrainIdentity } from '../../src/core/connect-probe.ts';
 import { discoverOAuth, mintClientCredentialsToken } from '../../src/core/remote-mcp-probe.ts';
 
@@ -42,10 +43,10 @@ describe('connect bearer probe E2E (PGLite + real serve --http)', () => {
     delete env.DATABASE_URL;
     delete env.GBRAIN_DATABASE_URL;
 
-    execFileSync('bun', ['run', 'src/cli.ts', 'init', '--pglite', '--no-embedding', '--non-interactive'], {
+    bunExecFileSync( ['run', 'src/cli.ts', 'init', '--pglite', '--no-embedding', '--non-interactive'], {
       cwd: process.cwd(), env, stdio: 'ignore',
     });
-    const authOut = execFileSync('bun', ['run', 'src/cli.ts', 'auth', 'create', 'e2e-connect'], {
+    const authOut = bunExecFileSync( ['run', 'src/cli.ts', 'auth', 'create', 'e2e-connect'], {
       cwd: process.cwd(), env, encoding: 'utf8',
     });
     token = (authOut.match(/gbrain_[a-f0-9]{64}/) ?? [''])[0];
@@ -53,7 +54,7 @@ describe('connect bearer probe E2E (PGLite + real serve --http)', () => {
 
     // Register the OAuth client BEFORE spawning serve — PGLite is single-writer,
     // so register-client can't open the brain once the server holds it.
-    const regOut = execFileSync('bun', [
+    const regOut = bunExecFileSync( [
       'run', 'src/cli.ts', 'auth', 'register-client', 'e2e-perplexity-oauth',
       '--grant-types', 'client_credentials', '--scopes', 'read write',
       '--token-endpoint-auth-method', 'client_secret_post',
@@ -127,7 +128,7 @@ describe('connect bearer probe E2E (PGLite + real serve --http)', () => {
   // sandbox + GBRAIN_REMOTE_TOKEN). spawnSync captures stderr too — connect's
   // "Verified" / "Added" lines go to stderr.
   const runConnectCli = (args: string[], extraEnv: Record<string, string>): { code: number; out: string } => {
-    const r = spawnSync('bun', ['run', 'src/cli.ts', 'connect', ...args], {
+    const r = bunSpawnSync(['run', 'src/cli.ts', 'connect', ...args], {
       cwd: process.cwd(),
       encoding: 'utf8',
       env: { ...process.env, GBRAIN_HOME: home, ...extraEnv },

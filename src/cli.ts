@@ -33,7 +33,7 @@ import {
 import { operations, OperationError } from './core/operations.ts';
 import { formatVolunteeredPage } from './core/context/volunteer.ts';
 import type { Operation, OperationContext } from './core/operations.ts';
-import { BRAND, brandHelp, cliCmd } from './core/branding.ts';
+import { BRAND, brandHelp, cliCmd, usageLine } from './core/branding.ts';
 import { serializeMarkdown } from './core/markdown.ts';
 import { parseGlobalFlags, setCliOptions, getCliOptions } from './core/cli-options.ts';
 import type { CliOptions } from './core/cli-options.ts';
@@ -222,7 +222,7 @@ async function main() {
   }
 
   if (command === '--version' || command === 'version') {
-    console.log(`gbrain ${VERSION}`);
+    console.log(`${BRAND.cliName} ${VERSION}`);
     return;
   }
 
@@ -379,7 +379,7 @@ async function main() {
       const cliName = op.cliHints?.name || op.name;
       const positional = op.cliHints?.positional || [];
       const usage = positional.map(p => `<${p}>`).join(' ');
-      console.error(`Usage: gbrain ${cliName} ${usage}`);
+      console.error(usageLine(`${cliName} ${usage}`));
       process.exit(1);
     }
   }
@@ -2214,7 +2214,7 @@ export function printOpHelp(op: Operation, invokedName?: string) {
   // v114 (#1941): when invoked via an alias (e.g. `gbrain link-add --help`),
   // show the alias the user typed, not the primary op name.
   const name = invokedName || op.cliHints?.name || op.name;
-  console.log(`Usage: gbrain ${name} ${positional} [options]\n`);
+  console.log(`${usageLine(`${name} ${positional}`)} [options]\n`);
   console.log(op.description + '\n');
   const entries = Object.entries(op.params);
   if (entries.length > 0) {

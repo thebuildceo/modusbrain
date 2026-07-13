@@ -74,7 +74,7 @@ async function captureRun(args: string[]): Promise<{ out: string; err: string }>
 describe('eval-trajectory CLI — arg parsing', () => {
   test('--help prints usage and returns without DB call', async () => {
     const { out } = await captureRun(['--help']);
-    expect(out).toContain('Usage: gbrain eval trajectory');
+    expect(out).toContain('Usage: modusbrain eval trajectory');
     expect(out).toContain('--metric');
   });
 
