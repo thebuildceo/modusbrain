@@ -1,43 +1,44 @@
 ---
 title: Introduction
-description: ModusBrain turns scattered company knowledge into versioned, confidence-gated skills that AI agents execute against — not just search.
+description: ModusBrain is an enterprise-grade operational knowledge engine that compiles unstructured company policies into versioned, confidence-gated skills that autonomous agents can safely execute.
 icon: brain
 ---
 
-# Welcome to ModusBrain
+# Introduction to ModusBrain
 
-**ModusBrain** is an operational knowledge engine for AI agents. While most company knowledge bases stop at simple search and chat, ModusBrain compiles policies, wiki runbooks, and tribal knowledge into **approved operational skills** with full audit logs and safety gates.
+**ModusBrain** is an advanced operational knowledge engine specifically engineered to solve the safety and consistency challenges faced by autonomous AI agents. While traditional corporate knowledge bases and retrieval-augmented generation (RAG) platforms are designed primarily for conversational search and basic Q&A, ModusBrain provides an execution-oriented layer. It systematically compiles scattered policy documents, internal wiki runbooks, and team guidelines into highly structured, versioned, and **approved operational skills** protected by automated safety gates and comprehensive cryptographic audit trails.
 
-With ModusBrain, autonomous agents act consistently, not creatively.
+By deploying ModusBrain as your agentic runtime boundary, you ensure that autonomous systems act consistently and follow exact company protocols, eliminating the risk of creative hallucinations or policy violations during high-stakes tasks.
 
 ---
 
 ## Key Capabilities
 
-ModusBrain adds the final layer of safety to agent execution:
+ModusBrain bridges the gap between static retrieval and safe agent execution by establishing a secure operational lifecycle:
 
-* **Compile** — Turn prose guides, runbooks, and policies into versioned, standing operational skills via the command line:
+* **High-Fidelity Compilation** — ModusBrain automatically reads and parses your raw markdown documentation, wikis, and policies, translating unstructured prose into versioned, static operational skill runbooks with executable logic via a simple command-line interface:
   `modusbrain opskill compile "topic"`
-* **Gate** — Establish risk tiers, minimum confidence thresholds, and manual human approval token overrides for high-stakes actions.
-* **Prove** — Maintain a cryptographic action audit log tracking executing agent IDs, evaluated context, and approval records.
+* **Adaptive Confidence Gating** — Every action requested by an agent is evaluated in real time against the active policy context. ModusBrain calculates a confidence score and applies strict gating rules based on configurable risk tiers, allowing operators to require manual human approval tokens for sensitive or low-confidence operations.
+* **Cryptographic Action Auditing** — Every skill execution, decision parameter, confidence calculation, and operator approval is written to a secure, queryable audit ledger. This ensures total operational transparency, simplifies compliance reviews, and provides detailed logs for debugging agent behaviors.
 
 ---
 
-## Explore the Docs
+## Explore the Documentation
 
-Get started with the installation, or learn how to author skills for your agents:
+Get started with the initial setup, or learn the details of how to author and manage operational skills:
 
 <CardGroup cols={2}>
   <Card title="Quickstart Guide" icon="rocket" href="/quickstart">
-    Set up the CLI and execute your first operational skill in 5 minutes.
+    Set up the command-line interface locally, initialize your database, and execute your first operational skill in 5 minutes.
   </Card>
   <Card title="Operational Workflow" icon="list-check" href="/opskill-workflow">
-    Learn how compilation, approval, execution, and corrections work.
+    Learn the complete lifecycle of operational skills, including compilation, human approval, execution gating, and the correction feedback loop.
   </Card>
 </CardGroup>
 
 ---
 
 <Note>
-  Explore the top navigation tabs to access our complete documentation catalog: **MCP & Integrations** (client setups), **Core Guides** (RAG & sync), **Opskill Dev** (minions & spend), **Architecture** (schema & topologies), **Tutorials** (hands-on setups), and **Reference** (API specs & testing).
+  Explore the top navigation tabs to access our complete documentation catalog: **MCP & Integrations** (setting up client integrations), **Core Guides** (RAG search and synchronization), **Opskill Dev** (minion queue management and cost controls), **Architecture** (schema design and system topologies), **Tutorials** (step-by-step practical guides), and **Reference** (command-line references and evaluation suites).
 </Note>
+
