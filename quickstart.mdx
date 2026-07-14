@@ -6,72 +6,91 @@ icon: rocket
 
 # Quickstart
 
-Get ModusBrain running locally in about 5 minutes.
+Welcome to ModusBrain! This guide will have you using versioned, confidence-gated operational skills with AI agents in a few minutes. By the end, you'll understand how to install the CLI, initialize a local brain, and audit actions.
 
-## Prerequisites
+## Before you begin
 
-- [Bun](https://bun.sh) installed
-- Terminal access
+Make sure you have:
+* A terminal or command prompt open
+* [Bun](https://bun.sh) (>= 1.3.10) or [Node.js](https://nodejs.org) installed
+* A code project or document directory to serve as your brain source context
 
-## 1. Install
+<Info>
+  This guide covers the local terminal CLI. ModusBrain is also available to run as an MCP server with **Claude Desktop**, **Claude Code**, **ChatGPT**, and other developer tools.
+</Info>
+
+---
+
+## Step 1: Install ModusBrain
+
+Install the global CLI using your package manager of choice:
 
 ```bash
-curl -fsSL https://bun.sh/install | bash
-git clone https://github.com/thebuildceo/modusbrain.git
-cd modusbrain
-bun install --ignore-scripts
-bun link
+npm install -g @genthropic/modusbrain
+# or
+bun install -g @genthropic/modusbrain
 ```
 
-Or install globally once published:
+---
 
-```bash
-bun install -g github:thebuildceo/modusbrain
-```
+## Step 2: Initialize your brain
 
-<Note>
-The legacy `modusbrain` CLI alias still works during migration.
-</Note>
-
-## 2. Initialize your brain
+Initialize your database configuration. This sets up a fast, zero-config embedded PGLite database locally at `~/.modusbrain` (no database server required):
 
 ```bash
 modusbrain init
 modusbrain apply-migrations --yes
-modusbrain config set schema_pack modusbrain-ops
+modusbrain config set schema_pack gbrain-base-v2
 ```
 
-This creates a local brain at `~/.modusbrain` (PGLite, zero-config — no database server required).
+---
 
-## 3. Compile your first skill
+## Step 3: Compile your first skill
+
+Draft an operational skill from your brain's existing document context. Compiling translates your prose guidelines into a draft version for your agent:
 
 ```bash
 modusbrain opskill compile "refund handling" --risk-tier low_stakes
 modusbrain opskill show refund-handling
 ```
 
-## 4. Approve and execute
+---
+
+## Step 4: Approve and execute
+
+Draft skills are confidence-gated and cannot be executed by agents until explicitly approved by an owner:
 
 ```bash
-modusbrain opskill approve refund-handling --by you@company.com
+# Promote the draft version to active status
+modusbrain opskill approve refund-handling --by owner@company.com
+
+# Execute the skill with confidence scoring
 modusbrain opskill execute refund-handling \
-  --task "Process $300 refund" \
+  --task "Process $300 refund for order #1204" \
   --context '{"amount":300}'
 ```
 
-## 5. Check the audit trail
+---
+
+## Step 5: Check the audit trail
+
+Review the secure audit ledger log containing skill slugs, versions, confidence scores, results, and executor IDs:
 
 ```bash
-modusbrain opskill audit --json
+modusbrain opskill audit --slug refund-handling --json
 ```
+
+---
 
 ## Next steps
 
+Now that you've completed your first run, dive deeper into the operational workflow and reference docs:
+
 <CardGroup cols={2}>
-  <Card title="Full workflow" icon="route" href="/opskill-workflow">
-    Refund handling walkthrough with all 5 phases.
+  <Card title="Workflow Guide" icon="route" href="/opskill-workflow">
+    Detailed walkthrough of the 5 operational phases.
   </Card>
-  <Card title="CLI reference" icon="terminal" href="/cli-reference">
-    All opskill commands.
+  <Card title="CLI Reference" icon="terminal" href="/cli-reference">
+    All CLI commands and MCP parameters.
   </Card>
 </CardGroup>

@@ -4,44 +4,57 @@ description: Compile, approve, execute, audit, and correct — the full ModusBra
 icon: list-check
 ---
 
-# Operational skills workflow
+# Operational Skills Workflow
 
-ModusBrain operational skills follow five phases. This page walks through **refund handling** as an example.
+ModusBrain operational skills follow five main lifecycle phases. This guide walks through **refund handling** as an example of how your agents interact with these phases.
+
+---
 
 ## Phase 1 — Compile
 
-Turn brain content into a versioned draft skill:
+Compilation reads your company documents (such as markdown wikis, policies, or ticketing context) and compiles them into a versioned, static draft skill. 
 
 ```bash
-# Ingest policy content first (optional)
+# Optional: ingest the raw policy document first
 modusbrain capture --file ./docs/refund-policy.md
 
+# Compile into a versioned draft skill
 modusbrain opskill compile "refund handling" \
   --risk-tier high_stakes \
   --owner support-lead
 ```
 
-Each skill version includes:
-- **Prose judgment** — edge-case guidance for agents
-- **Structured policy** — rules like `if amount < 500 → auto_approve`
-- **Provenance** — source pages, compiler, timestamps
+Every compiled skill version includes:
+* **Prose judgment** — LLM-derived edge-case guidance that helps steer agent behaviors.
+* **Structured policy rules** — Executable rules (e.g. `if amount < 500 => auto_approve`).
+* **Provenance record** — Mapping back to the source files, compiler identity, and timestamps.
+
+---
 
 ## Phase 2 — Approve
 
-Draft skills cannot be auto-executed by remote agents until approved:
+When a skill is first compiled, it remains in a `draft` status. Active agents cannot execute drafts until an owner promotes them:
 
 ```bash
+# View the compiled version contents
 modusbrain opskill show refund-handling
+
+# Approve the draft to make it the active skill version
 modusbrain opskill approve refund-handling --by alice@company.com
 ```
 
-For high-stakes execution below confidence threshold, issue an approval token:
+### Approval Tokens (Override)
+If an execution request falls below the confidence threshold, you can issue a temporary 1-hour approval token to bypass the gate:
 
 ```bash
 modusbrain opskill approve-token refund-handling
 ```
 
-## Phase 3 — Execute (with gating)
+---
+
+## Phase 3 — Execute (with Gating)
+
+During agent runtime, the agent requests skill execution. ModusBrain evaluates the context against the active policy and computes a confidence score:
 
 ```bash
 modusbrain opskill execute refund-handling \
@@ -49,41 +62,52 @@ modusbrain opskill execute refund-handling \
   --context '{"amount":300}'
 ```
 
-| Risk tier | Default confidence threshold |
-| --- | --- |
-| `informational` | 0.50 |
-| `low_stakes` | 0.70 |
-| `high_stakes` | 0.85 |
+The execution is allowed or blocked based on its risk tier threshold:
+
+| Risk Tier | Confidence Threshold | Action if Below Threshold |
+| :--- | :---: | :--- |
+| `informational` | **0.50** | Warnings logged, execution proceeds |
+| `low_stakes` | **0.70** | Blocked unless override flag is set |
+| `high_stakes` | **0.85** | Hard-blocked; requires human approval token |
+
+---
 
 ## Phase 4 — Audit
 
-Every execution is logged:
+ModusBrain logs all execution actions to a secure, queryable database plane for compliance reviews:
 
 ```bash
 modusbrain opskill audit --slug refund-handling --json
 ```
 
-Logs include: skill slug, version, confidence score, action taken, agent ID, result.
+Audit entries capture the executing agent's ID, the skill version, confidence scores, parameters evaluated, and the final outcome.
 
-## Phase 5 — Feedback loop
+---
 
-When a human corrects an agent action:
+## Phase 5 — Feedback Loop
+
+If an agent action is incorrect or needs adjustments, operators submit corrections. This writes feedback files back to the database to influence future compilations:
 
 ```bash
 modusbrain opskill correct refund-handling \
   --original "auto_approve" \
-  --correction "Amounts over $400 need manager approval" \
+  --correction "Amounts over $400 require manager sign-off" \
   --by bob@company.com
 ```
 
-Corrections write evidence pages and may trigger automatic re-compilation.
+---
 
-## Conflict handling
+## Conflict Handling
+
+If multiple source documents contradict each other, ModusBrain flags a conflict item in the review queue:
 
 ```bash
+# Flag a conflict manually
 modusbrain opskill flag-conflict refund-handling \
   --description "Policy docs disagree on $500 threshold" \
   --sources wiki/policies/refund-policy,wiki/policies/old-refund
 
-modusbrain opskill resolve 1 --by alice@company.com --note "Use $400 threshold"
+# Resolve the conflict and automatically trigger re-compilation
+modusbrain opskill resolve 1 --by alice@company.com --note "Use the newer $400 threshold"
 ```
+
