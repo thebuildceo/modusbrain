@@ -53,7 +53,14 @@
           {
             "group": "Overview",
             "pages": [
-              "introduction"
+              "introduction",
+              "how-it-works"
+            ]
+          },
+          {
+            "group": "Use Cases",
+            "pages": [
+              "for-companies"
             ]
           },
           {
@@ -72,6 +79,7 @@
           {
             "group": "Reference",
             "pages": [
+              "faq",
               "cli-reference",
               "env-vars",
               "attribution"

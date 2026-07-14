@@ -159,7 +159,11 @@ base.navigation = {
       groups: [
         {
           group: 'Overview',
-          pages: ['introduction'],
+          pages: ['introduction', 'how-it-works'],
+        },
+        {
+          group: 'Use Cases',
+          pages: ['for-companies'],
         },
         {
           group: 'First Run',
@@ -171,7 +175,7 @@ base.navigation = {
         },
         {
           group: 'Reference',
-          pages: ['cli-reference', 'env-vars', 'attribution'],
+          pages: ['faq', 'cli-reference', 'env-vars', 'attribution'],
         },
       ],
     },
