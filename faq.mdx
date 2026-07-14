@@ -1,0 +1,293 @@
+---
+title: FAQ
+description: Answers to the most common questions about installing, configuring, and operating ModusBrain.
+icon: circle-question
+---
+
+## Getting Started
+
+<AccordionGroup>
+  <Accordion title="Does ModusBrain require an external database to run?">
+    No. ModusBrain ships with a zero-configuration embedded **PGLite** database that runs entirely in-process on your local machine. No server setup, no Docker container, and no cloud account is required to get started.
+
+    For teams with larger knowledge bases (1,000+ documents) or organizations that need multi-machine access, ModusBrain also supports a full **PostgreSQL + pgvector** backend via Supabase or any hosted Postgres provider. You can start locally and migrate later with a single command:
+
+    ```bash
+    modusbrain migrate --to supabase
+    ```
+  </Accordion>
+
+  <Accordion title="What API keys do I need to get started?">
+    ModusBrain requires at least one embedding provider API key to enable semantic search and skill compilation. Supported providers include:
+
+    - **ZeroEntropy** — recommended for highest quality retrieval (`ZEROENTROPY_API_KEY`)
+    - **OpenAI** — broadly available, good general-purpose embeddings (`OPENAI_API_KEY`)
+    - **Voyage AI** — alternative high-quality embedding provider (`VOYAGE_API_KEY`)
+    - **Anthropic** — used for LLM-powered compilation and reasoning (`ANTHROPIC_API_KEY`)
+
+    Set keys via the CLI:
+    ```bash
+    modusbrain config set zeroentropy_api_key sk-...
+    modusbrain config set anthropic_api_key sk-ant-...
+    ```
+  </Accordion>
+
+  <Accordion title="What is the difference between PGLite and Postgres (Supabase)?">
+    **PGLite** is ModusBrain's default embedded database. It runs in-process, requires zero setup, and is ideal for individual developers or small teams using a single machine.
+
+    **Postgres + pgvector** (typically via Supabase) is the recommended backend when you need:
+    - A knowledge base with more than 1,000 documents
+    - Multi-machine access (e.g., a team sharing one brain over HTTP)
+    - Production-grade durability and backup strategies
+
+    The `modusbrain init` command automatically detects your repo size and suggests Supabase when it's warranted.
+  </Accordion>
+
+  <Accordion title="Can I use ModusBrain with Node.js instead of Bun?">
+    Yes. ModusBrain can be installed via npm and run with Node.js (version 18.0.0 or higher):
+
+    ```bash
+    npm install -g @genthropic/modusbrain
+    ```
+
+    Bun is the recommended runtime because it provides faster startup times and is the platform the CLI is primarily developed and tested against, but the npm installation works across standard Node.js environments.
+  </Accordion>
+
+  <Accordion title="How do I verify that my installation is working correctly?">
+    Run the built-in system diagnostics command after installation:
+
+    ```bash
+    modusbrain --version       # Confirms the CLI binary is accessible
+    modusbrain doctor          # Runs a full health check across all system components
+    modusbrain models          # Lists configured AI models and their assigned roles
+    modusbrain models doctor   # Issues a 1-token probe to each configured model
+    ```
+
+    If any check returns a warning or failure, `modusbrain doctor` will print the exact fix command needed to resolve the issue.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Operational Skills
+
+<AccordionGroup>
+  <Accordion title="What exactly is an 'operational skill'?">
+    An **operational skill** is a versioned, structured artifact that ModusBrain compiles from your raw company documentation. It contains:
+
+    - **Prose judgment** — semantic, context-aware guidelines for reasoning about edge cases
+    - **Structured policy rules** — explicit executable logic (e.g. `if amount < 500 => auto_approve`)
+    - **Provenance record** — a full audit trail linking the skill back to every source document, compiler identity, and timestamp
+
+    Skills are the unit of work that AI agents execute against. Instead of an agent reading raw markdown and reasoning about it independently, it receives a structured, pre-approved, versioned skill runbook with a confidence score.
+  </Accordion>
+
+  <Accordion title="What is the difference between a 'draft' and an 'active' skill?">
+    When you compile a skill, it is initially created in **draft** status. Draft skills are safety-gated — no autonomous agent can execute them.
+
+    Once a designated owner reviews the compiled skill and explicitly approves it, its status changes to **active**. Only active skills are available for agent execution.
+
+    This two-stage model ensures that a human always reviews and signs off on company policy before any agent acts on it:
+
+    ```bash
+    # View the draft before approving
+    modusbrain opskill show refund-handling
+
+    # Promote to active
+    modusbrain opskill approve refund-handling --by owner@company.com
+    ```
+  </Accordion>
+
+  <Accordion title="What happens when an agent's execution request is blocked by the confidence gate?">
+    When an agent's request falls below the configured confidence threshold for a skill's risk tier, ModusBrain **blocks the execution** and returns a structured error response indicating the confidence score and the minimum threshold required.
+
+    The agent receives this as a clear signal rather than a silent failure. Operators have three options to respond:
+
+    1. **Issue an approval token** — a time-limited override that allows one specific agent to bypass the gate for exactly one execution
+    2. **Lower the risk tier** — recompile the skill with a lower-tier setting if the current threshold is misconfigured
+    3. **Submit a correction** — provide feedback that improves future confidence scores for this skill
+  </Accordion>
+
+  <Accordion title="Can I revert a skill to a previous version?">
+    Yes. ModusBrain keeps a full version history of every compiled skill. You can view the version history and promote any previous version back to active status:
+
+    ```bash
+    # View all versions of a skill
+    modusbrain opskill show refund-handling --history
+
+    # Promote version 2 back to active
+    modusbrain opskill approve refund-handling --version 2 --by owner@company.com
+    ```
+  </Accordion>
+
+  <Accordion title="How many skills can I compile from a single document source?">
+    There is no limit. You can compile as many skills as you need from your documentation. Each skill is a separate versioned artifact with its own approval chain, risk tier, and audit log.
+
+    Common patterns include compiling one skill per major business process (e.g., `refund-handling`, `expense-reimbursement`, `onboarding-checklist`) and having multiple agents share the same active skill version.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Safety & Compliance
+
+<AccordionGroup>
+  <Accordion title="How does confidence gating work?">
+    When an agent requests a skill execution, ModusBrain evaluates the full task context — the task description, the provided parameters, and the active skill policy — and computes a **confidence score** between 0 and 1.
+
+    This score is then compared against the skill's risk tier threshold:
+
+    | Risk Tier | Threshold | Action if Below |
+    | :--- | :---: | :--- |
+    | `informational` | 0.50 | Warnings logged; execution allowed |
+    | `low_stakes` | 0.70 | Blocked unless override flag is set |
+    | `high_stakes` | 0.85 | Hard-blocked; requires human approval token |
+
+    The gating happens entirely server-side before any action is taken.
+  </Accordion>
+
+  <Accordion title="What is an approval token and when should I use one?">
+    An **approval token** is a time-limited (1-hour), single-use credential that allows an agent to bypass the confidence gate for exactly one execution of a specific skill.
+
+    Use approval tokens when:
+    - A legitimate business case requires executing a high-stakes action that falls below the automatic confidence threshold
+    - An emergency situation requires bypassing the normal approval flow
+    - You want a human to review an edge case without recompiling the skill
+
+    ```bash
+    modusbrain opskill approve-token refund-handling
+    ```
+
+    Approval token issuances and the executions they authorize are both recorded in the audit ledger.
+  </Accordion>
+
+  <Accordion title="Where are audit logs stored and how do I access them?">
+    All audit records are stored in your configured database (PGLite or Postgres). Each record captures:
+
+    - The executing agent's identity
+    - The skill slug and exact version evaluated
+    - The full parameter set passed to the execution
+    - The calculated confidence score
+    - The final outcome (allowed, blocked, or overridden)
+    - A timestamp and operator identity for any approval actions
+
+    Query logs at any time:
+    ```bash
+    modusbrain opskill audit --slug refund-handling --json
+    modusbrain opskill audit --all --since 7d --json
+    ```
+  </Accordion>
+
+  <Accordion title="Is ModusBrain compliant with data privacy regulations?">
+    ModusBrain is designed with data locality in mind. With the default **PGLite** backend, all data — including your company's knowledge, skill runbooks, and audit logs — stays entirely on your local machine. Nothing is sent to external servers except the specific API calls made to your configured embedding and LLM providers.
+
+    For the HTTP MCP server deployment, all data stays within your own infrastructure. ModusBrain does not operate a SaaS brain service — you own and control your own data at all times.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## MCP & Integrations
+
+<AccordionGroup>
+  <Accordion title="Which AI coding agents and clients does ModusBrain support?">
+    ModusBrain works with any tool that supports the **Model Context Protocol (MCP)**. Verified integrations include:
+
+    - **Claude Code** — via `claude mcp add modusbrain -- modusbrain serve`
+    - **Claude Desktop** — via stdio MCP configuration
+    - **ChatGPT** — via OpenAI MCP client support
+    - **Codex** — via `codex mcp add modusbrain -- modusbrain serve`
+    - **Cursor** — via stdio MCP
+    - **Perplexity** — via OAuth-scoped HTTP MCP
+
+    See the [MCP & Integrations](/mcp/claude-code) section for per-client setup guides.
+  </Accordion>
+
+  <Accordion title="Can I run ModusBrain as a shared server for my whole team?">
+    Yes. ModusBrain ships with a full **HTTP MCP server** mode that includes OAuth 2.1 authorization, per-user scoped credentials, and an admin dashboard.
+
+    ```bash
+    modusbrain serve --http --port 3000
+    ```
+
+    Each team member gets their own token with `read`, `write`, or `admin` access. The server includes an admin SPA at `/admin` for managing users and viewing activity.
+
+    See the [For Teams & Companies](/for-companies) guide for the full setup walkthrough.
+  </Accordion>
+
+  <Accordion title="Can I connect my agent to a remote brain without installing a full local engine?">
+    Yes. ModusBrain supports a **thin-client mode** that configures a remote MCP connection without setting up a local database or embedding engine.
+
+    ```bash
+    modusbrain init --mcp-only \
+      --mcp-url https://brain.your-company.com/mcp \
+      --oauth-client-id <your-client-id>
+    ```
+
+    In thin-client mode, most local commands route transparently through the remote server. This is ideal for team members who want to query and use the company brain without running their own instance.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="What do I do if 'modusbrain doctor' shows warnings or failures?">
+    `modusbrain doctor` is a self-healing diagnostic tool. When it reports a warning or failure, it also prints the exact fix command in the output message. Most common issues and their solutions:
+
+    | Issue | Fix |
+    | :--- | :--- |
+    | Missing API key | `modusbrain config set <provider>_api_key sk-...` |
+    | Stale database schema | `modusbrain upgrade --force-schema` |
+    | Schema version is 0 | `modusbrain apply-migrations --yes` |
+    | Skills directory not found | `modusbrain skillpack scaffold --all` |
+
+    For persistent issues, run `modusbrain doctor --fix` to attempt automatic remediation.
+  </Accordion>
+
+  <Accordion title="A skill's confidence score is consistently too low. How do I improve it?">
+    Low confidence scores usually indicate one of three things:
+
+    1. **The source documentation is thin or contradictory** — Enrich the relevant docs in your knowledge base, then recompile the skill.
+    2. **Conflicting policy documents** — Run `modusbrain opskill flag-conflict <slug>` to identify and resolve document-level contradictions before recompiling.
+    3. **The risk tier is too high for the skill's domain** — Review whether the assigned risk tier matches the actual business risk of the operation.
+
+    After making corrections, recompile to generate a new draft skill version:
+    ```bash
+    modusbrain opskill compile "refund handling" --risk-tier low_stakes
+    ```
+  </Accordion>
+
+  <Accordion title="How do I upgrade ModusBrain to the latest version?">
+    Use the built-in upgrade command, which handles binary updates, schema migrations, and post-upgrade configuration prompts in one step:
+
+    ```bash
+    modusbrain upgrade
+    ```
+
+    The upgrade command is TTY-only by design — it will prompt you to confirm schema changes before applying them. If you are running in a non-interactive CI environment, prompts are skipped with informational stderr messages.
+  </Accordion>
+
+  <Accordion title="What does 'schema_version: 0' mean and how do I fix it?">
+    A `schema_version: 0` in your `modusbrain doctor` output means the database schema has not been initialized or the migrations have not been applied. This typically happens after a fresh install or a failed upgrade.
+
+    Fix it by running the migration command manually:
+
+    ```bash
+    modusbrain apply-migrations --yes
+    ```
+
+    After this completes, run `modusbrain doctor` again to confirm all schema checks are green.
+  </Accordion>
+
+  <Accordion title="Is ModusBrain open source? Can I self-host it?">
+    Yes. ModusBrain is fully open source and available at [github.com/thebuildceo/modusbrain](https://github.com/thebuildceo/modusbrain). You can self-host the complete platform — including the CLI, the HTTP MCP server, and the admin dashboard — on your own infrastructure with no licensing fees or usage restrictions.
+
+    The source-from-clone install path is:
+    ```bash
+    git clone https://github.com/thebuildceo/modusbrain.git ~/modusbrain
+    cd ~/modusbrain && bun install && bun link
+    ```
+  </Accordion>
+</AccordionGroup>
