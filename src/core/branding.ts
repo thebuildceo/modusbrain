@@ -12,24 +12,24 @@ export const BRAND = {
   productSlug: 'modusbrain',
   cliName: 'modusbrain',
   /** Deprecated alias; still registered as a bin entry for migration. */
-  legacyCliName: 'modusbrain',
+  legacyCliName: 'gbrain',
   domain: 'modusbrain.com',
   website: 'https://modusbrain.com',
   docsUrl: 'https://docs.modusbrain.com',
   githubOrg: 'thebuildceo', // github.com/thebuildceo/modusbrain
   tagline: 'The company brain agents can safely execute against.',
   configDirName: '.modusbrain',
-  legacyConfigDirName: '.modusbrain',
+  legacyConfigDirName: '.gbrain',
   sourceDotfile: '.modusbrain-source',
-  legacySourceDotfile: '.modusbrain-source',
+  legacySourceDotfile: '.gbrain-source',
   attribution:
     'Built on ModusBrain (MIT License) — https://github.com/thebuildceo/modusbrain',
 } as const;
 
-/** Resolve env var: MODUSBRAIN_* wins, then legacy MODUSBRAIN_*. */
+/** Resolve env var: MODUSBRAIN_* wins, then legacy GBRAIN_*. */
 export function brandEnv(name: string): string | undefined {
   const modus = `MODUSBRAIN_${name}`;
-  const legacy = `MODUSBRAIN_${name}`;
+  const legacy = `GBRAIN_${name}`;
   return cleanEnvValue(process.env[modus]) ?? cleanEnvValue(process.env[legacy]);
 }
 
@@ -39,14 +39,14 @@ function cleanEnvValue(value: string | undefined): string | undefined {
   return trimmed;
 }
 
-/** Home override: MODUSBRAIN_HOME or MODUSBRAIN_HOME (parent dir; we append config dir). */
+/** Home override: MODUSBRAIN_HOME or GBRAIN_HOME (parent dir; we append config dir). */
 export function brandHomeOverride(): string | undefined {
-  return brandEnv('HOME') ?? cleanEnvValue(process.env.MODUSBRAIN_HOME);
+  return brandEnv('HOME') ?? cleanEnvValue(process.env.GBRAIN_HOME);
 }
 
 /**
- * Active config directory (~/.modusbrain or legacy ~/.modusbrain).
- * New installs use ~/.modusbrain. Existing ModusBrain users keep working via fallback.
+ * Active config directory (~/.modusbrain or legacy ~/.gbrain).
+ * New installs use ~/.modusbrain. Existing GBrain users keep working via fallback.
  */
 export function brandConfigDir(): string {
   const override = brandHomeOverride();
@@ -57,7 +57,7 @@ export function brandConfigDir(): string {
     if (override.split(/[\\/]/).includes('..')) {
       throw new Error(`MODUSBRAIN_HOME must not contain '..' segments; got: ${override}`);
     }
-    if (cleanEnvValue(process.env.MODUSBRAIN_HOME)) {
+    if (cleanEnvValue(process.env.MODUSBRAIN_HOME) || cleanEnvValue(process.env.GBRAIN_HOME)) {
       return join(override, BRAND.configDirName);
     }
     return join(override, BRAND.legacyConfigDirName);
@@ -76,18 +76,18 @@ export function cliCmd(sub = ''): string {
   return sub ? `${BRAND.cliName} ${sub}` : BRAND.cliName;
 }
 
-/** Replace user-facing modusbrain/ModusBrain in help strings at runtime. */
+/** Replace user-facing gbrain/GBrain in help strings at runtime. */
 export function brandHelp(text: string): string {
   return text
-    .replace(/\bmodusbrain\b/g, BRAND.cliName)
-    .replace(/\bModusBrain\b/g, BRAND.productName)
-    .replace(/~\/\.modusbrain\b/g, `~/${BRAND.configDirName}`)
-    .replace(/\$MODUSBRAIN_HOME/g, '$MODUSBRAIN_HOME')
-    .replace(/\bMODUSBRAIN_/g, 'MODUSBRAIN_')
-    .replace(/\.modusbrain-source/g, BRAND.sourceDotfile);
+    .replace(/\bgbrain\b/g, BRAND.cliName)
+    .replace(/\bGBrain\b/g, BRAND.productName)
+    .replace(/~\/\.gbrain\b/g, `~/${BRAND.configDirName}`)
+    .replace(/\$GBRAIN_HOME/g, '$MODUSBRAIN_HOME')
+    .replace(/\bGBRAIN_/g, 'MODUSBRAIN_')
+    .replace(/\.gbrain-source/g, BRAND.sourceDotfile);
 }
 
 /** Branded `Usage: …` line for CLI help and error messages. */
 export function usageLine(sub: string): string {
-  return brandHelp(`Usage: modusbrain ${sub}`);
+  return brandHelp(`Usage: gbrain ${sub}`);
 }

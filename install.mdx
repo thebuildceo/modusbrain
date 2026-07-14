@@ -6,26 +6,37 @@ icon: download
 
 # Install
 
-## From source (recommended for now)
+## From npm (recommended)
+
+Install globally via npm or Bun:
 
 ```bash
+npm install -g @genthropic/modusbrain
+# or
+bun install -g @genthropic/modusbrain
+```
+
+## From GitHub / Source
+
+If you want to install directly from the repository or build from source:
+
+```bash
+# Global install from GitHub:
+bun install -g github:thebuildceo/modusbrain
+
+# Or build and link from source:
 git clone https://github.com/thebuildceo/modusbrain.git
 cd modusbrain
 bun install --ignore-scripts
 bun link
-modusbrain --version
-```
-
-## From GitHub (global)
-
-```bash
-bun install -g github:thebuildceo/modusbrain
 ```
 
 If postinstall fails on Windows, run:
 
 ```bash
-bun install -g github:thebuildceo/modusbrain --ignore-scripts
+npm install -g @genthropic/modusbrain --ignore-scripts
+# or
+bun install -g @genthropic/modusbrain --ignore-scripts
 modusbrain init
 modusbrain apply-migrations --yes
 ```
@@ -42,11 +53,11 @@ bun run build
 | Path | Purpose |
 | --- | --- |
 | `~/.modusbrain` | Default config + brain data (new installs) |
-| `~/.modusbrain` | Legacy path — auto-detected if present |
+| `~/.gbrain` | Legacy path — auto-detected if present |
 
 ## Environment variables
 
-Prefer `MODUSBRAIN_*` — legacy `MODUSBRAIN_*` still works. See [Environment variables](/env-vars).
+Prefer `MODUSBRAIN_*` — legacy `GBRAIN_*` still works. See [Environment variables](/env-vars).
 
 ## Verify install
 
