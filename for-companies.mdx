@@ -1,0 +1,106 @@
+---
+title: ModusBrain for Teams & Companies
+description: Learn how organizations use ModusBrain as a shared company brain that keeps every AI agent across your team aligned, safe, and fully auditable.
+icon: building
+---
+
+**ModusBrain** is built for teams and organizations that want to move beyond individual AI interactions and deploy autonomous agents that understand and follow company-wide policies — consistently, at scale.
+
+Whether you are a small startup onboarding your first AI agent or a large enterprise running dozens of agents across different departments, ModusBrain gives your entire organization a **single, authoritative source of operational truth** that every agent executes against.
+
+---
+
+## The Problem ModusBrain Solves for Teams
+
+When multiple people and agents work from the same company knowledge, three problems emerge immediately:
+
+- **Inconsistency** — Different agents give different answers to the same question because they each interpret raw documents differently.
+- **Risk** — Agents take high-stakes actions (processing refunds, sending emails, modifying records) without any safety gate between them and your company policies.
+- **No Accountability** — When something goes wrong, there is no audit trail to understand what an agent did, what version of a policy it used, or who approved the action.
+
+ModusBrain solves all three. It compiles your company's tribal knowledge, runbooks, and policies into versioned, **approved operational skills** — and enforces them consistently across every agent that connects to your brain.
+
+---
+
+## Common Company Use Cases
+
+<CardGroup cols={2}>
+  <Card title="Support & Refund Policies" icon="headset">
+    Compile your support team's refund guidelines into a versioned skill. Every agent — whether Claude, Codex, or your custom bot — follows the exact same policy, with automatic escalation for amounts above your risk threshold.
+  </Card>
+  <Card title="HR & Onboarding Procedures" icon="users">
+    Turn your onboarding runbooks into executable skills. New hires and AI assistants follow identical procedures, and every action is logged for HR compliance and audit reviews.
+  </Card>
+  <Card title="Finance & Approval Workflows" icon="coins">
+    Gate financial actions behind confidence thresholds and human approval tokens. Finance teams set the policy; ModusBrain enforces it, and every execution is recorded with a cryptographic audit trail.
+  </Card>
+  <Card title="Engineering Runbooks" icon="code">
+    Convert your incident response and deployment runbooks into skills your on-call agents execute step by step — with full logging so post-mortems have complete records.
+  </Card>
+</CardGroup>
+
+---
+
+## How a Company Brain Is Set Up
+
+Setting up ModusBrain for a full team takes about 30 minutes. The setup has three main steps:
+
+<Steps>
+  <Step title="Run the server">
+    Deploy the ModusBrain HTTP MCP server on your infrastructure. It ships with a built-in OAuth 2.1 authorization layer, so each team member gets their own scoped credentials — with `read`, `write`, and `admin` access tiers.
+
+    ```bash
+    modusbrain serve --http --port 3000
+    ```
+  </Step>
+
+  <Step title="Connect your team's AI clients">
+    Each team member installs the ModusBrain thin-client on their machine and connects their coding agent (Claude Code, Codex, Cursor, or any MCP-aware editor) to the shared brain server using their personal token.
+
+    ```bash
+    modusbrain init --mcp-only --mcp-url https://brain.your-company.com/mcp
+    claude mcp add modusbrain -- modusbrain serve
+    ```
+  </Step>
+
+  <Step title="Compile and approve your first company skill">
+    Your policy owners compile your first operational skill from your existing internal documentation. Once reviewed and approved, every connected agent immediately has access to the live, policy-gated version.
+
+    ```bash
+    modusbrain opskill compile "expense reimbursement" --risk-tier high_stakes --owner finance@company.com
+    modusbrain opskill approve expense-reimbursement --by finance@company.com
+    ```
+  </Step>
+</Steps>
+
+---
+
+## Team Roles & Permissions
+
+ModusBrain is designed around a clear permission model that separates the people who set policy from the agents who execute it:
+
+| Role | What They Do |
+| :--- | :--- |
+| **Policy Owner** | Compiles skills, approves drafts, issues approval tokens, submits corrections |
+| **Team Member** | Connects their agent to the brain, queries the knowledge graph, triggers skill execution |
+| **Admin** | Manages user credentials, access scopes, and server configuration |
+| **Agent** | Executes approved skills, requests confidence evaluations, logs audit records |
+
+---
+
+## Multi-Database and Scale
+
+For teams with large knowledge bases (1,000+ documents) or multi-machine setups, ModusBrain supports a full **PostgreSQL + pgvector** backend via Supabase or any hosted Postgres provider. You can start with the zero-configuration embedded PGLite database and migrate later with a single command:
+
+```bash
+modusbrain migrate --to supabase
+```
+
+<CardGroup cols={2}>
+  <Card title="Company Brain Tutorial" icon="graduation-cap" href="/docs/tutorials/company-brain">
+    Follow the complete step-by-step guide for setting up ModusBrain as a shared company brain with OAuth, multi-user access, and Supabase.
+  </Card>
+  <Card title="MCP & Integrations" icon="plug" href="/mcp/claude-code">
+    Learn how to connect Claude Code, Codex, Claude Desktop, ChatGPT, and other MCP-aware clients to your company brain.
+  </Card>
+</CardGroup>

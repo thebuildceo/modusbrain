@@ -56,7 +56,14 @@
               {
                 "group": "Overview",
                 "pages": [
-                  "introduction"
+                  "introduction",
+                  "how-it-works"
+                ]
+              },
+              {
+                "group": "Use Cases",
+                "pages": [
+                  "for-companies"
                 ]
               },
               {
