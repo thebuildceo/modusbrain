@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
+  "theme": "quill",
   "name": "ModusBrain",
   "description": "The company brain agents can safely execute against.",
   "colors": {
@@ -14,6 +14,16 @@
     "href": "/introduction"
   },
   "favicon": "/logo/moduslogo.svg",
+  "font": {
+    "headings": {
+      "family": "Lora",
+      "weight": 400
+    },
+    "body": {
+      "family": "Inter",
+      "weight": 400
+    }
+  },
   "appearance": {
     "default": "dark"
   },
