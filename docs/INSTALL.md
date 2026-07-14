@@ -7,7 +7,7 @@ Three install paths. Pick one. Mix later if needed.
 Already running [OpenClaw](https://github.com/garrytan/openclaw) or [Hermes](https://github.com/garrytan/hermes)?
 
 ```bash
-bun install -g github:garrytan/modusbrain
+bun install -g github:thebuildceo/modusbrain
 modusbrain init --pglite                  # 2 seconds; no server
 modusbrain skillpack scaffold --all       # 43 skills scaffolded into your agent workspace
 modusbrain doctor                         # green checks all the way down
@@ -24,11 +24,11 @@ To upgrade later: `modusbrain upgrade` runs schema migrations + post-upgrade pro
 No agent platform, just shell + MCP-aware editor.
 
 ```bash
-bun install -g github:garrytan/modusbrain
+bun install -g github:thebuildceo/modusbrain
 modusbrain init --pglite
 ```
 
-> **If `bun install -g` hits a postinstall error** (Bun blocks postinstall hooks in some environments), the CLI prints a recovery hint pointing at [#218](https://github.com/garrytan/gbrain/issues/218). Run `modusbrain doctor` to diagnose, then `modusbrain apply-migrations --yes` manually. The deterministic fallback is `git clone https://github.com/garrytan/gbrain.git ~/modusbrain && cd ~/modusbrain && bun install && bun link`.
+> **If `bun install -g` hits a postinstall error** (Bun blocks postinstall hooks in some environments), the CLI prints a recovery hint pointing at [#218](https://github.com/garrytan/gbrain/issues/218). Run `modusbrain doctor` to diagnose, then `modusbrain apply-migrations --yes` manually. The deterministic fallback is `git clone https://github.com/thebuildceo/modusbrain.git ~/modusbrain && cd ~/modusbrain && bun install && bun link`.
 
 The init flow detects your repo size and suggests Supabase for brains > 1000 markdown files. To switch later:
 

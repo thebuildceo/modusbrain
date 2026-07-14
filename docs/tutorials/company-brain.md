@@ -388,7 +388,7 @@ Recommended path for each teammate: the thin-client install. On their machine:
 
 ```bash
 curl -fsSL https://bun.sh/install | bash
-bun install -g github:garrytan/modusbrain
+bun install -g github:thebuildceo/modusbrain
 
 modusbrain init --mcp-only \
   --issuer-url https://brain.acme-co.com \

@@ -16,7 +16,7 @@ FROM oven/bun:1 AS builder
 ARG OPENAI_API_KEY
 ENV OPENAI_API_KEY=$OPENAI_API_KEY
 
-RUN bun install -g github:garrytan/modusbrain
+RUN bun install -g github:thebuildceo/modusbrain
 RUN modusbrain init --pglite  # auto-picks OpenAI, persists config
 ```
 
@@ -26,7 +26,7 @@ RUN modusbrain init --pglite  # auto-picks OpenAI, persists config
   env:
     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   run: |
-    bun install -g github:garrytan/modusbrain
+    bun install -g github:thebuildceo/modusbrain
     modusbrain init --pglite
 ```
 
@@ -38,7 +38,7 @@ If the API key is a runtime secret (Kubernetes secret, runtime env injection, en
 
 ```dockerfile
 FROM oven/bun:1
-RUN bun install -g github:garrytan/modusbrain
+RUN bun install -g github:thebuildceo/modusbrain
 
 # Build the brain shape without a provider — schema lands at the default
 # width, but no embed callsite will actually run until runtime config.

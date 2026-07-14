@@ -18,7 +18,7 @@ and writes new knowledge back as you work. The last section,
 [Now make it actually useful](#now-make-it-actually-useful), is the same for both
 and is the part that changes how you work.
 
-Prerequisite for either path: `bun install -g github:garrytan/modusbrain`.
+Prerequisite for either path: `bun install -g github:thebuildceo/modusbrain`.
 
 ---
 

@@ -10,12 +10,12 @@ start here.
    ```bash
    curl -fsSL https://bun.sh/install | bash
    export PATH="$HOME/.bun/bin:$PATH"
-   bun install -g github:garrytan/modusbrain
+   bun install -g github:thebuildceo/modusbrain
    ```
    If `bun install -g` aborts or `modusbrain doctor` reports `schema_version: 0`,
-   the CLI prints a recovery hint pointing at [#218](https://github.com/garrytan/gbrain/issues/218).
+   the CLI prints a recovery hint pointing at [#218](https://github.com/thebuildceo/modusbrain/issues/218).
    Run `modusbrain apply-migrations --yes` to recover, or fall back to the
-   deterministic install: `git clone https://github.com/garrytan/gbrain.git ~/modusbrain && cd ~/modusbrain && bun install && bun link`.
+   deterministic install: `git clone https://github.com/thebuildceo/modusbrain.git ~/modusbrain && cd ~/modusbrain && bun install && bun link`.
 2. Init the brain: `modusbrain init` (defaults to PGLite, zero-config). For 1000+ files or
    multi-machine sync, init suggests Postgres + pgvector via Supabase.
 3. **STOP — ask the user about search mode.** `modusbrain init` auto-applied a

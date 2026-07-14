@@ -28,7 +28,7 @@ Set up ModusBrain from scratch. Target: working brain in under 5 minutes.
 ## Install (if not already installed)
 
 ```bash
-bun add github:garrytan/modusbrain
+bun install -g github:thebuildceo/modusbrain
 ```
 
 ## How ModusBrain connects

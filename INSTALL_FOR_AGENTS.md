@@ -10,18 +10,17 @@ protocol (install, read order, trust boundary, common tasks). Claude Code reads
 `CLAUDE.md` automatically and can skip ahead.
 
 If you fetched this file by URL without cloning yet, the companion files live at:
-- `https://raw.githubusercontent.com/garrytan/modusbrain/master/AGENTS.md` — start here
-- `https://raw.githubusercontent.com/garrytan/modusbrain/master/llms.txt` — full doc map
-- `https://raw.githubusercontent.com/garrytan/modusbrain/master/llms-full.txt` — same map, inlined
+- `https://raw.githubusercontent.com/thebuildceo/modusbrain/master/AGENTS.md` — start here
+- `https://raw.githubusercontent.com/thebuildceo/modusbrain/master/llms.txt` — full doc map
+- `https://raw.githubusercontent.com/thebuildceo/modusbrain/master/llms-full.txt` — same map, inlined
 
-## Step 1: Install ModusBrain
+This orienter matches the v0.32.3+ downstream upgrade requirements.
 
-Default path (Bun is required — modusbrain is a Bun + TypeScript runtime):
+## Step 1: Install the binary (1 min)
 
+Install the global CLI package from GitHub (pinned release or master):
 ```bash
-curl -fsSL https://bun.sh/install | bash
-export PATH="$HOME/.bun/bin:$PATH"
-bun install -g github:garrytan/modusbrain
+bun install -g github:thebuildceo/modusbrain
 ```
 
 Verify: `modusbrain --version` should print a version number. If `modusbrain` is not found,
