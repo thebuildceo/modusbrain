@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "aspen",
+  "theme": "almond",
   "name": "ModusBrain",
   "description": "The company brain agents can safely execute against.",
   "colors": {
