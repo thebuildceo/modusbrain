@@ -119,7 +119,7 @@ modusbrain config set search.mode <mode>
 If they pick tokenmax AND want to preserve the literal v0.31.x default
 (limit=20 instead of tokenmax's 50), also run:
 ```bash
-modusbrain config set search.searchLimit 20
+modusbrain config set search.limit_default 20
 ```
 
 Verify the choice with `modusbrain search modes` before continuing.

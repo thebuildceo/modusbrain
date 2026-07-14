@@ -854,6 +854,7 @@ export const KNOWN_CONFIG_KEYS: readonly string[] = [
   'search.cross_modal.llm_intent',
   'search.image_query.max_bytes',
   'search.reranker.enabled',
+  'search.reranker.timeout_ms',
   'search.track_retrieval',
   // Models tier system (v0.31.12)
   'models.default',
