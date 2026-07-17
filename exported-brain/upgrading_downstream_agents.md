@@ -1,3 +1,8 @@
+---
+type: note
+title: Upgrading Downstream Agents
+---
+
 # Upgrading Downstream Agents
 
 ModusBrain ships skills in `skills/`. Downstream agents (custom OpenClaw deployments,
@@ -538,6 +543,7 @@ To check what your fork is missing:
 diff <(grep -A3 "Based on modusbrain" ~/<your-fork>/skills/brain-ops/SKILL.md) \
      <(grep "v[0-9]" ~/modusbrain/skills/migrations/ | tail -3)
 ```
+
 
 ## v0.36.5.0 — Free-form secret inheritance for shell jobs calling `modusbrain` CLI
 

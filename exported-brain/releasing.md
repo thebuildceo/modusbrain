@@ -1,3 +1,8 @@
+---
+type: note
+title: Releasing & contributing (modusbrain)
+---
+
 # Releasing & contributing (modusbrain)
 
 The full release + contributor process. CLAUDE.md keeps the ship-critical IRON RULES
@@ -48,6 +53,7 @@ invalid type literal that the runner accepted. Caught one of these
 shipping the v0.23.2 round-trip E2E (`type: 'reflection'` is not a
 member of `PageType`). Run `bun run typecheck` once before push, even
 when only test files changed.
+
 
 ## CHANGELOG + VERSION are branch-scoped
 
@@ -338,6 +344,7 @@ the migration orchestrator emits a structured TODO to
 TODOs using `skills/migrations/v0.11.0.md` — stays host-agnostic, still
 canonical.
 
+
 ## Schema state tracking
 
 `~/.modusbrain/update-state.json` tracks which recommended schema directories the user
@@ -359,6 +366,7 @@ done
 ```
 
 If any SHA differs from what's in the workflow files, update the pin and version comment.
+
 
 ## PR descriptions cover the whole branch
 
