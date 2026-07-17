@@ -25,20 +25,26 @@ import {
 } from '../src/core/doctor-categories.ts';
 
 const DOCTOR_TS_PATH = join(import.meta.dir, '..', 'src', 'commands', 'doctor.ts');
+const CHECKS_TS_PATH = join(import.meta.dir, '..', 'src', 'core', 'onboard', 'checks.ts');
 
 function enumerateCheckNames(): Set<string> {
-  const source = readFileSync(DOCTOR_TS_PATH, 'utf-8');
   const names = new Set<string>();
-  // 1) Inline object-literal form: `{ name: 'foo', ... }`.
-  for (const m of source.matchAll(/name:\s*['"]([a-z][a-z0-9_]+)['"]/g)) {
-    names.add(m[1]);
-  }
-  // 2) Helper-function form: `const name = 'foo';` inside a check helper.
-  //    Catches checks like `nightly_quality_probe_health` and
-  //    `conversation_facts_backlog` that build the Check from a captured
-  //    name constant.
-  for (const m of source.matchAll(/const\s+name\s*=\s*['"]([a-z][a-z0-9_]+)['"]/g)) {
-    names.add(m[1]);
+  const filesToScan = [DOCTOR_TS_PATH, CHECKS_TS_PATH];
+
+  for (const filePath of filesToScan) {
+    try {
+      const source = readFileSync(filePath, 'utf-8');
+      // 1) Inline object-literal form: `{ name: 'foo', ... }`.
+      for (const m of source.matchAll(/name:\s*['"]([a-z][a-z0-9_]+)['"]/g)) {
+        names.add(m[1]);
+      }
+      // 2) Helper-function form: `const name = 'foo';` inside a check helper.
+      for (const m of source.matchAll(/const\s+name\s*=\s*['"]([a-z][a-z0-9_]+)['"]/g)) {
+        names.add(m[1]);
+      }
+    } catch {
+      // Ignore if file doesn't exist (e.g. check.ts is optional on some test runs)
+    }
   }
   return names;
 }

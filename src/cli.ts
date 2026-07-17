@@ -811,6 +811,16 @@ export function parseOpArgs(op: Operation, args: string[]): Record<string, unkno
     params[op.cliHints.stdin] = stdinContent;
   }
 
+  // Slug normalization: all slugs are stored lowercase (via slugifyPath at
+  // import/sync time). Auto-lowercase any positional slug params so that
+  // `modusbrain get README` resolves the same as `modusbrain get readme`,
+  // preventing confusing page_not_found errors due to case mismatch.
+  for (const key of (op.cliHints?.positional ?? [])) {
+    if ((key === 'slug' || key === 'from' || key === 'to') && typeof params[key] === 'string') {
+      params[key] = (params[key] as string).toLowerCase();
+    }
+  }
+
   return params;
 }
 

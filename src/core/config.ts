@@ -915,6 +915,8 @@ export const KNOWN_CONFIG_KEYS: readonly string[] = [
   'self_upgrade.attempting_version',
   'self_upgrade.last_check_ts',
   'self_upgrade.last_applied_version',
+  // Schema pack (file-plane; written by `modusbrain init` and `modusbrain schema use`)
+  'schema_pack',
   // Misc
   'artifacts_sync_mode',
   'cross_project_learnings',

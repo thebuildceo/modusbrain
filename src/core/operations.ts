@@ -645,6 +645,15 @@ const get_page: Operation = {
     let page = await ctx.engine.getPage(slug, { includeDeleted, ...sourceOpts });
     let resolved_slug: string | undefined;
 
+    // Auto-normalize: all slugs are lowercased at import time. If the caller
+    // passed an uppercase slug (e.g. `modusbrain get README`), retry with the
+    // lowercased form before falling through to fuzzy resolution.
+    const slugLower = slug.toLowerCase();
+    if (!page && slugLower !== slug) {
+      page = await ctx.engine.getPage(slugLower, { includeDeleted, ...sourceOpts });
+      if (page) resolved_slug = slugLower;
+    }
+
     if (!page && fuzzy) {
       const candidates = await ctx.engine.resolveSlugs(slug, fuzzyScope);
       if (candidates.length === 1) {

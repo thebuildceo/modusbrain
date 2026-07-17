@@ -44,7 +44,25 @@ export async function runCall(engine: BrainEngine, args: string[]) {
     process.exit(1);
   }
 
-  const params = jsonStr ? JSON.parse(jsonStr) : {};
+  let params = {};
+  if (jsonStr) {
+    try {
+      params = JSON.parse(jsonStr);
+    } catch (err) {
+      try {
+        // Try fixing common PowerShell quote-escaping artifact: replace `\"` with `"`
+        const fixed = jsonStr.replace(/\\"/g, '"');
+        params = JSON.parse(fixed);
+      } catch {
+        console.error(`JSON Parse error: ${(err as Error).message}`);
+        console.error(`Received input: ${jsonStr}`);
+        console.error(`Usage: modusbrain call [--source <id>] <tool> '<json>'`);
+        console.error(`Note (Windows PowerShell): use single quotes around JSON and double quotes inside:`);
+        console.error(`  modusbrain call search_brain '{"query": "operational skills"}'`);
+        process.exit(1);
+      }
+    }
+  }
   // Resolve through the canonical 6-tier chain. resolveSourceId() throws if
   // an explicit/env/dotfile id refers to a non-registered source.
   const sourceId = await resolveSourceId(engine, explicitSource);

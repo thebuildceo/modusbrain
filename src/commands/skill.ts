@@ -47,13 +47,18 @@ Subcommands:
   resolve <id>          Resolve conflict and trigger re-compilation
   audit [--slug X]      View agent action audit trail
   correct <slug>        Record human correction (feedback loop)
+                          Required: --original "..." --correction "..."
   approve-token <slug>  Issue approval token for high-stakes execution
 
 Examples:
   modusbrain skill compile "refund handling" --risk-tier high_stakes
   modusbrain skill approve refund-handling --by alice@company.com
   modusbrain skill execute refund-handling --task "Process $300 refund" --context '{"amount":300}'
+  modusbrain skill correct refund-handling --original "gave full refund" --correction "amounts over $400 need sign-off"
   modusbrain skill audit --slug refund-handling --json
+
+Note (Windows PowerShell): pass --context as single-quoted JSON:
+  modusbrain skill execute <slug> --task "..." --context '{"key":"value"}'
 `;
 
 function flagValue(args: string[], name: string): string | undefined {

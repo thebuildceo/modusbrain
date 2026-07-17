@@ -46,3 +46,8 @@ reports/network-intelligence/
 exported-brain/
 allcommandstest.md
 .modusbrain-source
+
+# Auto-managed by modusbrain (db_only directories)
+media/x/
+media/articles/
+meetings/transcripts/
