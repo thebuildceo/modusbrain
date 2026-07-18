@@ -27,6 +27,9 @@
   "appearance": {
     "default": "dark"
   },
+  "styling": {
+    "eyebrows": "breadcrumbs"
+  },
   "navbar": {
     "links": [
       {
@@ -49,38 +52,45 @@
     "tabs": [
       {
         "tab": "Get Started",
+        "icon": "rocket",
         "groups": [
           {
-            "group": "Overview",
+            "group": "Product Overview",
+            "icon": "brain",
             "pages": [
               "introduction",
-              "how-it-works"
+              "how-it-works",
+              "docs/how-modusbrain-works"
             ]
           },
           {
             "group": "Use Cases",
+            "icon": "building-2",
             "pages": [
               "for-companies"
             ]
           },
           {
-            "group": "First Run",
+            "group": "Developer Platform",
+            "icon": "square-terminal",
             "pages": [
               "quickstart",
-              "install"
+              "install",
+              "cli-reference"
             ]
           },
           {
-            "group": "Skills Workflow",
+            "group": "Operational Skills",
+            "icon": "workflow",
             "pages": [
               "opskill-workflow"
             ]
           },
           {
-            "group": "Reference",
+            "group": "Help & Settings",
+            "icon": "circle-help",
             "pages": [
               "faq",
-              "cli-reference",
               "env-vars",
               "attribution"
             ]
@@ -88,10 +98,12 @@
         ]
       },
       {
-        "tab": "MCP & Integrations",
+        "tab": "Connect & Integrate",
+        "icon": "plug-zap",
         "groups": [
           {
             "group": "MCP Clients",
+            "icon": "bot",
             "pages": [
               "docs/mcp/CHATGPT",
               "docs/mcp/CLAUDE_CODE",
@@ -103,6 +115,7 @@
           },
           {
             "group": "MCP Deployment",
+            "icon": "server",
             "pages": [
               "docs/mcp/ALTERNATIVES",
               "docs/mcp/DEPLOY"
@@ -110,6 +123,7 @@
           },
           {
             "group": "Integrations",
+            "icon": "blocks",
             "pages": [
               "docs/integrations/README",
               "docs/integrations/credential-gateway",
@@ -122,10 +136,12 @@
         ]
       },
       {
-        "tab": "Core Guides",
+        "tab": "Build & Operate",
+        "icon": "settings-2",
         "groups": [
           {
             "group": "Core Concepts",
+            "icon": "book-open",
             "pages": [
               "docs/guides/brain-agent-loop",
               "docs/guides/brain-vs-memory",
@@ -136,6 +152,7 @@
           },
           {
             "group": "Knowledge Ingestion",
+            "icon": "inbox",
             "pages": [
               "docs/guides/diligence-ingestion",
               "docs/guides/originals-folder",
@@ -145,7 +162,8 @@
             ]
           },
           {
-            "group": "Advanced Operation",
+            "group": "Agent Operations",
+            "icon": "bot-message-square",
             "pages": [
               "docs/guides/agent-to-modusbrain",
               "docs/guides/brain-first-lookup",
@@ -167,10 +185,12 @@
         ]
       },
       {
-        "tab": "Opskill Dev",
+        "tab": "Skills & Automation",
+        "icon": "wand-sparkles",
         "groups": [
           {
             "group": "Skill Authoring",
+            "icon": "file-pen-line",
             "pages": [
               "docs/guides/skill-development",
               "docs/guides/scaling-skills",
@@ -180,6 +200,7 @@
           },
           {
             "group": "Minions & Gating",
+            "icon": "shield-check",
             "pages": [
               "docs/guides/minions-deployment",
               "docs/guides/minions-fix",
@@ -190,6 +211,7 @@
           },
           {
             "group": "Spend & Cost Controls",
+            "icon": "badge-dollar-sign",
             "pages": [
               "docs/operations/spend-controls",
               "docs/guides/queue-operations-runbook",
@@ -200,9 +222,11 @@
       },
       {
         "tab": "Architecture",
+        "icon": "network",
         "groups": [
           {
             "group": "System Topologies",
+            "icon": "share-2",
             "pages": [
               "docs/architecture/topologies",
               "docs/architecture/brains-and-sources",
@@ -213,6 +237,7 @@
           },
           {
             "group": "Schema & Packs",
+            "icon": "boxes",
             "pages": [
               "docs/architecture/schema-packs",
               "docs/architecture/lens-packs",
@@ -222,6 +247,7 @@
           },
           {
             "group": "Search & Sync Internals",
+            "icon": "search-code",
             "pages": [
               "docs/architecture/RETRIEVAL",
               "docs/architecture/frontmatter-scan-incremental",
@@ -231,6 +257,7 @@
           },
           {
             "group": "Quality & Evals Spec",
+            "icon": "chart-no-axes-combined",
             "pages": [
               "docs/architecture/calibration-quality-gate-spec",
               "docs/architecture/KEY_FILES"
@@ -240,9 +267,11 @@
       },
       {
         "tab": "Tutorials",
+        "icon": "graduation-cap",
         "groups": [
           {
             "group": "Hands-on Guides",
+            "icon": "map",
             "pages": [
               "docs/tutorials/README",
               "docs/tutorials/company-brain",
@@ -255,9 +284,11 @@
       },
       {
         "tab": "Reference",
+        "icon": "book-marked",
         "groups": [
           {
             "group": "CLI & Core Reference",
+            "icon": "terminal",
             "pages": [
               "docs/INSTALL",
               "docs/ENGINES",
@@ -270,8 +301,10 @@
           },
           {
             "group": "Evals & Metrics",
+            "icon": "chart-column",
             "pages": [
               "docs/eval-bench",
+              "docs/eval-benchmarking",
               "docs/eval-capture",
               "docs/eval-takes-quality",
               "docs/eval/METRIC_GLOSSARY",
@@ -280,6 +313,7 @@
           },
           {
             "group": "Database & Schemas",
+            "icon": "database",
             "pages": [
               "docs/contradictions",
               "docs/embedding-migrations",
@@ -292,6 +326,7 @@
           },
           {
             "group": "Schema Development",
+            "icon": "braces",
             "pages": [
               "docs/schema-author-tutorial",
               "docs/skillpack-anatomy",
@@ -303,6 +338,7 @@
           },
           {
             "group": "AI Providers",
+            "icon": "sparkles",
             "pages": [
               "docs/ai-providers/llama-server-reranker",
               "docs/ai-providers/zeroentropy"
@@ -310,6 +346,7 @@
           },
           {
             "group": "Incidents & Issues",
+            "icon": "triangle-alert",
             "pages": [
               "docs/incidents/2026-05-20-lsd-cost-explosion",
               "docs/issues/cross-modal-search",
@@ -318,6 +355,7 @@
           },
           {
             "group": "Migrations & Plans",
+            "icon": "git-pull-request-arrow",
             "pages": [
               "docs/migrations/v0.41.2-markdown-greenfield",
               "docs/plans/2026-06-03-001-feat-idea-lineage-skill-plan",
@@ -326,6 +364,7 @@
           },
           {
             "group": "Internal Designs",
+            "icon": "ruler",
             "pages": [
               "docs/designs/2026_05_EVAL_PLAN",
               "docs/designs/CODE_CATHEDRAL_II",
@@ -339,6 +378,7 @@
           },
           {
             "group": "Ethos & Origin",
+            "icon": "lightbulb",
             "pages": [
               "docs/ethos/MARKDOWN_SKILLS_AS_RECIPES",
               "docs/ethos/ORIGIN",

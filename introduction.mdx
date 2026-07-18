@@ -1,49 +1,56 @@
 ---
 title: Introduction
+description: A shared company brain that helps people and AI agents find the right context and follow approved operating guidance.
 icon: brain
 ---
-<img className="block dark:hidden" src="/docs/modusbrain-black.svg" />
-<img className="hidden dark:block" src="/docs/modusbrain-white.svg" />
 
-> "ModusBrain turns scattered company knowledge into versioned, confidence-gated skills that AI agents execute against-not just search."
+<img className="block dark:hidden" src="/docs/modusbrain-black.svg" alt="ModusBrain" />
+<img className="hidden dark:block" src="/docs/modusbrain-white.svg" alt="ModusBrain" />
 
-**ModusBrain** is an advanced operational knowledge engine specifically engineered to solve the safety and consistency challenges faced by autonomous AI agents. While traditional corporate knowledge bases and retrieval-augmented generation (RAG) platforms are designed primarily for conversational search and basic Q&A, ModusBrain provides an execution-oriented layer. It systematically compiles scattered policy documents, internal wiki runbooks, and team guidelines into highly structured, versioned, and **approved operational skills** protected by automated safety gates and comprehensive cryptographic audit trails.
+ModusBrain turns scattered company knowledge into a **shared, searchable brain** for people and AI agents. It keeps the source material, the context behind it, and the work based on it in one place.
 
-By deploying ModusBrain as your agentic runtime boundary, you ensure that autonomous systems act consistently and follow exact company protocols, eliminating the risk of creative hallucinations or policy violations during high-stakes tasks.
+Instead of asking an agent to guess from a folder of documents, you give it current context, clear operating guidance, and an audit trail for important actions.
 
 <Frame>
-  <img src="/docs/images/modusbrain-architecture.jpg" alt="ModusBrain Architecture Diagram" />
+  <img src="/docs/images/modusbrain-architecture.jpg" alt="A high-level view of the ModusBrain knowledge, retrieval, and agent workflow" />
 </Frame>
 
----
-
-## Key Capabilities
-
-ModusBrain bridges the gap between static retrieval and safe agent execution by establishing a secure operational lifecycle:
-
-* **High-Fidelity Compilation** — ModusBrain automatically reads and parses your raw markdown documentation, wikis, and policies, translating unstructured prose into versioned, static operational skill runbooks with executable logic via a simple command-line interface:
-  `modusbrain opskill compile "topic"`
-* **Adaptive Confidence Gating** — Every action requested by an agent is evaluated in real time against the active policy context. ModusBrain calculates a confidence score and applies strict gating rules based on configurable risk tiers, allowing operators to require manual human approval tokens for sensitive or low-confidence operations.
-* **Cryptographic Action Auditing** — Every skill execution, decision parameter, confidence calculation, and operator approval is written to a secure, queryable audit ledger. This ensures total operational transparency, simplifies compliance reviews, and provides detailed logs for debugging agent behaviors.
-
----
-
-## Explore the Documentation
-
-Get started with the initial setup, or learn the details of how to author and manage operational skills:
+## What ModusBrain does
 
 <CardGroup cols={2}>
-  <Card title="Quickstart Guide" icon="rocket" href="/quickstart">
-    Set up the command-line interface locally, initialize your database, and execute your first operational skill in 5 minutes.
+  <Card title="Organizes knowledge" icon="folders">
+    Import notes, documents, repositories, meetings, and other sources into one structured brain.
   </Card>
-  <Card title="Operational Workflow" icon="list-check" href="/opskill-workflow">
-    Learn the complete lifecycle of operational skills, including compilation, human approval, execution gating, and the correction feedback loop.
+  <Card title="Finds useful context" icon="search">
+    Search across your knowledge and return the pages, facts, links, and history that matter to the question.
+  </Card>
+  <Card title="Connects to agents" icon="bot">
+    Use the CLI or MCP server to give Claude Code, Codex, ChatGPT, and other compatible agents access to your brain.
+  </Card>
+  <Card title="Keeps work accountable" icon="shield-check">
+    Build approved operational skills, apply confidence gates where needed, and review the resulting audit trail.
   </Card>
 </CardGroup>
 
----
+## How it fits together
 
-<Note>
-  Explore the top navigation tabs to access our complete documentation catalog: **MCP & Integrations** (setting up client integrations), **Core Guides** (RAG search and synchronization), **Opskill Dev** (minion queue management and cost controls), **Architecture** (schema design and system topologies), **Tutorials** (step-by-step practical guides), and **Reference** (command-line references and evaluation suites).
-</Note>
+1. **Bring in your source material.** Add Markdown files, repositories, meeting notes, and connected data sources.
+2. **Build a usable knowledge layer.** ModusBrain indexes content, extracts links and facts, and keeps pages connected over time.
+3. **Give agents the right context.** Agents can search, reason over, and follow the approved guidance in your brain.
 
+## Start here
+
+<CardGroup cols={2}>
+  <Card title="See how it works" icon="route" href="/how-it-works">
+    Learn the knowledge-to-action flow in a few minutes.
+  </Card>
+  <Card title="Set up your developer platform" icon="square-terminal" href="/quickstart">
+    Install ModusBrain, create a local brain, and run your first workflow.
+  </Card>
+  <Card title="Connect an AI agent" icon="plug-zap" href="/docs/mcp/CLAUDE_CODE">
+    Add ModusBrain to an MCP-compatible coding agent.
+  </Card>
+  <Card title="Build for a team" icon="building-2" href="/for-companies">
+    See how a company brain supports shared work and safer agent operations.
+  </Card>
+</CardGroup>

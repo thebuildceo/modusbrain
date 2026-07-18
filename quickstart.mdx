@@ -1,28 +1,22 @@
 ---
 title: Quickstart
-description: Set up the ModusBrain command-line interface and execute your first versioned operational skill in under 5 minutes.
+description: Install ModusBrain, create a local brain, and run your first operational workflow.
 icon: rocket
 ---
 
+This guide gets you from a terminal to a working local ModusBrain setup. You will install the CLI, create a brain, compile a draft operational skill, approve it, and inspect the audit record.
 
-Welcome to the ModusBrain Quickstart Guide. This walk-through is designed to get you up and running with versioned, confidence-gated operational skills in just a few minutes. By following these steps, you will install the command-line interface, initialize a local brain database, compile a draft policy skill, approve it for agent use, and audit the results.
+<Info>
+  Use this path for a local setup. You can later connect the same brain to an MCP-compatible agent such as Claude Code or Codex.
+</Info>
 
 ## Before you begin
 
-Before initiating the installation, ensure that your environment meets the following baseline requirements:
-* A terminal or command prompt is open and active on your system.
-* [Bun](https://bun.sh) (version 1.3.10 or higher) or [Node.js](https://nodejs.org) (version 18.0.0 or higher) is installed.
-* A code project or document directory is available to serve as the ingestion source for your brain's context.
+- A terminal on macOS, Linux, or Windows.
+- [Bun](https://bun.sh) 1.3.10+ or Node.js 18+.
+- A folder of notes, docs, or project files you want to use as source material.
 
-<Info>
-  This guide focuses on utilizing the local command-line interface (CLI). To integrate ModusBrain directly into your autonomous agent workflows, you can also run it as a Model Context Protocol (MCP) server compatible with clients like **Claude Desktop**, **Claude Code**, and **ChatGPT**.
-</Info>
-
----
-
-## Step 1: Install ModusBrain
-
-To begin, install the ModusBrain command-line tool globally on your system. You can choose the package manager that best matches your existing JavaScript development environment:
+## 1. Install the CLI
 
 ```bash
 npm install -g @genthropic/modusbrain
@@ -30,67 +24,71 @@ npm install -g @genthropic/modusbrain
 bun install -g @genthropic/modusbrain
 ```
 
----
+## 2. Create a local brain
 
-## Step 2: Initialize your brain
-
-With the CLI installed, you must initialize your local database configuration. This command initializes a high-performance, embedded PGLite database locally at `~/.modusbrain`, which runs entirely in-process and requires no external database servers to be configured:
+The default setup uses PGLite: an embedded database that runs locally and needs no server.
 
 ```bash
 modusbrain init
 modusbrain apply-migrations --yes
-modusbrain config set schema_pack gbrain-base-v2
+modusbrain doctor
 ```
 
----
+<Tip>
+  `modusbrain doctor` checks your installation and tells you exactly how to fix common configuration problems.
+</Tip>
 
-## Step 3: Compile your first skill
+## 3. Add your first source
 
-Once your local database is initialized, you can compile your first operational skill from your raw text or markdown guidelines. The compilation process reads your documentation and extracts structured policy constraints alongside semantic guidance for your agents:
+Import a folder of Markdown files or point ModusBrain at a project you want to search.
+
+```bash
+modusbrain import ~/my-knowledge
+modusbrain search "what is in this knowledge base?"
+```
+
+## 4. Create an operational skill
+
+An operational skill turns approved guidance in your brain into a reusable workflow.
 
 ```bash
 modusbrain opskill compile "refund handling" --risk-tier low_stakes
 modusbrain opskill show refund-handling
 ```
 
----
+## 5. Approve and run it
 
-## Step 4: Approve and execute the skill
-
-By design, newly compiled skills are held in a `draft` status and are confidence-gated, preventing autonomous agents from executing them until they are explicitly verified. To make the skill available, you must promote it to active status and then execute it:
+New skills start as drafts. Review the draft, approve it, then run it with the task context.
 
 ```bash
-# Promote the compiled draft version to active status
 modusbrain opskill approve refund-handling --by owner@company.com
 
-# Execute the active skill using the runtime evaluation engine
 modusbrain opskill execute refund-handling \
-  --task "Process $300 refund for order #1204" \
+  --task "Process a $300 refund for order #1204" \
   --context '{"amount":300}'
 ```
 
----
-
-## Step 5: Verify the action audit trail
-
-Every time an agent executes a skill, ModusBrain logs the details to a secure, tamper-resistant audit ledger. You can inspect this trail to verify execution parameters, confidence scores, and final outcomes:
+## 6. Review what happened
 
 ```bash
 modusbrain opskill audit --slug refund-handling --json
 ```
 
----
+The audit record shows the skill version, inputs, confidence result, and outcome.
 
 ## Next steps
 
-Now that you have successfully completed your first operational loop, you can explore the advanced capabilities of the platform:
-
 <CardGroup cols={2}>
-  <Card title="Workflow Guide" icon="route" href="/opskill-workflow">
-    Read the detailed walk-through covering all five phases of the operational skills lifecycle.
+  <Card title="Connect a coding agent" icon="bot" href="/docs/mcp/CODEX">
+    Give Codex or another MCP client access to the brain you just created.
   </Card>
-  <Card title="CLI Reference" icon="terminal" href="/cli-reference">
-    Explore the complete list of available CLI commands, options, and MCP configuration parameters.
+  <Card title="Learn the full workflow" icon="workflow" href="/opskill-workflow">
+    Understand draft, approval, execution, correction, and audit stages.
+  </Card>
+  <Card title="Set up a team brain" icon="building-2" href="/for-companies">
+    Move from a local setup to shared company knowledge.
+  </Card>
+  <Card title="Browse every command" icon="terminal" href="/cli-reference">
+    Find the CLI commands available in this distribution.
   </Card>
 </CardGroup>
-

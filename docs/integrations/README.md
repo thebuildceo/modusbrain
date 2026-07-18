@@ -1,3 +1,9 @@
+---
+title: Integrations
+description: Bring reliable data from connected services into your ModusBrain knowledge workflow.
+icon: blocks
+---
+
 # Getting Data Into Your Brain
 
 ModusBrain is the retrieval layer. But retrieval is only as good as what you put in.

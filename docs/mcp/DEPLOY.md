@@ -1,3 +1,9 @@
+---
+title: Deploy an MCP server
+description: Connect remote AI clients to a ModusBrain server using local stdio or authenticated HTTP MCP.
+icon: server
+---
+
 # Deploy ModusBrain Remote MCP Server
 
 > **v0.26.0+:** `modusbrain serve --http` ships full OAuth 2.1 (client credentials,

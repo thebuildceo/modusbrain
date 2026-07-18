@@ -1,89 +1,60 @@
 ---
 title: How ModusBrain Works
-description: Understand the five-phase architecture that transforms unstructured company knowledge into versioned, safely executable operational skills for AI agents.
-icon: brain-circuit
+description: A simple view of how ModusBrain turns source material into useful, traceable context for people and AI agents.
+icon: route
 ---
 
-**ModusBrain** is not a chatbot, and it is not a traditional knowledge base. It is an **operational execution layer** — a system purpose-built to close the gap between what your company knows and what your AI agents can safely do.
+ModusBrain is a knowledge layer for AI work. It helps you move from raw files and conversations to context that people and agents can actually use.
 
-Most platforms stop at retrieval: they index your documents, allow your agents to search them, and return text snippets. ModusBrain goes several steps further. It compiles your company's policies, runbooks, and procedures into structured, versioned **operational skills** that agents can execute with full safety gating, human approval flows, and cryptographically signed audit trails.
+The goal is simple: keep the important information easy to find, easy to understand, and connected to the source that supports it.
 
----
-
-## The Five-Phase Lifecycle
-
-Every operational skill in ModusBrain moves through five distinct phases. Together, they form a closed loop that keeps your agents accurate, compliant, and continuously improving.
-
-<Steps>
-  <Step title="Compile">
-    ModusBrain reads your raw documentation — markdown files, internal wikis, support policies, and runbooks — and compiles them into a versioned draft skill. The compilation process extracts both **semantic judgment** (how to reason about edge cases) and **structured policy rules** (explicit logic constraints like `if amount < 500 => auto_approve`), along with a provenance record linking back to every source file used.
-
-    ```bash
-    modusbrain opskill compile "refund handling" --risk-tier high_stakes
-    ```
-  </Step>
-
-  <Step title="Approve">
-    Every compiled skill starts in a `draft` state. Agents cannot execute drafts. A designated owner reviews the skill and explicitly promotes it to `active` status. For sensitive tasks that fall below the confidence threshold, operators can issue time-limited approval tokens instead of promoting the full skill.
-
-    ```bash
-    modusbrain opskill approve refund-handling --by owner@company.com
-    ```
-  </Step>
-
-  <Step title="Execute with Gating">
-    When an agent requests execution, ModusBrain evaluates the full task context against the active skill policy in real time. It calculates a **confidence score** and applies gating rules based on the assigned risk tier. High-stakes actions are hard-blocked unless a human approval token is present. Informational-tier actions log warnings but proceed.
-
-    | Risk Tier | Confidence Threshold | Behavior |
-    | :--- | :---: | :--- |
-    | `informational` | **0.50** | Logs warnings, allows execution |
-    | `low_stakes` | **0.70** | Blocks unless override flag is set |
-    | `high_stakes` | **0.85** | Hard-blocked; requires human approval token |
-  </Step>
-
-  <Step title="Audit">
-    Every execution attempt — whether it succeeds, is blocked, or is overridden — is written to a tamper-resistant audit ledger. Records include the executing agent's identity, the specific skill version evaluated, the calculated confidence score, the full parameter set, and the final outcome. This provides complete operational transparency for compliance and debugging.
-
-    ```bash
-    modusbrain opskill audit --slug refund-handling --json
-    ```
-  </Step>
-
-  <Step title="Correct and Re-Compile">
-    When an agent action is incorrect or a policy needs updating, operators submit corrections through a structured feedback command. ModusBrain writes the correction back to the knowledge graph and, once enough corrections accumulate past the configured threshold, automatically triggers re-compilation of the skill with the updated guidance.
-
-    ```bash
-    modusbrain opskill correct refund-handling \
-      --correction "Amounts over $400 require manager sign-off" \
-      --by manager@company.com
-    ```
-  </Step>
-</Steps>
-
----
-
-## The Safety Architecture
-
-ModusBrain enforces safety at three independent layers, each of which must pass before an agent action is allowed:
+## At a glance
 
 <CardGroup cols={3}>
-  <Card title="Risk Tiers" icon="shield">
-    Every skill is tagged with a risk classification at compile time. The risk tier sets the minimum confidence score required for execution, ensuring that high-stakes actions always require higher certainty.
+  <Card title="1. Add knowledge" icon="folder-input">
+    Bring in documents, notes, repositories, meetings, and connected sources.
   </Card>
-  <Card title="Confidence Gating" icon="lock">
-    At runtime, ModusBrain computes a confidence score for each specific execution request by evaluating the task context against the active policy. Requests that fall below the tier threshold are blocked automatically.
+  <Card title="2. Build context" icon="network">
+    Index content, extract useful links and facts, and keep related pages connected.
   </Card>
-  <Card title="Approval Tokens" icon="key">
-    For edge cases where a human must make the final call, operators can issue time-limited, single-use approval tokens that allow a specific agent to bypass the gate for exactly one execution.
+  <Card title="3. Help agents act" icon="bot">
+    Let compatible agents search the brain and follow the guidance you approve.
   </Card>
 </CardGroup>
 
----
+## The knowledge loop
 
-## How It Fits Into Your Stack
+<Steps>
+  <Step title="Collect source material">
+    Start with the information your team already uses: Markdown files, repository documentation, meeting notes, and imported records. A brain can contain more than one source, so different workspaces can stay separate while still being searchable when appropriate.
+  </Step>
+  <Step title="Make it searchable and connected">
+    ModusBrain stores pages, chunks content for search, and can extract links, entities, timelines, and facts. This gives a question more than keyword matches: it gives it the surrounding context.
+  </Step>
+  <Step title="Retrieve the right context">
+    When a person or agent asks a question, ModusBrain combines keyword, vector, and graph-aware retrieval. Results stay scoped to the correct brain and source.
+  </Step>
+  <Step title="Use approved operational guidance">
+    For repeatable or sensitive work, compile an operational skill from the knowledge in the brain. Skills can be reviewed, approved, confidence-gated, and audited.
+  </Step>
+  <Step title="Keep the brain current">
+    Sync new source changes, enrich pages, and run maintenance when needed. The result is a brain that improves as your knowledge changes.
+  </Step>
+</Steps>
 
-ModusBrain functions as a **policy runtime** that sits between your AI agents and your company's knowledge. Your agents call ModusBrain skills the same way they call any other tool — but instead of getting back raw text, they receive a structured, policy-evaluated result with a full audit record attached.
+## Choose your path
 
-<Card title="Explore the Operational Workflow" icon="route" href="/opskill-workflow">
-  Read the step-by-step guide for the full compilation, approval, execution, and feedback loop in practice.
-</Card>
+<CardGroup cols={2}>
+  <Card title="Use it locally" icon="laptop" href="/quickstart">
+    Set up a local PGLite brain with the CLI.
+  </Card>
+  <Card title="Connect an agent" icon="plug" href="/docs/mcp/DEPLOY">
+    Serve your brain through MCP for coding agents and other clients.
+  </Card>
+  <Card title="Run it for a team" icon="users" href="/for-companies">
+    Use Postgres, scoped sources, and access controls for shared company knowledge.
+  </Card>
+  <Card title="Explore the architecture" icon="network" href="/docs/architecture/topologies">
+    Learn about brains, sources, storage engines, and deployment shapes.
+  </Card>
+</CardGroup>

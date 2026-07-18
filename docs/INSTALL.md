@@ -1,3 +1,9 @@
+---
+title: Advanced installation
+description: Choose the installation and deployment path that fits your local setup, agent platform, or remote MCP server.
+icon: download
+---
+
 # Install
 
 Three install paths. Pick one. Mix later if needed.

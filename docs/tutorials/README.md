@@ -1,3 +1,9 @@
+---
+title: Tutorials
+description: Follow practical, outcome-focused walkthroughs for personal, company, and coding-agent brains.
+icon: map
+---
+
 # Tutorials
 
 Step-by-step walkthroughs that take you from zero to a working outcome. Concrete commands, real numbers, no abstraction-first jargon. Each tutorial assumes no prior ModusBrain knowledge.
