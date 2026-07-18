@@ -1,3 +1,9 @@
+---
+title: Upgrades and auto-update
+description: Keep ModusBrain current without losing control of the update process.
+icon: arrows-rotate
+---
+
 # Upgrades and Auto-Update Notifications
 
 ## Goal

@@ -1,3 +1,9 @@
+---
+title: Spend controls
+description: Set limits and review costs for AI-powered ModusBrain operations.
+icon: dollar-sign
+---
+
 # Spend controls
 
 ModusBrain's embedding-spend gates in one place: every gate, its config key, default,

@@ -1,3 +1,9 @@
+---
+title: Compiled truth
+description: See how ModusBrain turns raw information into structured, usable context.
+icon: check
+---
+
 # Compiled Truth + Timeline Pattern
 
 ## Goal

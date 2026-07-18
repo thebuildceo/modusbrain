@@ -1,3 +1,9 @@
+---
+title: Skill development
+description: Build, test, and improve reusable skills for agent workflows.
+icon: pen
+---
+
 # Skill Development Cycle
 
 ## Goal

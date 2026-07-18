@@ -1,3 +1,9 @@
+---
+title: Brain vs. memory
+description: Learn the difference between a searchable, structured brain and short-term agent memory.
+icon: brain
+---
+
 # Brain vs Memory vs Session
 
 ## Goal

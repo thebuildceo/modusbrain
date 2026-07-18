@@ -1,3 +1,9 @@
+---
+title: Connect ChatGPT
+description: Connect ChatGPT to a remote ModusBrain server through MCP.
+icon: message
+---
+
 # Connect ModusBrain to ChatGPT
 
 **Status (v0.26.0):** Unblocked. ModusBrain's `modusbrain serve --http` ships OAuth 2.1

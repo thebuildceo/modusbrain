@@ -1,3 +1,9 @@
+---
+title: Retrieval
+description: Learn how hybrid search and graph signals help ModusBrain find better context.
+icon: magnifying-glass
+---
+
 # Why the hybrid + graph stack works
 
 Vector search alone underdelivers on real personal-knowledge queries. This doc explains why modusbrain layers four strategies together and how they compound.

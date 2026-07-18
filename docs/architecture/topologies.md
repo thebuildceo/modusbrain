@@ -1,3 +1,9 @@
+---
+title: Topologies
+description: Choose the deployment shape that fits your personal, team, or remote brain.
+icon: sitemap
+---
+
 # ModusBrain Deployment Topologies
 
 ModusBrain supports three deployment shapes. They compose: a single user can mix

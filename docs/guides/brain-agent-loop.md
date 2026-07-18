@@ -1,3 +1,9 @@
+---
+title: Brain-agent loop
+description: Understand how each interaction can improve the context available to your people and agents.
+icon: brain
+---
+
 # The Brain-Agent Loop
 
 ## Goal

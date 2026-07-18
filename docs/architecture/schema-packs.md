@@ -1,3 +1,9 @@
+---
+title: Schema packs
+description: Define the page types and structure that shape a ModusBrain knowledge base.
+icon: boxes
+---
+
 # Schema Packs
 
 A schema pack tells modusbrain what shape your brain takes — which directories

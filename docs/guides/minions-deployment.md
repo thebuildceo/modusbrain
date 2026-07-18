@@ -1,3 +1,9 @@
+---
+title: Minions deployment
+description: Deploy background workers for safe, reliable agent tasks.
+icon: robot
+---
+
 # Minions Worker Deployment Guide
 
 Keep `modusbrain jobs work` running across crashes, reboots, and Postgres

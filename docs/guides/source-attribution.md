@@ -1,3 +1,9 @@
+---
+title: Source attribution
+description: Keep the origin of important knowledge visible and traceable.
+icon: quote-left
+---
+
 # Source Attribution
 
 ## Goal
