@@ -1,3 +1,9 @@
+---
+title: Quiet Hours
+description: Configure quiet hours to pause background sync jobs.
+icon: moon
+---
+
 # Quiet Hours and Timezone-Aware Delivery
 
 ## Goal

@@ -1,3 +1,9 @@
+---
+title: Push Context
+description: Push live context from external tools into your brain.
+icon: upload
+---
+
 # Push-based context (#2095, v0.42.43.0)
 
 Retrieval used to be pull-only: the agent had to *know to ask* before the brain

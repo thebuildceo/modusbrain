@@ -1,3 +1,9 @@
+---
+title: Doctor Auto-Heal & Scoring
+description: How the doctor command auto-heals and scores brain health.
+icon: heart-pulse
+---
+
 # Doctor Auto-Heal and Scoring Improvements
 
 ## Summary

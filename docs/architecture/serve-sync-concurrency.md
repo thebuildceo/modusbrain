@@ -1,3 +1,9 @@
+---
+title: Serve-Sync Concurrency
+description: Concurrency model for serving queries while syncing new data.
+icon: arrows-rotate
+---
+
 # `modusbrain serve` ↔ `modusbrain sync` concurrency (PGLite)
 
 **Short version: on a PGLite brain, stop `modusbrain serve` before a large sync.**

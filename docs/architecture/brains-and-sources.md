@@ -1,3 +1,9 @@
+---
+title: Brains & Sources
+description: The two-axis model: which brain and which source every query routes on.
+icon: database
+---
+
 # Brains and Sources — the mental model
 
 ModusBrain has two orthogonal axes for organizing knowledge. Users and agents both

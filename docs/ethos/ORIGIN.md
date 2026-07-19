@@ -1,3 +1,9 @@
+---
+title: Origin Story
+description: Where ModusBrain came from and why it was built.
+icon: seedling
+---
+
 # Origin story
 
 ModusBrain came out of building OpenClaw — Garry's personal AI agent fork. The first version had skills and a brain, but the brain was a flat directory of markdown files. Search was ripgrep. Memory was vibes.

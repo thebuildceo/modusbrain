@@ -1,3 +1,9 @@
+---
+title: Infrastructure Layer
+description: The database and infrastructure layer powering ModusBrain.
+icon: layer-group
+---
+
 # ModusBrain Infrastructure Layer
 
 The shared foundation that all skills, recipes, and integrations build on.

@@ -1,3 +1,9 @@
+---
+title: Credential Gateway
+description: Manage API credentials securely with ModusBrain.
+icon: key
+---
+
 # Credential Gateway (ClawVisor / Hermes)
 
 

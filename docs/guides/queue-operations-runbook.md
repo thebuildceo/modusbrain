@@ -1,3 +1,9 @@
+---
+title: Queue Operations Runbook
+description: Manage the operation queue in production environments.
+icon: book-open
+---
+
 # Queue operations runbook
 
 "My queue looks wedged — what do I run?" The commands below are in the order

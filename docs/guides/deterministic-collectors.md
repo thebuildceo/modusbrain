@@ -1,3 +1,9 @@
+---
+title: Deterministic Collectors
+description: Build rule-based collectors for structured ingestion.
+icon: filter
+---
+
 # Deterministic Collectors: Code for Data, LLMs for Judgment
 
 ## Goal

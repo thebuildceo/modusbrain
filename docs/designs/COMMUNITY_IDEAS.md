@@ -1,3 +1,9 @@
+---
+title: Community Ideas
+description: Community-sourced feature ideas and feedback.
+icon: users
+---
+
 # Community Ideas Ledger
 
 > A diary of the **valuable ideas** surfaced by the community-PR wave, kept so that

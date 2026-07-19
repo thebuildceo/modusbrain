@@ -1,3 +1,9 @@
+---
+title: Minion Shell Jobs
+description: Run shell-based minion tasks from the CLI.
+icon: terminal
+---
+
 # Minions shell jobs — move deterministic crons off the gateway
 
 ## 30 seconds

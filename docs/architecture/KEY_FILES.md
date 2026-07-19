@@ -1,3 +1,9 @@
+---
+title: Key Files Index
+description: Per-file index: read an entry before editing any key file.
+icon: file-code
+---
+
 # Key files — per-file index (modusbrain repo)
 
 On-demand reference. CLAUDE.md (the always-loaded orientation file) routes here

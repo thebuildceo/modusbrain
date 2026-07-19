@@ -1,3 +1,9 @@
+---
+title: Meeting Ingestion
+description: Automatically ingest meeting notes and recordings.
+icon: microphone
+---
+
 # Meeting Ingestion
 
 ## Goal

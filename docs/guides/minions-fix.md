@@ -1,3 +1,9 @@
+---
+title: Minions Fix Guide
+description: Debug and repair broken minion jobs.
+icon: screwdriver-wrench
+---
+
 # Minions fix — repairing a half-migrated install
 
 **tl;dr:** on v0.11.1+ everything should self-heal. If Minions is partially

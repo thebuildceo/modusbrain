@@ -1,3 +1,9 @@
+---
+title: MCP Alternatives
+description: Alternative ways to connect agents to ModusBrain.
+icon: arrows-split-up-and-left
+---
+
 # Remote MCP Deployment Options
 
 ModusBrain's MCP server runs via `modusbrain serve` (stdio transport). To make it

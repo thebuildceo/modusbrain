@@ -1,3 +1,9 @@
+---
+title: Agent to ModusBrain
+description: Route agent queries through ModusBrain for grounded answers.
+icon: robot
+---
+
 # How a downstream agent should talk to modusbrain
 
 This guide is for authors of downstream agents (hermes, openclaw, future

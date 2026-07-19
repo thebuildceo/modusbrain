@@ -1,3 +1,9 @@
+---
+title: Idea Capture
+description: Quickly capture ideas and link them to existing knowledge.
+icon: lightbulb
+---
+
 # Idea Capture: Originals, Depth, and Distribution
 
 ## Goal

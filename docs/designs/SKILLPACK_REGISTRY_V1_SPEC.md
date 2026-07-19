@@ -1,3 +1,9 @@
+---
+title: Skillpack Registry v1 Spec
+description: Specification for the ModusBrain skillpack registry system.
+icon: box
+---
+
 # Skillpack Publish + Registry + Install Spec (post-v0.36.0.0)
 
 > **⚠️ Needs v0.36 realignment.** This spec was written assuming the pre-v0.36

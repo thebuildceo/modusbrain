@@ -1,3 +1,9 @@
+---
+title: Retrieval Maxpool Incident
+description: Post-mortem of the retrieval connection pool exhaustion incident.
+icon: triangle-exclamation
+---
+
 # Retrieval Incident: a chosen-name page was missed, and the fix
 
 **Status:** Resolved (retrieval-cathedral wave). Supersedes the docs-only RFC in

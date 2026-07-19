@@ -1,3 +1,9 @@
+---
+title: Embedding Providers
+description: Configure embedding providers for vector search.
+icon: microchip
+---
+
 # Embedding providers
 
 ModusBrain ships with 16 embedding-provider recipes covering OpenAI, ZeroEntropy, Voyage, OpenRouter (single key, many hosted models), the major hosted alternatives, three local options, and a universal escape hatch (LiteLLM proxy). Run `modusbrain providers list` to see the live registry; `modusbrain providers explain --json` emits a machine-readable matrix for agents.

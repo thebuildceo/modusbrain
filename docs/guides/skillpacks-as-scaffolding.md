@@ -1,3 +1,9 @@
+---
+title: Skillpacks as Scaffolding
+description: Use skillpacks to scaffold new agent capabilities fast.
+icon: building
+---
+
 # Skillpacks as scaffolding, not amber
 
 ModusBrain v0.33 reshapes `modusbrain skillpack` from a package manager into a

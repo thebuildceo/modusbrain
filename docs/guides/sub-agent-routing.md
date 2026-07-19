@@ -1,3 +1,9 @@
+---
+title: Sub-Agent Routing
+description: Route tasks across sub-agents using ModusBrain context.
+icon: arrows-split-up-and-left
+---
+
 # Sub-Agent Model Routing
 
 ## Goal

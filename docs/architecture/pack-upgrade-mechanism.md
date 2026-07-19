@@ -1,3 +1,9 @@
+---
+title: Pack Upgrade Mechanism
+description: How schema packs are versioned and upgraded without data loss.
+icon: arrow-up
+---
+
 # Pack-Upgrade Mechanism (v0.41.22)
 
 > How `gbrain-base@1.x → gbrain-base-v2@1.0.0` (and any future pack

@@ -1,3 +1,9 @@
+---
+title: Codex
+description: Connect ModusBrain to OpenAI Codex via MCP.
+icon: square-terminal
+---
+
 # Connect ModusBrain to Codex
 
 > New to this? The [Give your coding agent a memory](../tutorials/connect-coding-agent.md)

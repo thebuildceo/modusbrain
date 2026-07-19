@@ -1,3 +1,9 @@
+---
+title: Claude Co-Work
+description: Multi-agent collaboration with ModusBrain and Claude.
+icon: users
+---
+
 # Connect ModusBrain to Claude Cowork
 
 Two ways to get ModusBrain into Cowork sessions:

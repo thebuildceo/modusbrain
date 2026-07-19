@@ -1,3 +1,9 @@
+---
+title: Scaling Skills
+description: Scale operational skills across large agent fleets.
+icon: arrow-up-right-dots
+---
+
 # Scaling skills past 300 without drowning the context window
 
 When an agent grows past 100 skills, a wall starts forming. Sessions take

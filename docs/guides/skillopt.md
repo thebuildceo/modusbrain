@@ -1,3 +1,9 @@
+---
+title: Skill Optimization
+description: Improve skill quality using the SkillOpt feedback loop.
+icon: sliders
+---
+
 # `modusbrain skillopt` — Self-evolving skills
 
 Treat your `SKILL.md` files as the trainable parameters of an agent that

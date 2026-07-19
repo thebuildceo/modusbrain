@@ -1,3 +1,9 @@
+---
+title: Build a Company Brain
+description: Step-by-step tutorial: set up a shared brain for your team.
+icon: building
+---
+
 # Tutorial: Extend your personal brain into a company brain
 
 This tutorial picks up where the [personal brain tutorial](personal-brain.md) leaves off. You already have a working agent (OpenClaw on Render, talking to you on Telegram, with ModusBrain as memory and Supabase storing embeddings). Now you want your whole team to use it as shared institutional memory, with each person seeing only what they're allowed to see.

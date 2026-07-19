@@ -1,3 +1,9 @@
+---
+title: Metric Glossary
+description: Definitions for all ModusBrain evaluation metrics.
+icon: book
+---
+
 # Evaluation Metric Glossary
 
 **Auto-generated from `src/core/eval/metric-glossary.ts`. Do not edit by hand.** Run `bun run scripts/generate-metric-glossary.ts` to regenerate.

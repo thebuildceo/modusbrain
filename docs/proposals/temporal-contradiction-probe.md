@@ -1,3 +1,9 @@
+---
+title: Temporal Contradiction Probe
+description: Proposed system for detecting temporal contradictions in facts.
+icon: clock-rotate-left
+---
+
 # Proposal: Temporal Axis for Contradiction Probe
 
 **Status:** Report / RFC

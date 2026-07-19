@@ -1,3 +1,9 @@
+---
+title: Live Sync
+description: Keep your brain automatically in sync with source documents.
+icon: rotate
+---
+
 # Live Sync: Keep the Index Current
 
 ## Goal

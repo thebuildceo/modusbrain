@@ -1,3 +1,9 @@
+---
+title: Pre-Commit Hook
+description: Sync code knowledge into ModusBrain on every commit.
+icon: git-pull-request
+---
+
 # Pre-commit hook for brain repos (v0.22.4+)
 
 `modusbrain frontmatter install-hook` installs a git pre-commit hook in your

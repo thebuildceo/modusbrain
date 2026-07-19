@@ -1,3 +1,9 @@
+---
+title: ZeroEntropy
+description: Integrate ZeroEntropy as an AI provider for retrieval.
+icon: sparkles
+---
+
 # ZeroEntropy — zembed-1 + zerank-2
 
 [ZeroEntropy](https://zeroentropy.dev) ships two specialized small models

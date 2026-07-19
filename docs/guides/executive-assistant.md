@@ -1,3 +1,9 @@
+---
+title: Executive Assistant
+description: Use ModusBrain to power a fully context-aware executive assistant.
+icon: briefcase
+---
+
 # Executive Assistant Pattern
 
 ## Goal

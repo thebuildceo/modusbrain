@@ -1,3 +1,9 @@
+---
+title: Claude Code
+description: Connect ModusBrain to Claude Code via MCP.
+icon: code
+---
+
 # Connect ModusBrain to Claude Code
 
 > New to this? The [Give your coding agent a memory](../tutorials/connect-coding-agent.md)

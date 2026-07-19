@@ -1,3 +1,9 @@
+---
+title: Type Taxonomy
+description: The entity and document type taxonomy used across ModusBrain.
+icon: sitemap
+---
+
 # Type Taxonomy (v0.41.22: gbrain-base-v2)
 
 > The 14-canonical-type DRY/MECE taxonomy shipped in v0.41.22. Predecessor

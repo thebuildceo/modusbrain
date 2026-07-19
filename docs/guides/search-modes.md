@@ -1,3 +1,9 @@
+---
+title: Search Modes
+description: Choose between hybrid, vector, and keyword search strategies.
+icon: magnifying-glass
+---
+
 # Search Modes
 
 ## Goal

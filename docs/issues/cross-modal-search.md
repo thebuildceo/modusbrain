@@ -1,3 +1,9 @@
+---
+title: Cross-Modal Search
+description: Known issue: cross-modal search edge cases and workarounds.
+icon: magnifying-glass
+---
+
 # Cross-Modal Search: Text↔Image Retrieval
 
 ## Summary

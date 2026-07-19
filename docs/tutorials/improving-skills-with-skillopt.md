@@ -1,3 +1,9 @@
+---
+title: Improve Skills with SkillOpt
+description: Use the SkillOpt loop to continuously improve operational skills.
+icon: sliders
+---
+
 # Auto-improve a skill with `modusbrain skillopt`
 
 You have a `SKILL.md`. Sometimes the agent following it does a great job, sometimes

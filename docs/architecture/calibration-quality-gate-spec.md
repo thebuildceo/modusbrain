@@ -1,3 +1,9 @@
+---
+title: Calibration Quality Gate
+description: Specification for the calibration and quality gate system.
+icon: chart-line
+---
+
 # Calibration Quality Gate — Falsifiability Filter + Category Classification
 
 > **Historical context.** This is the source spec absorbed from PR #1191 into

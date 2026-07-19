@@ -1,3 +1,9 @@
+---
+title: Diligence Ingestion
+description: Ingest due-diligence documents and research into your brain.
+icon: inbox
+---
+
 # Diligence Ingestion: Data Room to Brain Pages
 
 ## Goal

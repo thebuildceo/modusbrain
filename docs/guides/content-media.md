@@ -1,3 +1,9 @@
+---
+title: Content & Media
+description: Ingest images, audio, and video content into your brain.
+icon: photo-film
+---
+
 # Content and Media Ingestion
 
 ## Goal

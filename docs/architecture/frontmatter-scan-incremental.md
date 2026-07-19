@@ -1,3 +1,9 @@
+---
+title: Incremental Frontmatter Scan
+description: How ModusBrain incrementally scans and indexes document frontmatter.
+icon: magnifying-glass
+---
+
 # Frontmatter scan: DB-backed incremental state (Phase 2 design sketch)
 
 **Status:** Designed, not built. Captured here as the starting point for the

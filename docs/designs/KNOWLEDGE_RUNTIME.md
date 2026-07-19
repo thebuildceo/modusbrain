@@ -1,3 +1,9 @@
+---
+title: Knowledge Runtime
+description: Design document for the ModusBrain knowledge runtime layer.
+icon: microchip
+---
+
 # ModusBrain Knowledge Runtime — Design Doc
 
 **Status:** DRAFT for CEO review.

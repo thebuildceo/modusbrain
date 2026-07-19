@@ -1,3 +1,9 @@
+---
+title: Claude Desktop
+description: Connect ModusBrain to the Claude Desktop app.
+icon: desktop
+---
+
 # Connect ModusBrain to Claude Desktop
 
 **Important:** Claude Desktop does NOT connect to remote MCP servers via

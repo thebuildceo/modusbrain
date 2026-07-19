@@ -1,3 +1,9 @@
+---
+title: Connect a Coding Agent
+description: Wire a coding agent (Cursor, Codex) to your ModusBrain.
+icon: code
+---
+
 # Give your coding agent a memory: ModusBrain + Claude Code / Codex
 
 Coding agents got very good at code. They're still amnesiac about everything

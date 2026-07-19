@@ -1,3 +1,9 @@
+---
+title: Llama Server Reranker
+description: Use a local Llama server as a reranking provider.
+icon: server
+---
+
 # llama-server reranker (local) — Qwen3-Reranker, self-hosted ZE, any ZE-wire-shape provider
 
 [`llama-server`](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md)

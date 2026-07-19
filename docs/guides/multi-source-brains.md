@@ -1,3 +1,9 @@
+---
+title: Multi-Source Brains
+description: Combine multiple data sources in a single unified brain.
+icon: layer-group
+---
+
 # Multi-source brains
 
 **A single modusbrain database can hold multiple knowledge repos.** Each one

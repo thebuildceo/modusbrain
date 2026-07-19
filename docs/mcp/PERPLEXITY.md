@@ -1,3 +1,9 @@
+---
+title: Perplexity
+description: Connect ModusBrain to Perplexity AI via MCP.
+icon: magnifying-glass
+---
+
 # Connect ModusBrain to Perplexity Computer
 
 Perplexity Computer connects as a **remote** MCP client, so ModusBrain must be served

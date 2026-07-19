@@ -1,3 +1,9 @@
+---
+title: Entity Detection
+description: Automatically detect and link entities across your brain.
+icon: tag
+---
+
 # Entity Detection: Run It on Every Message
 
 ## Goal

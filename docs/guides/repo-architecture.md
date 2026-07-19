@@ -1,3 +1,9 @@
+---
+title: Repo Architecture
+description: Understand how ModusBrain organizes its own codebase.
+icon: sitemap
+---
+
 # Two-Repo Architecture: Agent Behavior vs World Knowledge
 
 ## Goal

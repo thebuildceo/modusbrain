@@ -1,3 +1,9 @@
+---
+title: Lens Packs
+description: View your knowledge through different lenses for specific use cases.
+icon: glasses
+---
+
 # Lens packs (v0.41.2.0)
 
 Four bundled schema packs that turn the modusbrain dream cycle into a multi-lens

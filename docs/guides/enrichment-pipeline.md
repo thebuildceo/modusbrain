@@ -1,3 +1,9 @@
+---
+title: Enrichment Pipeline
+description: Enrich raw documents with entities, facts, and relationships.
+icon: arrow-right-arrow-left
+---
+
 # Enrichment Pipeline
 
 ## Goal

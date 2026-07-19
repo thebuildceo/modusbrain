@@ -1,3 +1,9 @@
+---
+title: Homebrew for Personal AI
+description: Vision: ModusBrain as the Homebrew of personal AI infrastructure.
+icon: house
+---
+
 # Homebrew for Personal AI Infrastructure
 
 The 10-star vision for ModusBrain's integration system. Ship Approach B (v0.7.0),

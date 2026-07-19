@@ -1,3 +1,9 @@
+---
+title: Row-Level Security
+description: Control data visibility with row-level security policies.
+icon: shield-halved
+---
+
 # RLS and you
 
 Short version: every table in your modusbrain's `public` schema needs Row Level

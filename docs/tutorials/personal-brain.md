@@ -1,3 +1,9 @@
+---
+title: Build a Personal Brain
+description: Set up a private personal knowledge brain for yourself.
+icon: user
+---
+
 # Tutorial: Set up your personal AI agent + brain from zero
 
 By the end of this tutorial you'll have your own AI agent running on a server you control, talking to you over Telegram, with a brain that remembers everything you tell it. About two hours end-to-end, $100 to $150 a month sustained.

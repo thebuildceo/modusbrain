@@ -1,3 +1,9 @@
+---
+title: Thin Client
+description: The remote MCP seam and thin-client architecture for distributed deployments.
+icon: plug
+---
+
 # Thin-client routing (remote MCP)
 
 On-demand reference (see CLAUDE.md Reference map). Current behavior + invariants

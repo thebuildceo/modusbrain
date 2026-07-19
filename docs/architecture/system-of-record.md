@@ -1,3 +1,9 @@
+---
+title: System of Record
+description: How ModusBrain acts as the authoritative system of record for agent knowledge.
+icon: server
+---
+
 # System of record
 
 **The GitHub repo (markdown + frontmatter) is the system of record.

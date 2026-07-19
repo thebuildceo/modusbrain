@@ -1,3 +1,9 @@
+---
+title: Brain-First Lookup
+description: Always check ModusBrain before hitting external APIs.
+icon: brain
+---
+
 # Brain-First Lookup Protocol
 
 ## Goal

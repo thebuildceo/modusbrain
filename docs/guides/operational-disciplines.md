@@ -1,3 +1,9 @@
+---
+title: Operational Disciplines
+description: Best practices for running ModusBrain in production.
+icon: list-check
+---
+
 # Operational Disciplines
 
 ## Goal

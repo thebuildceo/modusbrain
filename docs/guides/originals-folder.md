@@ -1,3 +1,9 @@
+---
+title: Originals Folder
+description: Keep source originals linked to their extracted knowledge.
+icon: folder-open
+---
+
 # The Originals Folder
 
 ## Goal

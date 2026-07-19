@@ -1,3 +1,9 @@
+---
+title: Eval Plan (May 2026)
+description: Internal design document for the May 2026 evaluation plan.
+icon: chart-line
+---
+
 # Embedder Shootout — May 2026 Eval Plan
 
 **Status:** approved, ready to execute

@@ -1,3 +1,9 @@
+---
+title: Cron Schedule
+description: Schedule recurring brain sync and operation jobs.
+icon: clock
+---
+
 # Reference Cron Schedule
 
 ## Goal

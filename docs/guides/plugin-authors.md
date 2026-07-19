@@ -1,3 +1,9 @@
+---
+title: Plugin Authors
+description: Guide for building plugins and custom skill handlers.
+icon: puzzle-piece
+---
+
 # Plugin authors guide (v0.15)
 
 `modusbrain` discovers subagent definitions from outside this repo via

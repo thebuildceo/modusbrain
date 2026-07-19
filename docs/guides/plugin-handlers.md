@@ -1,3 +1,9 @@
+---
+title: Plugin Handlers
+description: Register and manage custom operation handlers.
+icon: plug
+---
+
 # Plugin handlers — registering host-specific Minion handlers
 
 ModusBrain's Minion worker ships with seven built-in handlers: `sync`,

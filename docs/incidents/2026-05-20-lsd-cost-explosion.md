@@ -1,3 +1,9 @@
+---
+title: Incident: LSD Cost Explosion
+description: Post-mortem of the May 2026 cost explosion incident.
+icon: triangle-exclamation
+---
+
 # Incident Report: LSD Brainstorm 53× Cost Overrun
 
 **Date:** 2026-05-20
