@@ -68,7 +68,7 @@ Every metric `modusbrain eval *` and `modusbrain search stats` reports has a pla
 
 **Plain English:** The mean base (pre-boost) retrieval score of the TOP result across recent searches, from `modusbrain search stats`. It is NOT a labeled accuracy number — it is a drift signal: if this trends DOWN over time, retrieval quality is regressing (the early warning that would have caught the duplicate-page incident before a human did).
 
-**Range:** 0..1. Watch the trend, not the absolute value; pair with the <0.6 / 0.6-0.85 / >=0.85 bucket counts for shape.
+**Range:** 0..1. Watch the trend, not the absolute value; pair with the &lt;0.6 / 0.6-0.85 / &gt;=0.85 bucket counts for shape.
 
 ### Create-safety hint (evidence contract)
 
@@ -154,7 +154,7 @@ Every metric `modusbrain eval *` and `modusbrain search stats` reports has a pla
 
 **Plain English:** 99th percentile wall-clock time per search call. The latency that 1% of users see — long-tail experience, not the average.
 
-**Range:** 0..unbounded. Warm-cache hits should be <50ms; tokenmax with expansion can exceed 200ms due to the Haiku call.
+**Range:** 0..unbounded. Warm-cache hits should be &lt; 50ms; tokenmax with expansion can exceed 200ms due to the Haiku call.
 
 ## Result-Sizing Metrics
 
@@ -162,7 +162,7 @@ Every metric `modusbrain eval *` and `modusbrain search stats` reports has a pla
 
 **Key:** `autocut.signal`
 
-**Plain English:** Which signal autocut used to size the result set. 'rerank' means it found a real score cliff in the cross-encoder rerank scores and cut there; 'none' means no trustworthy cliff (no reranker, <2 scored results, or the gap was too small) so it returned the full list.
+**Plain English:** Which signal autocut used to size the result set. 'rerank' means it found a real score cliff in the cross-encoder rerank scores and cut there; 'none' means no trustworthy cliff (no reranker, &lt; 2 scored results, or the gap was too small) so it returned the full list.
 
 **Range:** 'rerank' | 'none'. 'none' is not a failure — it means autocut declined to cut because the signal didn't justify it.
 

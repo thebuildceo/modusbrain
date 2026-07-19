@@ -291,7 +291,7 @@ No contributor hand-runs git. The skill drives:
    - Dependency declaration check — every external resource referenced
      in SKILL.md must be in a declared `external_resources:` array
    - Trial install: extract pack into a tempdir, run `modusbrain skillpack
-     install <tempdir>` against an ephemeral PGLite-backed modusbrain (mirrors
+     install &lt;tempdir&gt;` against an ephemeral PGLite-backed modusbrain (mirrors
      the `test/e2e/longmemeval` ephemeral-PGLite pattern at
      `src/eval/longmemeval/harness.ts`), assert `modusbrain check-resolvable`
      stays clean and the skill rows appear in the managed block.
@@ -465,7 +465,7 @@ defaults to per-step approval**.
 - `--runbook-apply-all` flag bypasses the per-step prompt for CI /
   unattended agent use. Loud stderr line on first use:
   `[skillpack] applying runbook unattended; this skillpack is community
-  tier — confirm trust by inspecting <pack-dir>/runbooks/install.md`.
+  tier — confirm trust by inspecting &lt;pack-dir&gt;/runbooks/install.md`.
 - `--runbook-skip` lands the files without executing any runbook step
   (the publisher gets file-drop only; everything else is the user's
   decision).
@@ -939,8 +939,8 @@ modusbrain skillpack pack [--out <path>]         # NEW: validate + emit .tgz tar
   `test/skillpack-tarball-determinism.test.ts` (pack the same dir
   twice on different days → same SHA).
 - `src/core/skillpack/collision-resolver.ts` — pure function
-  `resolveSlugCollisions(incoming: string[], existing: Set<string>): {
-  finalSlugs: string[], renameMap: Record<string,string> }`. Bounded
+  `resolveSlugCollisions(incoming: string[], existing: Set&lt;string&gt;): {
+  finalSlugs: string[], renameMap: Record&lt;string,string&gt; }`. Bounded
   walk to `-99`. Pinned by unit tests.
 - `src/core/skillpack/multi-source-receipt.ts` — parse + serialize the
   per-source resolver-block sub-headers. Pure functions; pinned by tests.
@@ -954,7 +954,7 @@ modusbrain skillpack pack [--out <path>]         # NEW: validate + emit .tgz tar
   **Offline-safe**: on fetch failure (network down, GitHub 5xx, DNS
   miss), falls back to the on-disk cache and emits a single stderr
   line per process: `[skillpack] registry fetch failed, using cache
-  from <fetched_at> (N hours old)`. If cache is >7 days old, the
+  from &lt;fetched_at&gt; (N hours old)`. If cache is >7 days old, the
   warning escalates to `cache is stale, run 'modusbrain skillpack registry
   --refresh' when back online`. Hard-fail only when there is no cache
   at all (first-run + offline). `--no-cache` flag forces network and
@@ -972,7 +972,7 @@ modusbrain skillpack pack [--out <path>]         # NEW: validate + emit .tgz tar
     spinup. Falls back to `unshare --net + --mount` when bwrap is
     missing but the kernel allows unprivileged user namespaces (covers
     stock Debian/Ubuntu/Arch). Falls back to `docker run --rm
-    --network=none --volume <tempdir>:/work --workdir /work` for
+    --network=none --volume &lt;tempdir&gt;:/work --workdir /work` for
     RHEL/Rocky/CentOS where unprivileged userns is disabled by
     sysctl. Pure-tree: no minimal Linux image without bwrap AND without
     docker — fails loud with a paste-ready apt/yum install hint.
@@ -1030,13 +1030,13 @@ modusbrain skillpack pack [--out <path>]         # NEW: validate + emit .tgz tar
 - `src/commands/skillpack-pack.ts` — `modusbrain skillpack pack` validator
   AND tarball emitter. Single command, `--dry-run` skips the tarball.
 - `src/commands/skillpack-info.ts` + `skillpack-update.ts`.
-- `src/commands/skillpack-search.ts` — `modusbrain skillpack search <query>
+- `src/commands/skillpack-search.ts` — `modusbrain skillpack search &lt;query&gt;
   [--tier ...] [--json]` reads the registry, ranks by tier then tag
   match, prints a table.
 - `src/commands/skillpack-registry.ts` — `modusbrain skillpack registry
   [--url X] [--refresh]` show/set the configured registry URL,
   optionally force a fresh fetch.
-- `src/commands/skillpack-endorse.ts` — `modusbrain skillpack endorse <name>
+- `src/commands/skillpack-endorse.ts` — `modusbrain skillpack endorse &lt;name&gt;
   [--tier endorsed|community|experimental] [--push] [--dry-run]`. Runs
   in a clone of the registry repo; validates `<name>` against
   `registry.json`; reads, updates, schema-validates, and writes
@@ -1082,7 +1082,7 @@ modusbrain skillpack pack [--out <path>]         # NEW: validate + emit .tgz tar
   tests.
 - `src/core/skillpack/doctor.ts` — `runDoctor(pack, opts:
   {mode: 'quick' | 'full', fix: boolean, autoYes: boolean}):
-  Promise<DoctorResult>`. Walks the rubric, dispatches each check,
+  Promise&lt;DoctorResult&gt;`. Walks the rubric, dispatches each check,
   computes score + tier eligibility, emits paste-ready fixes. `--fix`
   path dispatches per-dimension auto-scaffold (calls `modusbrain skillify
   scaffold` for missing skills, writes runbook stubs from a template
@@ -1133,7 +1133,7 @@ modusbrain skillpack pack [--out <path>]         # NEW: validate + emit .tgz tar
   `readRecentSkillpackEvents(days)` is the readback path for `modusbrain
   doctor`'s new `skillpack_activity` check (info-level: "installed N
   packs in the last 7 days, all from endorsed tier" or "installed 2
-  community-tier packs in the last 24h — review at <audit-path>").
+  community-tier packs in the last 24h — review at &lt;audit-path&gt;").
 - `skills/modusbrain-skillpack-publish/SKILL.md` — the publish-gate skill
   itself. Lives in the bundled skillpack so every modusbrain install ships
   with it. Walks the contributor through:
@@ -1269,8 +1269,8 @@ modusbrain skillpack pack [--out <path>]         # NEW: validate + emit .tgz tar
   pass / fail each dimension individually + a known-bad pack that
   triggers all 10 fixes simultaneously),
   `test/skillpack-doctor-quick.test.ts` (the `--quick` mode runs in
-  < 1s on the reference pack; produces stable JSON envelope; refuses
-  scores < 5; exit codes correct per band),
+  &lt; 1s on the reference pack; produces stable JSON envelope; refuses
+  scores &lt; 5; exit codes correct per band),
   `test/skillpack-doctor-fix.test.ts` (`--fix` scaffolds missing
   pieces; respects the mtime-vs-manifest heuristic and refuses to
   overwrite hand-edited files; confirm prompt fires on TTY;
@@ -1405,7 +1405,7 @@ earlier ones from shipping value:
 2. **W2: Registry catalog** — `garrytan/modusbrain-skillpack-registry`
    created, `registry.json` schema + endorsements.json, registry-client
    with stale-cache fallback, `modusbrain skillpack search` + `install
-   <short-name>` + `info`. Initial catalog seeded with bundled modusbrain
+   <short-name&gt;` + `info`. Initial catalog seeded with bundled modusbrain
    skills + hackathon-evaluation + maybe one community pack.
 3. **W3: Publish-gate skill** — `/modusbrain-skillpack-publish` skill,
    security-gates module, sandbox-probe, subprocess-isolated trial
@@ -1496,7 +1496,7 @@ Conflict flag: Lane A and Lane C both touch the in-tree skillpack module dir. Re
 
 | Dimension          | Before | Round 1 | Round 2 | Notes |
 |--------------------|--------|---------|---------|-------|
-| Getting Started    | 4/10   | 9/10    | **10/10** | scaffold + `doctor --quick` round-trip in <10s; reference pack as ground truth |
+| Getting Started    | 4/10   | 9/10    | **10/10** | scaffold + `doctor --quick` round-trip in &lt; 10s; reference pack as ground truth |
 | API/CLI/SDK        | 6/10   | 9/10    | **10/10** | `init / doctor / pack / test / publish / endorse / install / search` complete surface |
 | Error Messages     | 5/10   | 8/10    | **9/10** | doctor emits paste-ready fix per failed dimension; auto-fixable flag for agents |
 | Documentation      | 5/10   | 8/10    | **10/10** | `docs/skillpack-anatomy.md` is one-page + auto-generated rubric + reference pack as example |
@@ -1504,7 +1504,7 @@ Conflict flag: Lane A and Lane C both touch the in-tree skillpack module dir. Re
 | Dev Environment    | 6/10   | 9/10    | **10/10** | `doctor --quick` (~5s) + `--fix` autoscaffold + `--full` (publish-gate) |
 | Community          | 3/10   | 8/10    | **9/10** | registry + tarball mirror + endorsement workflow + reference pack to fork |
 | DX Measurement     | 2/10   | 7/10    | **9/10** | doctor JSON envelope is stable; per-dimension scoring trend across publishes |
-| **TTHW**           | n/a    | <5min   | **<3min** | `init` → edit → `doctor --quick` → 10/10 |
+| **TTHW**           | n/a    | &lt; 5min   | **&lt; 3min** | `init` → edit → `doctor --quick` → 10/10 |
 | **Overall DX**     | 4/10   | 8.5/10  | **9.5/10** | Rubric-as-source-of-truth + `every bundled pack is 10/10` invariant is the kill move |
 
 **Magical moment** (locked from DX 0D): `modusbrain skillpack install <name>` lands the pack AND walks `runbooks/install.md` AND the agent immediately knows what triggers fire, what tools the skill exposes, and how to upgrade later. Zero "where are the docs?" moment.
@@ -1533,7 +1533,7 @@ Conflict flag: Lane A and Lane C both touch the in-tree skillpack module dir. Re
 
 **Recommended next reviews:**
 1. **/codex consult** as an outside voice on the locked-in plan; the artifact-as-software-package framing deserves an independent challenge.
-2. **/devex-review** after implementation lands — the boomerang. Plan says TTHW < 5min; reality check post-ship.
+2. **/devex-review** after implementation lands — the boomerang. Plan says TTHW &lt; 5min; reality check post-ship.
 
 **UNRESOLVED:** none. CEO + Eng + DX (both rounds) + Codex outside-voice all clear with explicit decisions for every load-bearing item across 27 questions.
 

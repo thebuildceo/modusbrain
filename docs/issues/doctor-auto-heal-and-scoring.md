@@ -148,7 +148,7 @@ Many doctor warnings have known fixes that are safe to auto-apply:
 |---|---|
 | Supervisor not running | Start supervisor |
 | Stale embeddings | Submit `embed --stale` job |
-| Extract coverage < 70% | Submit `extract all --skip-existing` job |
+| Extract coverage &lt; 70% | Submit `extract all --skip-existing` job |
 | Stale sync | Submit sync job |
 | Effective date drift | Run `reindex-frontmatter` |
 
@@ -215,7 +215,7 @@ Threshold-based scoring:
 - 100% = full points
 - ≥95% = 90% of points
 - ≥80% = 70% of points
-- <80% = proportional
+- &lt; 80% = proportional
 
 ---
 

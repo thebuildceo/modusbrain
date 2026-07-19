@@ -87,14 +87,14 @@ proposal (this lives in v0.42 follow-up; v1 emits the audit event).
 | `--batch-size N` | 8 | Tasks per inner step |
 | `--lr N` | 4 | Max edits per step |
 | `--lr-schedule cosine\|linear\|constant` | cosine | Edit-budget decay |
-| `--split TRAIN:SEL:TEST` | 4:1:5 | Ratio; refuses if D_sel < 5 |
+| `--split TRAIN:SEL:TEST` | 4:1:5 | Ratio; refuses if D_sel &lt; 5 |
 | `--optimizer-model MODEL` | tier.deep | Reflects + proposes |
 | `--target-model MODEL` | tier.subagent | Executes the skill |
 | `--judge-model MODEL` | tier.reasoning | Scores rollouts |
 | `--patch \| --rewrite` | patch | Edit ops only vs. full rewrites |
 | `--dry-run` | off | Cost preview, no LLM calls |
 | `--no-mutate` | off | Write proposed.md, don't replace SKILL.md (no held-out needed) |
-| `--allow-mutate-bundled` | off | Required to mutate modusbrain-bundled skills in place — ALSO requires `--held-out` (>=5 rows) or the run hard-refuses |
+| `--allow-mutate-bundled` | off | Required to mutate modusbrain-bundled skills in place — ALSO requires `--held-out` (&gt;=5 rows) or the run hard-refuses |
 | `--held-out <path>` | — | Independent test set (same JSONL shape as the benchmark, task IDs disjoint from it). A candidate that beats the benchmark but regresses on the held-out set is refused. Required for in-place bundled mutation. |
 | `--max-cost-usd N` | 5.00 | Hard cap; preflight refuses if exceeded |
 | `--max-runtime-min N` | 30 | Wall-clock cap |
@@ -143,7 +143,7 @@ refuses to start when the estimate exceeds `--max-cost-usd`.
 - **No benchmark.** Optimizing against guesses is worse than not optimizing.
 - **Write-flavored skills.** Skills whose job is to `put_page` heavily can't
   use the v1 read-only sandbox; mocked-write capture is a v0.42 follow-up.
-- **Tiny benchmarks (<10 tasks).** D_sel < 5 refuses by default; meaningful
+- **Tiny benchmarks (&lt; 10 tasks).** D_sel &lt; 5 refuses by default; meaningful
   validation needs ≥20 tasks total per the paper.
 
 ## Related skills

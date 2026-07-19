@@ -45,10 +45,10 @@ modusbrain sync --repo /path/to/brain && modusbrain embed --stale
 ```
 
 - `modusbrain sync --repo <path>` -- one-shot incremental sync. Detects changes via
-  `git diff`, imports only what changed. For small changesets (<= 100 files),
+  `git diff`, imports only what changed. For small changesets (&lt;= 100 files),
   embeddings are generated inline during import.
 - `modusbrain embed --stale` -- backfill embeddings for any chunks that don't have
-  them. Safety net for large syncs (>100 files) or prior `--no-embed` runs.
+  them. Safety net for large syncs (&gt;100 files) or prior `--no-embed` runs.
 - `modusbrain sync --watch --repo <path>` -- foreground polling loop, every 60s
   (configurable with `--interval N`). Embeds inline for small changesets. Exits
   after 5 consecutive failures, so run under a process manager or pair with a
@@ -90,7 +90,7 @@ modusbrain sync --watch --repo /data/brain
 
 ### Approach 3: Git Hook / Webhook
 
-Triggers sync on push events for instant sync (<5s).
+Triggers sync on push events for instant sync (&lt; 5s).
 
 - **GitHub webhook:** Set up the webhook to call
   `modusbrain sync --repo /data/brain && modusbrain embed --stale`.
