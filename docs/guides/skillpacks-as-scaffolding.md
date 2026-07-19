@@ -14,7 +14,7 @@ workflow.
 
 Pre-v0.33 (the "amber" model):
 
-- `modusbrain skillpack install <name>` copied bundled skills into your
+- `modusbrain skillpack install &lt;name&gt;` copied bundled skills into your
   workspace AND wrote a managed-block fence into your `RESOLVER.md` /
   `AGENTS.md` with a `cumulative-slugs="..."` receipt.
 - Subsequent installs hash-checked every file and refused to overwrite
@@ -34,7 +34,7 @@ the diff and decides what (if anything) to integrate.
 
 ## The five commands
 
-### `modusbrain skillpack scaffold <name> [--workspace PATH]`
+### `modusbrain skillpack scaffold &lt;name&gt; [--workspace PATH]`
 
 One-time, additive copy of a bundled skill into your repo. Refuses to
 overwrite any file that exists. Routing comes from each skill's
@@ -57,7 +57,7 @@ policy handles "skill shipped earlier, gained a paired source later" —
 scaffold copies the new paired file even when the skill dir already
 exists.
 
-### `modusbrain skillpack reference <name> [--workspace PATH] [--apply-clean-hunks] [--json]`
+### `modusbrain skillpack reference &lt;name&gt; [--workspace PATH] [--apply-clean-hunks] [--json]`
 
 Read-only update lens. Diffs modusbrain's bundle against your local copy
 and emits per-file status (`identical` / `differs` / `missing`) plus
@@ -80,7 +80,7 @@ modusbrain skillpack reference book-mirror
 
 `reference --all` sweeps the whole bundle (one-line-per-skill summary).
 
-`reference <name> --apply-clean-hunks` is the auto-apply path. It
+`reference &lt;name&gt; --apply-clean-hunks` is the auto-apply path. It
 parses the diff between modusbrain's bundle and your local copy, applies
 every hunk whose pre-change context matches uniquely. **Two-way merge
 limitation**: without scaffold-time base tracking (intentionally
@@ -92,7 +92,7 @@ diff before letting auto-apply touch anything.
 ### `modusbrain skillpack migrate-fence [--workspace PATH] [--dry-run]`
 
 One-shot conversion for workspaces on the pre-v0.33 managed-block
-model. Strips the `<!-- modusbrain:skillpack:begin -->` / `end -->`
+model. Strips the `&lt;!-- modusbrain:skillpack:begin -->` / `end -->`
 markers and the manifest receipt comment from your resolver file.
 
 **Preserves every row inside the fence verbatim.** Those rows become
@@ -119,14 +119,14 @@ Opt-in cleanup. Once you've confirmed your agent walks frontmatter
 
 **Two-condition gate** (both must hold for a row to be removed):
 
-1. `skills/<slug>/` exists on host (it was a real scaffold).
+1. `skills/&lt;slug&gt;/` exists on host (it was a real scaffold).
 2. That skill's frontmatter declares non-empty `triggers:` (proof
    that frontmatter discovery covers this skill).
 
 Rows whose slug fails either gate are preserved — user-owned routing
 the migration shouldn't touch.
 
-### `modusbrain skillpack harvest <slug> --from <host-repo-root> [--no-lint] [--dry-run]`
+### `modusbrain skillpack harvest &lt;slug&gt; --from &lt;host-repo-root&gt; [--no-lint] [--dry-run]`
 
 Inverse of scaffold: lifts a proven skill from your host repo back
 into modusbrain so other clients can scaffold it. Default behavior:
@@ -178,7 +178,7 @@ If you're a downstream agent author updating to this model:
 ## Removing a scaffolded skill
 
 There's no `modusbrain skillpack uninstall` command in v0.33. The files
-in your `skills/<slug>/` are first-class members of your repo —
+in your `skills/&lt;slug&gt;/` are first-class members of your repo —
 delete them like any other code:
 
 ```bash

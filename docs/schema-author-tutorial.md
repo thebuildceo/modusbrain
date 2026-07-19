@@ -68,7 +68,7 @@ modusbrain schema add-type researcher \
   --expert
 ```
 
-Output: `Pack: mine (json)` + `Sha8: <prev> → <new>`.
+Output: `Pack: mine (json)` + `Sha8: &lt;prev&gt; → &lt;new&gt;`.
 
 What just happened:
 - The mutation went through `withMutation`'s 8-step skeleton: bundled-guard → per-pack lock → read → mutate → file-plane lint validation → atomic write → audit log → cache invalidation.
@@ -85,7 +85,7 @@ You'll see the resolved settings printed back.
 
 ## Step 5: Import some placeholder researcher pages
 
-You need pages under `people/researchers/` for the next step to do anything. If your brain repo already has them, skip ahead. If not, drop 3-5 placeholder markdown files into `<your-brain-repo>/people/researchers/` and import:
+You need pages under `people/researchers/` for the next step to do anything. If your brain repo already has them, skip ahead. If not, drop 3-5 placeholder markdown files into `&lt;your-brain-repo&gt;/people/researchers/` and import:
 
 ```bash
 mkdir -p people/researchers
@@ -202,7 +202,7 @@ The graph now shows `researcher --(authored)--> paper`.
 modusbrain schema add-alias researcher person
 ```
 
-Read [`skills/conventions/schema-evolution.md`](../skills/conventions/schema-evolution.md) for the decision tree on when to add types vs aliases vs prefixes. The short version: <20 pages → don't pack-codify; 20-100 → alias on existing type; 100+ → first-class type.
+Read [`skills/conventions/schema-evolution.md`](../skills/conventions/schema-evolution.md) for the decision tree on when to add types vs aliases vs prefixes. The short version: &lt;20 pages → don't pack-codify; 20-100 → alias on existing type; 100+ → first-class type.
 
 **Lint your pack before shipping.** The 11-rule lint surface (with the optional `--with-db` flag for DB-aware checks) catches dangling references, prefix collisions, and dead-corpus warnings:
 
@@ -210,7 +210,7 @@ Read [`skills/conventions/schema-evolution.md`](../skills/conventions/schema-evo
 modusbrain schema lint --with-db
 ```
 
-**Commit your pack to source control.** If `~/.modusbrain/schema-packs/mine/` is a git repo, commit `pack.json` and push. Your pack survives across machines, and the `mutation_count_anomaly` lint rule will nudge you when you hit >50 mutations in a week (the "you should be committing this" signal).
+**Commit your pack to source control.** If `~/.modusbrain/schema-packs/mine/` is a git repo, commit `pack.json` and push. Your pack survives across machines, and the `mutation_count_anomaly` lint rule will nudge you when you hit &gt;50 mutations in a week (the "you should be committing this" signal).
 
 **For agents (MCP):** the same operations are reachable over HTTPS MCP via 9 new ops. Register an admin-scope OAuth client and `schema_apply_mutations` lets a remote agent compose multi-step refactors as one atomic batch. The batched MCP op + per-pack lock + audit log are the load-bearing primitives that make remote schema authoring safe. See [`skills/schema-author/SKILL.md`](../skills/schema-author/SKILL.md) for the agent dispatcher.
 

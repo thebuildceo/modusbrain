@@ -7,7 +7,7 @@ icon: glasses
 # Lens packs (v0.41.2.0)
 
 Four bundled schema packs that turn the modusbrain dream cycle into a multi-lens
-brain. Activate one with `modusbrain config set schema_pack <name>` and the cycle
+brain. Activate one with `modusbrain config set schema_pack &lt;name&gt;` and the cycle
 picks up the pack's declared phases on the next `modusbrain dream` run.
 
 ## The four packs
@@ -36,11 +36,11 @@ Atom + concept content-creator lifecycle. Drives two cycle phases:
   transcript with the closed 11-value `atom_type` enum (insight,
   anecdote, quote, framework, statistic, story_angle, strategy_angle,
   strategy, endorsement, critique, collection). Writes
-  `atoms/{YYYY-MM-DD}/{slug}` pages. Budget cap $0.30/source/run.
+  `atoms/&#123;YYYY-MM-DD&#125;/&#123;slug&#125;` pages. Budget cap $0.30/source/run.
 - `synthesize_concepts` — globally aggregates atoms by frontmatter
   `concepts:` ref. Tier by count: T1 ≥10, T2 ≥5, T3 ≥2. T1/T2 get
   Sonnet narratives; T3 falls back to a deterministic stub. Writes
-  `concepts/{slug}` pages. Budget cap $1.50/run.
+  `concepts/&#123;slug&#125;` pages. Budget cap $1.50/run.
 
 One calibration domain: `concept_themes` / cluster_summary / [concept]
 — tier histogram + page count, not Brier (concepts don't have binary
@@ -51,11 +51,11 @@ YC / investor lens. Declares 2 net-new page types on top of
 gbrain-base's deal/person/company/yc seed:
 
 - `thesis` (NEW) — investment thesis with thesis_text + key_bets[] +
-  market_view + vintage. Files at `investing/theses/{slug}`. Extractable
+  market_view + vintage. Files at `investing/theses/&#123;slug&#125;`. Extractable
   (the LLM mines claims into facts).
 - `bet_resolution_log` (NEW) — outcome record for a thesis's bet. FK
   to a take row via take_id; carries resolved_outcome + resolved_at +
-  learned_pattern. Files at `investing/bets/{YYYY-MM}/{slug}`.
+  learned_pattern. Files at `investing/bets/&#123;YYYY-MM&#125;/&#123;slug&#125;`.
 
 No new cycle phases — consumes the existing
 extract_facts/propose_takes/grade_takes/calibration_profile loop. Three
@@ -67,7 +67,7 @@ conviction so high-stakes misses cost more).
 ### modusbrain-engineer
 Bridge-only pack. Declares `learning` page type + reuses base `code`.
 No new cycle phases — the daemon-side `gstack-learnings` IngestionSource
-(T8) watches `~/.gstack/projects/{repo}/learnings.jsonl` and emits
+(T8) watches `~/.gstack/projects/&#123;repo&#125;/learnings.jsonl` and emits
 each JSONL line as a `learning` page when this pack is active. Three
 calibration domains: `architecture_calls` (scalar_brier),
 `effort_estimates` (weighted_brier), `risk_assessment` (scalar_brier).
@@ -87,9 +87,9 @@ calibration_profile produces all 7 domain scorecards in one JSONB.
 ## Calibration profile widening (T10)
 
 Before v0.41.2.0, `calibration_profiles.domain_scorecards` was a
-`JSON.stringify({})` placeholder. v0.41.2.0 widens it: each declared
-domain produces a `{n, brier, accuracy, aggregator, page_types,
-extras}` entry. Four aggregator algorithms (closed enum):
+`JSON.stringify(&#123;&#125;)` placeholder. v0.41.2.0 widens it: each declared
+domain produces a `&#123;n, brier, accuracy, aggregator, page_types,
+extras&#125;` entry. Four aggregator algorithms (closed enum):
 
 - **scalar_brier** — `AVG(POWER(weight - outcome::int, 2))`. Default for
   probabilistic predictions.
@@ -101,7 +101,7 @@ extras}` entry. Four aggregator algorithms (closed enum):
   histogram). For domains like `concept_themes` where there's no
   binary outcome.
 
-Pack manifests declare domains with `{name, aggregator, page_types}`.
+Pack manifests declare domains with `&#123;name, aggregator, page_types&#125;`.
 Domain names are OPEN (third-party packs can declare new domain labels
 without a modusbrain release). Aggregator algorithms are CLOSED (safe SQL
 stays in code, validated at pack-load).

@@ -116,11 +116,11 @@ on nightly_schedule("02:00"):
 
 ## How to Verify
 
-1. Send a message mentioning a person with a brain page. Confirm the agent detects the entity and adds a timeline entry to their page (`modusbrain get_timeline <slug>`).
+1. Send a message mentioning a person with a brain page. Confirm the agent detects the entity and adds a timeline entry to their page (`modusbrain get_timeline &lt;slug&gt;`).
 2. Ask the agent about someone in the brain. Confirm it runs `modusbrain search` or `modusbrain get` BEFORE reaching for external APIs (check the tool call order).
 3. Write a new page with `modusbrain put`, then immediately run `modusbrain search` for it. Confirm it appears in results (verifies sync ran).
 4. Run `modusbrain doctor`. Confirm it returns a health report with database status, page count, and any flagged issues.
-5. After a dream cycle runs, check a page that had unlinked entity mentions. Confirm new links were added (`modusbrain get_links <slug>`).
+5. After a dream cycle runs, check a page that had unlinked entity mentions. Confirm new links were added (`modusbrain get_links &lt;slug&gt;`).
 
 ---
 *Part of the [ModusBrain Skillpack](../MODUSBRAIN_SKILLPACK.md).*

@@ -71,7 +71,7 @@ SOURCE_PRIORITY = [
 
 ## How to Verify
 
-1. Open any brain page with `modusbrain get <slug>`. Read the compiled truth section above the bar. Every factual claim should have an inline `[Source: ...]` citation.
+1. Open any brain page with `modusbrain get &lt;slug&gt;`. Read the compiled truth section above the bar. Every factual claim should have an inline `[Source: ...]` citation.
 2. Search for tweet references: `modusbrain search "X/@"`. Every result should have a full URL, not just an @handle.
 3. Find a page with data from multiple sources (e.g., a person enriched via API + mentioned in a meeting). Confirm both sources are cited independently.
 4. Check timeline entries on 3 random pages. Each entry should have a source citation with date and context.

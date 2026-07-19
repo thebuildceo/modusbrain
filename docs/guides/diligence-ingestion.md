@@ -32,7 +32,7 @@ CAC, Gross Margin, Unit Economics, ARR. User language like "data room",
 
 **Step 1: Identify the Company.**
 From the document content or filename, identify the company name.
-Check if `brain/companies/{slug}.md` exists.
+Check if `brain/companies/&#123;slug&#125;.md` exists.
 
 **Step 2: Create Diligence Directory.**
 
@@ -50,14 +50,14 @@ mkdir -p brain/diligence/{company-slug}/.raw
   ```
 
 **Step 4: Diarize and Save.**
-Write extracted content to `brain/diligence/{company}/{doc-name}.md`:
+Write extracted content to `brain/diligence/&#123;company&#125;/&#123;doc-name&#125;.md`:
 - Document title and type
 - Section-by-section breakdown with key metrics
 - Notable footnotes or caveats
 - Raw data tables where relevant
 
 **Step 5: Save Raw Files.**
-Copy original PDFs/files to `brain/diligence/{company}/.raw/`
+Copy original PDFs/files to `brain/diligence/&#123;company&#125;/.raw/`
 Preserve originals for reference. The diarized version is for search.
 
 **Step 6: Create or Update index.md.**
@@ -95,7 +95,7 @@ Every diligence directory needs an `index.md`:
 ```
 
 **Step 7: Enrich Company Brain Page.**
-Update `brain/companies/{slug}.md`:
+Update `brain/companies/&#123;slug&#125;.md`:
 - Add document sources to frontmatter
 - Update compiled truth with key findings
 - Add "See Also" link to diligence directory
@@ -128,7 +128,7 @@ A good diligence page reads like an intelligence assessment:
 
 2. **Idempotency on re-ingestion.** If the user sends an updated deck for
    the same company, don't create a duplicate directory. Check for an existing
-   `brain/diligence/{company-slug}/` and update in place. Append a version
+   `brain/diligence/&#123;company-slug&#125;/` and update in place. Append a version
    suffix to the document file if the old version should be preserved.
 
 3. **index.md completeness.** The index.md is the entry point for the entire
@@ -139,16 +139,16 @@ A good diligence page reads like an intelligence assessment:
 ## How to Verify
 
 1. **Search for key metrics.** After ingestion, run
-   `modusbrain search "revenue growth"` or `modusbrain search "{company name} CAC"`.
+   `modusbrain search "revenue growth"` or `modusbrain search "&#123;company name&#125; CAC"`.
    The diarized content should appear in results. If it doesn't, the sync
    or embedding step was missed.
 
 2. **Check the company page cross-reference.** Open
-   `brain/companies/{slug}.md` and verify it links to the diligence directory.
+   `brain/companies/&#123;slug&#125;.md` and verify it links to the diligence directory.
    The compiled truth section should include key findings from the deck.
 
 3. **Verify index.md has all sections.** Open
-   `brain/diligence/{company}/index.md` and confirm it has Round Details,
+   `brain/diligence/&#123;company&#125;/index.md` and confirm it has Round Details,
    Document Inventory, Key Findings, Bull Case, Bear Case, and Open Questions.
    Missing sections mean the pipeline stopped early.
 

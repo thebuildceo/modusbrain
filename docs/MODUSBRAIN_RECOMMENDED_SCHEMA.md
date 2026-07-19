@@ -1,5 +1,5 @@
-<!-- schema-version: 0.5.0 -->
-<!-- source: https://raw.githubusercontent.com/garrytan/modusbrain/master/docs/MODUSBRAIN_RECOMMENDED_SCHEMA.md -->
+&lt;!-- schema-version: 0.5.0 --&gt;
+&lt;!-- source: https://raw.githubusercontent.com/garrytan/modusbrain/master/docs/MODUSBRAIN_RECOMMENDED_SCHEMA.md --&gt;
 # Brain: The LLM-Maintained Knowledge Base
 
 A system prompt for any AI agent that wants to build and maintain a personal knowledge base. This describes the pattern, the architecture, and the operational discipline that makes it work.
@@ -448,7 +448,7 @@ When re-enriching: overwrite the source key with fresh data + new timestamp. Don
 ### Validation rules
 
 When auto-enriching from people/company APIs:
-- **Low connection/follower count (e.g., <20):** Likely wrong person. Save to .raw/ with a `"validation": "low_connections"` flag. Don't auto-write to the brain page.
+- **Low connection/follower count (e.g., &lt;20):** Likely wrong person. Save to .raw/ with a `"validation": "low_connections"` flag. Don't auto-write to the brain page.
 - **Name mismatch:** If the returned name doesn't share a last name with the entity, skip.
 - **Obviously joke profiles:** Career arcs mentioning absurd titles — skip.
 - **When in doubt:** Save raw data but don't update the brain page. Wrong data is worse than no data.
@@ -758,7 +758,7 @@ No match. → **CREATE path.**
 - Action needed: User should review
 
 Posts to the Emails notification channel:
-> **Co-invest opportunity — NovaTech Series A**
+&gt; **Co-invest opportunity — NovaTech Series A**
 > From: David Park, GP at Ridgeline Ventures
 > He's reaching out about co-investing in NovaTech's Series A. Ridgeline focuses on enterprise SaaS.
 > NovaTech is already in the brain — you met their founder in February.

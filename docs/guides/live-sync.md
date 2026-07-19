@@ -26,7 +26,7 @@ with the brain repo automatically. You never have to remember to run sync.
 ModusBrain is tuned for the Supabase **Transaction pooler** (port 6543): it
 auto-disables prepared statements there and routes `engine.transaction()`
 (migrations, DDL, sync imports) to a derived **direct** connection
-(`db.<ref>.supabase.co:5432`). That direct host is IPv6-only, so on an
+(`db.&lt;ref&gt;.supabase.co:5432`). That direct host is IPv6-only, so on an
 IPv4-only host, reads work but sync **silently skips most pages**. This is the
 number one cause of "sync ran but nothing happened."
 
@@ -44,12 +44,12 @@ Always chain sync + embed:
 modusbrain sync --repo /path/to/brain && modusbrain embed --stale
 ```
 
-- `modusbrain sync --repo <path>` -- one-shot incremental sync. Detects changes via
+- `modusbrain sync --repo &lt;path&gt;` -- one-shot incremental sync. Detects changes via
   `git diff`, imports only what changed. For small changesets (&lt;= 100 files),
   embeddings are generated inline during import.
 - `modusbrain embed --stale` -- backfill embeddings for any chunks that don't have
   them. Safety net for large syncs (&gt;100 files) or prior `--no-embed` runs.
-- `modusbrain sync --watch --repo <path>` -- foreground polling loop, every 60s
+- `modusbrain sync --watch --repo &lt;path&gt;` -- foreground polling loop, every 60s
   (configurable with `--interval N`). Embeds inline for small changesets. Exits
   after 5 consecutive failures, so run under a process manager or pair with a
   cron fallback.
@@ -141,7 +141,7 @@ hashes match. If both a cron and `--watch` fire simultaneously, no conflict.
 
 1. **Edit a file and search for the change.** Edit a brain markdown file,
    commit, and push. Wait for the next sync cycle (cron interval or `--watch`
-   poll). Run `modusbrain search "<text from the edit>"`. The updated content
+   poll). Run `modusbrain search "&lt;text from the edit&gt;"`. The updated content
    should appear in results. If it returns old content, sync failed.
 
 2. **Compare page count to file count.** Run `modusbrain stats` and count the

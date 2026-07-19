@@ -132,11 +132,11 @@ on user_shares_media(url_or_file):
 
 ## How to Verify
 
-1. Ingest a YouTube video. Run `modusbrain get media/youtube/{slug}`. Confirm the page has: the agent's analysis (not just a summary), key quotes with speaker attribution, and the full diarized transcript.
-2. Run `modusbrain get_links media/youtube/{slug}`. Confirm back-links exist to brain pages for every person and company mentioned in the video.
-3. Pick a person mentioned in the video. Run `modusbrain get <person_slug>`. Confirm their timeline has a new entry referencing the video with specific context.
+1. Ingest a YouTube video. Run `modusbrain get media/youtube/&#123;slug&#125;`. Confirm the page has: the agent's analysis (not just a summary), key quotes with speaker attribution, and the full diarized transcript.
+2. Run `modusbrain get_links media/youtube/&#123;slug&#125;`. Confirm back-links exist to brain pages for every person and company mentioned in the video.
+3. Pick a person mentioned in the video. Run `modusbrain get &lt;person_slug&gt;`. Confirm their timeline has a new entry referencing the video with specific context.
 4. Ingest a tweet. Confirm the brain page includes the thread context, linked article summaries, and entity cross-references -- not just the tweet text.
-5. Run `modusbrain search "{topic_from_video}"`. Confirm the media page appears in search results (verifies the content is indexed and searchable).
+5. Run `modusbrain search "&#123;topic_from_video&#125;"`. Confirm the media page appears in search results (verifies the content is indexed and searchable).
 
 ---
 *Part of the [ModusBrain Skillpack](../MODUSBRAIN_SKILLPACK.md).*

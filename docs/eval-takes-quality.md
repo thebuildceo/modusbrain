@@ -15,9 +15,9 @@ bumps the version.
 | Command | Brain required? | Exit codes |
 |---|---|---|
 | `modusbrain eval takes-quality run [flags]` | yes (samples takes) | 0 PASS, 1 FAIL, 2 INCONCLUSIVE |
-| `modusbrain eval takes-quality replay <receipt>` | **no** (disk-only) | 0 PASS, 1 FAIL, 2 INCONCLUSIVE |
+| `modusbrain eval takes-quality replay &lt;receipt&gt;` | **no** (disk-only) | 0 PASS, 1 FAIL, 2 INCONCLUSIVE |
 | `modusbrain eval takes-quality trend [flags]` | yes (reads runs table) | 0 |
-| `modusbrain eval takes-quality regress --against <receipt>` | yes | 0 OK, 1 regression |
+| `modusbrain eval takes-quality regress --against &lt;receipt&gt;` | yes | 0 OK, 1 regression |
 
 `replay` is the only mode that runs without `DATABASE_URL` — it reads the
 receipt file from disk and re-renders it. The other modes need the brain.
@@ -94,7 +94,7 @@ receipt file from disk and re-renders it. The other modes need the brain.
 ## Receipt persistence
 
 Receipts persist to **`eval_takes_quality_runs`** (DB-authoritative per
-codex review #6) AND to disk at `~/.modusbrain/eval-receipts/takes-quality-<corpus>-<prompt>-<models>-<rubric>.json`
+codex review #6) AND to disk at `~/.modusbrain/eval-receipts/takes-quality-&lt;corpus&gt;-&lt;prompt&gt;-&lt;models&gt;-&lt;rubric&gt;.json`
 as a best-effort artifact. The DB row carries the full receipt JSON in the
 `receipt_json` JSONB column, so when the disk artifact is gone, `replay`
 can still reconstruct via `loadReceiptFromDb` (v0.33+ flag wiring).

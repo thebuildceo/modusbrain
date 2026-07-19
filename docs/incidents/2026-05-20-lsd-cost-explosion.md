@@ -93,9 +93,9 @@ The judge call alone would have been:
 ### P2: Cost Guardrails (Critical — defense in depth)
 
 New flags for `brainstorm` and `lsd` commands:
-- `--max-cost <usd>` (default $5): hard-abort if pre-run estimate exceeds
+- `--max-cost &lt;usd&gt;` (default $5): hard-abort if pre-run estimate exceeds
 - `--strict-budget`: abort mid-run if running cost exceeds 5× estimate
-- `--max-far-set <n>` (default 50): explicit far set size cap
+- `--max-far-set &lt;n&gt;` (default 50): explicit far set size cap
 
 **Status:** Implemented in `dc080ac2`.
 
@@ -221,7 +221,7 @@ architectural rounds shipped in the budget-cathedral wave that followed:
 - **P5 (BudgetTracker at the gateway layer):** new
   `src/core/budget/budget-tracker.ts` is the canonical primitive. The
   gateway's `withBudgetTracker(tracker, fn)` composes via
-  `AsyncLocalStorage<BudgetTracker>` so every gateway-routed LLM call
+  `AsyncLocalStorage&lt;BudgetTracker&gt;` so every gateway-routed LLM call
   inside the scope auto-records. `BudgetExhausted` is a typed error with
   `reason: 'cost' | 'runtime' | 'no_pricing'`. `record()` throws when
   cumulative spend exceeds the cap (TX1). `reserve()` hard-fails on
@@ -230,11 +230,11 @@ architectural rounds shipped in the budget-cathedral wave that followed:
   `'batch'` and `'summarize'` strategies. Summarize embed-clusters
   (k=ceil(items/4)), Haiku-summarizes each cluster in parallel via
   `Promise.allSettled` at parallelism=4. Surfaces `degraded: true` flag
-  when success ratio < 0.75 so callers decide whether to surface a partial
+  when success ratio &lt; 0.75 so callers decide whether to surface a partial
   result or abort.
 - **P7 (brainstorm checkpoint + --resume):**
   `src/core/brainstorm/checkpoint.ts` persists FULL idea bodies (not just
-  counts — TX3 load-bearing). One `--resume <run_id>` flag covers both
+  counts — TX3 load-bearing). One `--resume &lt;run_id&gt;` flag covers both
   failed and never-attempted crosses (TX4). `run_id` formula uses NO
   embedding bits so the identity is stable across embedding-model swaps
   (A5 amended). 7-day mtime-based GC wired into the cycle purge phase.
@@ -246,7 +246,7 @@ Also shipped alongside the wave (folded inline):
 - **doctor --remediate --resume:** A4 amended. The mid-run cap is now a
   real ceiling; `--max-cost` is an alias for `--max-usd`. On
   BudgetExhausted, the orchestrator persists a checkpoint at
-  `~/.modusbrain/remediation/<plan_hash>.json` and tells the user the exact
+  `~/.modusbrain/remediation/&lt;plan_hash&gt;.json` and tells the user the exact
   `modusbrain doctor --remediate --resume` command. The resumed run skips
   already-completed steps.
 - **Audit-week-file consolidation (Q1):** four call sites
@@ -268,5 +268,5 @@ What did NOT make this wave (filed in TODOS for a follow-up):
   but the CLI flag wiring is deferred.
 - Async-batched audit writes. Sync `appendFileSync` is fine at typical
   volumes; revisit if profiling shows it dominates.
-- Multi-day brainstorm resume (>7d). The `--force-resume` flag is the
+- Multi-day brainstorm resume (&gt;7d). The `--force-resume` flag is the
   operator escape hatch for now.

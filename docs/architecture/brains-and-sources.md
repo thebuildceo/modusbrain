@@ -12,8 +12,8 @@ need to understand both of them, or queries misroute silently.
 **TL;DR:**
 - A **brain** is a database. You can have many.
 - A **source** is a named repo of content *inside* a brain. One brain can hold many.
-- `--brain <id>` picks WHICH DATABASE.
-- `--source <id>` picks WHICH REPO WITHIN that database.
+- `--brain &lt;id&gt;` picks WHICH DATABASE.
+- `--source &lt;id&gt;` picks WHICH REPO WITHIN that database.
 - They're independent. You can target any combination.
 
 ---
@@ -31,9 +31,9 @@ Each brain has:
 Brains are enumerated by:
 - **host** — your default brain, configured in `~/.modusbrain/config.json`.
 - **mounts** — additional brains registered in `~/.modusbrain/mounts.json` via
-  `modusbrain mounts add <id>` (v0.19+).
+  `modusbrain mounts add &lt;id&gt;` (v0.19+).
 
-Routing: `--brain <id>`, `MODUSBRAIN_BRAIN_ID`, `.modusbrain-mount` dotfile, or
+Routing: `--brain &lt;id&gt;`, `MODUSBRAIN_BRAIN_ID`, `.modusbrain-mount` dotfile, or
 longest-path match against registered mount paths. Falls back to `host`.
 
 ### Sources (the repo axis, v0.18.0+)
@@ -44,7 +44,7 @@ carries a `source_id`. Slugs are unique per source, not globally.
 Example: in one brain, the slug `topics/ai` can exist under `source=wiki`
 AND under `source=gstack` — they're different pages.
 
-Routing: `--source <id>`, `MODUSBRAIN_SOURCE`, `.modusbrain-source` dotfile, or
+Routing: `--source &lt;id&gt;`, `MODUSBRAIN_SOURCE`, `.modusbrain-source` dotfile, or
 registered `local_path` match in the `sources` table.
 
 ### When does each axis move?
@@ -231,8 +231,8 @@ know the other.
 - **Default path:** set up your personal brain (`modusbrain init`), add a source
   per repo you care about (`modusbrain sources add gstack --path ~/gstack`).
   You'll almost never need `--brain`.
-- **When a team publishes a brain:** `modusbrain mounts add <team-id> --path
-  <clone> --db-url <url>` and the `.modusbrain-mount` dotfile in that checkout
+- **When a team publishes a brain:** `modusbrain mounts add &lt;team-id&gt; --path
+  &lt;clone&gt; --db-url &lt;url&gt;` and the `.modusbrain-mount` dotfile in that checkout
   routes queries there automatically.
 - **When you are the CEO-class user with multiple team memberships:** mount
   each team brain. Trust the resolver — inside a team's directory the

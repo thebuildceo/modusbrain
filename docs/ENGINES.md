@@ -168,7 +168,7 @@ RRF fusion, multi-query expansion, and 4-layer dedup are engine-agnostic. They o
 | Factor | PGLite | PostgresEngine + Supabase |
 |--------|--------|--------------------------|
 | Setup | `modusbrain init` (zero-config) | Account + connection string |
-| Scale | Good for < 1,000 files | Production-proven at 10K+ |
+| Scale | Good for &lt; 1,000 files | Production-proven at 10K+ |
 | Multi-device | Single machine only | Any device via remote MCP |
 | Cost | Free | Supabase Pro ($25/mo) |
 | Concurrency | Single process | Connection pooling |
@@ -180,16 +180,16 @@ RRF fusion, multi-query expansion, and 4-layer dedup are engine-agnostic. They o
 
 Writing a JS value into a `jsonb` column has exactly two correct forms. Get this
 wrong and the write succeeds on PGLite but stores a **jsonb string scalar** on
-real Postgres — `col ->> 'k'` returns NULL, `jsonb_array_elements` throws, and a
+real Postgres — `col -&gt;> 'k'` returns NULL, `jsonb_array_elements` throws, and a
 `jsonb_typeof = 'array'` CHECK rejects the row (this aborted every sync in #2339).
 
 | Form | Verdict |
 |---|---|
-| Template tag: `` sql`... ${sql.json(obj)}` `` (postgres-engine only) | ✅ native jsonb serialization |
+| Template tag: `` sql`... $&#123;sql.json(obj)&#125;` `` (postgres-engine only) | ✅ native jsonb serialization |
 | Positional raw call, raw object: `executeRawJsonb(engine, sql, scalars, [obj])` | ✅ object reaches the wire as jsonb |
 | Positional raw call, stringified: `executeRaw(\`... $N::text::jsonb\`, [JSON.stringify(x)])` | ✅ binds as text, the cast parses it |
 | Positional raw call, BARE cast: `executeRaw(\`... $N::jsonb\`, [JSON.stringify(x)])` | ❌ **double-encodes** under postgres.js `.unsafe()` |
-| Template literal interpolation: `` `... ${JSON.stringify(x)}::jsonb` `` | ❌ double-encodes |
+| Template literal interpolation: `` `... $&#123;JSON.stringify(x)&#125;::jsonb` `` | ❌ double-encodes |
 
 **Why:** postgres.js `.unsafe(sql, params)` (the path behind `executeRaw` /
 `executeRawDirect`) binds a JS **string** as a text param. A bare `$N::jsonb`
@@ -199,7 +199,7 @@ parsing it. Casting through `$N::text::jsonb` forces a text→jsonb parse.
 why a regression only shows up on Postgres (and why the parity test must run there).
 
 **Two CI guards enforce this, both wired into `scripts/check-jsonb-pattern.sh`:**
-- the template-tag grep (`${JSON.stringify(x)}::jsonb`), and
+- the template-tag grep (`$&#123;JSON.stringify(x)&#125;::jsonb`), and
 - `scripts/check-jsonb-params.mjs`, an AST-lite scanner for the positional
   `$N::jsonb` + `JSON.stringify` form the grep misses. Sanctioned escapes:
   `$N::text::jsonb`, `$N::text[]`, `executeRawJsonb`, `sql.json`, or an inline
@@ -211,7 +211,7 @@ and assert `jsonb_typeof` — the assertion PGLite cannot make.
 
 ## Adding a new engine
 
-1. Create `src/core/<name>-engine.ts` implementing `BrainEngine`
+1. Create `src/core/&lt;name&gt;-engine.ts` implementing `BrainEngine`
 2. Add to engine factory in `src/core/engine-factory.ts`:
    ```typescript
    export function createEngine(type: string): BrainEngine {
@@ -224,7 +224,7 @@ and assert `jsonb_typeof` — the assertion PGLite cannot make.
    }
    ```
    The factory uses dynamic imports so engines are only loaded when selected.
-3. Store engine type in `~/.modusbrain/config.json`: `{ "engine": "myengine", ... }`
+3. Store engine type in `~/.modusbrain/config.json`: `&#123; "engine": "myengine", ... &#125;`
 4. Add tests. The test suite should be engine-agnostic where possible... same test cases, different engine constructor.
 5. Document in this file + add a design doc in `docs/`
 

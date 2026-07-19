@@ -88,12 +88,12 @@ modusbrain sources add sessions --path ~/.claude/sessions --no-federated
 When any command needs to pick a source, modusbrain walks this list (highest
 first):
 
-1. Explicit `--source <id>` flag.
+1. Explicit `--source &lt;id&gt;` flag.
 2. `MODUSBRAIN_SOURCE` environment variable.
 3. `.modusbrain-source` dotfile in CWD or any ancestor directory.
 4. A registered source whose `local_path` contains the CWD (longest
    prefix wins for nested checkouts).
-5. The brain-level default set via `modusbrain sources default <id>`.
+5. The brain-level default set via `modusbrain sources default &lt;id&gt;`.
 6. The seeded `default` source.
 
 So inside `~/.gstack/plans/` on a brain that pinned `gstack` to
@@ -108,12 +108,12 @@ Every source row stores `config.federated: boolean` in its JSONB config.
 | Value | Meaning |
 |-------|---------|
 | `true` | Source participates in unqualified `modusbrain search "X"` results. |
-| `false` (default for new sources) | Source only searched when explicitly named via `--source <id>` or qualified citation. |
+| `false` (default for new sources) | Source only searched when explicitly named via `--source &lt;id&gt;` or qualified citation. |
 
 The seeded `default` source is `federated=true` so pre-v0.17 brains
 behave exactly as before — every page appears in search.
 
-Flip later with `modusbrain sources federate <id>` / `unfederate <id>`.
+Flip later with `modusbrain sources federate &lt;id&gt;` / `unfederate &lt;id&gt;`.
 
 ## Commands
 
@@ -193,7 +193,7 @@ What hardening guarantees:
   dirty working tree is skipped (your in-progress edits are never touched); a
   rebase conflict is aborted cleanly and flagged for attention, never left
   half-applied.
-- **Push is never deferred.** `scripts/brain-commit-push.sh "<msg>" <path>`
+- **Push is never deferred.** `scripts/brain-commit-push.sh "&lt;msg&gt;" &lt;path&gt;`
   commits and pushes atomically and refuses to report success without a
   confirmed push. The post-commit hook is a best-effort background fallback;
   the helper is the guarantee.
@@ -234,7 +234,7 @@ Two commands. The existing default source is untouched.
   PageType) — v0.18.
 - Per-source retention/TTL (`modusbrain sources prune`) — v0.18.
 - ACL enforcement via caller-identity — v0.17.1.
-- `modusbrain sources import-from-github <url>` one-shot bootstrap — patch
+- `modusbrain sources import-from-github &lt;url&gt;` one-shot bootstrap — patch
   release after the core plumbing stabilizes.
 
 All of these build on the `sources` primitive shipped here.

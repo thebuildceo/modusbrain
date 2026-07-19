@@ -14,14 +14,14 @@ speaker diarization, and fires webhooks on completion.
 **Webhook setup:**
 
 1. In Circleback dashboard -> Automations -> add webhook
-2. URL: `{your_agent_gateway}/hooks/circleback-meetings`
+2. URL: `&#123;your_agent_gateway&#125;/hooks/circleback-meetings`
 3. Circleback provides a signing secret for HMAC-SHA256 signature verification
 4. Store the signing secret in your webhook transform for verification
 
 **Webhook payload:** Meeting JSON with id, name, attendees, notes, action items, full
 transcript, calendar event context.
 
-**Signature verification:** Header `X-Circleback-Signature` contains `sha256=<hex>`.
+**Signature verification:** Header `X-Circleback-Signature` contains `sha256=&lt;hex&gt;`.
 Verify with `HMAC-SHA256(body, signing_secret)`. Reject unverified webhooks.
 
 **OAuth for API access:** Circleback uses dynamic client registration (OAuth 2.0).
@@ -41,7 +41,7 @@ SMS, calls, voicemail, and AI transcripts.
 
 1. In Quo dashboard -> Integrations -> Webhooks
 2. Register webhooks for: `message.received`, `call.completed`, `call.summary.completed`, `call.transcript.completed`
-3. Point all to: `{your_agent_gateway}/hooks/quo-events`
+3. Point all to: `&#123;your_agent_gateway&#125;/hooks/quo-events`
 4. Store registered webhook IDs in agent memory
 
 **How inbound texts work:**
@@ -60,7 +60,7 @@ SMS, calls, voicemail, and AI transcripts.
 **API auth:** Bare API key in `Authorization` header (no Bearer prefix).
 
 **Key endpoints:** `POST /v1/messages` (send SMS), `GET /v1/messages` (list),
-`GET /v1/call-transcripts/{id}`, `GET /v1/conversations`.
+`GET /v1/call-transcripts/&#123;id&#125;`, `GET /v1/conversations`.
 
 ---
 

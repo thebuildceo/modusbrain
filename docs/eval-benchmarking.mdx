@@ -16,13 +16,13 @@ ModusBrain ships a complete retrieval evaluation suite so you can measure, track
 
 ## Eval Subcommands
 
-All eval commands are invoked as `modusbrain eval <subcommand>`:
+All eval commands are invoked as `modusbrain eval &lt;subcommand&gt;`:
 
 | Subcommand | What it does |
 | :--- | :--- |
-| `whoknows <fixture.jsonl>` | Grade expertise routing — checks if the brain correctly identifies the right knowledge holder per query |
-| `longmemeval <dataset.jsonl>` | Benchmark long-context memory recall against a standard ground-truth dataset |
-| `trajectory <entity-slug>` | Analyze typed-fact claim history for an entity over time; flags regressions |
+| `whoknows &lt;fixture.jsonl&gt;` | Grade expertise routing — checks if the brain correctly identifies the right knowledge holder per query |
+| `longmemeval &lt;dataset.jsonl&gt;` | Benchmark long-context memory recall against a standard ground-truth dataset |
+| `trajectory &lt;entity-slug&gt;` | Analyze typed-fact claim history for an entity over time; flags regressions |
 | `suspected-contradictions` | Surface document pairs in your brain that likely contradict each other |
 | `export` | Export captured query rows to a portable NDJSON baseline file |
 | `replay` | Replay a captured NDJSON baseline against your current retrieval pipeline |
@@ -55,7 +55,7 @@ modusbrain eval whoknows ./my-eval-fixtures.jsonl --skip-replay
 
 **Fixture format** — one JSON object per line:
 ```json
-{ "query": "Who handles enterprise onboarding?", "expected": "alice-example" }
+&#123; "query": "Who handles enterprise onboarding?", "expected": "alice-example" &#125;
 ```
 
 **Exit codes:** `0` = both gates pass, `1` = at least one gate failed, `2` = config error.

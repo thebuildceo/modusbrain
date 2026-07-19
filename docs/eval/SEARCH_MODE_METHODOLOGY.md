@@ -27,7 +27,7 @@ If you want to know how a mode behaves on YOUR brain, run `modusbrain search sta
 - **Replay captures** — NDJSON from the sibling `modusbrain-evals` repo, `n=200` queries. Each query carries a `retrieved_slugs` baseline + a `latency_ms` measurement from the original production run.
 - **BrainBench v1** — `n=1240` documents / `n=350` qrels (binary relevance judgments). Lives in the sibling [`modusbrain-evals`](https://github.com/garrytan/gbrain-evals) repo, SHA-pinned at every run.
 
-No private brain content is used in any reported result. The committed NDJSON dumps under `<repo>/.modusbrain-evals/` contain only the LongMemEval question IDs + the rank-ordered retrieved session IDs.
+No private brain content is used in any reported result. The committed NDJSON dumps under `&lt;repo&gt;/.modusbrain-evals/` contain only the LongMemEval question IDs + the rank-ordered retrieved session IDs.
 
 ## 3. Sample selection
 
@@ -59,7 +59,7 @@ modusbrain eval compare --md > docs/eval/results/v0.32.3/README.md
 modusbrain eval compare --json > docs/eval/results/v0.32.3/comparison.json
 ```
 
-The orchestrator writes per-run records to `<repo>/.modusbrain-evals/eval-results.jsonl`. Every record carries: `run_id`, `ran_at`, `suite`, `mode`, `commit`, `seed`, `limit`, `params`, `status`, `duration_ms`. The dumps under `docs/eval/results/v0.32.3/` carry the raw question-level outputs so a reviewer can re-score with their own metric implementation.
+The orchestrator writes per-run records to `&lt;repo&gt;/.modusbrain-evals/eval-results.jsonl`. Every record carries: `run_id`, `ran_at`, `suite`, `mode`, `commit`, `seed`, `limit`, `params`, `status`, `duration_ms`. The dumps under `docs/eval/results/v0.32.3/` carry the raw question-level outputs so a reviewer can re-score with their own metric implementation.
 
 ## 5. Threats to validity
 

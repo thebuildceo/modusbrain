@@ -93,15 +93,15 @@ on enrich(entity, trigger):
 
 1. **Don't overwrite human-written assessments.** If the user wrote an Assessment section with their own read on someone, API enrichment NEVER overwrites it. API data goes into State, Contact, Timeline. The user's assessment is sacrosanct.
 2. **Don't re-enrich the same page more than once per week.** Check `put_raw_data` timestamps before running the pipeline again. Enrichment is expensive and data doesn't change that fast.
-3. **LinkedIn connection count < 20 means wrong person.** Crustdata sometimes returns a different person with the same name. If the LinkedIn profile has fewer than 20 connections, it's almost certainly a false match. Discard it.
+3. **LinkedIn connection count &lt; 20 means wrong person.** Crustdata sometimes returns a different person with the same name. If the LinkedIn profile has fewer than 20 connections, it's almost certainly a false match. Discard it.
 4. **X/Twitter is the most underrated data source.** When you have someone's handle, their tweets reveal beliefs, what they're building, hobby horses, network (reply patterns), and trajectory (posting frequency, tone shifts). This is richer than LinkedIn for "What They Believe" and "What Makes Them Tick."
 5. **Cross-references are not optional.** After enriching a person, update their company page. After enriching a company, update founder pages. An enriched page without cross-links is a dead end in the graph.
 
 ## How to Verify
 
-1. Enrich a Tier 1 person. Run `modusbrain get <slug>` and confirm the page has Executive Summary, State, What They Believe, Contact, and Timeline sections populated from multiple sources.
-2. Run `modusbrain get_raw_data <slug>`. Confirm raw API responses are stored with `sources.{provider}.fetched_at` timestamps.
-3. Run `modusbrain get_links <slug>`. Confirm cross-reference links exist to the person's company page, deal pages, and related entities.
+1. Enrich a Tier 1 person. Run `modusbrain get &lt;slug&gt;` and confirm the page has Executive Summary, State, What They Believe, Contact, and Timeline sections populated from multiple sources.
+2. Run `modusbrain get_raw_data &lt;slug&gt;`. Confirm raw API responses are stored with `sources.&#123;provider&#125;.fetched_at` timestamps.
+3. Run `modusbrain get_links &lt;slug&gt;`. Confirm cross-reference links exist to the person's company page, deal pages, and related entities.
 4. Check a page that was enriched AND has a user-written Assessment. Confirm the Assessment section was preserved, not overwritten by API data.
 5. Try to re-enrich the same person. Confirm the system checks the `fetched_at` timestamp and skips if less than a week old.
 

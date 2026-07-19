@@ -120,13 +120,13 @@ is_notable(entity):
 
 | Signal | Destination |
 |--------|-------------|
-| User generated the idea | `brain/originals/{slug}.md` |
+| User generated the idea | `brain/originals/&#123;slug&#125;.md` |
 | User's synthesis of others' ideas | `brain/originals/` (the synthesis is original) |
-| World concept someone else coined | `brain/concepts/{slug}.md` |
-| Product or business idea | `brain/ideas/{slug}.md` |
-| Person mentioned | `brain/people/{slug}.md` |
-| Company mentioned | `brain/companies/{slug}.md` |
-| Media referenced | `brain/media/{type}/{slug}.md` |
+| World concept someone else coined | `brain/concepts/&#123;slug&#125;.md` |
+| Product or business idea | `brain/ideas/&#123;slug&#125;.md` |
+| Person mentioned | `brain/people/&#123;slug&#125;.md` |
+| Company mentioned | `brain/companies/&#123;slug&#125;.md` |
+| Media referenced | `brain/media/&#123;type&#125;/&#123;slug&#125;.md` |
 
 ### The Iron Law of Back-Linking
 
@@ -180,7 +180,7 @@ to Pedro" only works if Pedro's page links back to every mention.
 
 2. **Send a message with an original idea.** Say "What if we could distribute
    software as markdown files that agents execute?" Verify:
-   brain/originals/{slug}.md was created with your exact phrasing.
+   brain/originals/&#123;slug&#125;.md was created with your exact phrasing.
 
 3. **Check back-links.** Open Sarah Chen's page. It should have a timeline
    entry linking back to today's conversation. Open Acme Corp's page. Same.

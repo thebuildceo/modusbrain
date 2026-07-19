@@ -92,7 +92,7 @@ to hand off. Each session ends with a clean deliverable.
 
 ## Session 1 — PR α: modusbrain infra (v0.35.1.0)
 
-**Repo:** `/Users/garrytan/conductor/workspaces/modusbrain/<NEW-WORKSPACE>` (fresh from `master`)
+**Repo:** `/Users/garrytan/conductor/workspaces/modusbrain/&lt;NEW-WORKSPACE&gt;` (fresh from `master`)
 **Branch:** `garrytan/v0.35.1.0-infra`
 **Wallclock:** ~2h
 **API spend:** $0
@@ -104,9 +104,9 @@ clean prereq baseline:
 1. Add `voyage:voyage-4-large` ($0.18/M) and `zeroentropyai:zembed-1` ($0.05/M) to the
    embedding pricing table. Patch the `modusbrain models doctor` cost estimator + test.
 2. Expose `modusbrain/ai/gateway` in `package.json` exports map so the modusbrain-evals
-   adapters can call `configureGateway({embedding_model, embedding_dimensions, reranker_model})`
+   adapters can call `configureGateway(&#123;embedding_model, embedding_dimensions, reranker_model&#125;)`
    from outside the modusbrain process.
-3. Add `--resume-from <jsonl>` to `modusbrain eval longmemeval` so a mid-run abort
+3. Add `--resume-from &lt;jsonl&gt;` to `modusbrain eval longmemeval` so a mid-run abort
    (rate-limit, cost-cap, OS interrupt) doesn't lose the cells we already paid for.
 
 Ships at the end as v0.35.1.0.
@@ -175,7 +175,7 @@ bun test test/embedding-pricing.test.ts test/public-exports.test.ts test/eval-lo
 ### What this session ships into PR β (does NOT merge yet)
 Wire the harness to drive 3 embedding providers via the newly-exposed modusbrain gateway:
 
-1. New typed `EvalAdapterConfig {embedder, dim, reranker?}` passed into each adapter.
+1. New typed `EvalAdapterConfig &#123;embedder, dim, reranker?&#125;` passed into each adapter.
 2. Rewrite `vector.ts` + `hybrid-rrf.ts` to call `configureGateway()` from
    `modusbrain/ai/gateway` instead of the hardcoded `modusbrain/embedding` import.
 3. Critical: hybrid adapter must also route `search.reranker.enabled` (true/false) and
@@ -183,7 +183,7 @@ Wire the harness to drive 3 embedding providers via the newly-exposed modusbrain
 4. New 3-phase smoke harness: wiring (5 queries × embed roundtrip + dim check) +
    long-haystack (1 query × 50K-token synthetic haystack) + rerank-payload (1 query
    × `topNIn=30`). Exit code is the gate.
-5. New `--include-subset <name>` flag on the BrainBench runner (Cat 13 wiring; subset
+5. New `--include-subset &lt;name&gt;` flag on the BrainBench runner (Cat 13 wiring; subset
    itself comes in Session 3).
 
 ### Prereqs
@@ -405,7 +405,7 @@ Each scored file has correctness %.
 ```
 
 ### Verify
-- Each `longmemeval-{cell}.jsonl` has exactly 500 lines
+- Each `longmemeval-&#123;cell&#125;.jsonl` has exactly 500 lines
 - Each `hypothesis` field is non-empty AND is actual answer text (NOT retrieval text)
 - Each `scored.json` has a `correctness_score` field
 
@@ -449,7 +449,7 @@ bash scripts/run-shootout-phase2.sh 2>&1 | tee results/phase2-run-log.txt
 ### Writeup
 `docs/benchmarks/2026-05-22-embedder-shootout.md`. Structure:
 
-1. **Headline table** — 7 cells × {LongMemEval correctness %, BrainBench relational MRR + P@5, Cat 13 correctness %, total cost}
+1. **Headline table** — 7 cells × &#123;LongMemEval correctness %, BrainBench relational MRR + P@5, Cat 13 correctness %, total cost&#125;
 2. **Two questions answered:**
    - Which embedder wins solo? (A0 vs B0 vs C0)
    - Does zerank-2 carry ZE's win? (C0 vs C1 vs A1 vs B1)
@@ -497,7 +497,7 @@ gh pr merge --squash
 
 ## Session 6 (optional) — PR γ: modusbrain v0.35.2.0 release
 
-**Repo:** `/Users/garrytan/conductor/workspaces/modusbrain/<NEW-WORKSPACE>` (fresh from master)
+**Repo:** `/Users/garrytan/conductor/workspaces/modusbrain/&lt;NEW-WORKSPACE&gt;` (fresh from master)
 **Branch:** `garrytan/v0.35.2.0-benchmark-release`
 **Wallclock:** ~30min
 **API spend:** $0
@@ -556,7 +556,7 @@ JSONL preserved for resume).
 |---|---|
 | Voyage/ZE 429 rate-limit mid-cell | `gateway._shrinkState` halves safety_factor and retries. Cell continues. |
 | ZE 5MB rerank payload cap hit | `applyReranker` fail-opens, returns un-reranked results. Stderr warn. |
-| Mid-cell OS interrupt / cost-cap abort | Re-run with `modusbrain eval longmemeval --resume-from results/longmemeval-{cell}.jsonl`. Picks up where it left off. |
+| Mid-cell OS interrupt / cost-cap abort | Re-run with `modusbrain eval longmemeval --resume-from results/longmemeval-&#123;cell&#125;.jsonl`. Picks up where it left off. |
 | `evaluate_qa.py` auth fail | OPENAI_API_KEY check in wrapper aborts before any spend. |
 | Adapter typo (bad dim) | `EvalAdapterConfig` runtime assertion at constructor throws AIConfigError. Cell aborts before API call. |
 

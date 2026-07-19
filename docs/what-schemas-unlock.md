@@ -123,7 +123,7 @@ You approve once. The agent calls `schema_apply_mutations` over MCP with a batch
 }
 ```
 
-All inside ONE `withPackLock` scope, atomic, audited (the agent's `client_id` captured in the audit log as `actor: mcp:<clientId8>`). Cache invalidated cross-process. Sync backfills the 47 pages. The brain learned a new category of thing without you having to think about it.
+All inside ONE `withPackLock` scope, atomic, audited (the agent's `client_id` captured in the audit log as `actor: mcp:&lt;clientId8&gt;`). Cache invalidated cross-process. Sync backfills the 47 pages. The brain learned a new category of thing without you having to think about it.
 
 The next time you query "YC W24 companies in fintech", the brain routes through the new type. Six months later when you forget the pattern entirely, the agent reminds you it's there and offers to consolidate it with the W25 batch.
 
@@ -158,7 +158,7 @@ v0.40.7.0 closed those gaps:
 - **`withMutation` skeleton** wraps every primitive in 8 ordered safety steps (bundled-guard → lock → read → mutate → validate → atomic write → audit → invalidate). The pack file on disk is never partial. Two concurrent agents can't race.
 - **Per-pack `O_CREAT|O_EXCL` atomic lock** (not the TOCTOU `existsSync+writeFileSync` pattern from page-lock.ts — codex caught that during plan review). TTL refresh every 10s while a mutation runs; `--force` means "steal stale lock" not "skip locking."
 - **Privacy-redacted audit log** at `~/.modusbrain/audit/schema-mutations-YYYY-Www.jsonl`. Type names sha8-hashed, prefixes truncated to first segment only. A leaked screenshot of the audit can't reveal sensitive taxonomy like `personal/oncology/` or `legal/depositions/`.
-- **9 new MCP ops** including the batched `schema_apply_mutations` (admin scope, NOT localOnly — your OpenClaw and any remote agent author packs over normal HTTPS MCP, with `client_id` captured as `actor: mcp:<clientId8>`).
+- **9 new MCP ops** including the batched `schema_apply_mutations` (admin scope, NOT localOnly — your OpenClaw and any remote agent author packs over normal HTTPS MCP, with `client_id` captured as `actor: mcp:&lt;clientId8&gt;`).
 - **T1.5 wiring** finally completes for `whoknows` and `find_experts`: a custom `researcher` type marked `--expert` now actually surfaces in query results. Pre-v0.40.7 it silently never matched because the query path read hardcoded `['person', 'company']`.
 - **Cross-process invalidation** via stat-mtime TTL gate inside `loadActivePack`. Operator runs `modusbrain schema add-type` from a terminal; the autopilot daemon picks up the new type within 1 second without a restart.
 
@@ -168,7 +168,7 @@ The cumulative effect: an agent can safely co-curate your ontology with a comple
 
 - **Want to see it work in 5 minutes?** Run the [tutorial](schema-author-tutorial.md). Forks the bundled pack, adds a researcher type, proves the wiring end-to-end.
 - **Want the agent recipe?** Read [`skills/schema-author/SKILL.md`](../skills/schema-author/SKILL.md). 7-phase workflow agents follow when they detect a schema-evolution opportunity.
-- **Want the rules of thumb?** Read [`skills/conventions/schema-evolution.md`](../skills/conventions/schema-evolution.md). Decision tree for when to add a type vs alias vs prefix. <20 pages don't pack-codify. 100+ pages need first-class types.
+- **Want the rules of thumb?** Read [`skills/conventions/schema-evolution.md`](../skills/conventions/schema-evolution.md). Decision tree for when to add a type vs alias vs prefix. &lt;20 pages don't pack-codify. 100+ pages need first-class types.
 - **Want the architecture?** The "Schema Cathedral v3 (v0.40.7.0)" section in `CLAUDE.md` has the 14-bullet module-by-module breakdown, each citing the design decision and codex finding that motivated it.
 - **Want to set up an agent that co-curates your brain?** Run `modusbrain auth register-client my-agent --scopes admin` to mint an OAuth client your remote agent can use to call `schema_apply_mutations` over MCP. The agent then runs detect → suggest → apply on its own cadence and asks you to approve substantive changes.
 

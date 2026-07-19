@@ -115,7 +115,7 @@ on_message(text):
 
 ## How to Verify It Works
 
-1. **Mention a person the brain knows.** Ask "what do we know about {name}?"
+1. **Mention a person the brain knows.** Ask "what do we know about &#123;name&#125;?"
    The agent should search the brain and return compiled truth, not hallucinate
    or do a web search.
 
@@ -127,7 +127,7 @@ on_message(text):
    pull brain context without you asking. If it doesn't reference the brain
    page, the loop isn't running.
 
-4. **Check the sync.** After a conversation, run `modusbrain search "{topic}"`
+4. **Check the sync.** After a conversation, run `modusbrain search "&#123;topic&#125;"`
    from the CLI. The new information should be searchable.
 
 ---

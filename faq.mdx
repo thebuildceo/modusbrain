@@ -76,7 +76,7 @@ icon: circle-question
     An **operational skill** is a versioned, structured artifact that ModusBrain compiles from your raw company documentation. It contains:
 
     - **Prose judgment** — semantic, context-aware guidelines for reasoning about edge cases
-    - **Structured policy rules** — explicit executable logic (e.g. `if amount < 500 => auto_approve`)
+    - **Structured policy rules** — explicit executable logic (e.g. `if amount &lt; 500 =&gt; auto_approve`)
     - **Provenance record** — a full audit trail linking the skill back to every source document, compiler identity, and timestamp
 
     Skills are the unit of work that AI agents execute against. Instead of an agent reading raw markdown and reasoning about it independently, it receives a structured, pre-approved, versioned skill runbook with a confidence score.
@@ -238,7 +238,7 @@ icon: circle-question
 
     | Issue | Fix |
     | :--- | :--- |
-    | Missing API key | `modusbrain config set <provider>_api_key sk-...` |
+    | Missing API key | `modusbrain config set &lt;provider&gt;_api_key sk-...` |
     | Stale database schema | `modusbrain upgrade --force-schema` |
     | Schema version is 0 | `modusbrain apply-migrations --yes` |
     | Skills directory not found | `modusbrain skillpack scaffold --all` |
@@ -250,7 +250,7 @@ icon: circle-question
     Low confidence scores usually indicate one of three things:
 
     1. **The source documentation is thin or contradictory** — Enrich the relevant docs in your knowledge base, then recompile the skill.
-    2. **Conflicting policy documents** — Run `modusbrain opskill flag-conflict <slug>` to identify and resolve document-level contradictions before recompiling.
+    2. **Conflicting policy documents** — Run `modusbrain opskill flag-conflict &lt;slug&gt;` to identify and resolve document-level contradictions before recompiling.
     3. **The risk tier is too high for the skill's domain** — Review whether the assigned risk tier matches the actual business risk of the operation.
 
     After making corrections, recompile to generate a new draft skill version:

@@ -75,7 +75,7 @@ on user_asks(question):
 2. Ask the agent "How should I format responses?" -- confirm it checks agent memory, not ModusBrain. Preferences are operational state.
 3. Check that no person or company pages exist in agent memory storage. Run `memory_search "person"` -- it should return preferences, not dossiers.
 4. Check that ModusBrain doesn't contain pages about agent behavior. Run `modusbrain search "user prefers"` -- it should return nothing (preferences belong in agent memory).
-5. After an agent reset, confirm ModusBrain knowledge is still accessible. Run `modusbrain get <any_slug>` -- world knowledge should survive the reset.
+5. After an agent reset, confirm ModusBrain knowledge is still accessible. Run `modusbrain get &lt;any_slug&gt;` -- world knowledge should survive the reset.
 
 ---
 *Part of the [ModusBrain Skillpack](../MODUSBRAIN_SKILLPACK.md).*

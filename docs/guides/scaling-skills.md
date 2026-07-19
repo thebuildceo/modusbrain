@@ -20,7 +20,7 @@ Cursor, or your own MCP-aware agent.
 ## The problem
 
 OpenClaw scans every skill file on disk at session start and injects them
-into the system prompt as `<available_skills>` entries. The model sees a
+into the system prompt as `&lt;available_skills&gt;` entries. The model sees a
 name, description, and file path for each one. When a request matches, the
 model reads the full SKILL.md and follows it.
 
@@ -54,7 +54,7 @@ Some are specialized. Some are dormant.
 
 The skills the model needs on every single turn. Brain search, email triage,
 calendar, meeting ingestion, content creation, the executive assistant.
-They stay in the system prompt's `<available_skills>` manifest. The model
+They stay in the system prompt's `&lt;available_skills&gt;` manifest. The model
 sees them natively and routes to them without any lookup.
 
 ### Tier B: resolver-routed (~85 skills)
@@ -172,11 +172,11 @@ A few rules to keep the parser unambiguous:
   `Note`, `Convention`) are deliberately ignored. This is what stops prose
   bullets like `- **Note**: see [link]` from being mis-parsed as skill
   rows in real-world AGENTS.md files.
-- **The path always resolves to `skills/<name>/SKILL.md`.** An optional
+- **The path always resolves to `skills/&lt;name&gt;/SKILL.md`.** An optional
   `→ \`skills/path\`` (or ASCII `->`) suffix is allowed for readability,
   but the parser strips it. For non-conventional paths (skills under
   nested directories, references into `conventions/`, anything that
-  isn't `skills/<name>/SKILL.md`), use the table format.
+  isn't `skills/&lt;name&gt;/SKILL.md`), use the table format.
 - **Triggers separate with `|`.** Empty pieces and the literal `...`
   placeholder are dropped. Each trigger becomes its own resolver entry,
   all pointing at the same skill.

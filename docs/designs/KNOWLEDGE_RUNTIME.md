@@ -285,7 +285,7 @@ export interface CompletenessRubric<Page> {
 
 **Key property:** `non_redundancy` + `recency_score` explicitly kill the two brain pathologies observed in the audit (Wilco-style repeating blocks; stale pages without `last_verified`).
 
-The `completeness` field goes in frontmatter as `0.0–1.0`. It becomes queryable via `list_pages(where: completeness < 0.5)`.
+The `completeness` field goes in frontmatter as `0.0–1.0`. It becomes queryable via `list_pages(where: completeness &lt; 0.5)`.
 
 ### 4.4 Tier routing with hard budget
 
@@ -400,7 +400,7 @@ export interface ScheduledResolver extends Resolver<void, ScheduledResult> {
 
 The scheduler runs as either:
 1. **Embedded** (default for `modusbrain autopilot`): native event loop inside the daemon process. One process, many ScheduledResolvers.
-2. **OS-driven** (for Railway/launchd/systemd): `modusbrain schedule run <id>` invoked by OS cron, scheduler state is durable so cross-invocation dedup still works.
+2. **OS-driven** (for Railway/launchd/systemd): `modusbrain schedule run &lt;id&gt;` invoked by OS cron, scheduler state is durable so cross-invocation dedup still works.
 
 Both modes share the same `Schedule` config + state.
 
@@ -502,15 +502,15 @@ On `WriteTx.validate()` before commit:
 3. **Back-link validator.** Every outbound link must have a reverse link written in the same transaction.
 4. **Triple-HR validator.** Compiled truth / timeline split enforced at the schema level.
 
-**Fails closed**: the default is strict-mode. Loosening requires explicit `writer.transaction({ strictMode: false }, ...)` and logs a warning to the ingest log.
+**Fails closed**: the default is strict-mode. Loosening requires explicit `writer.transaction(&#123; strictMode: false &#125;, ...)` and logs a warning to the ingest log.
 
 ### 6.6 LLM output sanitization
 
 Any LLM output destined for a brain page passes through a JSON-Schema-validated parser first. No free-form markdown goes to disk.
 
-- Entity extraction: JSON array of `{ name, type, context }` per existing `extractEntities` pattern — strict validation.
-- Compiled-truth synthesis: LLM emits structured `{ sections: [{heading, paragraphs: [{text, sources: [...]}]}]}`, scaffolder renders to markdown.
-- Timeline entries: LLM emits `{ date, summary, detail, sources }`, scaffolder renders.
+- Entity extraction: JSON array of `&#123; name, type, context &#125;` per existing `extractEntities` pattern — strict validation.
+- Compiled-truth synthesis: LLM emits structured `&#123; sections: [&#123;heading, paragraphs: [&#123;text, sources: [...]&#125;]&#125;]&#125;`, scaffolder renders to markdown.
+- Timeline entries: LLM emits `&#123; date, summary, detail, sources &#125;`, scaffolder renders.
 
 LLM never sees file paths, never writes files, never emits finished markdown.
 
@@ -537,7 +537,7 @@ LLM never sees file paths, never writes files, never emits finished markdown.
 |---|---|
 | `src/core/enrichment-service.ts` (5/10) | `src/core/enrichment/orchestrator.ts` (L2) |
 | `src/core/embedding.ts` (monolithic) | `src/core/resolvers/builtin/embedding/openai.ts` |
-| `src/core/transcription.ts` (monolithic) | `src/core/resolvers/builtin/transcription/{groq,openai}.ts` |
+| `src/core/transcription.ts` (monolithic) | `src/core/resolvers/builtin/transcription/&#123;groq,openai&#125;.ts` |
 | `src/commands/integrations.ts` recipe format | Unified Resolver plugin format (§3.5) |
 | `src/core/data-research.ts` recipe format | Same unified format |
 | `src/commands/autopilot.ts` hard-coded daemon loop | Wraps a set of ScheduledResolvers |
@@ -555,7 +555,7 @@ LLM never sees file paths, never writes files, never emits finished markdown.
 Each phase ships independently, passes full E2E, is feature-flagged, and is reversible. No big-bang.
 
 ### Phase 0 — Foundation (human: ~1 wk / CC: ~4 h)
-- Define `Resolver<I,O>`, `ResolverContext`, `ResolverRegistry`, `ResolverResult` (§3.2–3.4).
+- Define `Resolver&lt;I,O&gt;`, `ResolverContext`, `ResolverRegistry`, `ResolverResult` (§3.2–3.4).
 - Add `src/core/resolvers/index.ts` wiring + tests for registry (register/get/list).
 - No behavioral change; ship as `v0.11.0-alpha` with feature flag.
 

@@ -93,26 +93,26 @@ Queries with >=1 contradiction: 12 / 50 (24%)  Wilson CI 95%: 14–37%
 
 What this says: with 95% confidence, the true rate is between 14% and 37%.
 The 24% point estimate is the most-likely-value but bounded by sampling
-noise. **`small_sample_note` fires when n < 30** — at that scale the CI is
+noise. **`small_sample_note` fires when n &lt; 30** — at that scale the CI is
 too wide to act on.
 
 Decision criteria for the bigger swing (chunk-level `revises` field):
 
 | Wilson CI lower bound | What it says | Action |
 |---|---|---|
-| < 5% | Source-boost + recency-decay + curated pages handle the load | Stop here; this is the right scope |
+| &lt;5% | Source-boost + recency-decay + curated pages handle the load | Stop here; this is the right scope |
 | 5–15% | Real but bounded | Operator decides whether the cost justifies the swing |
-| > 15% | Real and substantial | Plan the bigger swing in v0.34+ |
+| &gt; 15% | Real and substantial | Plan the bigger swing in v0.34+ |
 
 ## When to act on findings
 
 Each finding ships with a `resolution_command` field — paste-ready:
 
-- `modusbrain takes supersede <slug> --row N` — newer take should replace
+- `modusbrain takes supersede &lt;slug&gt; --row N` — newer take should replace
   the older chunk text on the same page (intra_page kind).
-- `modusbrain dream --phase synthesize --slug <slug>` — compiled_truth for
+- `modusbrain dream --phase synthesize --slug &lt;slug&gt;` — compiled_truth for
   the curated entity needs an update (cross_slug curated-vs-bulk).
-- `modusbrain takes mark-debate <slug> --row N` — intentional disagreement
+- `modusbrain takes mark-debate &lt;slug&gt; --row N` — intentional disagreement
   (e.g., two opinions you want to keep both of).
 - `# manual review: <a> vs <b>` — judge wasn't sure; operator decides.
 
@@ -154,9 +154,9 @@ pay near-zero on re-runs (until you bump PROMPT_VERSION).
   negation_artifact`) and threaded `pages.effective_date` into the judge
   prompt so the probe stops crying wolf on legitimate change-over-time.
   v0.35.7 lands the trajectory substrate the probe pointed at:
-  `modusbrain eval trajectory <entity>` shows the chronological typed-claim
+  `modusbrain eval trajectory &lt;entity&gt;` shows the chronological typed-claim
   history with regressions flagged inline; `modusbrain founder scorecard
-  <entity>` rolls up four signals (accuracy, consistency, growth
+  &lt;entity&gt;` rolls up four signals (accuracy, consistency, growth
   direction, red flags) into a stable JSON contract. MCP op
   `find_trajectory` (read scope, visibility-filtered for remote callers)
   exposes the same data to agents. The probe's `temporal_supersession`

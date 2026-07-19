@@ -90,7 +90,7 @@ to `source_id='default'`):
 ```
 
 Without `source_id`, a hit from the wrong source could false-pass the
-gate. The compare everywhere is `${source_id}::${slug}` strings.
+gate. The compare everywhere is `$&#123;source_id&#125;::$&#123;slug&#125;` strings.
 
 ### Example GitHub Actions workflow
 
@@ -181,9 +181,9 @@ Three numbers tell you whether the change is safe to land:
 
 | Metric | What it means | Healthy range |
 |---|---|---|
-| **Mean Jaccard@k** | Average overlap between captured retrieved slugs and current run's slugs. 1.0 = identical sets. | ≥0.85 for "neutral" changes. <0.7 means major retrieval shift. |
-| **Top-1 stability** | Fraction of queries whose #1 result didn't change. | ≥85% for tuning passes. <70% means top-of-funnel broke. |
-| **Mean latency Δ** | Current minus captured. Positive = slower now. | Within ±50ms of captured. >2× anywhere = regression alarm. |
+| **Mean Jaccard@k** | Average overlap between captured retrieved slugs and current run's slugs. 1.0 = identical sets. | ≥0.85 for "neutral" changes. &lt;0.7 means major retrieval shift. |
+| **Top-1 stability** | Fraction of queries whose #1 result didn't change. | ≥85% for tuning passes. &lt;70% means top-of-funnel broke. |
+| **Mean latency Δ** | Current minus captured. Positive = slower now. | Within ±50ms of captured. &gt;2× anywhere = regression alarm. |
 
 ## What it actually does
 
@@ -199,13 +199,13 @@ Three numbers tell you whether the change is safe to land:
 
 It does NOT compute MRR or nDCG — those need ground-truth relevance labels,
 not a baseline comparison. For metric-against-truth eval, use
-`modusbrain eval --qrels <path>` (the legacy IR-eval path, still supported). The
+`modusbrain eval --qrels &lt;path&gt;` (the legacy IR-eval path, still supported). The
 replay tool answers a different question: "did my code change move
 retrieval, and which queries did it move most?"
 
 For a third evaluation axis — public benchmark, ground-truth labels, full
 question-answer pipeline (not just retrieval) — `modusbrain eval longmemeval
-<dataset.jsonl>` (v0.28.8) runs the LongMemEval benchmark against modusbrain's
+&lt;dataset.jsonl&gt;` (v0.28.8) runs the LongMemEval benchmark against modusbrain's
 hybrid retrieval. Each question gets a clean in-memory PGLite, its haystack
 imported, the question asked, the hypothesis emitted as JSONL — exactly the
 shape LongMemEval's `evaluate_qa.py` consumes. Your `~/.modusbrain` brain is
@@ -372,10 +372,10 @@ python evaluate_qa.py /tmp/hypothesis.jsonl
 - Sanitization parity: re-uses `INJECTION_PATTERNS` from
   `src/core/think/sanitize.ts` so adding a new injection pattern
   automatically covers takes AND benchmarks. One source of truth.
-- Retrieved chat content is wrapped in `<chat_session id="..." date="...">`
+- Retrieved chat content is wrapped in `&lt;chat_session id="..." date="..."&gt;`
   framing; the answer-gen system prompt declares the content UNTRUSTED.
-  Same posture as `<take>` framing.
-- LLM injection seam: `runEvalLongMemEval(args, {client?: ThinkLLMClient})`.
+  Same posture as `&lt;take&gt;` framing.
+- LLM injection seam: `runEvalLongMemEval(args, &#123;client?: ThinkLLMClient&#125;)`.
   Tests stub the client so the full pipeline runs hermetically without any
   API key.
 

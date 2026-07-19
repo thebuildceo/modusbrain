@@ -66,7 +66,7 @@ on user_asks_about(topic):
 
 ## Tricky Spots
 
-1. **Search returns chunks, not full pages.** After `modusbrain search` or `modusbrain query`, you get excerpts. Always run `modusbrain get <slug>` to load the full page when the chunk confirms relevance. Don't answer questions from chunks alone when the full context matters.
+1. **Search returns chunks, not full pages.** After `modusbrain search` or `modusbrain query`, you get excerpts. Always run `modusbrain get &lt;slug&gt;` to load the full page when the chunk confirms relevance. Don't answer questions from chunks alone when the full context matters.
 2. **Keyword search works without embeddings.** On day one before any embedding run, `modusbrain search` still works. Don't tell the user "search isn't available yet" -- keyword search is always available.
 3. **Don't use hybrid search for known names.** `modusbrain query "Pedro Franceschi"` wastes embedding compute. Use `modusbrain search "Pedro Franceschi"` or better yet `modusbrain get pedro-franceschi` if you know the slug.
 4. **Token budget awareness.** A full page via `modusbrain get` can be large. Read the search chunks first to confirm relevance before pulling the full page. "Did anyone mention the Series A?" -- search results (chunks) are probably enough. "Tell me everything about Pedro" -- get the full page.

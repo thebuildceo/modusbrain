@@ -102,7 +102,7 @@ these are the densest source of real bugs in the whole backlog.
   generic `DATABASE_URL` silently overrides the configured brain (wrong DB, or
   auto-migrates it). Fix precedence: `MODUSBRAIN_DATABASE_URL` > config.json > `DATABASE_URL`.
 - **Engine-switch strips config** (#1088, @samchaudhary) — **OPEN, high.** `migrate --to`
-  rewrites config to just `{engine,url}`, dropping `embedding_model`/`dimensions`/keys;
+  rewrites config to just `&#123;engine,url&#125;`, dropping `embedding_model`/`dimensions`/keys;
   migration "succeeds" but new embeds break.
 - **Re-init silently corrupts the brain** (#1060, @vincedk-alt) — **OPEN, high.** Flag-less
   re-init ignores persisted `embedding_model`/`dimensions` and writes a wrong-shape

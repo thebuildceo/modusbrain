@@ -76,11 +76,11 @@ on new_meeting_transcript(meeting):
 
 ## How to Verify
 
-1. After ingesting a meeting, run `modusbrain get meetings/{date}-{slug}`. Confirm the page has the agent's analysis above the bar and the full diarized transcript below it.
-2. For each attendee, run `modusbrain get <attendee_slug>`. Check that their timeline has a new entry referencing the meeting with specific insights (not just "attended meeting").
-3. Pick a company mentioned in the meeting. Run `modusbrain get <company_slug>`. Confirm a timeline entry exists referencing what was discussed about the company.
-4. Run `modusbrain get_links meetings/{date}-{slug}`. Verify back-links exist to all attendee and entity pages.
-5. Run `modusbrain search "{meeting_topic}"`. Confirm the meeting page appears in search results (verifies sync ran).
+1. After ingesting a meeting, run `modusbrain get meetings/&#123;date&#125;-&#123;slug&#125;`. Confirm the page has the agent's analysis above the bar and the full diarized transcript below it.
+2. For each attendee, run `modusbrain get &lt;attendee_slug&gt;`. Check that their timeline has a new entry referencing the meeting with specific insights (not just "attended meeting").
+3. Pick a company mentioned in the meeting. Run `modusbrain get &lt;company_slug&gt;`. Confirm a timeline entry exists referencing what was discussed about the company.
+4. Run `modusbrain get_links meetings/&#123;date&#125;-&#123;slug&#125;`. Verify back-links exist to all attendee and entity pages.
+5. Run `modusbrain search "&#123;meeting_topic&#125;"`. Confirm the meeting page appears in search results (verifies sync ran).
 
 ---
 *Part of the [ModusBrain Skillpack](../MODUSBRAIN_SKILLPACK.md).*

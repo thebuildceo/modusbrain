@@ -21,7 +21,7 @@ modusbrain doctor                         # green checks all the way down
 
 Your agent now reads `skills/RESOLVER.md` once per request, routes intent to the right skill, executes. New entity mentions create new pages. Daily cron runs enrichment overnight.
 
-Scaffolded skills are first-class files in your agent repo — edit freely. To pull upstream modusbrain improvements later, `modusbrain skillpack reference <name>` diffs your local copy vs the bundle. The legacy `skillpack install` managed-block model was retired in v0.36.0.0; if you're upgrading from an older release, run `modusbrain skillpack migrate-fence` once to strip the legacy fence and keep your existing skill rows.
+Scaffolded skills are first-class files in your agent repo — edit freely. To pull upstream modusbrain improvements later, `modusbrain skillpack reference &lt;name&gt;` diffs your local copy vs the bundle. The legacy `skillpack install` managed-block model was retired in v0.36.0.0; if you're upgrading from an older release, run `modusbrain skillpack migrate-fence` once to strip the legacy fence and keep your existing skill rows.
 
 To upgrade later: `modusbrain upgrade` runs schema migrations + post-upgrade prompts (chunker bumps, the v0.36.2.0 ZeroEntropy switch). Always TTY-only; non-TTY upgrades skip prompts with informational stderr lines.
 

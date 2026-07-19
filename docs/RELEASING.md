@@ -206,7 +206,7 @@ work.
 Source material to pull from:
 - CHANGELOG.md previous entry for prior context
 - Latest `modusbrain-evals/docs/benchmarks/[latest].md` for headline numbers (sibling repo)
-- Recent commits (`git log <prev-version>..HEAD --oneline`) for what shipped
+- Recent commits (`git log &lt;prev-version&gt;..HEAD --oneline`) for what shipped
 - Don't make up numbers. If a metric isn't in a benchmark or production data, don't
   include it. Say "no measurement yet" if asked.
 
@@ -364,7 +364,7 @@ If any SHA differs from what's in the workflow files, update the pin and version
 
 Pull request titles and bodies must describe **everything in the PR diff against the
 base branch**, not just the most recent commit you made. When you open or update a
-PR, walk the full commit range with `git log --oneline <base>..<head>` and write the
+PR, walk the full commit range with `git log --oneline &lt;base&gt;..&lt;head&gt;` and write the
 body to cover all of it. Group by feature area (schema, code, tests, docs) — not
 chronologically by commit.
 
@@ -373,7 +373,7 @@ the body only covers your last commit, they miss everything else and can't revie
 properly. A 7-commit PR with a body that describes commit 7 is worse than no body
 at all — it actively misleads.
 
-When in doubt, run `gh pr view <N> --json commits --jq '[.commits[].messageHeadline]'`
+When in doubt, run `gh pr view &lt;N&gt; --json commits --jq '[.commits[].messageHeadline]'`
 to see what's actually in the PR before writing the body.
 
 ## Community PR wave process
@@ -409,20 +409,20 @@ job that needs `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or similar will fail
 with empty-env auth errors, regardless of what's set on the base repo. This
 is a GitHub security default, not a config bug.
 
-When the user says "check out <PR link>" and the PR is from `garrytan-agents`
+When the user says "check out &lt;PR link&gt;" and the PR is from `garrytan-agents`
 (or any other non-collaborator fork), move the branch into the base repo
 before running CI:
 
-1. `gh pr checkout <N>` — pull down the fork's branch. Note the PR number and
-   head branch name (`gh pr view <N> --json headRefName --jq .headRefName`).
-2. `git push origin HEAD:<branch-name>` — push the same branch to the base
+1. `gh pr checkout &lt;N&gt;` — pull down the fork's branch. Note the PR number and
+   head branch name (`gh pr view &lt;N&gt; --json headRefName --jq .headRefName`).
+2. `git push origin HEAD:&lt;branch-name&gt;` — push the same branch to the base
    repo (origin points at `garrytan/modusbrain`, not the fork). This is the move
    that gives CI access to secrets.
-3. `gh pr close <N> --comment "moving to base-repo branch for secret access"`
+3. `gh pr close &lt;N&gt; --comment "moving to base-repo branch for secret access"`
    — close the fork PR so the queue stays clean.
-4. `gh pr create --base master --head <branch-name>` — open the replacement
+4. `gh pr create --base master --head &lt;branch-name&gt;` — open the replacement
    PR from the base-repo branch. **Preserve the original PR's title and body
-   verbatim** (`gh pr view <N> --json title,body`); contributor attribution
+   verbatim** (`gh pr view &lt;N&gt; --json title,body`); contributor attribution
    moves to a `Co-Authored-By:` trailer if needed.
 
 Why this over alternatives: adding `garrytan-agents` as a collaborator, or

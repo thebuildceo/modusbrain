@@ -13,7 +13,7 @@ Cross-reference against your fork's local skill files.
 
 `modusbrain upgrade` ships the new binary. `modusbrain post-upgrade [--execute --yes]` runs
 the schema migrations and backfills the data. But the **skill files themselves**
-that tell the agent how to behave — those are user-owned. If your `~/git/<your-agent>/workspace/skills/brain-ops/SKILL.md`
+that tell the agent how to behave — those are user-owned. If your `~/git/&lt;your-agent&gt;/workspace/skills/brain-ops/SKILL.md`
 says `# Based on modusbrain v0.10.0` at the top, it doesn't know about v0.12.0 features.
 
 The agent will keep manually calling `modusbrain link` after every `put_page` (now redundant —
@@ -22,12 +22,12 @@ not know to backfill the structured timeline.
 
 ## How to apply
 
-1. Identify your forked skill files. Typically at `~/git/<your-agent>/workspace/skills/` or wherever your agent's skill directory lives.
+1. Identify your forked skill files. Typically at `~/git/&lt;your-agent&gt;/workspace/skills/` or wherever your agent's skill directory lives.
 2. For each skill listed below, find the matching phase/section in your fork.
 3. Apply the diff (paste the new block in the indicated location).
 4. Update the version banner at the top of your fork (`# Based on modusbrain v0.12.0`).
 5. Verify: ask the agent to write a test page and confirm the response includes
-   `auto_links: { created, removed, errors }`.
+   `auto_links: &#123; created, removed, errors &#125;`.
 
 Total time: ~10 minutes for all four skills.
 
@@ -169,7 +169,7 @@ Timeline entries still need explicit `modusbrain timeline-add` calls.
 
 3. **Verify auto-link works:** ask the agent to write a test page that references
    `[Some Person](people/some-person)`. Confirm the put_page response includes
-   `auto_links: { created: 1, removed: 0, errors: 0 }`.
+   `auto_links: &#123; created: 1, removed: 0, errors: 0 &#125;`.
 
 4. **Verify graph traversal works:**
    ```bash
@@ -219,13 +219,13 @@ The new `splitBody` rebuilds `compiled_truth` correctly.
 `splitBody` now requires an explicit timeline sentinel. Recognized markers
 (priority order):
 
-1. `<!-- timeline -->` (preferred — what `serializeMarkdown` emits)
+1. `&lt;!-- timeline --&gt;` (preferred — what `serializeMarkdown` emits)
 2. `--- timeline ---` (decorated separator)
 3. `---` directly before `## Timeline` or `## History` heading (backward-compat)
 
 A bare `---` in body text is now a markdown horizontal rule, not a timeline
 separator. If your agent writes pages with a bare `---` delimiter, migrate to
-`<!-- timeline -->` — the `serializeMarkdown` helper already does this.
+`&lt;!-- timeline --&gt;` — the `serializeMarkdown` helper already does this.
 
 ### 4. Wiki subtypes now auto-typed
 
@@ -345,7 +345,7 @@ To adopt, follow `skills/migrations/v0.14.0.md`. The short version:
        --params '{"cmd":"node scripts/your-script.mjs","cwd":"/data/.openclaw/workspace"}' \
        --max-attempts 3 --timeout-ms 300000
    ```
-4. Watch `modusbrain jobs get <id>` for exit_code / stdout_tail / stderr_tail on each
+4. Watch `modusbrain jobs get &lt;id&gt;` for exit_code / stdout_tail / stderr_tail on each
    fire. Compare against pre-migration behavior before approving the next batch.
 
 **No skill edits required.** The handler runs worker-side; skill files don't
@@ -354,7 +354,7 @@ they still work the same way.
 
 Iron rule: **never auto-rewrite the operator's crontab.** Every rewrite is
 per-cron, human-approved, with a diff. If you want automation later, the
-upcoming `modusbrain crontab-to-minions <file>` helper is P1 in TODOS.
+upcoming `modusbrain crontab-to-minions &lt;file&gt;` helper is P1 in TODOS.
 
 ---
 
@@ -418,7 +418,7 @@ Turn it on:
 export MODUSBRAIN_PLUGIN_PATH="$HOME/<your-agent>/modusbrain-plugin"
 ```
 
-Worker startup prints `[plugin-loader] loaded '<name>' v<ver> (N subagents)`
+Worker startup prints `[plugin-loader] loaded '&lt;name&gt;' v&lt;ver&gt; (N subagents)`
 per plugin; any rejection (bad manifest, unknown tool in `allowed_tools`,
 version mismatch) shows up as a loud warning at startup, not a silent dispatch-
 time failure. See `docs/guides/plugin-authors.md` for the full contract.
@@ -435,7 +435,7 @@ modusbrain agent run "analyze my last 50 journal pages for recurring themes" \
 ```
 
 Every turn persists to `subagent_messages`, every tool call is a two-phase
-ledger, and `modusbrain agent logs <job>` shows where it died + what the last
+ledger, and `modusbrain agent logs &lt;job&gt;` shows where it died + what the last
 successful call returned. No more "re-run from scratch because the session
 context evaporated."
 
@@ -443,7 +443,7 @@ context evaporated."
 
 If you adopted the v0.15 subagent runtime, note that `put_page` calls
 originating from a subagent's tool dispatch MUST target
-`wiki/agents/<subagent_id>/...`. The schema shown to the model enforces this
+`wiki/agents/&lt;subagent_id&gt;/...`. The schema shown to the model enforces this
 on first try; a server-side fail-closed check rejects anything else. This
 does NOT affect your skill files, CLI put_page calls, or MCP put_page —
 only tool-dispatched writes from inside an LLM loop.
@@ -519,7 +519,7 @@ the full recipe.
 After `modusbrain apply-migrations --yes` runs the v0.22.4 audit, your agent
 should read `~/.modusbrain/migrations/pending-host-work.jsonl` (filter to
 `migration === "0.22.4"`) and walk each entry's `command` field. Each entry
-points to a per-source `modusbrain frontmatter validate <source_path> --fix`
+points to a per-source `modusbrain frontmatter validate &lt;source_path&gt; --fix`
 command — surface counts to the user, get explicit consent, then run.
 
 The migration is **audit-only**. It never mutates brain content during
@@ -550,7 +550,7 @@ payload never lands in `minion_jobs.data`.
 
 **Why.** Pre-v0.36.5.0, agents that wanted to call `modusbrain` from shell jobs
 had to either write `database_url` to `~/.modusbrain/config.json` plaintext or
-pass `env: { MODUSBRAIN_DATABASE_URL: "..." }` per-job. Both left plaintext
+pass `env: &#123; MODUSBRAIN_DATABASE_URL: "..." &#125;` per-job. Both left plaintext
 secrets somewhere — disk or DB row. `inherit:` keeps names in the row and
 resolves values at spawn time.
 
@@ -570,7 +570,7 @@ The env-key name in the child is derived by uppercasing the config-key:
 does NOT police which config keys you inherit — the agent is in the same
 uid as the worker, so it's the agent's call.
 
-**You can still use `env:`.** v0.36.5.0 does not forbid `env:{ ANYTHING }`.
+**You can still use `env:`.** v0.36.5.0 does not forbid `env:&#123; ANYTHING &#125;`.
 If you have a reason to put a value in the row plaintext (a non-secret
 correlation token, or a secret you know is OK to persist), pass it via
 `env:`. Prefer `inherit:` when you want the value out of the row.
@@ -584,7 +584,7 @@ correlation token, or a secret you know is OK to persist), pass it via
   worker process
 
 If the worker can't resolve a requested name, the validator fail-fasts at
-submit time with `modusbrain config set <X>` hint. No more silent "No database
+submit time with `modusbrain config set &lt;X&gt;` hint. No more silent "No database
 URL" failures in child stderr minutes after submission.
 
 **Also new.** A `modusbrain doctor` check `home_dir_in_worktree` warns if
@@ -606,5 +606,5 @@ job + `inherit:` for `localOnly` admin ops (`sync`, `embed`, `dream`,
 |---|---|---|
 | `shell: inherit must be an array of config-key names` | `inherit` wasn't an array. | Pass `"inherit": ["database_url", ...]`. |
 | `shell: inherit entries must be non-empty strings` | Element was empty, non-string, or null. | Use snake_case config-key names. |
-| `shell: inherit name "<X>" must match [a-z][a-z0-9_]*` | Name failed snake_case regex (uppercase, leading underscore, etc.). | Use the config-key verbatim — `database_url`, not `DATABASE_URL`. |
-| `shell: inherit requested "<X>" but worker has no <X> configured` | Worker can't resolve the name from its `loadConfig()`. | Run `modusbrain config set <X> <value>` on the worker host. |
+| `shell: inherit name "&lt;X&gt;" must match [a-z][a-z0-9_]*` | Name failed snake_case regex (uppercase, leading underscore, etc.). | Use the config-key verbatim — `database_url`, not `DATABASE_URL`. |
+| `shell: inherit requested "&lt;X&gt;" but worker has no &lt;X&gt; configured` | Worker can't resolve the name from its `loadConfig()`. | Run `modusbrain config set &lt;X&gt; &lt;value&gt;` on the worker host. |

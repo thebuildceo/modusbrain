@@ -99,9 +99,9 @@ There are two ways to scope teammates' access. They suit different deployment sh
 
 **Model A: separate sources with OAuth scoping (recommended for true multi-user with different AI clients).** What this tutorial walks you through. Each teammate gets their own OAuth client, which carries `--source` + `--federated-read` flags. The brain refuses cross-source reads at the SQL layer; isolation is database-enforced. Each teammate can run their own MCP-aware client (Claude Code, Cursor, their own OpenClaw, etc.) and the scoping holds.
 
-**Model B: one source, directory-based per-person scoping (simpler for one-agent-serves-everyone setups).** The shape I actually run in production: a single source called `default`, with a `partners/<slug>/` convention inside it (e.g. `partners/alice-example/`, `partners/bob-example/`). Each partner gets their own subdirectory holding their personal pages: `partners/alice-example/USER.md`, `partners/alice-example/concepts/`, `partners/alice-example/sources/`, etc. There's no OAuth-enforced isolation; the agent itself enforces "Alice's writes go to her partners/ subdir." This is the right model when ONE agent (yours) serves everyone over Telegram or a single shared interface. It's simpler ops, no per-user OAuth, but the scoping is convention-only.
+**Model B: one source, directory-based per-person scoping (simpler for one-agent-serves-everyone setups).** The shape I actually run in production: a single source called `default`, with a `partners/&lt;slug&gt;/` convention inside it (e.g. `partners/alice-example/`, `partners/bob-example/`). Each partner gets their own subdirectory holding their personal pages: `partners/alice-example/USER.md`, `partners/alice-example/concepts/`, `partners/alice-example/sources/`, etc. There's no OAuth-enforced isolation; the agent itself enforces "Alice's writes go to her partners/ subdir." This is the right model when ONE agent (yours) serves everyone over Telegram or a single shared interface. It's simpler ops, no per-user OAuth, but the scoping is convention-only.
 
-For most company-brain installs (10+ teammates each with their own AI client), Model A is the right starting point. If you're running the fat-agent-serves-everyone pattern from the personal-brain tutorial, Model B is genuinely simpler. You can also mix: separate sources for the obviously-different ones (customer notes vs internal-only) AND a `partners/<slug>/` convention inside the shared source for per-person workspace.
+For most company-brain installs (10+ teammates each with their own AI client), Model A is the right starting point. If you're running the fat-agent-serves-everyone pattern from the personal-brain tutorial, Model B is genuinely simpler. You can also mix: separate sources for the obviously-different ones (customer notes vs internal-only) AND a `partners/&lt;slug&gt;/` convention inside the shared source for per-person workspace.
 
 ### Per-person folder structure inside each source
 
@@ -180,7 +180,7 @@ Re-run the server with the public URL so the OAuth discovery metadata matches wh
 modusbrain serve --http --port 3131 --bind 0.0.0.0 --public-url https://brain.acme-co.com
 ```
 
-You should be able to hit `https://brain.acme-co.com/health` and get `{"status":"ok"}` back.
+You should be able to hit `https://brain.acme-co.com/health` and get `&#123;"status":"ok"&#125;` back.
 
 ---
 
@@ -305,7 +305,7 @@ your-org/myagent/
         └── SKILL.md
 ```
 
-Each `SKILL.md` declares the trigger (verbs in plain English the agent listens for) and the procedure. Use the `modusbrain skillify scaffold <name>` command to generate the boilerplate:
+Each `SKILL.md` declares the trigger (verbs in plain English the agent listens for) and the procedure. Use the `modusbrain skillify scaffold &lt;name&gt;` command to generate the boilerplate:
 
 ```bash
 modusbrain skillify scaffold onboarding-new-hire
@@ -357,7 +357,7 @@ What works instead: I personally onboard each new teammate myself. The flow look
 
 ### Step 1: Pre-populate their slice
 
-Before they ever log in, I seed their `partners/<their-slug>/` directory (or their dedicated source) with the context they need to feel like the brain already knows them:
+Before they ever log in, I seed their `partners/&lt;their-slug&gt;/` directory (or their dedicated source) with the context they need to feel like the brain already knows them:
 
 - `partners/alice-example/USER.md`. a one-page profile: role, focus areas, current top 3 priorities, the kind of questions they tend to ask, the kind of writing they prefer (terse vs detailed, casual vs formal).
 - `partners/alice-example/concepts/`. 5-10 frameworks or recurring themes that are specifically THEIRS. If Alice runs sales, that's "pipeline stage definitions," "ICP criteria," "objection-handling playbooks."
@@ -520,7 +520,7 @@ The first sync embeds every page, which takes time. Check `modusbrain sources st
 
 ### "I see a page I shouldn't see"
 
-This shouldn't happen, but if you suspect it, run `modusbrain search <query> --remote --json` as the constrained client and inspect the `source_id` field on every returned result. Every row should be in the client's `--federated-read` set. If one isn't, file an issue with the exact slug and source IDs.
+This shouldn't happen, but if you suspect it, run `modusbrain search &lt;query&gt; --remote --json` as the constrained client and inspect the `source_id` field on every returned result. Every row should be in the client's `--federated-read` set. If one isn't, file an issue with the exact slug and source IDs.
 
 ### "The synthesized answer is wrong"
 
@@ -528,7 +528,7 @@ The brain layer is grounded in the retrieved pages. If the retrieved pages conta
 
 ### "OAuth `/token` endpoint returns 401 for my client"
 
-Verify the client secret matches what was printed at register-client time. The server stores only a SHA-256 hash; if you lost the original, you have to revoke the client and re-register. Use `modusbrain auth revoke-client <client_id>` and re-run `register-client`.
+Verify the client secret matches what was printed at register-client time. The server stores only a SHA-256 hash; if you lost the original, you have to revoke the client and re-register. Use `modusbrain auth revoke-client &lt;client_id&gt;` and re-run `register-client`.
 
 ### "Postgres connection is exhausting"
 

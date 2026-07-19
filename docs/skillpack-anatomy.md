@@ -28,15 +28,15 @@ my-skillpack/
 └── .gitignore
 ```
 
-`modusbrain skillpack init <name>` scaffolds this exact tree, pre-filled
+`modusbrain skillpack init &lt;name&gt;` scaffolds this exact tree, pre-filled
 with stubs that score 10/10 on `modusbrain skillpack doctor . --quick`
 immediately. Replace the stubs with real content, run the doctor
 between edits, and `modusbrain skillpack pack` produces a deterministic
-`<name>-<version>.tgz` ready to publish to the registry.
+`&lt;name&gt;-&lt;version&gt;.tgz` ready to publish to the registry.
 
 ## How the agent uses a scaffolded pack
 
-After `modusbrain skillpack scaffold <source>` lands the files:
+After `modusbrain skillpack scaffold &lt;source&gt;` lands the files:
 
 1. The user's agent walks `skills/*/SKILL.md` frontmatter and reads
    each pack's `triggers:` array on startup or per-message.
@@ -51,11 +51,11 @@ After `modusbrain skillpack scaffold <source>` lands the files:
 ## How the doctor scores a pack
 
 Ten binary dimensions. Each is checked by a pure function in
-`src/core/skillpack/rubric.ts` and returns `{passed, detail, fix_hint}`.
+`src/core/skillpack/rubric.ts` and returns `&#123;passed, detail, fix_hint&#125;`.
 The doctor walks them in order and prints the score + per-dimension
 status + paste-ready fix for every failure.
 
-<!-- BEGIN auto-generated:rubric -->
+&lt;!-- BEGIN auto-generated:rubric --&gt;
 
 ### Core dimensions (5; must all pass to publish at any tier)
 
@@ -79,14 +79,14 @@ status + paste-ready fix for every failure.
 
 _Generated from `src/core/skillpack/rubric.ts` by `bun run scripts/build-skillpack-anatomy.ts`._
 
-<!-- END auto-generated:rubric -->
+&lt;!-- END auto-generated:rubric --&gt;
 ## Tier eligibility
 
 | Tier | Requirement |
 |------|-------------|
 | `endorsed` | All 5 core + all 5 badges, plus Garry's `endorsements.json` overlay in the registry repo |
 | `community` | All 5 core + >= 3 of 5 badges. Default tier on PR merge. |
-| `experimental` | All 5 core + < 3 badges |
+| `experimental` | All 5 core + &lt;3 badges |
 | `blocked` | Any core dimension fails |
 
 ## CLI reference (third-party path)

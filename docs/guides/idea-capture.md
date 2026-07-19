@@ -69,10 +69,10 @@ capture_idea(message_text, source_context):
 
 | Signal | Destination |
 |--------|-------------|
-| User generated the idea | `brain/originals/{slug}.md` |
+| User generated the idea | `brain/originals/&#123;slug&#125;.md` |
 | User's unique synthesis of others' ideas | `brain/originals/` (the synthesis is original) |
-| World concept someone else coined | `brain/concepts/{slug}.md` |
-| Product or business idea | `brain/ideas/{slug}.md` |
+| World concept someone else coined | `brain/concepts/&#123;slug&#125;.md` |
+| Product or business idea | `brain/ideas/&#123;slug&#125;.md` |
 | User's ghostwritten book/essay | `brain/originals/` (note ghostwriter in metadata) |
 | Article ABOUT user | `brain/media/writings/` |
 
@@ -180,7 +180,7 @@ search enrichment. No stubs. If you make a page, make it good.
 
 1. **Generate an idea and check the page.** Say something original in
    conversation (e.g., "What if markdown files are actually distributed
-   software?"). Verify that `brain/originals/{slug}.md` was created with
+   software?"). Verify that `brain/originals/&#123;slug&#125;.md` was created with
    your exact phrasing, not a paraphrase.
 
 2. **Check cross-links exist.** Open the newly created original page. It

@@ -46,7 +46,7 @@ Every `put_page` runs `extractEntityRefs` on the markdown body. It matches:
 - Obsidian wikilinks: `[[wiki/people/garry-tan|Garry Tan]]`
 - Typed-link blockquotes: `> **Convention:** see [path](path).`
 
-Three regexes, zero LLM tokens, single SQL `addLinksBatch` call with `INSERT ... SELECT FROM jsonb_to_recordset(($1::jsonb)->'rows') JOIN pages ON CONFLICT DO NOTHING RETURNING 1` (free-text-safe; the prior `unnest(${arr}::text[])` form crashed on calendar/Zoom context per modusbrain#1861). The graph grows on every write at near-zero cost. On a 17K-page brain, full graph extract completes in seconds.
+Three regexes, zero LLM tokens, single SQL `addLinksBatch` call with `INSERT ... SELECT FROM jsonb_to_recordset(($1::jsonb)->'rows') JOIN pages ON CONFLICT DO NOTHING RETURNING 1` (free-text-safe; the prior `unnest($&#123;arr&#125;::text[])` form crashed on calendar/Zoom context per modusbrain#1861). The graph grows on every write at near-zero cost. On a 17K-page brain, full graph extract completes in seconds.
 
 Heuristic link-type inference (`attended`, `works_at`, `invested_in`, `founded`, `advises`) fires from surrounding sentence context — also LLM-free. Power users who want richer types add them via the typed-link blockquote convention.
 
@@ -96,7 +96,7 @@ embedding proximity. Four layers, added after the incident in
 The `search` MCP/CLI op is **cheap-hybrid** (vector + keyword + RRF + pool +
 title + alias, expansion off); `query` is the full-control variant. NamedThingBench
 (`modusbrain eval retrieval-quality`) gates these families on every PR. Diagnose a
-specific miss with `modusbrain search diagnose "<q>" --target <slug>`.
+specific miss with `modusbrain search diagnose "&lt;q&gt;" --target &lt;slug&gt;`.
 
 ## Intent-aware query rewriting
 
@@ -149,7 +149,7 @@ deduplication (same slug, different chunks → keep best)
 results
 ```
 
-Each stage is testable in isolation. Each stage is replaceable. The whole pipeline is < 1ms of orchestration cost; the latency budget goes to the upstream HTTP calls (embedding, rerank) and the index scans.
+Each stage is testable in isolation. Each stage is replaceable. The whole pipeline is &lt; 1ms of orchestration cost; the latency budget goes to the upstream HTTP calls (embedding, rerank) and the index scans.
 
 ## How to verify on your own brain
 

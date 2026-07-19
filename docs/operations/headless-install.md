@@ -57,7 +57,7 @@ ENTRYPOINT ["/bin/sh", "-c", "\
   && exec modusbrain serve"]
 ```
 
-The `modusbrain init --no-embedding` opt-in writes `embedding_disabled: true` to config. Every embed callsite (`modusbrain import`, `modusbrain embed`, the `runEmbedCore` library entry point) checks this and refuses cleanly with a `modusbrain config set embedding_model <id>` hint rather than proceeding with a silent default.
+The `modusbrain init --no-embedding` opt-in writes `embedding_disabled: true` to config. Every embed callsite (`modusbrain import`, `modusbrain embed`, the `runEmbedCore` library entry point) checks this and refuses cleanly with a `modusbrain config set embedding_model &lt;id&gt;` hint rather than proceeding with a silent default.
 
 The runtime `modusbrain init --force` re-runs the init flow against the now-populated env, which:
 

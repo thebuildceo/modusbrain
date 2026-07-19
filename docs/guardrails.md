@@ -32,7 +32,7 @@ These hold for every seam and are enforced by `test/guardrails.test.ts`:
 
 ## The five seams
 
-All seams call `runGuardrails({ hook, content, metadata })` from
+All seams call `runGuardrails(&#123; hook, content, metadata &#125;)` from
 `src/core/guardrails.ts`.
 
 | `hook` | Location | Fires |
@@ -41,7 +41,7 @@ All seams call `runGuardrails({ hook, content, metadata })` from
 | `file_storage.code` | `import-file.ts` → `importCodeFile` | After code size guard, **before** hashing, code-chunking, embedding, DB write |
 | `ai_gateway.chat` | `ai/gateway.ts` → `chat` | On the **latest user message only**, before provider inference |
 | `ai_gateway.expand` | `ai/gateway.ts` → `expand` | On the query, before the expansion model call |
-| `ai_gateway.tool_input` | `ai/gateway.ts` → `toolLoop` | On `{toolName, input}`, before pending-persist and before tool execution |
+| `ai_gateway.tool_input` | `ai/gateway.ts` → `toolLoop` | On `&#123;toolName, input&#125;`, before pending-persist and before tool execution |
 
 The two `file_storage.*` hooks cover every natural ingest caller that routes
 through `importFromContent` / `importCodeFile`: `modusbrain import`, sync, capture,
@@ -91,9 +91,9 @@ nothing) is ~80 lines and lives entirely in the provider's own package. See
 the reference provider doc shipped to integration partners for a complete
 `classify` implementation that:
 
-1. resolves `<base>/classify` from an env URL,
-2. posts `{ text, hook, metadata }` with an `x-api-key` header,
-3. parses a `{ prediction, blocked, score, threshold }` response,
+1. resolves `&lt;base&gt;/classify` from an env URL,
+2. posts `&#123; text, hook, metadata &#125;` with an `x-api-key` header,
+3. parses a `&#123; prediction, blocked, score, threshold &#125;` response,
 4. emits one redacted stderr line (`status=… prediction=… content_sha256=…`),
 5. fails open on every error path.
 

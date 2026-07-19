@@ -1,5 +1,5 @@
-<!-- skillpack-version: 0.7.0 -->
-<!-- source: https://raw.githubusercontent.com/garrytan/modusbrain/master/docs/MODUSBRAIN_SKILLPACK.md -->
+&lt;!-- skillpack-version: 0.7.0 --&gt;
+&lt;!-- source: https://raw.githubusercontent.com/garrytan/modusbrain/master/docs/MODUSBRAIN_SKILLPACK.md --&gt;
 # ModusBrain Skillpack: Reference Architecture for AI Agents
 
 This is a reference architecture for how a production AI agent uses modusbrain as its
@@ -120,9 +120,9 @@ data sources to populate it:
 |---------|---------|
 | `modusbrain search "term"` | Keyword search across all brain pages |
 | `modusbrain query "question"` | Hybrid search (vector + keyword + RRF) |
-| `modusbrain get <slug>` | Read a specific brain page by slug |
+| `modusbrain get &lt;slug&gt;` | Read a specific brain page by slug |
 | `modusbrain sync` | Sync local markdown repo to modusbrain index |
-| `modusbrain import <path>` | Import files into the brain |
+| `modusbrain import &lt;path&gt;` | Import files into the brain |
 | `modusbrain embed --stale` | Re-embed pages with stale or missing embeddings |
 | `modusbrain integrations` | Manage integration recipes (senses + reflexes) |
 | `modusbrain stats` | Show brain statistics (page count, last sync, etc.) |

@@ -107,7 +107,7 @@ on schedule_request(meeting):
 
 1. Run meeting prep for tomorrow's calendar. For each attendee, confirm the agent ran `modusbrain search` and loaded their brain page before generating the briefing.
 2. Triage 5 emails. Confirm the agent searched for each sender in the brain before classifying the email.
-3. After clearing an inbox, check 2 sender brain pages with `modusbrain get <slug>`. Confirm new timeline entries were added with information from the emails.
+3. After clearing an inbox, check 2 sender brain pages with `modusbrain get &lt;slug&gt;`. Confirm new timeline entries were added with information from the emails.
 4. Check a scheduling suggestion. Confirm the agent referenced the attendee's brain page (last interaction date, open threads) in the nudge.
 5. Send a test email from someone with a brain page. Confirm the triage response references their relationship context, not just the email content.
 
