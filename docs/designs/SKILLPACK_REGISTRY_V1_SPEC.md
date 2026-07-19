@@ -14,12 +14,12 @@ icon: box
 >
 > | Old spec verb | v0.36-aligned verb | What changes |
 > |---|---|---|
-> | `modusbrain skillpack install <name>` | `modusbrain skillpack scaffold <source>` | One-time additive copy, no managed block, refuses to overwrite. |
-> | `modusbrain skillpack uninstall <name>` | (gone) | User owns files; deletes via `rm` or git. |
+> | `modusbrain skillpack install &lt;name&gt;` | `modusbrain skillpack scaffold &lt;source&gt;` | One-time additive copy, no managed block, refuses to overwrite. |
+> | `modusbrain skillpack uninstall &lt;name&gt;` | (gone) | User owns files; deletes via `rm` or git. |
 > | Auto-walk runbook | Display `bootstrap.md` post-scaffold | Already aligned with codex T1 (per-step approval) — becomes a printed checklist, not an executor. |
 > | Multi-source resolver receipt | Per-scaffold state in `~/.modusbrain/skillpack-state.json` | Codex G1 was the right call; v0.36 retired the resolver-block anyway. |
 > | Auto-rename collision | Refuses-to-overwrite (v0.36's contract) | Codex was right; v0.36 already enforces it. |
-> | Update path | `modusbrain skillpack reference <name> [--apply-clean-hunks]` | Diff-lens with optional auto-merge of clean hunks. |
+> | Update path | `modusbrain skillpack reference &lt;name&gt; [--apply-clean-hunks]` | Diff-lens with optional auto-merge of clean hunks. |
 >
 > What stays verbatim: registry at `garrytan/modusbrain-skillpack-registry`, rubric,
 > doctor, anatomy doc, tarball determinism, TOFU + SHA pinning, endorsement
@@ -87,7 +87,7 @@ in front.
   (`name`, `version`, `description`, `skills[]`, `shared_deps[]`,
   `excluded_from_install?[]`). Reuse + extend; do not re-invent.
 - `installer.ts:259-293` — cumulative-slugs receipt embedded in the managed
-  block (`<!-- modusbrain:skillpack:manifest cumulative-slugs="..." version="..." -->`).
+  block (`&lt;!-- modusbrain:skillpack:manifest cumulative-slugs="..." version="..." --&gt;`).
   Single source of truth for "what's installed from modusbrain."
 - `installer.ts:376-402` — per-file byte-compare gate before install /
   uninstall (D11). Refuses to clobber user edits without `--overwrite-local`.
@@ -110,17 +110,17 @@ A skillpack is **a git repo with `skillpack.json` at root + a `skills/`
 directory**. A `.tgz` of that same tree is an offline-transportable form
 of the same thing. Both paths land in the same installer.
 
-- `modusbrain skillpack install <owner>/<repo>` — clones via existing
+- `modusbrain skillpack install &lt;owner&gt;/&lt;repo&gt;` — clones via existing
   `git-remote.ts` SSRF-hardened path.
-- `modusbrain skillpack install <url.git>` — verbatim https URL.
-- `modusbrain skillpack install <path/to/pack.tgz>` — extract to cache dir,
+- `modusbrain skillpack install &lt;url.git&gt;` — verbatim https URL.
+- `modusbrain skillpack install &lt;path/to/pack.tgz&gt;` — extract to cache dir,
   install from extracted tree. Useful inside YC orgs / corp networks that
   block direct GitHub access, or for air-gapped distribution.
-- `modusbrain skillpack install <path/to/repo>` — local path (skill authors
+- `modusbrain skillpack install &lt;path/to/repo&gt;` — local path (skill authors
   testing).
-- `modusbrain skillpack pack [--out <path>]` — publisher-side command that
+- `modusbrain skillpack pack [--out &lt;path&gt;]` — publisher-side command that
   validates the manifest, runs the full `pack --dry-run` pipeline, and
-  emits `<name>-<version>.tgz`. SHA-256 of the tarball is recorded in the
+  emits `&lt;name&gt;-&lt;version&gt;.tgz`. SHA-256 of the tarball is recorded in the
   TOFU receipt so re-install of the same tarball is silent, but a
   tampered tarball with the same filename fails loud.
 - Tarball schema: gzipped tar with `skillpack.json` at the top level and
@@ -206,7 +206,7 @@ order. Garry curates the starter pack.
 
 **First-install identity confirm + anti-typosquat (codex G4):**
 
-`modusbrain skillpack install <name>` on first install of a given source
+`modusbrain skillpack install &lt;name&gt;` on first install of a given source
 surfaces a confirm prompt with full identity:
 
 ```
@@ -223,7 +223,7 @@ Continue? [y/N]
 Honored on TTY; non-TTY requires `--trust` flag and prints the same
 block to stderr.
 
-Subsequent installs of the same `<author>/<name>` pair at the same
+Subsequent installs of the same `&lt;author&gt;/&lt;name&gt;` pair at the same
 pinned commit + tarball SHA skip the prompt (already trusted).
 Different pinned commit re-prompts. Different author with the same
 name re-prompts (someone may have transferred / forked the pack).
@@ -267,10 +267,10 @@ modusbrain skillpack endorse <name> [--tier endorsed|community|experimental]
 
 Run from a clone of `garrytan/modusbrain-skillpack-registry`. Steps:
 1. Read + validate current `endorsements.json` against the schema.
-2. Confirm `<name>` exists in `registry.json`.
+2. Confirm `&lt;name&gt;` exists in `registry.json`.
 3. Update or insert the entry with the new tier.
 4. Write back with stable key ordering (so diffs are clean).
-5. Stage + create a one-line conventional commit: `endorse: <name> -> <tier>`.
+5. Stage + create a one-line conventional commit: `endorse: &lt;name&gt; -> &lt;tier&gt;`.
 6. If `--push`, push to `main`. Otherwise print "now run git push" hint.
 
 ### Publish-gate skill: /modusbrain-skillpack-publish
@@ -322,22 +322,22 @@ No contributor hand-runs git. The skill drives:
      - `experimental`: anything that passes structural validation.
    - **Failed eval / test surfaces actionable line**: each failure
      in the validation log includes the file path, the assertion, and
-     a paste-ready re-run command (`bun test <file>` or
-     `modusbrain routing-eval skills/<name>/routing-eval.jsonl`).
+     a paste-ready re-run command (`bun test &lt;file&gt;` or
+     `modusbrain routing-eval skills/&lt;name&gt;/routing-eval.jsonl`).
 3. **Tarball + hash**:
-   - `modusbrain skillpack pack --out skillpack-<name>-<version>.tgz`
+   - `modusbrain skillpack pack --out skillpack-&lt;name&gt;-&lt;version&gt;.tgz`
    - SHA-256 recorded for registry pin
 4. **Registry PR** (Printing Press pattern verbatim):
    - Fork `garrytan/modusbrain-skillpack-registry` if not already forked
-   - Branch `add-<name>-<version>`
+   - Branch `add-&lt;name&gt;-&lt;version&gt;`
    - Append catalog entry to `registry.json` with tier=`community`,
      pinned commit, tarball SHA-256, validated_at timestamp, and a
      `validation_run_id` that points at a JSON log committed to a
-     `validation-runs/<run-id>.json` file under the registry repo so
+     `validation-runs/&lt;run-id&gt;.json` file under the registry repo so
      anyone can audit what was checked
    - Open PR against `garrytan/modusbrain-skillpack-registry:main` with the
      validation log in the body
-   - Stretch: Garry's `endorse <name>` command flips the entry to
+   - Stretch: Garry's `endorse &lt;name&gt;` command flips the entry to
      `endorsed` via a one-line commit on `endorsements.json`
 
 The skill file itself ships in the modusbrain skillpack at
@@ -426,9 +426,9 @@ package artifacts.
   the skill's `triggers:` frontmatter. The single highest-leverage eval
   type for an agent-routed skillpack: proves user phrases actually fire
   the right skill.
-- `runbooks.{install, uninstall}` — agent-readable markdown (see
+- `runbooks.&#123;install, uninstall&#125;` — agent-readable markdown (see
   format below).
-- `runbooks.upgrades` — glob expanding to `upgrade-<from>-to-<to>.md`
+- `runbooks.upgrades` — glob expanding to `upgrade-&lt;from&gt;-to-&lt;to&gt;.md`
   files; the agent picks the right one based on the version recorded
   in the resolver receipt.
 - `changelog` — required; the agent surfaces "what changed" at upgrade
@@ -448,14 +448,14 @@ exactly what's blocking promotion.
 
 ### Install/upgrade trust model: per-step approval, not auto-walk (codex T1)
 
-The DX review's first cut had `modusbrain skillpack install <name>` auto-
+The DX review's first cut had `modusbrain skillpack install &lt;name&gt;` auto-
 walk `runbooks/install.md` after dropping files. Codex pointed out
 that this runs trusted-path (`remote=false`) modusbrain CLI calls against
 the user's brain on every install — a malicious community-tier pack
 mutates brain state on first install. v1 fix: **runbook executor
 defaults to per-step approval**.
 
-- `modusbrain skillpack install <name>` ALWAYS drops files + updates the
+- `modusbrain skillpack install &lt;name&gt;` ALWAYS drops files + updates the
   resolver block. That part is content-only; the trust gates (TOFU
   + content-hash + endorsement tier) already cover it.
 - After file-drop, if `runbooks/install.md` exists, the install
@@ -510,7 +510,7 @@ unambiguous:
 - **`show user:`** — display the message to the user (no action).
 - **`ask user:`** — require user confirmation; the next step is gated.
 
-Upgrade runbooks (`upgrade-<from>-to-<to>.md`) follow the same shape
+Upgrade runbooks (`upgrade-&lt;from&gt;-to-&lt;to&gt;.md`) follow the same shape
 with extra frontmatter (`from_version`, `to_version`) so the
 upgrade-walker picks the right runbook when stepping multi-version
 upgrades (e.g., v0.1 → v0.2 → v0.3 walks two runbooks in sequence).
@@ -628,7 +628,7 @@ export const SKILLPACK_RUBRIC_V1: RubricDimension[] = [
 - `10/10` → **endorsed-eligible** (paired with the publish-gate's >=95% test+eval pass)
 - `8-9` → **community-tier eligible**, doctor prints paste-ready fixes for the misses
 - `5-7` → **experimental-tier only**, doctor lists required fixes
-- `<5` → doctor refuses to score, prints "this isn't a skillpack yet — run `modusbrain skillpack init` and try again"
+- `&lt;5` → doctor refuses to score, prints "this isn't a skillpack yet — run `modusbrain skillpack init` and try again"
 
 **2. Layered doctor — `modusbrain skillpack doctor`**
 
@@ -701,7 +701,7 @@ badges** (5 dimensions, earn-them-for-tier-eligibility). A pack with
 | `endorsed`      | 1, 2, 3, 5, 10            | + ALL of &#123;4, 6, 7, 8, 9&#125; |
 
 Required core (5 dimensions): manifest_valid, skills_have_skill_md,
-routing_evals_present (>=5 intents per skill), check_resolvable_clean,
+routing_evals_present (&gt;=5 intents per skill), check_resolvable_clean,
 changelog_present_and_current. Quality badges (5 dimensions):
 routing_evals_clean (LLM-judge layer), unit_tests_present,
 llm_eval_present, install_runbook_present, uninstall_runbook_present.
@@ -747,7 +747,7 @@ guard, not a target:
   unit tests, no LLM-judge evals, no runbooks). **Bringing it to 10/10
   is in-scope for v1 — wave W4.5** (added below).
 
-### Scaffold: `modusbrain skillpack init <name>` (cathedral defaults)
+### Scaffold: `modusbrain skillpack init &lt;name&gt;` (cathedral defaults)
 
 Lands the complete tree out of the box. `modusbrain skillpack pack --dry-run`
 on the scaffold passes immediately; developer deletes what they don't
@@ -831,7 +831,7 @@ owned state**.
   cumulative-slugs list (still needed for uninstall to know what to
   remove without consulting state.json — defense in depth against a
   corrupted state.json). Receipt comment shape:
-  `<!-- modusbrain:skillpack:source name="..." version="..." tier="..." cumulative-slugs="..." -->`.
+  `&lt;!-- modusbrain:skillpack:source name="..." version="..." tier="..." cumulative-slugs="..." --&gt;`.
 - Mismatch between state.json and resolver-block (e.g., resolver lists
   a source not in state.json, or state.json's cumulative-slugs differs
   from the rendered rows) fails loud at install-time and refuses
@@ -869,7 +869,7 @@ rows or D11 hash budget.
 
 - **Default**: TOFU. First install of a given repo URL prompts via
   `AskUserQuestion`-equivalent CLI flow ("you are about to install
-  skillpack `<name>` from `<url>` at commit `<sha>`. Trust this source?").
+  skillpack `&lt;name&gt;` from `&lt;url&gt;` at commit `&lt;sha&gt;`. Trust this source?").
   TTY-only; non-TTY requires explicit `--trust` flag.
 - **Pin the commit SHA** into the per-source resolver receipt. Re-install
   / upgrade refuses to silently advance the SHA without user consent (same
@@ -890,7 +890,7 @@ modusbrain skillpack init <name>                 # NEW: scaffold publisher repo
 modusbrain skillpack pack [--out <path>]         # NEW: validate + emit .tgz tarball
 ```
 
-`<source>` accepts:
+`&lt;source&gt;` accepts:
 - `garrytan/repo` → `https://github.com/garrytan/repo.git`
 - `https://github.com/.../...git` → verbatim, SSRF-checked
 - `./path/to/pack.tgz` → tarball; extract to cache, install from tree
@@ -899,7 +899,7 @@ modusbrain skillpack pack [--out <path>]         # NEW: validate + emit .tgz tar
 
 ### Publisher workflow (the "make a skillpack" path)
 
-1. `modusbrain skillpack init <name>` — scaffolds `skillpack.json` +
+1. `modusbrain skillpack init &lt;name&gt;` — scaffolds `skillpack.json` +
    `skills/` + `RESOLVER.md` (skillpack-internal) + `.gitignore`.
 2. Author writes skills using existing `modusbrain skillify scaffold` patterns.
 3. `modusbrain skillpack pack --dry-run` — runs the full validate pipeline:
@@ -919,7 +919,7 @@ modusbrain skillpack pack [--out <path>]         # NEW: validate + emit .tgz tar
   validator for `skillpack.json`. Owns the `SkillpackManifest` type.
 - `src/core/skillpack/remote-source.ts` — wraps `git-remote.ts` for the
   skillpack use case: shallow clone to a cache dir under
-  `~/.modusbrain/skillpack-cache/<host>/<owner>/<repo>/<sha>/`, resolves
+  `~/.modusbrain/skillpack-cache/&lt;host&gt;/&lt;owner&gt;/&lt;repo&gt;/&lt;sha&gt;/`, resolves
   HEAD SHA, supports update via `pullRepo`.
 - `src/core/skillpack/tarball.ts` — `packTarball(dir, outPath)` +
   `extractTarball(tgzPath, cacheDir)`. Tar entries validated against
@@ -949,7 +949,7 @@ modusbrain skillpack pack [--out <path>]         # NEW: validate + emit .tgz tar
 - `src/core/skillpack/registry-client.ts` — fetch + cache the live
   `registry.json` over HTTPS. Honors `If-None-Match` etag for cheap
   polling. Validates schema before use. Caches under
-  `~/.modusbrain/skillpack-cache/registry-<sha256-of-url>.json` with a
+  `~/.modusbrain/skillpack-cache/registry-&lt;sha256-of-url&gt;.json` with a
   1-hour soft TTL.
   **Offline-safe**: on fetch failure (network down, GitHub 5xx, DNS
   miss), falls back to the on-disk cache and emits a single stderr
@@ -985,7 +985,7 @@ modusbrain skillpack pack [--out <path>]         # NEW: validate + emit .tgz tar
   - Inside the sandbox, an ephemeral in-memory PGLite modusbrain runs the
     trial install, reuses the pattern from
     `src/eval/longmemeval/harness.ts`. Exposes
-    `runTrialInstall(packPath, opts): Promise<TrialResult>` consumed
+    `runTrialInstall(packPath, opts): Promise&lt;TrialResult&gt;` consumed
     by the publish-gate.
   - Bun's `child_process` spawn with the chosen backend's wrapper
     argv; abort signal kills the wrapper which cascades to the child.
@@ -997,7 +997,7 @@ modusbrain skillpack pack [--out <path>]         # NEW: validate + emit .tgz tar
     `GIT_*` (no GIT_ASKPASS, no GIT_SSH), `NPM_TOKEN`,
     `BUN_INSTALL_TOKEN`, plus an explicit denylist defined as a
     pure-function constant in `src/core/skillpack/sandbox-env.ts`.
-  - **HOME override**: `HOME=<tempdir>/sandbox-home` (empty dir).
+  - **HOME override**: `HOME=&lt;tempdir&gt;/sandbox-home` (empty dir).
     Side effects: no `~/.modusbrain` access, no `~/.gitconfig` (credential
     helper disabled), no `~/.netrc`, no `~/.npmrc`, no
     `~/.bunfig.toml`. The publish-gate's PGLite + LLM-judge stubs
@@ -1011,7 +1011,7 @@ modusbrain skillpack pack [--out <path>]         # NEW: validate + emit .tgz tar
     asserting each known-credential env var is stripped, HOME is
     overridden, the denylist constant matches the test fixture.
 - `src/core/skillpack/sandbox-profiles/macos.sb` — sandbox-exec policy
-  file (allow read/write only within `${TEMPDIR}`, deny network, deny
+  file (allow read/write only within `$&#123;TEMPDIR&#125;`, deny network, deny
   process-fork beyond the trial-install Bun process, deny mach lookups
   except the minimum set Bun needs to start).
 - `src/core/skillpack/sandbox-probe.ts` — pre-flight: detects which
@@ -1025,7 +1025,7 @@ modusbrain skillpack pack [--out <path>]         # NEW: validate + emit .tgz tar
   to a built-in regex pass naming the offending patterns when not),
   `scanForbiddenFiletypes(tree)`, `validateExternalResources(skill)`,
   `checkFrontmatter(skill)`. Each returns structured findings.
-- `src/commands/skillpack-init.ts` — `modusbrain skillpack init <name>`
+- `src/commands/skillpack-init.ts` — `modusbrain skillpack init &lt;name&gt;`
   scaffold command.
 - `src/commands/skillpack-pack.ts` — `modusbrain skillpack pack` validator
   AND tarball emitter. Single command, `--dry-run` skips the tarball.
@@ -1038,10 +1038,10 @@ modusbrain skillpack pack [--out <path>]         # NEW: validate + emit .tgz tar
   optionally force a fresh fetch.
 - `src/commands/skillpack-endorse.ts` — `modusbrain skillpack endorse &lt;name&gt;
   [--tier endorsed|community|experimental] [--push] [--dry-run]`. Runs
-  in a clone of the registry repo; validates `<name>` against
+  in a clone of the registry repo; validates `&lt;name&gt;` against
   `registry.json`; reads, updates, schema-validates, and writes
   `endorsements.json` with stable key ordering; stages + commits with a
-  one-line conventional-commit message `endorse: <name> -> <tier>`;
+  one-line conventional-commit message `endorse: &lt;name&gt; -> &lt;tier&gt;`;
   optionally pushes. Refuses if not inside a registry-shaped repo.
 - `src/core/skillpack/runbook-parser.ts` — parses
   `runbooks/install.md`, `uninstall.md`, and `upgrade-*.md` files.
@@ -1087,7 +1087,7 @@ modusbrain skillpack pack [--out <path>]         # NEW: validate + emit .tgz tar
   path dispatches per-dimension auto-scaffold (calls `modusbrain skillify
   scaffold` for missing skills, writes runbook stubs from a template
   baked into the bundle, generates CHANGELOG entries from VERSION +
-  `git log --since=<last-version-tag>`). Refuses to overwrite files
+  `git log --since=&lt;last-version-tag&gt;`). Refuses to overwrite files
   whose mtime is newer than `skillpack.json`'s mtime (heuristic for
   "hand-edited since last manifest update").
 - `src/commands/skillpack-doctor.ts` — CLI wrapper. Reads flags,
@@ -1150,10 +1150,10 @@ modusbrain skillpack pack [--out <path>]         # NEW: validate + emit .tgz tar
 
 - `registry.json` — the catalog (schema above)
 - `endorsements.json` — Garry-only file controlling the `endorsed` tier
-- `validation-runs/<run-id>.json` — one file per published validation,
+- `validation-runs/&lt;run-id&gt;.json` — one file per published validation,
   immutable, content-addressable. Anyone auditing a skillpack can pull
   the corresponding run JSON.
-- `tarballs/<name>-<version>.tgz` — registry-mirrored tarball, written
+- `tarballs/&lt;name&gt;-&lt;version&gt;.tgz` — registry-mirrored tarball, written
   by CI at PR-merge time as the durable copy. Each tarball is
   content-addressed by the SHA-256 already recorded in `registry.json`.
   Tarballs use **git LFS** to keep the registry clone small (a 1GB
@@ -1168,7 +1168,7 @@ modusbrain skillpack pack [--out <path>]         # NEW: validate + emit .tgz tar
   entry is reverted.
 - **CI liveness job** (`.github/workflows/liveness-check.yml`): weekly,
   walks every registry entry and verifies the source URL still resolves
-  to the pinned commit. Unreachable entries get a `last_alive: <date>`
+  to the pinned commit. Unreachable entries get a `last_alive: &lt;date&gt;`
   field but are NOT auto-tombstoned — Garry decides whether to deprecate.
 - `README.md` — explains the tier system, links to the publish skill,
   documents how to fork + submit
@@ -1265,7 +1265,7 @@ modusbrain skillpack pack [--out <path>]         # NEW: validate + emit .tgz tar
   assignment matches expectations),
   `test/skillpack-rubric.test.ts` (every dimension in
   `SKILLPACK_RUBRIC_V1` has a check function that returns
-  `{passed, detail}`; pure-function tests against fixture packs that
+  `&#123;passed, detail&#125;`; pure-function tests against fixture packs that
   pass / fail each dimension individually + a known-bad pack that
   triggers all 10 fixes simultaneously),
   `test/skillpack-doctor-quick.test.ts` (the `--quick` mode runs in
@@ -1310,7 +1310,7 @@ End-to-end:
 1. **Publisher path**: `modusbrain skillpack init hackathon-evaluation` in a
    tempdir → add a synthetic skill → `modusbrain skillpack pack --dry-run`
    → expect pass.
-2. **Install from local path**: `modusbrain skillpack install <tempdir>` in
+2. **Install from local path**: `modusbrain skillpack install &lt;tempdir&gt;` in
    a fresh workspace → resolver-block shows the new source sub-block →
    `modusbrain check-resolvable` clean.
 3. **Install from git** (E2E, optional): clone a known-good public
@@ -1450,8 +1450,8 @@ W4-W6 are quality layers on a working system.
 1. **Linux sandbox chain**: `bwrap → unshare --net → docker`. bwrap preferred (most portable, ~100ms); unshare covers stock kernels; docker as heavyweight fallback for RHEL/Rocky/CentOS where unprivileged userns is disabled.
 2. **macOS sandbox**: `sandbox-exec → docker`. Apple's built-in `sandbox-exec` is the primary path (~50ms, no Docker dep); Docker is the rare fallback. macOS publishers without Docker can still publish.
 3. **Bundle install atomicity**: per-pack independent (option γ). Failures inside a bundle leave earlier successful packs installed, skip later packs, print a summary with retry hint.
-4. **Deleted source repo durability**: registry CI mirrors tarballs to `tarballs/<name>-<version>.tgz` via git LFS at PR merge time. 5MB per-pack cap; larger packs flagged `source_only: true`.
-5. **Endorsement workflow**: `modusbrain skillpack endorse <name> [--tier ...] [--push]` CLI command with schema validation; hand-editing remains valid.
+4. **Deleted source repo durability**: registry CI mirrors tarballs to `tarballs/&lt;name&gt;-&lt;version&gt;.tgz` via git LFS at PR merge time. 5MB per-pack cap; larger packs flagged `source_only: true`.
+5. **Endorsement workflow**: `modusbrain skillpack endorse &lt;name&gt; [--tier ...] [--push]` CLI command with schema validation; hand-editing remains valid.
 
 **Eng-review findings (resolved by the 5 decisions above):**
 - A1: Linux sandbox fallback chain underspecified → locked (#1).
@@ -1481,9 +1481,9 @@ Conflict flag: Lane A and Lane C both touch the in-tree skillpack module dir. Re
 **DX-review decisions locked across two rounds:**
 
 *Round 1 — artifact scope:*
-1. **Artifact scope: full cathedral.** `skillpack.json` declares `skills[]`, `unit_tests[]`, `e2e_tests[]`, `llm_evals[]`, `routing_evals[]`, `runbooks{install, uninstall, upgrades}`, `changelog`. The differentiation moat — nobody else ships AI evals + agent runbooks as first-class package artifacts.
+1. **Artifact scope: full cathedral.** `skillpack.json` declares `skills[]`, `unit_tests[]`, `e2e_tests[]`, `llm_evals[]`, `routing_evals[]`, `runbooks&#123;install, uninstall, upgrades&#125;`, `changelog`. The differentiation moat — nobody else ships AI evals + agent runbooks as first-class package artifacts.
 2. **Publish gate runs everything in the sandbox.** Unit + E2E (when DB available) + LLM-judge (stubbed gateway, zero cost) + routing-evals. Coverage score drives tier eligibility: `endorsed` requires routing + runbooks + &gt;=95% pass; `community` requires routing + install + >=80%; `experimental` accepts structural-only.
-3. **Runbook format: agent-readable markdown** with three step kinds (`agent:`, `show user:`, `ask user:`). Separate `install.md`, `uninstall.md`, `upgrade-<from>-to-<to>.md` per version. Mirrors modusbrain's own `skills/migrations/v0.21.0.md` pattern.
+3. **Runbook format: agent-readable markdown** with three step kinds (`agent:`, `show user:`, `ask user:`). Separate `install.md`, `uninstall.md`, `upgrade-&lt;from&gt;-to-&lt;to&gt;.md` per version. Mirrors modusbrain's own `skills/migrations/v0.21.0.md` pattern.
 4. **`modusbrain skillpack init` scaffolds the cathedral by default.** Full tree (skills, tests, e2e, evals, runbooks, CHANGELOG, README, LICENSE) lands out of the box; `modusbrain skillpack pack --dry-run` passes immediately. `--minimal` flag for power users opting out.
 
 *Round 2 — rubric + doctor + reference + invariant:*
@@ -1507,7 +1507,7 @@ Conflict flag: Lane A and Lane C both touch the in-tree skillpack module dir. Re
 | **TTHW**           | n/a    | &lt; 5min   | **&lt; 3min** | `init` → edit → `doctor --quick` → 10/10 |
 | **Overall DX**     | 4/10   | 8.5/10  | **9.5/10** | Rubric-as-source-of-truth + `every bundled pack is 10/10` invariant is the kill move |
 
-**Magical moment** (locked from DX 0D): `modusbrain skillpack install <name>` lands the pack AND walks `runbooks/install.md` AND the agent immediately knows what triggers fire, what tools the skill exposes, and how to upgrade later. Zero "where are the docs?" moment.
+**Magical moment** (locked from DX 0D): `modusbrain skillpack install &lt;name&gt;` lands the pack AND walks `runbooks/install.md` AND the agent immediately knows what triggers fire, what tools the skill exposes, and how to upgrade later. Zero "where are the docs?" moment.
 
 **Second magical moment** (Round 2): `modusbrain skillpack doctor --quick --json` prints a 10/10 score with paste-ready fixes for the misses. The agent reads the JSON, runs `--fix --yes` to auto-scaffold, re-runs `--quick`, and the score climbs. The first time an agent gets from 6/10 to 10/10 in 30 seconds via three `modusbrain` commands is the moment the "skillpacks are real software packages" claim becomes felt rather than asserted.
 
@@ -1519,7 +1519,7 @@ Conflict flag: Lane A and Lane C both touch the in-tree skillpack module dir. Re
 - T3 (10/10 BUNDLED) — held: shipping modusbrain's own packs below the bar modusbrain demands is credibility-poison; W4.5 retrofit costs ~3d with --fix autoscaffold, slips v1 by a week.
 - T4 (GAMEABLE CATHEDRAL) — adopted: rubric splits into required core (5 dimensions: manifest + SKILL.md + routing-evals + check-resolvable + CHANGELOG) and quality badges (5: routing-evals-clean + unit tests + LLM-judge + install + uninstall runbook). Endorsed needs all badges; community needs 3/5; experimental needs core only. Plus stubbed-eval detection in publish-gate content scan.
 - G1 (TRUST STORE) — adopted: `~/.modusbrain/skillpack-state.json` machine-owned (TOFU pins, hashes, rename maps); resolver markdown stays render-only (rows + cumulative-slugs). Mismatch fails loud.
-- G2 (ENV SCRUB) — adopted: clean env (only PATH/LANG/TZ), HOME override to empty `<tempdir>/sandbox-home`, explicit denylist (`*_API_KEY` / `*_TOKEN` / `*_SECRET` / SSH_AUTH_SOCK / GIT_* / NPM_TOKEN / BUN_INSTALL_TOKEN). Read-only mounts + masked `/proc` where bwrap supports it.
+- G2 (ENV SCRUB) — adopted: clean env (only PATH/LANG/TZ), HOME override to empty `&lt;tempdir&gt;/sandbox-home`, explicit denylist (`*_API_KEY` / `*_TOKEN` / `*_SECRET` / SSH_AUTH_SOCK / GIT_* / NPM_TOKEN / BUN_INSTALL_TOKEN). Read-only mounts + masked `/proc` where bwrap supports it.
 - G3 (CI SUPPLY CHAIN) — adopted: three-workflow split. validate-pr.yml is static-only on `pull_request` (no privileged tokens, no LFS write). post-merge-validate.yml runs the heavy suite inside the registry's own sandbox after merge. mirror-tarball.yml commits the tarball with a least-privilege deploy key scoped to `tarballs/`.
 - G4 (NAMESPACE / TYPOSQUAT) — adopted: first-install identity confirm prompt showing author/source/commit/SHA/tier; subsequent same-author-same-pin installs skip. Registry rejects new endorsed-tier names within Damerau-Levenshtein edit-distance 2 of any existing endorsed pack.
 
