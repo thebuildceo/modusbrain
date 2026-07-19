@@ -119,7 +119,7 @@ losing your knowledge. You can switch knowledge tools (ModusBrain -> something e
 without losing your agent setup.
 
 **Scale.** The brain grows large (10,000+ files). The agent repo stays small
-(< 100 files). Different backup strategies, different sync cadences.
+(&lt; 100 files). Different backup strategies, different sync cadences.
 
 **Privacy.** The brain contains sensitive information (people, deals, personal
 notes). The agent repo contains operational config. Different access controls.

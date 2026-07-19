@@ -72,7 +72,7 @@ thesis, he's interested in your take on AI agents."
 
 3. **Don't skip for "simple" questions.** Even "what's Acme Corp's address?"
    should check the brain first. The brain might have it, and the lookup adds
-   no latency (< 100ms for keyword search).
+   no latency (&lt; 100ms for keyword search).
 
 4. **Load compiled truth + recent timeline.** The compiled truth gives you the
    state of play in 30 seconds. The timeline gives you what changed recently.
