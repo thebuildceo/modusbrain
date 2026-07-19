@@ -421,8 +421,8 @@ package artifacts.
   (task/output prompt with multi-model judging). Run with a **stubbed
   gateway** in the publish-gate sandbox so no real API spend; the
   publisher's machine runs real-gateway evals before submitting.
-- `routing_evals[]` — `routing-eval.jsonl` files with `{intent,
-  expected_skill, ambiguous_with?}` rows. Structural matching against
+- `routing_evals[]` — `routing-eval.jsonl` files with `&#123;intent,
+  expected_skill, ambiguous_with?&#125;` rows. Structural matching against
   the skill's `triggers:` frontmatter. The single highest-leverage eval
   type for an agent-routed skillpack: proves user phrases actually fire
   the right skill.
@@ -697,8 +697,8 @@ badges** (5 dimensions, earn-them-for-tier-eligibility). A pack with
 | Tier            | Required core (must pass) | Badges (must earn) |
 |-----------------|---------------------------|--------------------|
 | `experimental`  | 1, 2, 3, 5, 10            | 0                  |
-| `community`     | 1, 2, 3, 5, 10            | + at least 3 of {4, 6, 7, 8, 9} |
-| `endorsed`      | 1, 2, 3, 5, 10            | + ALL of {4, 6, 7, 8, 9} |
+| `community`     | 1, 2, 3, 5, 10            | + at least 3 of &#123;4, 6, 7, 8, 9&#125; |
+| `endorsed`      | 1, 2, 3, 5, 10            | + ALL of &#123;4, 6, 7, 8, 9&#125; |
 
 Required core (5 dimensions): manifest_valid, skills_have_skill_md,
 routing_evals_present (>=5 intents per skill), check_resolvable_clean,
@@ -939,8 +939,8 @@ modusbrain skillpack pack [--out <path>]         # NEW: validate + emit .tgz tar
   `test/skillpack-tarball-determinism.test.ts` (pack the same dir
   twice on different days → same SHA).
 - `src/core/skillpack/collision-resolver.ts` — pure function
-  `resolveSlugCollisions(incoming: string[], existing: Set&lt;string&gt;): {
-  finalSlugs: string[], renameMap: Record&lt;string,string&gt; }`. Bounded
+  `resolveSlugCollisions(incoming: string[], existing: Set&lt;string&gt;): &#123;
+  finalSlugs: string[], renameMap: Record&lt;string,string&gt; &#125;`. Bounded
   walk to `-99`. Pinned by unit tests.
 - `src/core/skillpack/multi-source-receipt.ts` — parse + serialize the
   per-source resolver-block sub-headers. Pure functions; pinned by tests.
@@ -1077,11 +1077,11 @@ modusbrain skillpack pack [--out <path>]         # NEW: validate + emit .tgz tar
   test/, e2e/, evals/ for power users who explicitly opt out.
 - `src/core/skillpack/rubric.ts` — declarative `SKILLPACK_RUBRIC_V1`
   array of `RubricDimension` (see schema above). Pure-data + check
-  functions that take a parsed pack and return `{ passed: boolean,
-  detail: string }`. Single source of truth for doctor + anatomy doc +
+  functions that take a parsed pack and return `&#123; passed: boolean,
+  detail: string &#125;`. Single source of truth for doctor + anatomy doc +
   tests.
 - `src/core/skillpack/doctor.ts` — `runDoctor(pack, opts:
-  {mode: 'quick' | 'full', fix: boolean, autoYes: boolean}):
+  &#123;mode: 'quick' | 'full', fix: boolean, autoYes: boolean&#125;):
   Promise&lt;DoctorResult&gt;`. Walks the rubric, dispatches each check,
   computes score + tier eligibility, emits paste-ready fixes. `--fix`
   path dispatches per-dimension auto-scaffold (calls `modusbrain skillify
@@ -1126,8 +1126,8 @@ modusbrain skillpack pack [--out <path>]         # NEW: validate + emit .tgz tar
 - `src/core/skillpack/audit.ts` — JSONL audit at
   `~/.modusbrain/audit/skillpack-YYYY-Www.jsonl` (ISO-week rotated, mirrors
   `src/core/audit-slug-fallback.ts` + `src/core/rerank-audit.ts`).
-  `logSkillpackEvent({event, source_kind, name, version,
-  pinned_commit, tier_when_installed, outcome, error?})` called by
+  `logSkillpackEvent(&#123;event, source_kind, name, version,
+  pinned_commit, tier_when_installed, outcome, error?&#125;)` called by
   install / uninstall / update / search-resolve paths. Best-effort —
   never throws, logs stderr warning on write failure.
   `readRecentSkillpackEvents(days)` is the readback path for `modusbrain
@@ -1289,8 +1289,8 @@ modusbrain skillpack pack [--out <path>]         # NEW: validate + emit .tgz tar
 
 - `src/commands/skillpack.ts` — extend `install` to dispatch on source
   shape (bundled vs `owner/repo` vs URL vs local path).
-- `src/core/skillpack/installer.ts` — thread a `source: {name, version,
-  pinnedCommit?}` discriminator through `applyInstall` / `applyUninstall`.
+- `src/core/skillpack/installer.ts` — thread a `source: &#123;name, version,
+  pinnedCommit?&#125;` discriminator through `applyInstall` / `applyUninstall`.
   Read + write per-source managed sub-blocks.
 - `src/core/skillpack/bundle.ts` — accept either today's
   `openclaw.plugin.json` shape OR the new `skillpack.json`, normalize
@@ -1405,7 +1405,7 @@ earlier ones from shipping value:
 2. **W2: Registry catalog** — `garrytan/modusbrain-skillpack-registry`
    created, `registry.json` schema + endorsements.json, registry-client
    with stale-cache fallback, `modusbrain skillpack search` + `install
-   <short-name&gt;` + `info`. Initial catalog seeded with bundled modusbrain
+   &lt;short-name&gt;` + `info`. Initial catalog seeded with bundled modusbrain
    skills + hackathon-evaluation + maybe one community pack.
 3. **W3: Publish-gate skill** — `/modusbrain-skillpack-publish` skill,
    security-gates module, sandbox-probe, subprocess-isolated trial
@@ -1482,7 +1482,7 @@ Conflict flag: Lane A and Lane C both touch the in-tree skillpack module dir. Re
 
 *Round 1 — artifact scope:*
 1. **Artifact scope: full cathedral.** `skillpack.json` declares `skills[]`, `unit_tests[]`, `e2e_tests[]`, `llm_evals[]`, `routing_evals[]`, `runbooks{install, uninstall, upgrades}`, `changelog`. The differentiation moat — nobody else ships AI evals + agent runbooks as first-class package artifacts.
-2. **Publish gate runs everything in the sandbox.** Unit + E2E (when DB available) + LLM-judge (stubbed gateway, zero cost) + routing-evals. Coverage score drives tier eligibility: `endorsed` requires routing + runbooks + >=95% pass; `community` requires routing + install + >=80%; `experimental` accepts structural-only.
+2. **Publish gate runs everything in the sandbox.** Unit + E2E (when DB available) + LLM-judge (stubbed gateway, zero cost) + routing-evals. Coverage score drives tier eligibility: `endorsed` requires routing + runbooks + &gt;=95% pass; `community` requires routing + install + >=80%; `experimental` accepts structural-only.
 3. **Runbook format: agent-readable markdown** with three step kinds (`agent:`, `show user:`, `ask user:`). Separate `install.md`, `uninstall.md`, `upgrade-<from>-to-<to>.md` per version. Mirrors modusbrain's own `skills/migrations/v0.21.0.md` pattern.
 4. **`modusbrain skillpack init` scaffolds the cathedral by default.** Full tree (skills, tests, e2e, evals, runbooks, CHANGELOG, README, LICENSE) lands out of the box; `modusbrain skillpack pack --dry-run` passes immediately. `--minimal` flag for power users opting out.
 

@@ -146,7 +146,7 @@ Every metric `modusbrain eval *` and `modusbrain search stats` reports has a pla
 
 **Plain English:** Sum of LLM + embedding API charges for one search call. Includes Haiku expansion call (tokenmax mode only) + embedding cost + downstream answer-model cost if measured.
 
-**Range:** 0..unbounded. Conservative mode is typically <\$0.001 per call; tokenmax with answer-gen can exceed \$0.01.
+**Range:** 0..unbounded. Conservative mode is typically &lt;\$0.001 per call; tokenmax with answer-gen can exceed \$0.01.
 
 ### p99 latency (ms)
 
