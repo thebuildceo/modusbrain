@@ -1374,14 +1374,17 @@ export function readLineSafe(
 export function detectGStack(): { found: boolean; path: string | null; host: string | null } {
   // Try gstack's own discovery tool first (DRY: don't reimplement host detection)
   try {
-    const result = execSync(
-      `${join(homedir(), '.claude', 'skills', 'gstack', 'bin', 'gstack-global-discover')} 2>/dev/null`,
-      { encoding: 'utf-8', timeout: 5000 }
-    ).trim();
-    if (result) {
-      return { found: true, path: result.split('\n')[0], host: 'auto-detected' };
+    const discoverPath = join(homedir(), '.claude', 'skills', 'gstack', 'bin', 'gstack-global-discover');
+    if (existsSync(discoverPath)) {
+      const result = execSync(
+        `"${discoverPath}"`,
+        { encoding: 'utf-8', timeout: 5000, stdio: 'pipe' }
+      ).trim();
+      if (result) {
+        return { found: true, path: result.split('\n')[0], host: 'auto-detected' };
+      }
     }
-  } catch { /* binary not available */ }
+  } catch { /* binary not available or execution failed */ }
 
   // Fallback: check known host paths
   const hostPaths = [

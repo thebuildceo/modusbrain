@@ -36,7 +36,7 @@ import { findResolverFile } from '../resolver-filenames.ts';
 import { extractManagedSlugs, parseReceipt } from './installer.ts';
 import { autoDetectSkillsDir } from '../repo-root.ts';
 import { resolve as resolvePath } from 'path';
-import { currentRecommendedSet, type RecommendedSkill } from '../advisor/recommended-set.ts';
+import { currentRecommendedSet, currentEnterpriseRecommendedSet, type RecommendedSkill } from '../advisor/recommended-set.ts';
 import { renderRecommendedSkills } from '../advisor/render.ts';
 
 /**
@@ -128,4 +128,20 @@ export function printAdvisoryIfRecommended(opts: {
   const advisory = buildAdvisory(opts);
   if (!advisory) return;
   process.stderr.write(advisory);
+
+  // Append enterprise track footer so teams know the additional skill set exists.
+  // This is always shown (not gated on installed state) so new teams notice it.
+  const enterpriseSkills = currentEnterpriseRecommendedSet();
+  const lines = [
+    '',
+    '------------------------------------------------------------------------',
+    'ENTERPRISE SKILLS (policy / compliance / incident — optional add-on set)',
+    '------------------------------------------------------------------------',
+    ...enterpriseSkills.map((s) => `  - ${s.slug}\n      ${s.description}`),
+    '',
+    'To scaffold all enterprise skills:',
+    `  modusbrain skillpack scaffold ${enterpriseSkills.map((s) => s.slug).join(' ')}`,
+    '',
+  ];
+  process.stderr.write(lines.join('\n') + '\n');
 }

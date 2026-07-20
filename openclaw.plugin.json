@@ -67,7 +67,10 @@
     "skills/strategic-reading",
     "skills/testing",
     "skills/voice-note-ingest",
-    "skills/webhook-transforms"
+    "skills/webhook-transforms",
+    "skills/policy-compile",
+    "skills/incident-runbook",
+    "skills/compliance-audit"
   ],
   "shared_deps": [
     "skills/conventions",

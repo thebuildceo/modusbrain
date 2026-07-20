@@ -66,3 +66,31 @@ export const RECOMMENDED: RecommendedSkill[] = [
 export function currentRecommendedSet(): RecommendedSkill[] {
   return RECOMMENDED;
 }
+
+/**
+ * Enterprise-oriented skill set: policy/compliance/incident tools.
+ * Additive — does NOT replace the personal knowledge skills above.
+ * Scaffold with: modusbrain skillpack scaffold policy-compile incident-runbook compliance-audit
+ */
+export const ENTERPRISE_RECOMMENDED: RecommendedSkill[] = [
+  {
+    slug: 'policy-compile',
+    description:
+      'Compile a policy doc or brain page into a versioned operational skill. Every decision rule is cross-referenced against a brain page — fabrication is blocked by the confidence gate.',
+  },
+  {
+    slug: 'incident-runbook',
+    description:
+      'Generate a structured incident runbook (triage steps, escalation paths, rollback procedures) from an existing brain page or SOP. Never invents contacts not found in the brain.',
+  },
+  {
+    slug: 'compliance-audit',
+    description:
+      'Run a structured compliance gap analysis (SOC 2, GDPR, HIPAA, ISO 27001) across brain pages. Produces a coverage report and an evidence dossier with brain-page citations per control.',
+  },
+];
+
+/** Enterprise-track skill set for policy / compliance / incident use cases. */
+export function currentEnterpriseRecommendedSet(): RecommendedSkill[] {
+  return ENTERPRISE_RECOMMENDED;
+}

@@ -233,3 +233,53 @@ describe('operational skills — list and approve', () => {
     expect(token).toContain('appr_');
   });
 });
+
+describe('operational skills — compile file-input validation (Tier 1.1)', () => {
+  test('(i) nonexistent file path fails with clear error', async () => {
+    await expect(
+      compileSkill(engine, { topic: '/tmp/nonexistent-file.md' }),
+    ).rejects.toThrow('Error: file not found: /tmp/nonexistent-file.md');
+  });
+
+  test('(ii) real but irrelevant file (grocery list) is rejected with low-confidence error', async () => {
+    // Seed a completely unrelated brain page
+    await engine.executeRaw(
+      `INSERT INTO pages (source_id, slug, type, page_kind, title, compiled_truth)
+       VALUES ('default', 'wiki/policies/refund-policy', 'guide', 'markdown',
+               'Refund Policy',
+               'If amount is under $50, auto approve refunds. Amounts over $500 require finance approval.')`,
+    );
+
+    // Write a real grocery-list file to a temp path
+    const fs = await import('fs');
+    const tmpPath = '/tmp/grocery-list.md';
+    fs.writeFileSync(tmpPath, '- milk\n- eggs\n- bananas\n- coffee\n- toilet paper\n');
+
+    await expect(
+      compileSkill(engine, { topic: tmpPath }),
+    ).rejects.toThrow('Low confidence match');
+  });
+
+  test('(iii) real relevant policy file compiles successfully when content matches brain', async () => {
+    // Seed a refund policy page that shares tokens with our test file
+    await engine.executeRaw(
+      `INSERT INTO pages (source_id, slug, type, page_kind, title, compiled_truth)
+       VALUES ('default', 'wiki/policies/refund-policy', 'guide', 'markdown',
+               'Refund Policy',
+               'If amount is under $50, auto approve refunds. If amount is under $500, auto approve with support lead notification. Amounts over $500 require finance approval.')`,
+    );
+
+    // Write a file whose content has high token overlap with the seeded page
+    const fs = await import('fs');
+    const tmpPath = '/tmp/refund-policy.md';
+    fs.writeFileSync(
+      tmpPath,
+      '# Refund Policy\n\nIf amount is under $50, auto approve refunds.\nIf amount is under $500, auto approve with support lead notification.\nAmounts over $500 require finance approval.\n',
+    );
+
+    const result = await compileSkill(engine, { topic: tmpPath });
+    expect(result.skill.slug).toBeTruthy();
+    expect(result.version.status).toBe('draft');
+    expect(result.matched_sources.length).toBeGreaterThan(0);
+  });
+});

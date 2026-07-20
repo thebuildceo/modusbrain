@@ -263,6 +263,21 @@
       "name": "skill-optimizer",
       "path": "skill-optimizer/SKILL.md",
       "description": "Self-evolving skill optimization via modusbrain skillopt — SkillOpt-paper-grounded text-space optimizer with validation gating (median-of-3 + epsilon=0.05), bundled-skill safety, bootstrap review sentinel, per-skill DB lock, and atomic versioned writes."
+    },
+    {
+      "name": "policy-compile",
+      "path": "policy-compile/SKILL.md",
+      "description": "Compile a brain page or policy file into a versioned operational skill. Validates brain coverage before creating a draft skill version; blocks fabrication via confidence gate."
+    },
+    {
+      "name": "incident-runbook",
+      "path": "incident-runbook/SKILL.md",
+      "description": "Generate a structured incident runbook (triage steps, escalation path, rollback procedure) from a brain page or SOP doc. Files under wiki/runbooks/. Never invents escalation contacts not in the brain."
+    },
+    {
+      "name": "compliance-audit",
+      "path": "compliance-audit/SKILL.md",
+      "description": "Run a structured compliance audit (SOC 2, GDPR, HIPAA, ISO 27001) across brain pages. Produces a coverage/gap report and an evidence dossier with brain-page citations for every covered control."
     }
   ],
   "dependencies": {

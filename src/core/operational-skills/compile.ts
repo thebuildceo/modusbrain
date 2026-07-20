@@ -101,6 +101,20 @@ async function searchBrainContent(
   return { slugs, excerpts };
 }
 
+import * as fs from 'fs';
+
+function computeOverlap(fileContent: string, excerpts: string[]): number {
+  const combined = excerpts.join('\n');
+  const tokensA = new Set(fileContent.toLowerCase().split(/\W+/).filter(t => t.length > 2));
+  const tokensB = new Set(combined.toLowerCase().split(/\W+/).filter(t => t.length > 2));
+  if (tokensA.size === 0 || tokensB.size === 0) return 0;
+  let overlap = 0;
+  for (const t of tokensA) {
+    if (tokensB.has(t)) overlap++;
+  }
+  return overlap / Math.min(tokensA.size, tokensB.size);
+}
+
 export async function compileSkill(
   engine: BrainEngine,
   input: CompileSkillInput,
@@ -111,7 +125,27 @@ export async function compileSkill(
   const confidenceThreshold =
     input.confidence_threshold ?? DEFAULT_CONFIDENCE_THRESHOLDS[riskTier];
 
+  const isFilePath = input.topic.endsWith('.md') || input.topic.endsWith('.mdx') || input.topic.includes('/') || input.topic.includes('\\');
+  let fileContent: string | null = null;
+  if (isFilePath) {
+    if (!fs.existsSync(input.topic)) {
+      throw new Error(`Error: file not found: ${input.topic}`);
+    }
+    fileContent = fs.readFileSync(input.topic, 'utf8');
+  }
+
   const { slugs, excerpts } = await searchBrainContent(engine, input.topic, sourceId);
+
+  if (isFilePath && fileContent !== null) {
+    if (slugs.length === 0) {
+      throw new Error(`Error: Low confidence match. The content of '${input.topic}' has no meaningful relation to matched sources.`);
+    }
+    const overlap = computeOverlap(fileContent, excerpts);
+    if (overlap < 0.1) {
+      throw new Error(`Error: Low confidence match. The content of '${input.topic}' has no meaningful relation to matched sources (overlap: ${overlap.toFixed(2)}).`);
+    }
+  }
+
   const prose = buildProseJudgment(input.topic, excerpts);
   const structuredPolicy = inferPolicyRules(input.topic, excerpts);
   const slug = slugify(input.topic);
@@ -136,3 +170,4 @@ export async function compileSkill(
 
   return { skill, version, matched_sources: slugs };
 }
+
