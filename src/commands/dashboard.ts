@@ -136,6 +136,37 @@ export async function runDashboard(
   engine: BrainEngine | null,
   args: string[],
 ): Promise<{ exitCode: number }> {
+  if (args.includes('--help') || args.includes('-h')) {
+    process.stdout.write(`
+modusbrain dashboard — Brain health and operational skills dashboard
+
+USAGE
+  modusbrain dashboard [flags]           Terminal dashboard (6 health sections + opskill table)
+  modusbrain dashboard --web             Launch browser-based local Web UI Studio (http://localhost:3710)
+
+FLAGS
+  --web, web            Launch local browser-based Studio (approval queue, audit log, version history)
+  --json                Output terminal dashboard data in JSON envelope
+  --port <N>            Override Web UI port (default: 3710)
+
+EXAMPLES
+  modusbrain dashboard                   # Quick terminal snapshot
+  modusbrain dashboard --web             # Interactive local browser UI
+`.trim() + '\n');
+    return { exitCode: 0 };
+  }
+
+  // Web flag check: `modusbrain dashboard --web` or `modusbrain dashboard web`
+  if (args.includes('--web') || args.includes('web')) {
+    if (!engine) {
+      process.stderr.write('modusbrain dashboard --web: DB unreachable. Run `modusbrain doctor` to diagnose.\n');
+      return { exitCode: 1 };
+    }
+    const { runWebDashboard } = await import('./dashboard-web.ts');
+    await runWebDashboard(engine, { openBrowser: true });
+    return { exitCode: 0 };
+  }
+
   // Collect dashboard stdout so we can append opskills after it
   const chunks: string[] = [];
   const collect = (s: string) => { chunks.push(s); };

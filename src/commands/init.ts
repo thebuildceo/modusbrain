@@ -989,6 +989,7 @@ async function initPGLite(opts: {
       }
       console.log('');
       console.log('When you outgrow local: modusbrain migrate --to supabase');
+      console.log('(Note: ModusBrain uses a single global brain per machine/user by default at ~/.modusbrain/brain.pglite)');
       reportModStatus();
       const { printAdvisoryIfRecommended } = await import('../core/skillpack/post-install-advisory.ts');
       const { VERSION } = await import('../version.ts');
@@ -1513,6 +1514,10 @@ NOTES
   - Bare \`modusbrain init\` in a directory with 1000+ .md files defaults to Supabase
     interactive setup. With <1000 files (or with --pglite explicitly), defaults
     to PGLite at ~/.modusbrain/brain.pglite.
+  - Global brain by default: ModusBrain uses a single global brain per machine/user
+    by default (stored at ~/.modusbrain/brain.pglite). Running \`modusbrain init\` in
+    multiple project folders connects to this shared global brain, not per-project
+    isolated databases.
   - Existing config is preserved unless --force is passed.
 `.trim()));
 }

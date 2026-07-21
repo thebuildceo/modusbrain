@@ -1,6 +1,6 @@
 ---
 title: Cross-Modal Search
-description: Known issue: cross-modal search edge cases and workarounds.
+description: "Known issue: cross-modal search edge cases and workarounds."
 icon: magnifying-glass
 ---
 

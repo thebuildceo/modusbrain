@@ -1,6 +1,6 @@
 ---
 title: Brains & Sources
-description: The two-axis model: which brain and which source every query routes on.
+description: "The two-axis model: which brain and which source every query routes on."
 icon: database
 ---
 

@@ -8,7 +8,7 @@ updated: 2026-04-11
 tags: [ai, agents, gstack, harness-engineering, skills, architecture]
 status: draft-v4
 talk: "YC Spring 2026 -- Thin Harness, Fat Skills"
-thread: https://x.com/garrytan/status/2042925773300908103
+thread: "https://x.com/garrytan/status/2042925773300908103"
 ---
 
 # Thin Harness, Fat Skills

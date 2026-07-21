@@ -55,4 +55,4 @@ in the gateway config. Hermes's scheduled automations can run the same EA workfl
 
 ---
 
-*Part of the [ModusBrain Skillpack](../MODUSBRAIN_SKILLPACK.md). See also: [Getting Data In](README.md)*
+*Part of the [ModusBrain Skillpack](../MODUSBRAIN_SKILLPACK.md). See also: [Getting Data In](overview.md)*

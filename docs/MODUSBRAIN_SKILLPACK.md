@@ -40,7 +40,7 @@ Getting data in and keeping it current.
 | [Diligence Ingestion](guides/diligence-ingestion.md) | Data room materials: pitch decks, financial models, cap tables |
 | [Deterministic Collectors](guides/deterministic-collectors.md) | Code for data, LLMs for judgment. The collector pattern |
 | [Idea Capture & Originals](guides/idea-capture.md) | Depth test, originality distribution, deep cross-linking |
-| [Getting Data In](integrations/README.md) | Integration recipes: voice, email, X, calendar |
+| [Getting Data In](integrations/overview.md) | Integration recipes: voice, email, X, calendar |
 
 ## Operations
 

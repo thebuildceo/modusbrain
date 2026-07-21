@@ -8,7 +8,7 @@ requires: []
 secrets:
   - name: NGROK_AUTHTOKEN
     description: ngrok auth token (Hobby tier recommended for fixed domain)
-    where: https://dashboard.ngrok.com/get-started/your-authtoken — sign up, then copy your authtoken
+where: "https://dashboard.ngrok.com/get-started/your-authtoken — sign up, then copy your authtoken"
 health_checks:
   - type: command
     argv: ["pgrep", "-f", "ngrok.*http"]

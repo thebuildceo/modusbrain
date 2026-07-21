@@ -8,7 +8,7 @@ requires: []
 secrets:
   - name: CIRCLEBACK_TOKEN
     description: Circleback API token for meeting data access
-    where: https://app.circleback.ai — Settings > API > generate token
+where: "https://app.circleback.ai — Settings > API > generate token"
 health_checks:
   - type: http
     url: "https://app.circleback.ai/api/mcp"

@@ -1,6 +1,6 @@
 ---
 title: Homebrew for Personal AI
-description: Vision: ModusBrain as the Homebrew of personal AI infrastructure.
+description: "Vision: ModusBrain as the Homebrew of personal AI infrastructure."
 icon: house
 ---
 

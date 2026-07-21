@@ -8,7 +8,7 @@ requires: []
 secrets:
   - name: X_BEARER_TOKEN
     description: X API v2 Bearer token (Basic tier minimum, $200/mo for full archive search)
-    where: https://developer.x.com/en/portal/dashboard — create a project + app, copy the Bearer Token from "Keys and tokens"
+where: "https://developer.x.com/en/portal/dashboard — create a project + app, copy the Bearer Token from \"Keys and tokens\""
 health_checks:
   - type: http
     url: "https://api.x.com/2/users/me"

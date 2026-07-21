@@ -8,13 +8,13 @@ requires: [ngrok-tunnel]
 secrets:
   - name: TWILIO_ACCOUNT_SID
     description: Twilio account SID (starts with AC)
-    where: https://www.twilio.com/console — visible on the main dashboard after login
+    where: "https://www.twilio.com/console — visible on the main dashboard after login"
   - name: TWILIO_AUTH_TOKEN
     description: Twilio auth token (click "Show" next to the SID on the dashboard)
-    where: https://www.twilio.com/console — click "Show" under Auth Token on the main dashboard
+    where: "https://www.twilio.com/console — click \"Show\" under Auth Token on the main dashboard"
   - name: OPENAI_API_KEY
     description: OpenAI API key (needs Realtime API access enabled on your account)
-    where: https://platform.openai.com/api-keys — click "+ Create new secret key", copy immediately (you can't see it again)
+    where: "https://platform.openai.com/api-keys — click \"+ Create new secret key\", copy immediately (you can't see it again)"
 health_checks:
   - type: http
     url: "https://api.twilio.com/2010-04-01/Accounts/$TWILIO_ACCOUNT_SID.json"

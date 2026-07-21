@@ -1,6 +1,6 @@
 ---
 title: Build a Company Brain
-description: Step-by-step tutorial: set up a shared brain for your team.
+description: "Step-by-step tutorial: set up a shared brain for your team."
 icon: building
 ---
 

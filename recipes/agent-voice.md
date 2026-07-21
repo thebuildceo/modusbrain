@@ -9,13 +9,13 @@ requires: []
 secrets:
   - name: OPENAI_API_KEY
     description: OpenAI API key with Realtime API access enabled
-    where: https://platform.openai.com/api-keys — click "+ Create new secret key", copy immediately
+    where: "https://platform.openai.com/api-keys — click '+ Create new secret key', copy immediately"
   - name: TWILIO_ACCOUNT_SID
     description: (optional) Twilio Account SID — only if wiring inbound Twilio calls
-    where: https://www.twilio.com/console
+    where: "https://www.twilio.com/console"
   - name: TWILIO_AUTH_TOKEN
     description: (optional) Twilio auth token — only if wiring inbound Twilio calls
-    where: https://www.twilio.com/console
+    where: "https://www.twilio.com/console"
 health_checks:
   - type: env_exists
     var: OPENAI_API_KEY

@@ -66,4 +66,4 @@ SMS, calls, voicemail, and AI transcripts.
 
 ---
 
-*Part of the [ModusBrain Skillpack](../MODUSBRAIN_SKILLPACK.md). See also: [Getting Data In](README.md)*
+*Part of the [ModusBrain Skillpack](../MODUSBRAIN_SKILLPACK.md). See also: [Getting Data In](overview.md)*

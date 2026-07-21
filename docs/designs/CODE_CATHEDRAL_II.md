@@ -1,6 +1,6 @@
 ---
 title: Code Cathedral II
-description: Internal design: architectural vision for the codebase.
+description: "Internal design: architectural vision for the codebase."
 icon: church
 ---
 

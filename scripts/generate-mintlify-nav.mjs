@@ -37,7 +37,11 @@ const allDocs = collectMdFiles(DOCS);
 const mcpDeployment = ['docs/mcp/DEPLOY', 'docs/mcp/ALTERNATIVES'];
 const mcpClients = allDocs.filter(f => f.startsWith('docs/mcp/') && !mcpDeployment.includes(f)).sort();
 const mcpDeploy = allDocs.filter(f => f.startsWith('docs/mcp/') && mcpDeployment.includes(f)).sort();
-const integrations = allDocs.filter(f => f.startsWith('docs/integrations/')).sort();
+const integrationsRaw = allDocs.filter(f => f.startsWith('docs/integrations/'));
+const integrations = [
+  ...integrationsRaw.filter(f => f.endsWith('/overview')),
+  ...integrationsRaw.filter(f => !f.endsWith('/overview')).sort()
+];
 
 const coreConcepts = [
   'docs/guides/brain-agent-loop',
@@ -115,7 +119,11 @@ const qualityEvals = [
   'docs/architecture/KEY_FILES'
 ];
 
-const tutorials = allDocs.filter(f => f.startsWith('docs/tutorials/')).sort();
+const tutorialsRaw = allDocs.filter(f => f.startsWith('docs/tutorials/'));
+const tutorials = [
+  ...tutorialsRaw.filter(f => f.endsWith('/overview')),
+  ...tutorialsRaw.filter(f => !f.endsWith('/overview')).sort()
+];
 
 const cliRef = [
   'docs/INSTALL',
@@ -156,147 +164,182 @@ base.navigation = {
   tabs: [
     {
       tab: 'Get Started',
+      icon: 'rocket',
       groups: [
         {
-          group: 'Overview',
-          pages: ['introduction', 'how-it-works'],
+          group: 'Product Overview',
+          icon: 'brain',
+          pages: ['introduction', 'how-it-works', 'docs/how-modusbrain-works'],
         },
         {
           group: 'Use Cases',
+          icon: 'building',
           pages: ['for-companies'],
         },
         {
-          group: 'First Run',
-          pages: ['quickstart', 'install'],
+          group: 'Developer Platform',
+          icon: 'square-terminal',
+          pages: ['quickstart', 'install', 'cli-reference'],
         },
         {
-          group: 'Skills Workflow',
+          group: 'Operational Skills',
+          icon: 'list-check',
           pages: ['opskill-workflow'],
         },
         {
-          group: 'Reference',
-          pages: ['faq', 'cli-reference', 'env-vars', 'attribution'],
+          group: 'Help & Settings',
+          icon: 'circle-question',
+          pages: ['faq', 'env-vars', 'attribution'],
         },
       ],
     },
     {
-      tab: 'MCP & Integrations',
+      tab: 'Connect & Integrate',
+      icon: 'plug',
       groups: [
         {
           group: 'MCP Clients',
+          icon: 'bot',
           pages: mcpClients,
         },
         {
           group: 'MCP Deployment',
+          icon: 'server',
           pages: mcpDeploy,
         },
         {
           group: 'Integrations',
+          icon: 'puzzle-piece',
           pages: integrations,
         },
       ],
     },
     {
-      tab: 'Core Guides',
+      tab: 'Build & Operate',
+      icon: 'gear',
       groups: [
         {
           group: 'Core Concepts',
+          icon: 'book-open',
           pages: coreConcepts,
         },
         {
           group: 'Knowledge Ingestion',
+          icon: 'inbox',
           pages: knowledgeIngestion,
         },
         {
-          group: 'Advanced Operation',
+          group: 'Agent Operations',
+          icon: 'robot',
           pages: advancedOperation,
         },
       ],
     },
     {
-      tab: 'Opskill Dev',
+      tab: 'Skills & Automation',
+      icon: 'wand-sparkles',
       groups: [
         {
           group: 'Skill Authoring',
+          icon: 'pen',
           pages: skillAuthoring,
         },
         {
           group: 'Minions & Gating',
+          icon: 'shield',
           pages: minionsGating,
         },
         {
           group: 'Spend & Cost Controls',
+          icon: 'dollar-sign',
           pages: spendControls,
         },
       ],
     },
     {
       tab: 'Architecture',
+      icon: 'sitemap',
       groups: [
         {
           group: 'System Topologies',
+          icon: 'sitemap',
           pages: topologies,
         },
         {
           group: 'Schema & Packs',
+          icon: 'boxes',
           pages: schemaPacks,
         },
         {
           group: 'Search & Sync Internals',
+          icon: 'magnifying-glass',
           pages: searchSync,
         },
         {
           group: 'Quality & Evals Spec',
+          icon: 'chart-line',
           pages: qualityEvals,
         },
       ],
     },
     {
       tab: 'Tutorials',
+      icon: 'graduation-cap',
       groups: [
         {
           group: 'Hands-on Guides',
+          icon: 'map',
           pages: tutorials,
         },
       ],
     },
     {
       tab: 'Reference',
+      icon: 'book-open',
       groups: [
         {
           group: 'CLI & Core Reference',
+          icon: 'terminal',
           pages: cliRef,
         },
         {
           group: 'Evals & Metrics',
+          icon: 'chart-line',
           pages: evalsMetrics,
         },
         {
           group: 'Database & Schemas',
+          icon: 'database',
           pages: dbSchemas,
         },
         {
           group: 'Schema Development',
+          icon: 'code',
           pages: schemaDev,
         },
         {
           group: 'AI Providers',
+          icon: 'sparkles',
           pages: aiProviders,
         },
         {
           group: 'Incidents & Issues',
+          icon: 'triangle-exclamation',
           pages: incidentsIssues,
         },
         {
           group: 'Migrations & Plans',
+          icon: 'code-branch',
           pages: migrationsPlans,
         },
         {
           group: 'Internal Designs',
+          icon: 'pen',
           pages: internalDesigns,
         },
         {
           group: 'Ethos & Origin',
+          icon: 'lightbulb',
           pages: ethosOrigin,
         },
       ],
@@ -306,3 +349,4 @@ base.navigation = {
 
 writeFileSync(join(ROOT, 'docs.json'), JSON.stringify(base, null, 2) + '\n');
 console.log(`Updated docs.json with ${allDocs.length} engine doc pages in 7 organized tabs.`);
+

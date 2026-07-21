@@ -125,7 +125,7 @@
             "group": "Integrations",
             "icon": "puzzle-piece",
             "pages": [
-              "docs/integrations/README",
+              "docs/integrations/overview",
               "docs/integrations/credential-gateway",
               "docs/integrations/embedding-providers",
               "docs/integrations/meeting-webhooks",
@@ -273,7 +273,7 @@
             "group": "Hands-on Guides",
             "icon": "map",
             "pages": [
-              "docs/tutorials/README",
+              "docs/tutorials/overview",
               "docs/tutorials/company-brain",
               "docs/tutorials/connect-coding-agent",
               "docs/tutorials/improving-skills-with-skillopt",
@@ -304,7 +304,6 @@
             "icon": "chart-line",
             "pages": [
               "docs/eval-bench",
-              "docs/eval-benchmarking",
               "docs/eval-capture",
               "docs/eval-takes-quality",
               "docs/eval/METRIC_GLOSSARY",

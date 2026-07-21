@@ -51,3 +51,6 @@ allcommandstest.md
 media/x/
 media/articles/
 meetings/transcripts/
+
+# Test isolation copies of PGLite brain
+test/tmp/

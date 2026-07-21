@@ -302,6 +302,34 @@ export async function approveVersion(
   return versionRow;
 }
 
+export async function rejectVersion(
+  engine: BrainEngine,
+  skillId: number,
+  version: number,
+  rejectedBy: string,
+): Promise<OperationalSkillVersion> {
+  const now = new Date().toISOString();
+  const current = await getVersion(engine, skillId, version);
+  if (!current) throw new Error(`Version ${version} not found for skill ${skillId}`);
+
+  const updatedProvenance = {
+    ...current.provenance,
+    rejected_by: rejectedBy,
+    rejected_at: now,
+  };
+
+  await engine.executeRaw(
+    `UPDATE operational_skill_versions
+     SET status = 'blocked', provenance = $3::jsonb
+     WHERE skill_id = $1 AND version = $2`,
+    [skillId, version, updatedProvenance],
+  );
+
+  const versionRow = await getVersion(engine, skillId, version);
+  if (!versionRow) throw new Error(`Version ${version} not found after reject`);
+  return versionRow;
+}
+
 export async function hasOpenConflict(
   engine: BrainEngine,
   skillId: number,

@@ -3518,8 +3518,8 @@ export async function checkSyncFreshness(
       }
 
       if (!source.last_sync_at) {
-        issues.push(`Source ${display} has never been synced`);
-        hasFailures = true;
+        issues.push(`Source ${display} has not completed initial sync yet. Run \`modusbrain sync --source <id>\``);
+        hasWarnings = true;
         stale_count++;
         continue;
       }
@@ -3815,8 +3815,8 @@ export async function checkCycleFreshness(
         : `'${source.id}'`;
       const raw = source.config?.last_full_cycle_at;
       if (typeof raw !== 'string') {
-        issues.push(`Source ${display} has never completed a full cycle`);
-        hasFailures = true;
+        issues.push(`Source ${display} has not completed initial cycle yet`);
+        hasWarnings = true;
         continue;
       }
       const last = new Date(raw).getTime();
