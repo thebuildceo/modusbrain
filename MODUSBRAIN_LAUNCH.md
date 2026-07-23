@@ -2,7 +2,7 @@
 
 **Domain:** [modusbrain.com](https://modusbrain.com)  
 **Product:** ModusBrain — the company brain agents can safely execute against  
-**Engine:** Built on [ModusBrain](https://github.com/garrytan/gbrain) (MIT License)
+**Engine:** Built on [Gbrain](https://github.com/garrytan/gbrain) (MIT License)
 
 This file is your single checklist for going public: copy, website structure, docs hosting, deployment, and user onboarding.
 
