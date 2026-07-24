@@ -73,7 +73,7 @@ modusbrain schema usage --since 30d   # per-verb invocation counts (D14 telemetr
 
 The verbs marked `experimental` are demand-gated per D14: their usage is
 tracked via T15's schema-events audit, and v0.40+ retro decides whether
-to deprecate any that stay <5% usage.
+to deprecate any that stay &lt;5% usage.
 
 ## Resolution chain (7 tiers)
 

@@ -13,3 +13,4 @@ scripts/
 terminals/
 *.test.ts
 llms-full.txt
+scratch/
