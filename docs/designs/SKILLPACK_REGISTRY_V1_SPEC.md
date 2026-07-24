@@ -21,7 +21,7 @@ icon: box
 > | Auto-rename collision | Refuses-to-overwrite (v0.36's contract) | Codex was right; v0.36 already enforces it. |
 > | Update path | `modusbrain skillpack reference &lt;name&gt; [--apply-clean-hunks]` | Diff-lens with optional auto-merge of clean hunks. |
 >
-> What stays verbatim: registry at `garrytan/modusbrain-skillpack-registry`, rubric,
+> What stays verbatim: registry at `thebuildceo/modusbrain-skillpack-registry`, rubric,
 > doctor, anatomy doc, tarball determinism, TOFU + SHA pinning, endorsement
 > tiers, sandbox + env scrub, CI workflow split, anti-typosquat. See
 > `docs/guides/skillpacks-as-scaffolding.md` (the v0.36 canonical model) for
@@ -33,10 +33,10 @@ icon: box
 
 After v0.36.0.0 (Hindsight Calibration), modusbrain has a mature skillpack system —
 but it only knows how to install the **one** bundle declared in
-`openclaw.plugin.json` at modusbrain's own repo root. Garry wants to ship a
+`openclaw.plugin.json` at modusbrain's own repo root. We want to ship a
 "hackathon-evaluation" skillpack as a standalone artifact, any modusbrain user
 should be able to discover + install it, and the ecosystem should grow
-without Garry hand-curating every README. That requires five new capabilities:
+without hand-curating every README. That requires five new capabilities:
 
 1. **Publish** — a documented repo layout + manifest format that anyone can
    point a git repo at and call "a skillpack."
@@ -46,7 +46,7 @@ without Garry hand-curating every README. That requires five new capabilities:
    source, with trust posture appropriate for installing markdown/SKILL.md
    files into a workspace that an agent then routes through.
 4. **Discover + curate** — a canonical catalog at
-   `github.com/garrytan/gbrain-skillpack-registry` (the Printing Press
+   `github.com/thebuildceo/modusbrain-skillpack-registry` (the Printing Press
    library pattern) with endorsement tiers, security gating, and
    programmatic search. Third-party packs live in their authors' repos;
    the registry is a `registry.json` manifest pointing at them.
@@ -114,7 +114,7 @@ of the same thing. Both paths land in the same installer.
   `git-remote.ts` SSRF-hardened path.
 - `modusbrain skillpack install &lt;url.git&gt;` — verbatim https URL.
 - `modusbrain skillpack install &lt;path/to/pack.tgz&gt;` — extract to cache dir,
-  install from extracted tree. Useful inside YC orgs / corp networks that
+  install from extracted tree. Useful inside corporate orgs / corp networks that
   block direct GitHub access, or for air-gapped distribution.
 - `modusbrain skillpack install &lt;path/to/repo&gt;` — local path (skill authors
   testing).
@@ -132,9 +132,9 @@ Tarballs are an additive transport, not a different artifact shape. The
 installer normalizes both paths to "extracted tree on disk" before the
 existing `enumerateBundle` + `applyInstall` pipeline runs.
 
-### Registry: github.com/garrytan/gbrain-skillpack-registry
+### Registry: github.com/thebuildceo/modusbrain-skillpack-registry
 
-A separate git repo Garry controls. **Not** a hosting layer — a catalog.
+A separate git repo Shubham controls. **Not** a hosting layer — a catalog.
 Skillpacks live in their authors' own repos; the registry points at them.
 
 Two files at the registry repo root:
@@ -148,13 +148,13 @@ Two files at the registry repo root:
     "skillpacks": [
       {
         "name": "hackathon-evaluation",
-        "description": "Score hackathon submissions with the YC rubric.",
-        "author": "Garry Tan",
-        "author_handle": "garrytan",
-        "homepage": "https://github.com/garrytan/skillpack-hackathon-evaluation",
+        "description": "Score hackathon submissions with the evaluation rubric.",
+        "author": "Shubham Chavan",
+        "author_handle": "shubham",
+        "homepage": "https://github.com/thebuildceo/skillpack-hackathon-evaluation",
         "source": {
           "kind": "git",
-          "url": "https://github.com/garrytan/skillpack-hackathon-evaluation.git",
+          "url": "https://github.com/thebuildceo/skillpack-hackathon-evaluation.git",
           "pinned_commit": "abc1234567890..."
         },
         "tarball_sha256": "deadbeef...",
@@ -170,18 +170,18 @@ Two files at the registry repo root:
   }
   ```
 
-- `endorsements.json` — Garry-controlled. The single source of truth for
+- `endorsements.json` — Shubham-controlled. The single source of truth for
   which entries get the `endorsed` tier. Decoupling the endorsement
   decision from the catalog write means a contributor's PR can land a
   catalog entry at the `community` tier; promotion to `endorsed` is a
-  separate, smaller, Garry-only commit.
+  separate, smaller, Shubham-only commit.
 
 **Endorsement tiers:**
 
-- `endorsed` — Garry has used it, it works, it's in his pinned set.
+- `endorsed` — Shubham has used it, it works, it's in his pinned set.
   Listed first in `modusbrain skillpack search` output. Manual promotion.
 - `community` — passed the publish-gate validation, lives in the catalog,
-  but Garry hasn't personally vetted it. Default tier on first PR.
+  but Shubham hasn't personally vetted it. Default tier on first PR.
 - `experimental` — author self-flagged as in-development. Listed last,
   with a stderr warning at install time.
 
@@ -196,13 +196,13 @@ modusbrain skillpack install starter-pack    # special bundle entry in registry.
 modusbrain skillpack registry [--url <url>]  # show/set the configured registry
 ```
 
-`--url` defaults to `https://raw.githubusercontent.com/garrytan/modusbrain-skillpack-registry/main/registry.json`.
+`--url` defaults to `https://raw.githubusercontent.com/thebuildceo/modusbrain-skillpack-registry/main/registry.json`.
 Operators inside corp networks can point at a fork. The registry URL is
 recorded in `~/.modusbrain/config.json` under `skillpack.registry_url`.
 
 `modusbrain skillpack install starter-pack` resolves a special `bundles` array
 in `registry.json` (a named list of skillpack names) and installs each in
-order. Garry curates the starter pack.
+order. Shubham curates the starter pack.
 
 **First-install identity confirm + anti-typosquat (codex G4):**
 
@@ -213,7 +213,7 @@ surfaces a confirm prompt with full identity:
 [skillpack] About to install:
   Name:          hackathon-evaluation
   Author:        garrytan
-  Source:        https://github.com/garrytan/skillpack-hackathon-evaluation
+  Source:        https://github.com/thebuildceo/skillpack-hackathon-evaluation
   Pinned commit: abc1234567890abcdef1234567890abcdef12345
   Tier:          endorsed
   Tarball SHA:   sha256:deadbeef...
@@ -265,7 +265,7 @@ modusbrain skillpack endorse <name> [--tier endorsed|community|experimental]
                                 [--push] [--dry-run]
 ```
 
-Run from a clone of `garrytan/modusbrain-skillpack-registry`. Steps:
+Run from a clone of `thebuildceo/modusbrain-skillpack-registry`. Steps:
 1. Read + validate current `endorsements.json` against the schema.
 2. Confirm `&lt;name&gt;` exists in `registry.json`.
 3. Update or insert the entry with the new tier.
@@ -328,16 +328,16 @@ No contributor hand-runs git. The skill drives:
    - `modusbrain skillpack pack --out skillpack-&lt;name&gt;-&lt;version&gt;.tgz`
    - SHA-256 recorded for registry pin
 4. **Registry PR** (Printing Press pattern verbatim):
-   - Fork `garrytan/modusbrain-skillpack-registry` if not already forked
+   - Fork `thebuildceo/modusbrain-skillpack-registry` if not already forked
    - Branch `add-&lt;name&gt;-&lt;version&gt;`
    - Append catalog entry to `registry.json` with tier=`community`,
      pinned commit, tarball SHA-256, validated_at timestamp, and a
      `validation_run_id` that points at a JSON log committed to a
      `validation-runs/&lt;run-id&gt;.json` file under the registry repo so
      anyone can audit what was checked
-   - Open PR against `garrytan/modusbrain-skillpack-registry:main` with the
+   - Open PR against `thebuildceo/modusbrain-skillpack-registry:main` with the
      validation log in the body
-   - Stretch: Garry's `endorse &lt;name&gt;` command flips the entry to
+   - Stretch: Shubham's `endorse &lt;name&gt;` command flips the entry to
      `endorsed` via a one-line commit on `endorsements.json`
 
 The skill file itself ships in the modusbrain skillpack at
@@ -349,7 +349,7 @@ harness that loads modusbrain skills.
 Two-direction integration (decision Q2):
 
 - **Cross-list**: open a PR against `mvanhorn/printing-press-library`
-  registering `garrytan/modusbrain-skillpack-registry` as a sister-registry
+  registering `thebuildceo/modusbrain-skillpack-registry` as a sister-registry
   in their catalog (their library has a `sister_registries:` section per
   their AGENTS.md). Their 1.4k-star audience discovers modusbrain through
   the same search surface they already use.
@@ -358,7 +358,7 @@ Two-direction integration (decision Q2):
   tool definitions). The output is a `modusbrain-cli` agent-native binary
   with SQLite mirror that any agent — not just modusbrain users — can use to
   hit a remote modusbrain. Submitted back to `mvanhorn/printing-press-library`
-  as a published CLI, credited to Garry. Doubles distribution surface and
+  as a published CLI, credited to Shubham. Doubles distribution surface and
   turns modusbrain into something Printing Press users can route through.
 
 The cross-list is ~1 day. The generated CLI is ~1 week and produces a
@@ -378,10 +378,10 @@ package artifacts.
   "api_version": "gbrain-skillpack-v1",
   "name": "hackathon-evaluation",
   "version": "0.1.0",
-  "description": "Score hackathon submissions with the YC rubric.",
-  "author": "Garry Tan <garry@ycombinator.com>",
+  "description": "Score hackathon submissions with the evaluation rubric.",
+  "author": "Shubham Chavan <garry@ycombinator.com>",
   "license": "MIT",
-  "homepage": "https://github.com/garrytan/skillpack-hackathon-evaluation",
+  "homepage": "https://github.com/thebuildceo/skillpack-hackathon-evaluation",
   "modusbrain_min_version": "0.36.0",
   "skills": ["skills/judge-submission", "skills/score-rubric"],
   "shared_deps": [],
@@ -496,7 +496,7 @@ skillpack_version: 0.1.0
    --frontmatter type=skillpack-config`
    - Why: bootstraps the config page this skillpack reads from.
 2. **show user:** "Hackathon evaluation is installed. Try: 'Judge this
-   submission against the YC rubric.'"
+   submission against the evaluation rubric.'"
 3. **ask user:** "Want a starter list of evaluation criteria added to
    your brain?"
    - On yes: `modusbrain put_page wiki/concepts/yc-rubric < seeds/rubric.md`
@@ -852,7 +852,7 @@ whole block on every install. Cumulative-slugs receipt is per-source:
 | ingest | ... |
 | query  | ... |
 <!-- modusbrain:skillpack:source name="hackathon-evaluation" version="0.1.0" cumulative-slugs="judge-submission-2,score-rubric" pinned-commit="abc1234" rename-map="judge-submission:judge-submission-2" tofu-sha256="deadbeef..." -->
-| judge-submission-2 | Judge a hackathon submission against the YC rubric. |
+| judge-submission-2 | Judge a hackathon submission against the evaluation rubric. |
 | score-rubric       | ... |
 <!-- modusbrain:skillpack:end -->
 ```
@@ -1106,7 +1106,7 @@ modusbrain skillpack pack [--out <path>]         # NEW: validate + emit .tgz tar
   score=10. Fails the build loud on regression. Wired into
   `package.json`'s `verify` script.
 
-### New (in github.com/garrytan/gbrain repo, examples + docs)
+### New (in github.com/thebuildceo/modusbrain repo, examples + docs)
 
 - `examples/skillpack-reference/` — a real, working **10/10 reference
   skillpack** that lives in the modusbrain repo. Two skills, 2
@@ -1140,16 +1140,16 @@ modusbrain skillpack pack [--out <path>]         # NEW: validate + emit .tgz tar
   1. Validate locally (`modusbrain skillpack pack --dry-run`)
   2. Run security gates
   3. Pack tarball + compute SHA
-  4. Fork `garrytan/modusbrain-skillpack-registry` if needed (`gh repo fork`)
+  4. Fork `thebuildceo/modusbrain-skillpack-registry` if needed (`gh repo fork`)
   5. Branch, append catalog entry, commit validation-run JSON
   6. Push + open PR via `gh pr create`
-  7. Print the PR URL and remind the contributor "Garry endorses
+  7. Print the PR URL and remind the contributor "Shubham endorses
      separately; check back for the tier flip."
 
-### New (in github.com/garrytan/gbrain-skillpack-registry, separate repo)
+### New (in github.com/thebuildceo/modusbrain-skillpack-registry, separate repo)
 
 - `registry.json` — the catalog (schema above)
-- `endorsements.json` — Garry-only file controlling the `endorsed` tier
+- `endorsements.json` — Shubham-only file controlling the `endorsed` tier
 - `validation-runs/&lt;run-id&gt;.json` — one file per published validation,
   immutable, content-addressable. Anyone auditing a skillpack can pull
   the corresponding run JSON.
@@ -1169,7 +1169,7 @@ modusbrain skillpack pack [--out <path>]         # NEW: validate + emit .tgz tar
 - **CI liveness job** (`.github/workflows/liveness-check.yml`): weekly,
   walks every registry entry and verifies the source URL still resolves
   to the pinned commit. Unreachable entries get a `last_alive: &lt;date&gt;`
-  field but are NOT auto-tombstoned — Garry decides whether to deprecate.
+  field but are NOT auto-tombstoned — Shubham decides whether to deprecate.
 - `README.md` — explains the tier system, links to the publish skill,
   documents how to fork + submit
 - **Two-workflow CI split (codex G3)** — registry-side CI separates
@@ -1374,7 +1374,7 @@ Tests:
 ## Out of scope (deferred)
 
 - Cryptographic signatures (minisign / cosign / Sigstore). The
-  registry's content-hash pin + Garry-controlled endorsement file is the
+  registry's content-hash pin + Shubham-controlled endorsement file is the
   v1 trust posture; signatures are a v2 layer on top.
 - Dependency resolution between skillpacks (`pack A depends on pack B`).
   v1 declares dependencies as informational metadata only.
@@ -1390,7 +1390,7 @@ Tests:
   registry ship.
 
 Each deferred item is an additive layer on the v1 design; none are
-load-bearing for "Garry ships a hackathon-evaluation skillpack, gets it
+load-bearing for "Shubham ships a hackathon-evaluation skillpack, gets it
 listed in the registry, and someone discovers + installs it."
 
 ## Sequencing — what ships in what order
@@ -1401,8 +1401,8 @@ earlier ones from shipping value:
 1. **W1: Single-pack install** — manifest schema, tarball pack, install
    from git URL / tarball / local path, multi-source resolver block,
    auto-rename collision resolver, TOFU prompt + commit pinning. Ships
-   the floor: Garry can hand-distribute hackathon-evaluation today.
-2. **W2: Registry catalog** — `garrytan/modusbrain-skillpack-registry`
+   the floor: Shubham can hand-distribute hackathon-evaluation today.
+2. **W2: Registry catalog** — `thebuildceo/modusbrain-skillpack-registry`
    created, `registry.json` schema + endorsements.json, registry-client
    with stale-cache fallback, `modusbrain skillpack search` + `install
    &lt;short-name&gt;` + `info`. Initial catalog seeded with bundled modusbrain
@@ -1415,7 +1415,7 @@ earlier ones from shipping value:
    JSONL, `modusbrain doctor` check, `modusbrain skillpack history` reader.
 5. **W5: Printing Press cross-list** — open the PR against
    `mvanhorn/printing-press-library` listing
-   `garrytan/modusbrain-skillpack-registry` as a sister registry. ~1 day.
+   `thebuildceo/modusbrain-skillpack-registry` as a sister registry. ~1 day.
 6. **W6: Generated modusbrain-cli (Printing Press)** — run printing-press
    against modusbrain's HTTP MCP, ship the resulting agent-native CLI to
    their library. Independent week of work; doesn't block W1-W5.
@@ -1431,8 +1431,8 @@ hours across the ~25 bundled skills. Doctor's `--fix` auto-scaffold
 reduces this to mostly "review the auto-generated stubs and fill in
 the prose."
 
-W1 is the floor for "Garry can ship hackathon-evaluation." W2 is the
-floor for "anyone can discover it without reading Garry's README."
+W1 is the floor for "Shubham can ship hackathon-evaluation." W2 is the
+floor for "anyone can discover it without reading Shubham's README."
 W3 is the floor for "anyone can publish without hand-running git."
 W4-W6 are quality layers on a working system.
 

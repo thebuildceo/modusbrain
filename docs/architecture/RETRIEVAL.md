@@ -10,14 +10,14 @@ Vector search alone underdelivers on real personal-knowledge queries. This doc e
 
 ## The four strategies in concert
 
-1. **Vector (HNSW on pgvector)** — semantic similarity. Catches "who works on retrieval quality at YC?" → pages mentioning "Garry Tan + retrieval" even when the user never typed "YC".
+1. **Vector (HNSW on pgvector)** — semantic similarity. Catches "who works on retrieval quality?" → pages mentioning "Shubham Chavan + retrieval" even when the user never typed "YC".
 2. **BM25 keyword** — lexical match. Catches names, exact phrases, code identifiers, anything where the user remembers the literal token. Survives the cases where vector search drifts into thematic neighbors.
 3. **Reciprocal-rank fusion (RRF)** — merges vector + keyword rankings without weighting one over the other globally. Each strategy gets to vote.
 4. **Knowledge graph traversal** — follows typed edges. Catches "what did Bob invest in this quarter?" by walking `bob ── invested_in ──> company ── dated ──> Q1`. Vector search can't see causal chains; the graph can.
 
 ## Why each one alone fails
 
-**Vector only.** Returns chunks semantically close to the query. Misses any factual relationship not directly encoded in the embedding. "Companies in Garry's portfolio" returns essays about portfolios, not company pages.
+**Vector only.** Returns chunks semantically close to the query. Misses any factual relationship not directly encoded in the embedding. "Companies in Shubham's portfolio" returns essays about portfolios, not company pages.
 
 **Keyword only (ripgrep-style).** Brittle to phrasing. "Who works on retrieval?" misses pages that say "search ranking" instead of "retrieval." Garbage on synonyms, near-misses, or paraphrases.
 
@@ -27,7 +27,7 @@ Vector search alone underdelivers on real personal-knowledge queries. This doc e
 
 ## The benchmark
 
-BrainBench (corpus + harness in the sibling [modusbrain-evals](https://github.com/garrytan/gbrain-evals) repo) measures retrieval P@5, R@5, MRR, nDCG@5 on a 240-page Opus-generated rich-prose corpus.
+BrainBench (corpus + harness in the sibling [modusbrain-evals](https://github.com/thebuildceo/modusbrain-evals) repo) measures retrieval P@5, R@5, MRR, nDCG@5 on a 240-page Opus-generated rich-prose corpus.
 
 | Strategy | P@5 | R@5 | Notes |
 |---|---|---|---|
@@ -42,8 +42,8 @@ BrainBench (corpus + harness in the sibling [modusbrain-evals](https://github.co
 
 Every `put_page` runs `extractEntityRefs` on the markdown body. It matches:
 
-- Standard markdown links: `[Garry Tan](wiki/people/garry-tan)`
-- Obsidian wikilinks: `[[wiki/people/garry-tan|Garry Tan]]`
+- Standard markdown links: `[Shubham Chavan](wiki/people/shubham-chavan)`
+- Obsidian wikilinks: `[[wiki/people/shubham-chavan|Shubham Chavan]]`
 - Typed-link blockquotes: `> **Convention:** see [path](path).`
 
 Three regexes, zero LLM tokens, single SQL `addLinksBatch` call with `INSERT ... SELECT FROM jsonb_to_recordset(($1::jsonb)->'rows') JOIN pages ON CONFLICT DO NOTHING RETURNING 1` (free-text-safe; the prior `unnest($&#123;arr&#125;::text[])` form crashed on calendar/Zoom context per modusbrain#1861). The graph grows on every write at near-zero cost. On a 17K-page brain, full graph extract completes in seconds.

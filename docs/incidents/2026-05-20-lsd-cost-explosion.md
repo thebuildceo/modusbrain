@@ -14,7 +14,7 @@ icon: triangle-exclamation
 
 ## What Happened
 
-A user ran `modusbrain lsd "what story should Garry's List write next" --yes` on a 13,690-page brain. The command:
+A user ran `modusbrain lsd "what story should Shubham's List write next" --yes` on a 13,690-page brain. The command:
 
 1. **Estimated cost: $0.96** (2×12 = 24 crosses × 4 ideas + judge)
 2. **Actual cost: $50.71** — 53× over estimate

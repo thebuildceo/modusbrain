@@ -34,7 +34,7 @@ bun install -g github:thebuildceo/modusbrain
 modusbrain init --pglite
 ```
 
-> **If `bun install -g` hits a postinstall error** (Bun blocks postinstall hooks in some environments), the CLI prints a recovery hint pointing at [#218](https://github.com/garrytan/gbrain/issues/218). Run `modusbrain doctor` to diagnose, then `modusbrain apply-migrations --yes` manually. The deterministic fallback is `git clone https://github.com/thebuildceo/modusbrain.git ~/modusbrain && cd ~/modusbrain && bun install && bun link`.
+> **If `bun install -g` hits a postinstall error** (Bun blocks postinstall hooks in some environments), the CLI prints a recovery hint pointing at [#218](https://github.com/thebuildceo/modusbrain/issues/218). Run `modusbrain doctor` to diagnose, then `modusbrain apply-migrations --yes` manually. The deterministic fallback is `git clone https://github.com/thebuildceo/modusbrain.git ~/modusbrain && cd ~/modusbrain && bun install && bun link`.
 
 The init flow detects your repo size and suggests Supabase for brains > 1000 markdown files. To switch later:
 

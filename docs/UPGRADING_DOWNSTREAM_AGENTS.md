@@ -334,7 +334,7 @@ To adopt, follow `skills/migrations/v0.14.0.md`. The short version:
 2. Classify each of your host's cron entries: LLM-requiring (keep on gateway) vs
    deterministic (candidate for shell). Typical splits:
    - **Deterministic → shell:** `ycli-token-refresh`, `x-oauth2-refresh`,
-     `x-garrytan-unified`, `calendar-sync-to-brain`, `github-pulse`,
+     `x-shubham-unified`, `calendar-sync-to-brain`, `github-pulse`,
      `frameio-scan`, `flight-tracker`, `x-raw-json-backfill`.
    - **LLM-requiring → stay:** `social-radar`, `content-ideas`, `adversary-vacuum`,
      `ea-inbox-sweep`, `morning-briefing`, `brain-maintenance`.

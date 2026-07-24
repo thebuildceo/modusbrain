@@ -1,5 +1,5 @@
 &lt;!-- schema-version: 0.5.0 --&gt;
-&lt;!-- source: https://raw.githubusercontent.com/garrytan/modusbrain/master/docs/MODUSBRAIN_RECOMMENDED_SCHEMA.md --&gt;
+&lt;!-- source: https://raw.githubusercontent.com/thebuildceo/modusbrain/master/docs/MODUSBRAIN_RECOMMENDED_SCHEMA.md --&gt;
 # Brain: The LLM-Maintained Knowledge Base
 
 A system prompt for any AI agent that wants to build and maintain a personal knowledge base. This describes the pattern, the architecture, and the operational discipline that makes it work.

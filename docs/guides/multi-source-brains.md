@@ -37,36 +37,36 @@ modusbrain sync --source gstack
 Result: wiki pages and gstack plans are separate (different source_ids,
 different slug namespaces) but share the search surface.
 
-### 2. Purpose-separated brains (yc-media + garrys-list)
+### 2. Purpose-separated brains (team-media + personal-list)
 
 You run two completely different content pipelines on the same backend.
-YC Media covers portfolio news and founder profiles. Garry's List is
-personal writing. You explicitly DON'T want them mixed in search — YC
+Team Media covers portfolio news and founder profiles. Shubham's List is
+personal writing. You explicitly DON'T want them mixed in search — company
 portfolio content leaking into essay searches is a bug, not a feature.
 
 ```bash
 # Two sources, both isolated (federated=false)
-modusbrain sources add yc-media --path ~/yc-media --no-federated
-modusbrain sources add garrys-list --path ~/writing --no-federated
+modusbrain sources add team-media --path ~/team-media --no-federated
+modusbrain sources add personal-list --path ~/writing --no-federated
 
 # Pin each checkout directory
-(cd ~/yc-media && modusbrain sources attach yc-media)
-(cd ~/writing && modusbrain sources attach garrys-list)
+(cd ~/team-media && modusbrain sources attach team-media)
+(cd ~/writing && modusbrain sources attach personal-list)
 
 # Sync each independently
-modusbrain sync --source yc-media
-modusbrain sync --source garrys-list
+modusbrain sync --source team-media
+modusbrain sync --source personal-list
 ```
 
 Result: searching from neither directory returns the `default` source
-(your main brain). Searching from inside `~/yc-media` returns only yc-
-media hits. Searching from inside `~/writing` returns only garrys-list.
+(your main brain). Searching from inside `~/team-media` returns only team-
+media hits. Searching from inside `~/writing` returns only personal-list.
 Federation is opt-in, not leaked.
 
 To search across them explicitly on demand:
 
 ```bash
-modusbrain search "tech layoffs" --source yc-media,garrys-list
+modusbrain search "tech layoffs" --source team-media,personal-list
 ```
 
 ### 3. Mixed (wiki federated + sessions isolated)

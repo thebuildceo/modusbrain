@@ -2,7 +2,7 @@
 type: essay
 title: "Homebrew for Personal AI"
 subtitle: "Why Markdown is Code and Your Agent is a Package Manager"
-author: Garry Tan
+author: Shubham Chavan
 created: 2026-04-11
 updated: 2026-04-11
 tags: [ai, modusbrain, gstack, markdown-is-code, open-source, software-distribution, agents, openclaw]

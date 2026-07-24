@@ -7,7 +7,7 @@ icon: chart-line
 # Embedder Shootout — May 2026 Eval Plan
 
 **Status:** approved, ready to execute
-**Owner:** Garry
+**Owner:** Shubham
 **Plan source:** `~/.claude/plans/system-instruction-you-are-working-linear-origami.md` (review log)
 **Target wallclock:** ~2 weeks
 **Target API spend:** ~$525 (hard cap $700)
@@ -92,8 +92,8 @@ to hand off. Each session ends with a clean deliverable.
 
 ## Session 1 — PR α: modusbrain infra (v0.35.1.0)
 
-**Repo:** `/Users/garrytan/conductor/workspaces/modusbrain/&lt;NEW-WORKSPACE&gt;` (fresh from `master`)
-**Branch:** `garrytan/v0.35.1.0-infra`
+**Repo:** `/Users/shubham/conductor/workspaces/modusbrain/&lt;NEW-WORKSPACE&gt;` (fresh from `master`)
+**Branch:** `shubham/v0.35.1.0-infra`
 **Wallclock:** ~2h
 **API spend:** $0
 
@@ -167,8 +167,8 @@ bun test test/embedding-pricing.test.ts test/public-exports.test.ts test/eval-lo
 
 ## Session 2 — PR β setup: modusbrain-evals adapter + smoke + subset flag
 
-**Repo:** `/Users/garrytan/git/modusbrain-evals` (or a fresh Conductor workspace cloned from it)
-**Branch:** `garrytan/embedder-shootout`
+**Repo:** `/Users/shubham/git/modusbrain-evals` (or a fresh Conductor workspace cloned from it)
+**Branch:** `shubham/embedder-shootout`
 **Wallclock:** ~3-4h
 **API spend:** ~$0.10 (smoke verification calls only)
 
@@ -263,7 +263,7 @@ EOF
 - Branch ready for Session 3 (Cat 13 curation)
 
 ### Hand-off to Session 3
-- Branch `garrytan/embedder-shootout` exists on origin
+- Branch `shubham/embedder-shootout` exists on origin
 - The `--include-subset cat13-embedder` flag is wired but the subset file doesn't exist
   yet — that's Session 3
 
@@ -271,7 +271,7 @@ EOF
 
 ## Session 3 — PR β: Cat 13 conceptual-recall curation
 
-**Repo:** `/Users/garrytan/git/modusbrain-evals`, branch `garrytan/embedder-shootout` (same as Session 2)
+**Repo:** `/Users/shubham/git/modusbrain-evals`, branch `shubham/embedder-shootout` (same as Session 2)
 **Wallclock:** ~3-4h (heavily user-interactive; AI proposes, you review each)
 **API spend:** $0
 
@@ -497,8 +497,8 @@ gh pr merge --squash
 
 ## Session 6 (optional) — PR γ: modusbrain v0.35.2.0 release
 
-**Repo:** `/Users/garrytan/conductor/workspaces/modusbrain/&lt;NEW-WORKSPACE&gt;` (fresh from master)
-**Branch:** `garrytan/v0.35.2.0-benchmark-release`
+**Repo:** `/Users/shubham/conductor/workspaces/modusbrain/&lt;NEW-WORKSPACE&gt;` (fresh from master)
+**Branch:** `shubham/v0.35.2.0-benchmark-release`
 **Wallclock:** ~30min
 **API spend:** $0
 

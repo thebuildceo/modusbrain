@@ -308,7 +308,7 @@ Then run `modusbrain eval replay --against handcrafted.ndjson` to confirm the
 authoritative slugs come back. This is the seam between the BrainBench-Real
 pipeline (replay against live captures) and the BrainBench fixed-fixture
 pipeline (`modusbrain eval --qrels` with the sibling
-[modusbrain-evals](https://github.com/garrytan/gbrain-evals) corpus).
+[modusbrain-evals](https://github.com/thebuildceo/modusbrain-evals) corpus).
 
 ## Off-switch
 

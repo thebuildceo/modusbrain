@@ -1,5 +1,5 @@
 &lt;!-- skillpack-version: 0.7.0 --&gt;
-&lt;!-- source: https://raw.githubusercontent.com/garrytan/modusbrain/master/docs/MODUSBRAIN_SKILLPACK.md --&gt;
+&lt;!-- source: https://raw.githubusercontent.com/thebuildceo/modusbrain/master/docs/MODUSBRAIN_SKILLPACK.md --&gt;
 # ModusBrain Skillpack: Reference Architecture for AI Agents
 
 This is a reference architecture for how a production AI agent uses modusbrain as its

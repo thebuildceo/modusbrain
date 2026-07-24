@@ -107,9 +107,9 @@ The schema is the team's tribal knowledge made explicit. Two engineers on differ
 
 This is what v0.40.7.0 actually enabled, and what the closed PR #1321 was reaching for.
 
-Your OpenClaw (or any agent connected to your brain over HTTPS MCP with admin scope) watches your ingestion stream. After a week of you dumping notes under `garrytan/companies/yc-w24/`, the agent runs `modusbrain schema detect` periodically, sees that prefix accumulating, and proposes:
+Your OpenClaw (or any agent connected to your brain over HTTPS MCP with admin scope) watches your ingestion stream. After a week of you dumping notes under `shubham/companies/w24/`, the agent runs `modusbrain schema detect` periodically, sees that prefix accumulating, and proposes:
 
-> You have 47 pages under `companies/yc-w24/` typed as `company` (generic). They share a structural pattern (founder names, raise amounts, batch tag). Should I add a `yc-w24-company` type with `extractable: true` and the existing aliases pointing back to `company`? I'd backfill the 47 pages and add `cohort=W24` as a typed fact extracted from each page.
+> You have 47 pages under `companies/w24/` typed as `company` (generic). They share a structural pattern (founder names, raise amounts, batch tag). Should I add a `w24-company` type with `extractable: true` and the existing aliases pointing back to `company`? I'd backfill the 47 pages and add `cohort=W24` as a typed fact extracted from each page.
 
 You approve once. The agent calls `schema_apply_mutations` over MCP with a batch:
 
@@ -117,15 +117,15 @@ You approve once. The agent calls `schema_apply_mutations` over MCP with a batch
 {
   "pack": "mine",
   "mutations": [
-    {"op": "add_type", "name": "yc-w24-company", "primitive": "entity", "prefix": "companies/yc-w24/", "extractable": true, "expert_routing": true},
-    {"op": "add_alias", "type": "yc-w24-company", "alias": "company"}
+    {"op": "add_type", "name": "w24-company", "primitive": "entity", "prefix": "companies/w24/", "extractable": true, "expert_routing": true},
+    {"op": "add_alias", "type": "w24-company", "alias": "company"}
   ]
 }
 ```
 
 All inside ONE `withPackLock` scope, atomic, audited (the agent's `client_id` captured in the audit log as `actor: mcp:&lt;clientId8&gt;`). Cache invalidated cross-process. Sync backfills the 47 pages. The brain learned a new category of thing without you having to think about it.
 
-The next time you query "YC W24 companies in fintech", the brain routes through the new type. Six months later when you forget the pattern entirely, the agent reminds you it's there and offers to consolidate it with the W25 batch.
+The next time you query "W24 companies in fintech", the brain routes through the new type. Six months later when you forget the pattern entirely, the agent reminds you it's there and offers to consolidate it with the W25 batch.
 
 The brain learns. The agent is the curator. You approve, the agent does the work.
 

@@ -84,7 +84,7 @@ _Generated from `src/core/skillpack/rubric.ts` by `bun run scripts/build-skillpa
 
 | Tier | Requirement |
 |------|-------------|
-| `endorsed` | All 5 core + all 5 badges, plus Garry's `endorsements.json` overlay in the registry repo |
+| `endorsed` | All 5 core + all 5 badges, plus Shubham's `endorsements.json` overlay in the registry repo |
 | `community` | All 5 core + >= 3 of 5 badges. Default tier on PR merge. |
 | `experimental` | All 5 core + &lt;3 badges |
 | `blocked` | Any core dimension fails |

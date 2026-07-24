@@ -5,7 +5,7 @@ on every row; additive changes increment the minor version; removals
 are breaking-schema-v2.
 
 **Audience:** downstream consumers (primarily the sibling
-[modusbrain-evals](https://github.com/garrytan/gbrain-evals) repo) that
+[modusbrain-evals](https://github.com/thebuildceo/modusbrain-evals) repo) that
 replay captured real-world queries as a BrainBench-Real fixture.
 
 ## The pipeline

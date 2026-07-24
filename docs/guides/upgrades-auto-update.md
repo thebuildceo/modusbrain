@@ -172,7 +172,7 @@ installing modusbrain, you can still stay current. Both MODUSBRAIN_SKILLPACK.md 
 MODUSBRAIN_RECOMMENDED_SCHEMA.md have version markers:
 
 ```bash
-curl -s https://raw.githubusercontent.com/garrytan/modusbrain/master/docs/MODUSBRAIN_SKILLPACK.md | head -1
+curl -s https://raw.githubusercontent.com/thebuildceo/modusbrain/master/docs/MODUSBRAIN_SKILLPACK.md | head -1
 # Returns: <!-- skillpack-version: X.Y.Z -->
 ```
 

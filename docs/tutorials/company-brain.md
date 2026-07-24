@@ -13,7 +13,7 @@ This tutorial picks up where the [personal brain tutorial](personal-brain.md) le
 
 If you haven't done the personal-brain install yet, [start there first](personal-brain.md). Come back when you've got the agent responding to you on Telegram. This tutorial assumes that's already working.
 
-I'm Garry Tan. I built ModusBrain to run my own AI agents at Y Combinator. After a couple of months of multi-user features landing (parallel sync across team sources, per-user OAuth scoping, leak-free isolation across every read path), it's finally usable as a company brain too. This is the recipe I'd run if I were standing it up for a 10-50 person company today.
+I'm Shubham Chavan, founder of Genthropic. I built ModusBrain to run my own AI agents in production. After a couple of months of multi-user features landing (parallel sync across team sources, per-user OAuth scoping, leak-free isolation across every read path), it's finally usable as a company brain too. This is the recipe I'd run if I were standing it up for a 10-50 person company today.
 
 ---
 
@@ -99,13 +99,13 @@ There are two ways to scope teammates' access. They suit different deployment sh
 
 **Model A: separate sources with OAuth scoping (recommended for true multi-user with different AI clients).** What this tutorial walks you through. Each teammate gets their own OAuth client, which carries `--source` + `--federated-read` flags. The brain refuses cross-source reads at the SQL layer; isolation is database-enforced. Each teammate can run their own MCP-aware client (Claude Code, Cursor, their own OpenClaw, etc.) and the scoping holds.
 
-**Model B: one source, directory-based per-person scoping (simpler for one-agent-serves-everyone setups).** The shape I actually run in production: a single source called `default`, with a `partners/&lt;slug&gt;/` convention inside it (e.g. `partners/alice-example/`, `partners/bob-example/`). Each partner gets their own subdirectory holding their personal pages: `partners/alice-example/USER.md`, `partners/alice-example/concepts/`, `partners/alice-example/sources/`, etc. There's no OAuth-enforced isolation; the agent itself enforces "Alice's writes go to her partners/ subdir." This is the right model when ONE agent (yours) serves everyone over Telegram or a single shared interface. It's simpler ops, no per-user OAuth, but the scoping is convention-only.
+**Model B: one source, directory-based per-person scoping (simpler for one-agent-serves-everyone setups).** The shape recommended for this setup: a single source called `default`, with a `partners/&lt;slug&gt;/` convention inside it (e.g. `partners/alice-example/`, `partners/bob-example/`). Each partner gets their own subdirectory holding their personal pages: `partners/alice-example/USER.md`, `partners/alice-example/concepts/`, `partners/alice-example/sources/`, etc. There's no OAuth-enforced isolation; the agent itself enforces "Alice's writes go to her partners/ subdir." This is the right model when ONE agent (yours) serves everyone over Telegram or a single shared interface. It's simpler ops, no per-user OAuth, but the scoping is convention-only.
 
 For most company-brain installs (10+ teammates each with their own AI client), Model A is the right starting point. If you're running the fat-agent-serves-everyone pattern from the personal-brain tutorial, Model B is genuinely simpler. You can also mix: separate sources for the obviously-different ones (customer notes vs internal-only) AND a `partners/&lt;slug&gt;/` convention inside the shared source for per-person workspace.
 
 ### Per-person folder structure inside each source
 
-Inside each source, give each teammate their own subfolder. This is the structure I run:
+Inside each source, give each teammate their own subfolder. This is the recommended structure:
 
 ```
 customers/
@@ -331,7 +331,7 @@ These files turn into the de facto company policy for the agent. Edit one, and e
 
 ## Part 8: Wire Slack carefully
 
-Slack is the integration most teams want first, and it has enough sharp edges to deserve its own callout. The conventions I run:
+Slack is the integration most teams want first, and it has enough sharp edges to deserve its own callout. The recommended conventions:
 
 **Two crons, two jobs.** One scan cron that runs every 5-15 minutes and surfaces signals (new threads in channels you care about, mentions of your teammates, decisions). One archive cron that runs nightly and stores the full conversation history. Splitting them this way means urgent signals get acted on fast while the slow archive work doesn't crowd the live channel.
 
@@ -502,7 +502,7 @@ Real numbers from the published benchmark, running the default stack (ModusBrain
 - **Synthesized-answer latency:** a few seconds, dominated by the Anthropic API.
 - **Retrieval quality:** on the public LongMemEval benchmark, ModusBrain hits 97.60% recall at the top 5 retrieved sessions, beating the previous published state of the art at 96.6%. On the in-house BrainBench corpus of relational queries, ModusBrain beats commodity vector retrieval by 38 percentage points, because the graph layer surfaces relationships that vector similarity alone misses.
 
-Full methodology and per-run receipt JSONs live in [the modusbrain-evals repo](https://github.com/garrytan/gbrain-evals/blob/main/docs/benchmarks/2026-05-23-v0.40.6.0-snapshot.md).
+Full methodology and per-run receipt JSONs live in [the modusbrain-evals repo](https://github.com/thebuildceo/modusbrain-evals/blob/main/docs/benchmarks/2026-05-23-v0.40.6.0-snapshot.md).
 
 For a 25-person company at sustained use, expect about $35 a month in embeddings (ZeroEntropy at $0.05/million tokens), $50 a month in Anthropic calls for the synthesized-answer queries, plus your hosting bill. Under $100 a month for the AI side at most companies your size.
 
@@ -560,4 +560,4 @@ What to do next:
 
 If you're building in this space (which YC has flagged as the [company-brain category in its Request for Startups](https://www.ycombinator.com/rfs#company-brain)), you might as well build on this. Everything described above is open source, MIT licensed, and what I run in production behind my own AI agents.
 
-Questions, gotchas, or wins worth sharing? Open an issue at [github.com/garrytan/gbrain](https://github.com/garrytan/gbrain/issues).
+Questions, gotchas, or wins worth sharing? Open an issue at [github.com/thebuildceo/modusbrain](https://github.com/thebuildceo/modusbrain/issues).

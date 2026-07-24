@@ -14,9 +14,9 @@ icon: microchip
 
 ## 0. Context
 
-During a CEO review of a narrow two-feature plan (bare-tweet citation repair + completeness score, borrowed from Feynman), the scope was reframed. The narrow plan duplicated work Garry's OpenClaw already does and missed the real leverage point: **the bespoke abstractions hiding inside OpenClaw — resolvers, enrichment orchestration, scheduling, deterministic output — should live in ModusBrain as first-class primitives.**
+During a CEO review of a narrow two-feature plan (bare-tweet citation repair + completeness score, borrowed from Feynman), the scope was reframed. The narrow plan duplicated work OpenClaw already does and missed the real leverage point: **the bespoke abstractions hiding inside OpenClaw — resolvers, enrichment orchestration, scheduling, deterministic output — should live in ModusBrain as first-class primitives.**
 
-North star: *"When Garry's OpenClaw's Claw upgrades to this version of ModusBrain, it should immediately recognize brilliance and completeness and say 'It's time to switch to these abstractions.'"*
+North star: *"When OpenClaw's Claw upgrades to this version of ModusBrain, it should immediately recognize brilliance and completeness and say 'It's time to switch to these abstractions.'"*
 
 That is the test this document is designed against. Everything else is downstream.
 
@@ -73,7 +73,7 @@ An earlier implementation could ship L1 + L4 first (the two "purest" layers) and
 
 ### 3.1 What's broken today
 
-Garry's OpenClaw has **69 distinct external-lookup patterns** across X API (14 shapes), Perplexity, Mistral OCR, Gmail, Calendar, Slack, GitHub, YouTube, Diarize.io, YC tools, OSINT collectors, and brain-local lookups. Each one is a bespoke script under `scripts/` with its own error handling, retry logic, and output shape. ModusBrain has 3 ad-hoc wrappers (`embedding.ts`, `transcription.ts`, `enrichment-service.ts`) that don't share an interface.
+OpenClaw has **69 distinct external-lookup patterns** across X API (14 shapes), Perplexity, Mistral OCR, Gmail, Calendar, Slack, GitHub, YouTube, Diarize.io, external tools, OSINT collectors, and brain-local lookups. Each one is a bespoke script under `scripts/` with its own error handling, retry logic, and output shape. ModusBrain has 3 ad-hoc wrappers (`embedding.ts`, `transcription.ts`, `enrichment-service.ts`) that don't share an interface.
 
 Common consequences:
 - No uniform retry/backoff strategy (some scripts retry, most don't)
@@ -181,8 +181,8 @@ health_check:
   url: https://api.twitter.com/2/tweets/1
   expect: { status: [200, 401] }   # 401 = auth failure but endpoint reachable
 tests:
-  - input:  { handle: "garrytan" }
-    expect: { url: { pattern: "^https://x\\.com/garrytan/status/\\d+$" } }
+  - input:  { handle: "shubham" }
+    expect: { url: { pattern: "^https://x\\.com/shubham/status/\\d+$" } }
 ```
 
 Trust flagging follows the existing `src/commands/integrations.ts` pattern: only package-bundled resolvers are `embedded=true` and may run arbitrary commands; user-provided resolvers are restricted to `http` and validated schemas.
@@ -212,7 +212,7 @@ The remaining 63 OpenClaw patterns port incrementally, driven by user need. Each
 
 ### 4.1 What's broken today
 
-Garry's OpenClaw's enrichment is **polished at the data layer, hacky at the control layer**:
+OpenClaw's enrichment is **polished at the data layer, hacky at the control layer**:
 
 - **Completeness = "length > 500 chars + no `needs-enrichment` tag"** (`lib/enrich.mjs:351-355`). Naïve. A rich page of repetitive Perplexity summaries (see `brain/people/0interestrates.md` — 38 repeating blocks) passes this check.
 - **30-day auto-re-enrichment** runs forever. No "done" state. A person met once in 2023 still gets re-researched monthly.
@@ -348,9 +348,9 @@ await writer.transaction(async (tx) => {
 
 ### 5.1 What's broken today
 
-Garry's OpenClaw's cron is **externally-driven JSON** (`cron/jobs.json`) with ~30 jobs manually stagger-offset at different minutes. ModusBrain has **zero native scheduling** — `src/commands/autopilot.ts` is a single daemon loop, and `docs/guides/cron-schedule.md` is architectural guidance, not code.
+OpenClaw's cron is **externally-driven JSON** (`cron/jobs.json`) with ~30 jobs manually stagger-offset at different minutes. ModusBrain has **zero native scheduling** — `src/commands/autopilot.ts` is a single daemon loop, and `docs/guides/cron-schedule.md` is architectural guidance, not code.
 
-Failures observed in Garry's OpenClaw's actual state:
+Failures observed in OpenClaw's actual state:
 - `X OAuth2 Token Refresh`: 11 consecutive timeouts (critical-path silent failure)
 - `flight-tracker daily scan`: 5 consecutive timeouts
 - `morning-briefing`: 4 consecutive timeouts
@@ -384,9 +384,9 @@ export interface ScheduledResolver extends Resolver<void, ScheduledResult> {
 }
 ```
 
-### 5.3 Enforcement vs convention (the key delta from Garry's OpenClaw)
+### 5.3 Enforcement vs convention (the key delta from OpenClaw)
 
-| Concern | Garry's OpenClaw today | Knowledge Runtime |
+| Concern | OpenClaw today | Knowledge Runtime |
 |---|---|---|
 | Quiet hours | Checked inside each skill (trust-based) | Enforced at scheduler, skill cannot override |
 | Staggering | Manual minute-offset in `jobs.json` | Scheduler assigns slots via hashed staggerKey |
@@ -411,7 +411,7 @@ Every scheduled run emits structured events: `started`, `skipped-quiet-hours`, `
 - `engine.logIngest` (audit trail in brain DB)
 - Optional webhook (Slack/Telegram for the user)
 
-`modusbrain doctor` reads the event log and reports: current circuit-breaker state, any resolver with > 3 consecutive failures, any resolver that hasn't fired within 3× its interval (freshness SLA like Garry's OpenClaw's `freshness-check.mjs` but built-in).
+`modusbrain doctor` reads the event log and reports: current circuit-breaker state, any resolver with > 3 consecutive failures, any resolver that hasn't fired within 3× its interval (freshness SLA like OpenClaw's `freshness-check.mjs` but built-in).
 
 ---
 
@@ -421,9 +421,9 @@ Every scheduled run emits structured events: `started`, `skipped-quiet-hours`, `
 
 **Iron Law: LLM picks WHAT. Code guarantees WHERE and HOW.**
 
-Garry's OpenClaw's existing `lib/enrich.mjs:buildTweetEntry` is close to this — tweet URLs are built from `tweet.id` returned by the X API, never from LLM memory. But:
+OpenClaw's existing `lib/enrich.mjs:buildTweetEntry` is close to this — tweet URLs are built from `tweet.id` returned by the X API, never from LLM memory. But:
 
-- A past incident: *"Sub-agent test #2 FAILED — hallucinated 'Philip Leung' entity links across all daily files. LLM rewriting of daily files is too error-prone."* (Garry's OpenClaw memory log, 2026-04-13.)
+- A past incident: *"Sub-agent test #2 FAILED — hallucinated 'Philip Leung' entity links across all daily files. LLM rewriting of daily files is too error-prone."* (OpenClaw memory log, 2026-04-13.)
 - Back-links depend on `appendTimeline` being called everywhere; skips are silent.
 - Slug collisions are unchecked (no conflict detection on `slugify`).
 - Citation format is post-hoc linted weekly, not pre-write enforced.
@@ -464,7 +464,7 @@ Every user-visible URL/link/citation is built by code from resolver outputs, not
 // src/core/output/scaffold.ts
 export class Scaffolder {
   tweetCitation(handle: string, tweetId: string, dateISO: string): string {
-    // "[Source: [X/garrytan, 2026-04-18](https://x.com/garrytan/status/123456)]"
+    // "[Source: [X/garrytan, 2026-04-18](https://x.com/shubham/status/123456)]"
   }
   emailCitation(account: string, messageId: string, subject: string): string {
     // deterministic Gmail URL per OpenClaw pattern
@@ -569,7 +569,7 @@ Each phase ships independently, passes full E2E, is feature-flagged, and is reve
 - L4 core: `BrainWriter.transaction`, `Scaffolder`, `SlugRegistry` with conflict detection.
 - Pre-write validators: citation, link, back-link, triple-HR.
 - Migrate `src/commands/publish.ts` + `src/commands/backlinks.ts` to route through BrainWriter.
-- **Now** Garry's OpenClaw's "Philip Leung" hallucination is structurally impossible — LLM output passes through JSON-Schema validator before reaching Scaffolder.
+- **Now** OpenClaw's "Philip Leung" hallucination is structurally impossible — LLM output passes through JSON-Schema validator before reaching Scaffolder.
 
 ### Phase 3 — `modusbrain integrity` command (human: ~0.5 wk / CC: ~2 h)
 - Ship the originally-scoped user-facing feature on top of the new foundation.
@@ -594,7 +594,7 @@ Each phase ships independently, passes full E2E, is feature-flagged, and is reve
 
 ### Phase 7 — OpenClaw Adoption Integration (human: ~1 wk / CC: ~4 h)
 - Write `docs/openclaw/ADOPTION.md` showing your OpenClaw how to replace its 69 bespoke scripts with calls to `modusbrain registry.resolve(...)`.
-- Ship a `modusbrain claw-bridge` subcommand that proxies Garry's OpenClaw's current script invocations to the resolver registry — zero-edit adoption path.
+- Ship a `modusbrain claw-bridge` subcommand that proxies OpenClaw's current script invocations to the resolver registry — zero-edit adoption path.
 - **This is the test of the north star.** If your OpenClaw can stand up a 1-line shim and drop `scripts/x-api-client.mjs`, the abstraction succeeded.
 
 Total: human: ~10 weeks / CC: ~42 hours / calendar with single implementer: ~3–4 weeks.
@@ -691,7 +691,7 @@ Every Resolver implementation tested against the interface spec. Table-driven: r
 - Simulate API timeout mid-transaction; transaction must roll back completely.
 - Corrupted state file; scheduler must escalate, not silently skip.
 
-### Regression tests vs. Garry's OpenClaw behavior
+### Regression tests vs. OpenClaw behavior
 For each OpenClaw pattern we port (e.g. X-handle → tweet URL), a regression test proves the new resolver produces the same answer on real-world inputs from the brain audit. This is the "your OpenClaw would adopt" proof.
 
 ---

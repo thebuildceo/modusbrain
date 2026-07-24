@@ -213,8 +213,8 @@ Both install via the same scaffold + copy path; install targets are
 `~/.modusbrain/schema-packs/<name>/` and `~/.modusbrain/skillpacks/<name>/`
 respectively.
 
-Publication to the public registries (`garrytan/modusbrain-schema-registry`,
-`garrytan/modusbrain-skillpack-registry`) follows the same publish-as-PR
+Publication to the public registries (`thebuildceo/modusbrain-schema-registry`,
+`thebuildceo/modusbrain-skillpack-registry`) follows the same publish-as-PR
 workflow as v0.37 skillpack publishing.
 
 ## What's deferred to v0.40+

@@ -14,10 +14,10 @@ The epistemological layer. WHO believes WHAT, with confidence weight and time.
 - **Scale:** 100K+ rows across thousands of holders in a mature brain
 
 **Example takes:**
-- `holder=people/garry-tan kind=bet` "AI will replace 50% of coding by 2030" (w=0.75)
+- `holder=people/shubham-chavan kind=bet` "AI will replace 50% of coding by 2030" (w=0.75)
 - `holder=people/jared-friedman kind=take` "Momo has strong retention" (w=0.80)
 - `holder=world kind=fact` "Clipboard raised $100M Series C" (w=1.0)
-- `holder=brain kind=hunch` "Garry has a hero/rescuer pattern" (w=0.70)
+- `holder=brain kind=hunch` "Shubham has a hero/rescuer pattern" (w=0.70)
 
 **Query surface:** `modusbrain takes list`, `modusbrain takes search`, `modusbrain think`
 
@@ -85,7 +85,7 @@ First full takes extraction run on a ~100K-page brain:
 
 ### Key Learnings for Extraction Prompts
 
-1. **Holder ≠ subject.** "Garry has a hero/rescuer pattern" → holder=brain, NOT people/garry-tan
+1. **Holder ≠ subject.** "Shubham has a hero/rescuer pattern" → holder=brain, NOT people/shubham-chavan
 2. **Atomic claims.** Split compound claims into separate rows
 3. **Amplification ≠ endorsement.** Retweet-only → max weight 0.55
 4. **Self-reported ≠ verified.** "Reports 7 figures" → holder=person, weight=0.75, NOT world/1.0

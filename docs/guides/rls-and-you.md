@@ -153,7 +153,7 @@ Rules:
 ```sql
 ALTER TABLE public.expenses_ramp DISABLE ROW LEVEL SECURITY;
 COMMENT ON TABLE public.expenses_ramp IS
-  'MODUSBRAIN:RLS_EXEMPT reason=analytics-only, anon-readable ok, owner=garry, 2026-04-22';
+  'MODUSBRAIN:RLS_EXEMPT reason=analytics-only, anon-readable ok, owner=shubham, 2026-04-22';
 ```
 
 After that, `modusbrain doctor` reports:

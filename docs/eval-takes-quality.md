@@ -5,7 +5,7 @@ score a sample of takes against a 5-dimension rubric, the runner aggregates to
 PASS / FAIL / INCONCLUSIVE, and the receipt persists to `eval_takes_quality_runs`
 so a follow-up `trend` or `regress` can compare against history.
 
-This doc is the consumer contract. The sibling [modusbrain-evals](https://github.com/garrytan/gbrain-evals)
+This doc is the consumer contract. The sibling [modusbrain-evals](https://github.com/thebuildceo/modusbrain-evals)
 repo and any future CI gate read receipts shaped exactly like the JSON below.
 Fields are additive-stable at `schema_version: 1`. A breaking shape change
 bumps the version.

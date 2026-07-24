@@ -174,7 +174,7 @@ invalidate pre-v0.42 cache rows that don't reflect the new stage.
 
 ## Reference
 
-- Issue: https://github.com/garrytan/gbrain/issues/1479
+- Issue: https://github.com/thebuildceo/modusbrain/issues/1479
 - Pack file: `src/core/schema-pack/base/gbrain-base-v2.yaml`
 - Pack-upgrade mechanism: `docs/architecture/pack-upgrade-mechanism.md`
 - Migration handler: `src/core/schema-pack/unify-types-handler.ts`

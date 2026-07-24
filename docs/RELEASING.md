@@ -132,7 +132,7 @@ answer one of three questions: *What can I now do? How do I use it? What
 should I watch for after I upgrade?*
 
 Every version entry in `CHANGELOG.md` MUST start with a release-summary section in
-the GStack/Garry voice — one viewport's worth of prose + tables that lands like a
+the GStack/Shubham voice — one viewport's worth of prose + tables that lands like a
 verdict, not marketing. The itemized changelog (subsections, bullets, files) goes
 BELOW that summary, separated by a `### Itemized changes` header.
 
@@ -246,7 +246,7 @@ warns about a partial migration:
    modusbrain stats
    ```
 4. **If any step fails or the numbers look wrong,** please file an issue:
-   https://github.com/garrytan/gbrain/issues with:
+   https://github.com/thebuildceo/modusbrain/issues with:
    - output of `modusbrain doctor`
    - contents of `~/.modusbrain/upgrade-errors.jsonl` if it exists
    - which step broke
@@ -383,7 +383,7 @@ Never merge external PRs directly into master. Instead, use the "fix wave" workf
 1. **Categorize** — group PRs by theme (bug fixes, features, infra, docs)
 2. **Deduplicate** — if two PRs fix the same thing, pick the one that changes fewer
    lines. Close the other with a note pointing to the winner.
-3. **Collector branch** — create a feature branch (e.g. `garrytan/fix-wave-N`), cherry-pick
+3. **Collector branch** — create a feature branch (e.g. `thebuildceo/fix-wave-N`), cherry-pick
    or manually re-implement the best fixes from each PR. Do NOT merge PR branches directly —
    read the diff, understand the fix, and write it yourself if needed.
 4. **Test the wave** — verify with `bun test && bun run test:e2e` (full E2E lifecycle).
@@ -397,26 +397,26 @@ Never merge external PRs directly into master. Instead, use the "fix wave" workf
 **Community PR guardrails:**
 - Always AskUserQuestion before accepting commits that touch voice, tone, or
   promotional material (README intro, CHANGELOG voice, skill templates).
-- Never auto-merge PRs that remove YC references or "neutralize" the founder perspective.
+- Never auto-merge PRs that neutralize the Genthropic founder perspective.
 - Preserve contributor attribution in commit messages.
 
-## Checking out PRs from garrytan-agents
+## Checking out PRs from thebuildceo-agents
 
-`garrytan-agents` is the AI-authored PR account and is NOT a collaborator on
+`thebuildceo-agents` is the AI-authored PR account and is NOT a collaborator on
 this repo. Its PRs live in a fork, so GitHub Actions triggered by
 `pull_request` events on those PRs do not receive base-repo secrets. Any CI
 job that needs `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or similar will fail
 with empty-env auth errors, regardless of what's set on the base repo. This
 is a GitHub security default, not a config bug.
 
-When the user says "check out &lt;PR link&gt;" and the PR is from `garrytan-agents`
+When the user says "check out &lt;PR link&gt;" and the PR is from `thebuildceo-agents`
 (or any other non-collaborator fork), move the branch into the base repo
 before running CI:
 
 1. `gh pr checkout &lt;N&gt;` — pull down the fork's branch. Note the PR number and
    head branch name (`gh pr view &lt;N&gt; --json headRefName --jq .headRefName`).
 2. `git push origin HEAD:&lt;branch-name&gt;` — push the same branch to the base
-   repo (origin points at `garrytan/modusbrain`, not the fork). This is the move
+   repo (origin points at `thebuildceo/modusbrain`, not the fork). This is the move
    that gives CI access to secrets.
 3. `gh pr close &lt;N&gt; --comment "moving to base-repo branch for secret access"`
    — close the fork PR so the queue stays clean.
@@ -425,7 +425,7 @@ before running CI:
    verbatim** (`gh pr view &lt;N&gt; --json title,body`); contributor attribution
    moves to a `Co-Authored-By:` trailer if needed.
 
-Why this over alternatives: adding `garrytan-agents` as a collaborator, or
+Why this over alternatives: adding `thebuildceo-agents` as a collaborator, or
 flipping the repo-wide "send secrets to fork PRs" toggle, both broaden
 secret distribution to every fork PR from that account or any fork. Moving
 the branch keeps secret scope tight to just the one PR being shipped.

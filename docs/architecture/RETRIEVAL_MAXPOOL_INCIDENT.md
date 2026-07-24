@@ -9,18 +9,18 @@ icon: triangle-exclamation
 **Status:** Resolved (retrieval-cathedral wave). Supersedes the docs-only RFC in
 closed PR #1616 — the diagnosis there was directionally right about the disease
 but wrong on several mechanics; this is the corrected record + what shipped.
-**Original author:** Garry Tan's OpenClaw. **Severity at the time:** High.
+**Original author:** the OpenClaw agent. **Severity at the time:** High.
 **Related:** [`RETRIEVAL.md`](./RETRIEVAL.md), [`../eval/METRIC_GLOSSARY.md`](../eval/METRIC_GLOSSARY.md).
 
 ---
 
 ## 1. What happened
 
-The agent was asked to log that Garry "wants to build a Greek amphitheater." It
+The agent was asked to log that Shubham "wants to build a Greek amphitheater." It
 ran a retrieval for the concept, the canonical concept page (titled "...Indoor
 Greek Amphitheater...") did **not** surface with enough confidence to be
 recognized as the existing page, and the agent wrote a **duplicate stub** on top
-of a fully-developed concept doc. Garry caught it: "It's in the brain. It's the
+of a fully-developed concept doc. we caught it: "It's in the brain. It's the
 Hall of Light. Why did you forget?"
 
 The page is *about* a Greek amphitheater — the phrase is in its title and first

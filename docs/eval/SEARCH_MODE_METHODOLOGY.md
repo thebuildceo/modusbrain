@@ -25,7 +25,7 @@ If you want to know how a mode behaves on YOUR brain, run `modusbrain search sta
 
 - **LongMemEval** — public split, `n=500` questions. Downloaded from [Hugging Face](https://huggingface.co/datasets/xiaowu0162/longmemeval). The corpus + answer keys are pinned to a specific commit; recorded in every per-run record.
 - **Replay captures** — NDJSON from the sibling `modusbrain-evals` repo, `n=200` queries. Each query carries a `retrieved_slugs` baseline + a `latency_ms` measurement from the original production run.
-- **BrainBench v1** — `n=1240` documents / `n=350` qrels (binary relevance judgments). Lives in the sibling [`modusbrain-evals`](https://github.com/garrytan/gbrain-evals) repo, SHA-pinned at every run.
+- **BrainBench v1** — `n=1240` documents / `n=350` qrels (binary relevance judgments). Lives in the sibling [`modusbrain-evals`](https://github.com/thebuildceo/modusbrain-evals) repo, SHA-pinned at every run.
 
 No private brain content is used in any reported result. The committed NDJSON dumps under `&lt;repo&gt;/.modusbrain-evals/` contain only the LongMemEval question IDs + the rank-ordered retrieved session IDs.
 

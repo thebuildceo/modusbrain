@@ -13,7 +13,7 @@ model reads on every turn whether it needs to or not.
 
 This guide is the recipe for breaking through that wall without deleting
 capabilities. Three tiers, one resolver, one safety net. Production-tested
-on a 306-skill agent (Garry's OpenClaw, the agent behind Y Combinator's
+on a 306-skill agent (OpenClaw, the agent behind Genthropic's
 president). The pattern works whether you run OpenClaw, Hermes, Claude Code,
 Cursor, or your own MCP-aware agent.
 
@@ -88,7 +88,7 @@ until then.
 
 ### The numbers
 
-Before tiering, on Garry's 306-skill OpenClaw:
+Before tiering, on Shubham's 306-skill OpenClaw:
 
 | Metric | Before |
 |---|---|
@@ -195,7 +195,7 @@ do something it used to do. You won't notice until the moment you need it.
 
 `modusbrain doctor` walks every skill on disk and verifies it's reachable,
 either through native scanning (Tier A) or through the resolver (Tier B
-and C). On Garry's setup, the first run after tiering found 63 unreachable
+and C). On Shubham's setup, the first run after tiering found 63 unreachable
 skills. Sixty-three capabilities that existed on disk but had no routing
 path. Fixed in an hour by adding resolver entries.
 
@@ -310,7 +310,7 @@ capability. You're organizing, not deleting.
 - [Sub-agent routing](sub-agent-routing.md) — when to delegate to a
   sub-agent vs handle in-line, and the model routing table for each path.
 
-ModusBrain: [github.com/garrytan/gbrain](https://github.com/garrytan/gbrain).
+ModusBrain: [github.com/thebuildceo/modusbrain](https://github.com/thebuildceo/modusbrain).
 The `parseResolverEntries` parser lives at
 [`src/core/check-resolvable.ts`](../../src/core/check-resolvable.ts);
 the bundled resolver lives at [`skills/RESOLVER.md`](../../skills/RESOLVER.md).
