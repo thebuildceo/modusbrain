@@ -3,7 +3,7 @@
 ## Setup
 
 ```bash
-git clone https://github.com/garrytan/gbrain.git
+git clone https://github.com/thebuildceo/modusbrain.git
 cd modusbrain
 bun install
 bun test
