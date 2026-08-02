@@ -3,7 +3,7 @@
 ## Reporting Vulnerabilities
 
 If you discover a security issue in ModusBrain, please report it privately by opening
-a [private security advisory](https://github.com/garrytan/gbrain/security/advisories/new)
+a [private security advisory](https://github.com/thebuildceo/modusbrain/security/advisories/new)
 on GitHub.
 
 Do not open a public issue for security vulnerabilities.
